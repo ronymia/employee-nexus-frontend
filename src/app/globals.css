@@ -1,26 +1,39 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "../styles/loaders.css";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  --color-primary: #da2637;
+  --color-primary-content: #fed9d6;
+  --color-primary-focus: #bb0606;
+  /* --color-secondary: #28cb38; */
+  /* --color-secondary-content: #010f01; */
+  /* --color-accent: #1656c4; */
+  /* --color-accent-content: #cfdef6; */
+  /* --color-neutral: #262931; */
+  /* --color-neutral-content: #cfd0d2; */
+  --color-base-100: #f2f2f2;
+  --color-base-200: #fafafb;
+  --color-base-300: #fff;
+  /* --color-content: #121412; */
+  /* --color-neutral-content: #; */
+  /* --color-info: #2563eb; */
+  /* --color-info-content: #; */
+  /* --color-success: #; */
+  /* --color-success-content:#; */
+  /* --color-warning	: #; */
+  /* --color-warning-content: #; */
+  /* --color-error	: #; */
+  /* --color-error-content	: #; */
+  /* --radius-selector	: ; */
+  /* --radius-field	: ; */
+  /* --radius-box	: ; */
+  /* --size-selector	: ; */
+  /* --size-field	: ; */
+  /* --border	: ; */
+  /* --depth	: ; */
+  /* --noise	: #; */
 }
