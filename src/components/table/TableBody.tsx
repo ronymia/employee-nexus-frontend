@@ -1,3 +1,5 @@
+"use client";
+
 import CustomLoading from "../loader/CustomLoading";
 import useDeviceWidth from "@/hooks/useDeviceWidth";
 import TableActionButton from "./TableActionButton";

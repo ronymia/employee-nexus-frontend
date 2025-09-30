@@ -136,7 +136,10 @@ export default function CustomTable({
       </section>
       {/* TABLE */}
       {windowInnerWidth > 768 && (
-        <table className="w-full border-separate border-spacing-y-2 table-auto text-sm">
+        <table
+          key={tableConfig.tableType}
+          className="w-full border-separate border-spacing-y-2 table-auto text-sm"
+        >
           {/* <===================================== Table Header ===================================> */}
           <TableHeader
             columns={visibleColumns}

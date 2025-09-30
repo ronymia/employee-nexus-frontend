@@ -7,6 +7,7 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import CustomTable from "@/components/table/CustomTable";
 import { GET_BUSINESSES } from "@/graphql/business.api";
+import Link from "next/link";
 
 export default function AllBusinesses() {
   const { user } = useAppStore((state) => state);
@@ -87,42 +88,35 @@ export default function AllBusinesses() {
   console.log({ columns });
 
   return (
-    <>
-      {/* Modal for adding a new subscription plan */}
-      <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Business</h1>
-          </div>
-        </header>
-        {/* TABLE */}
-        <CustomTable
-          isLoading={loading}
-          actions={actions}
-          columns={columns}
-          setColumns={setColumnHelper}
-          searchConfig={{
-            searchable: loading ? true : false,
-            debounceDelay: 500,
-            defaultField: "name",
-            searchableFields: [
-              { label: "Name", value: "name" },
-              { label: "Email", value: "email" },
-              { label: "Address", value: "address" },
-            ],
-          }}
-          dataSource={data?.businesses?.data || []}
-        >
-          <button
-            type="button"
-            onClick={() => {}}
-            className={`btn btn-primary`}
-          >
-            <PiPlusCircle className={`text-xl`} />
-            Add Business
-          </button>
-        </CustomTable>
-      </section>
-    </>
+    <section className={``}>
+      <header className={`mb-5 flex items-center justify-between`}>
+        <div className="">
+          <h1 className={`text-2xl font-medium`}>All Business</h1>
+        </div>
+      </header>
+      {/* TABLE */}
+      <CustomTable
+        isLoading={loading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumnHelper}
+        searchConfig={{
+          searchable: loading ? true : false,
+          debounceDelay: 500,
+          defaultField: "name",
+          searchableFields: [
+            { label: "Name", value: "name" },
+            { label: "Email", value: "email" },
+            { label: "Address", value: "address" },
+          ],
+        }}
+        dataSource={data?.businesses?.data || []}
+      >
+        <Link href={`/businesses/create`} className={`btn btn-primary`}>
+          <PiPlusCircle className={`text-xl`} />
+          Add Business
+        </Link>
+      </CustomTable>
+    </section>
   );
 }

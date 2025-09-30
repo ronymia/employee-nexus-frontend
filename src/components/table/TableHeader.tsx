@@ -1,3 +1,5 @@
+"use client";
+
 import useDeviceWidth from "@/hooks/useDeviceWidth";
 import type { TableActionType, TableColumnType } from "@/types";
 import { useState } from "react";

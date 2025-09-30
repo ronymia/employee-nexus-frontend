@@ -11,6 +11,13 @@ export default function CustomColumnsSet({
   columns = [],
   setColumns,
 }: ICustomColumnsSet) {
+  // const [mounted, setMounted] = useState(false);
+
+  // useEffect(() => {
+  //   setMounted(true);
+  // }, []);
+
+  // if (!mounted) return null;
   return (
     <div className={`dropdown`}>
       <div tabIndex={0} role="button" className={`btn btn-primary m-1`}>

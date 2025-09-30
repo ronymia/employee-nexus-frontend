@@ -1,3 +1,5 @@
+"use client";
+
 import { FiEdit } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
 import { BiShow } from "react-icons/bi";
