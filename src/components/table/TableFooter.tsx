@@ -20,10 +20,11 @@ export default function TableFooter({
           >
             {/* Pagination Info */}
             <div className={`flex flex-col items-start gap-2`}>
-              <span className={`font-bold`}>
-                Showing {paginationConfig?.skip} -{" "}
-                {paginationConfig?.skip + paginationConfig?.paginationTotal} of{" "}
-                {paginationConfig?.total}
+              <span className="font-bold">
+                Showing {paginationConfig?.skip ?? 0} -{" "}
+                {(paginationConfig?.skip ?? 0) +
+                  (paginationConfig?.paginationTotal ?? 0)}{" "}
+                of {paginationConfig?.total ?? 0}
               </span>
             </div>
 

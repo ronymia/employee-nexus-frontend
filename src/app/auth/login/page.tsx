@@ -5,7 +5,12 @@ import CustomButton from "@/components/button/CustomButton";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import { LOGIN_MUTATION } from "@/graphql/auth.api";
-import { loginSchema } from "@/schemas/auth.schema";
+import {
+  ILoginFormData,
+  ILoginResponse,
+  ILoginVariables,
+  loginSchema,
+} from "@/schemas/auth.schema";
 import useAppStore from "@/stores/useAppStore";
 import { useMutation } from "@apollo/client/react";
 import Image from "next/image";
@@ -17,10 +22,12 @@ export default function LoginPage() {
   // NAVIGATE
   const router = useRouter();
   // LOGIN API
-  const [login, loginResult] = useMutation(LOGIN_MUTATION);
+  const [login, loginResult] = useMutation<ILoginResponse, ILoginVariables>(
+    LOGIN_MUTATION
+  );
 
   // HANDLE SUBMIT
-  const handleOnSubmit = async (formValues: any) => {
+  const handleOnSubmit = async (formValues: ILoginFormData) => {
     // console.log(formValues);
 
     const { data } = await login({ variables: formValues });

@@ -14,8 +14,3 @@ export interface IErrorResponse {
   message: string;
   code: number;
 }
-
-export interface ISystemModule {
-  id: string;
-  name: string;
-}

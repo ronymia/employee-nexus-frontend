@@ -6,7 +6,11 @@ import {
   GET_SUBSCRIPTION_PLANS,
 } from "@/graphql/subscription-plans.api";
 import CustomTable from "@/components/table/CustomTable";
-import type { TableActionType, TableColumnType } from "@/types";
+import type {
+  ISubscriptionPlan,
+  TableActionType,
+  TableColumnType,
+} from "@/types";
 import { PiPlusCircle } from "react-icons/pi";
 import { useMutation, useQuery } from "@apollo/client/react";
 import usePopupOption from "@/hooks/usePopupOption";
@@ -15,7 +19,12 @@ import FormModal from "@/components/form/FormModal";
 export default function AllSubscriptionPlan() {
   const { popupOption, setPopupOption, createNewSubscriptionPlan } =
     usePopupOption();
-  const { data, loading } = useQuery(GET_SUBSCRIPTION_PLANS, {});
+  const { data, loading } = useQuery<{
+    subscriptionPlans: {
+      data: ISubscriptionPlan[];
+    };
+  }>(GET_SUBSCRIPTION_PLANS, {});
+
   const [deleteSubscriptionPlan, deleteResult] = useMutation(
     DELETE_SUBSCRIPTION_PLAN,
     {
@@ -25,7 +34,7 @@ export default function AllSubscriptionPlan() {
   );
   // console.log({ data });
 
-  const handleEdit = (row: any) => {
+  const handleEdit = (row: ISubscriptionPlan) => {
     //
     const data = {
       id: row?.id,
@@ -45,7 +54,7 @@ export default function AllSubscriptionPlan() {
       title: "Update Subscription Plan",
     });
   };
-  const handleDelete = async (row: any) => {
+  const handleDelete = async (row: ISubscriptionPlan) => {
     await deleteSubscriptionPlan({
       variables: {
         id: Number(row?.id),

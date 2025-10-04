@@ -1,5 +1,5 @@
+import * as z from "zod";
 import { emailRegex, passwordRegex } from "@/libs/regex";
-import z from "zod";
 
 export const loginSchema = z.object({
   email: z
@@ -16,3 +16,17 @@ export const loginSchema = z.object({
         "Password must be at least 8 characters, include uppercase, lowercase, number, and special character",
     }),
 });
+
+export type ILoginFormData = z.infer<typeof loginSchema>;
+
+export type ILoginResponse = {
+  login: {
+    user: any;
+    accessToken: string;
+  };
+};
+
+export type ILoginVariables = {
+  email: string;
+  password: string;
+};

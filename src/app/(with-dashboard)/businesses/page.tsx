@@ -1,7 +1,7 @@
 "use client";
 
 import { PiPlusCircle } from "react-icons/pi";
-import type { TableActionType, TableColumnType } from "@/types";
+import type { IBusiness, TableActionType, TableColumnType } from "@/types";
 import useAppStore from "@/stores/useAppStore";
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
@@ -11,10 +11,14 @@ import Link from "next/link";
 
 export default function AllBusinesses() {
   const { user } = useAppStore((state) => state);
-  const { data, loading } = useQuery(GET_BUSINESSES);
+  const { data, loading } = useQuery<{
+    businesses: {
+      data: IBusiness[];
+    };
+  }>(GET_BUSINESSES);
 
-  const handleEdit = (row: any) => {};
-  const handleDelete = (row: any) => {};
+  const handleEdit = (row: IBusiness) => {};
+  const handleDelete = (row: IBusiness) => {};
 
   const [columnHelper, setColumnHelper] = useState<TableColumnType[]>([
     {

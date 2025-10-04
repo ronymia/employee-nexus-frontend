@@ -6,9 +6,17 @@ import {
   GET_SUBSCRIPTION_PLANS,
   UPDATE_SUBSCRIPTION_PLAN,
 } from "@/graphql/subscription-plans.api";
+import { ISubscriptionPlanFormData } from "@/schemas";
+import { ISubscriptionPlan } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
-export default function SubscriptionPlanForm({ handleClosePopup, data }: any) {
+export default function SubscriptionPlanForm({
+  handleClosePopup,
+  data,
+}: {
+  handleClosePopup: () => void;
+  data: ISubscriptionPlan;
+}) {
   // MUTATION TO CREATE A NEW SUBSCRIPTION PLAN
   const [createSubscriptionPlan, createResult] = useMutation(
     CREATE_SUBSCRIPTION_PLAN,
@@ -26,7 +34,7 @@ export default function SubscriptionPlanForm({ handleClosePopup, data }: any) {
   );
 
   // HANDLER FOR FORM SUBMISSION
-  const handleOnSubmit = async (formValues: any) => {
+  const handleOnSubmit = async (formValues: ISubscriptionPlanFormData) => {
     // ADDED MODULE ID
     formValues["moduleIds"] = [1];
     formValues["price"] = Number(formValues["price"]);
@@ -53,14 +61,18 @@ export default function SubscriptionPlanForm({ handleClosePopup, data }: any) {
       defaultValues={data || {}}
       className={`flex flex-col gap-y-3`}
     >
+      {/* NAME */}
       <CustomInputField name="name" label="Name" required />
+      {/* PRICE */}
       <CustomInputField type="number" name="price" label="Price" required />
+      {/* SETUP FEE */}
       <CustomInputField
         type="number"
         name="setupFee"
         label="Setup Fee"
         required
       />
+      {/* DESCRIPTION */}
       <CustomTextareaField name="description" label="Description" required />
 
       {/* ACTION BUTTON */}
