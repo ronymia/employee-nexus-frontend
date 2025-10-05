@@ -5,6 +5,7 @@ import useDeviceWidth from "@/hooks/useDeviceWidth";
 import TableActionButton from "./TableActionButton";
 import type { TableActionType, TableColumnType } from "@/types";
 import { noDataFoundImage } from "@/assets";
+import Image from "next/image";
 
 interface ITableBodyProps {
   dataSource: any[];
@@ -94,7 +95,7 @@ export default function TableBody({
               <div
                 className={`flex flex-col items-center justify-center gap-4 w-full h-full py-10`}
               >
-                <img
+                <Image
                   src={noDataFoundImage}
                   alt="No data found"
                   className={`w-40`}

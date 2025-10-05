@@ -1,4 +1,5 @@
 import CustomForm from "@/components/form/CustomForm";
+import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import {
@@ -76,54 +77,9 @@ export default function SubscriptionPlanForm({
       <CustomTextareaField name="description" label="Description" required />
 
       {/* ACTION BUTTON */}
-      <div
-        className={`w-full md:w-1/2 self-end flex items-center justify-end gap-x-2 px-2`}
-      >
-        <button
-          type="button"
-          disabled={createResult.loading || updateResult.loading}
-          className={`btn btn-outline btn-primary min-w-1/2 rounded-sm`}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={createResult.loading || updateResult.loading}
-          className={`btn btn-primary min-w-1/2 rounded-sm flex items-center justify-center gap-2
-    ${
-      createResult.loading || updateResult.loading
-        ? "opacity-50 cursor-not-allowed !bg-primary !text-base-300"
-        : "hover:opacity-90"
-    }`}
-        >
-          {createResult.loading ||
-            (updateResult.loading && (
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
-            ))}
-          {createResult.loading || updateResult.loading
-            ? "Submitting..."
-            : "Submit"}
-        </button>
-      </div>
+      <FormActionButton
+        isPending={createResult.loading || updateResult.loading}
+      />
     </CustomForm>
   );
 }

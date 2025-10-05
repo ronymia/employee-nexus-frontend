@@ -58,7 +58,7 @@ export default function PrivateLayout({
       {/* CONTENT */}
       <motion.div
         layout
-        className={`bg-base-300 rounded-box overflow-auto h-[calc(100vh-80px)] p-3 mt-4`}
+        className={`bg-base-300 rounded-box overflow-auto h-[calc(100%-80px)] p-3 mt-4`}
       >
         {children}
       </motion.div>

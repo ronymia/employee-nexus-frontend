@@ -170,6 +170,24 @@ export default function CustomInputField({
               id={id ? id : name}
               value={field.value ?? ""}
               type={`${type}`}
+              onWheel={(e) => {
+                if (type === "number") {
+                  e.currentTarget.blur();
+                } else {
+                  return;
+                }
+              }}
+              onKeyDown={(e) => {
+                // if (!/^[0-9]$/.test(e.key) && e.key !== "Backspace") {
+                //   e.preventDefault();
+                // }
+                if (
+                  type === "number" &&
+                  ["e", "E", "+", "-", "ArrowUp", "ArrowDown"].includes(e.key)
+                ) {
+                  e.preventDefault();
+                }
+              }}
               inputMode={inputMode}
               name={name}
               placeholder={`${placeholder ? placeholder : label}`}
