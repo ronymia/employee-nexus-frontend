@@ -2,8 +2,10 @@ import React from "react";
 
 export default function FormActionButton({
   isPending,
+  cancelHandler,
 }: {
   isPending: boolean;
+  cancelHandler: () => void;
 }) {
   return (
     <div
@@ -12,6 +14,7 @@ export default function FormActionButton({
       <button
         type="button"
         disabled={isPending}
+        onClick={cancelHandler}
         className={`btn btn-outline btn-primary min-w-1/2 rounded-sm`}
       >
         Cancel

@@ -8,16 +8,20 @@ import { useMemo, useState } from "react";
 import CustomTable from "@/components/table/CustomTable";
 import { GET_BUSINESSES } from "@/graphql/business.api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AllBusinesses() {
   const { user } = useAppStore((state) => state);
+  const router = useRouter();
   const { data, loading } = useQuery<{
     businesses: {
       data: IBusiness[];
     };
   }>(GET_BUSINESSES);
 
-  const handleEdit = (row: IBusiness) => {};
+  const handleEdit = (row: IBusiness) => {
+    router.push(`/businesses/${row?.id}/update`);
+  };
   const handleDelete = (row: IBusiness) => {};
 
   const [columnHelper, setColumnHelper] = useState<TableColumnType[]>([
@@ -76,7 +80,7 @@ export default function AllBusinesses() {
     {
       name: "edit",
       type: "button",
-      handler: (row) => console.log("Edit:", row),
+      handler: handleEdit,
       permissions: [],
       disabledOn: [{ accessorKey: "status", value: "inactive" }],
     },
