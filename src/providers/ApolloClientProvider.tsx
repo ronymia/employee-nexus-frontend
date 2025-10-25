@@ -2,7 +2,7 @@
 import createApolloClient from "@/apollo/apolloClient";
 import { ApolloProvider } from "@apollo/client/react";
 
-export default function ClientApolloProvider({
+export default function ApolloClientProvider({
   children,
 }: {
   children: React.ReactNode;
