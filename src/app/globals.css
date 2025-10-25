@@ -1,8 +1,17 @@
-@import "tailwindcss";
-@plugin "daisyui";
-
+/* LOAD CUSTOM STYLES */
 @import "../styles/loaders.css";
 
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+  root: ":root";
+  include: ;
+  exclude: ;
+  prefix: ;
+  logs: true;
+}
+
+/* HANDLE NUMBER INPUT */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -11,6 +20,12 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* HANDLE DISABLE BUTTON */
+button:disabled {
+  cursor: not-allowed !important;
+  pointer-events: all !important;
 }
 
 @plugin "daisyui/theme" {
