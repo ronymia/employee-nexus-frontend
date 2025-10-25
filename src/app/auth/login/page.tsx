@@ -1,17 +1,17 @@
 "use client";
 
 import { loginImage } from "@/assets";
-import CustomButton from "@/components/button/CustomButton";
 import CustomForm from "@/components/form/CustomForm";
-import CustomInputField from "@/components/form/input/CustomInputField";
+import CustomEmailField from "@/components/form/input/CustomEmailField";
+import CustomPasswordField from "@/components/form/input/CustomPasswordField";
 import { LOGIN_MUTATION } from "@/graphql/auth.api";
+import useAppStore from "@/hooks/useAppStore";
 import {
   ILoginFormData,
   ILoginResponse,
   ILoginVariables,
   loginSchema,
 } from "@/schemas/auth.schema";
-import useAppStore from "@/stores/useAppStore";
 import { useMutation } from "@apollo/client/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -41,7 +41,7 @@ export default function LoginPage() {
       // console.log(data?.login?.accessToken);
       setToken(data?.login?.accessToken);
       setUser(data?.login?.user);
-      router.push("/");
+      router.push("/dashboard");
     }
   };
   return (
@@ -50,7 +50,7 @@ export default function LoginPage() {
     >
       {/* IMAGE */}
       <div>
-        <Image src={loginImage} width={500} alt="login image" />
+        <Image loading="eager" src={loginImage} width={500} alt="login image" />
       </div>
 
       {/* LOGIN FORM */}
@@ -65,28 +65,24 @@ export default function LoginPage() {
           submitHandler={handleOnSubmit}
           resolver={loginSchema}
           defaultValues={{}}
-          className={`flex flex-col gap-1 w-xs sm:w-md`}
+          className={`flex flex-col gap-2 w-xs sm:w-md`}
         >
           {/* EMAIL */}
-          <CustomInputField type="email" name="email" label="Email" required />
+          <CustomEmailField name="email" label="Email" required />
           {/* PASSWORD */}
-          <CustomInputField
-            type="password"
-            name="password"
-            label="Password"
-            required
-          />
+          <CustomPasswordField name="password" label="Password" required />
 
           {/* SUBMIT */}
-          <CustomButton
-            htmlType={"submit"}
-            // variant={"primary"}
-            className={`mt-5 w-full`}
+          <button
+            type={"submit"}
             disabled={loginResult.loading}
-            isLoading={loginResult.loading}
+            className={`btn btn-primary bg-primary flex items-center justify-center border-none rounded-field mt-3 transition-all duration-200
+                disabled:!bg-primary disabled:!opacity-70 disabled:!cursor-not-allowed disabled:!text-black ${
+                  loginResult.loading ? "cursor-not-allowed" : "cursor-grab"
+                }`}
           >
             Login
-          </CustomButton>
+          </button>
         </CustomForm>
       </div>
     </div>
