@@ -2,19 +2,23 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import useAppStore from "@/stores/useAppStore";
+import useAppStore from "./useAppStore";
 
 export default function useAuthGuard() {
   const router = useRouter();
-  const { user, token } = useAppStore();
+  const { token, hydrated } = useAppStore((state) => state);
 
-  const isAuthenticated = !!(user && token);
+  const isAuthenticated = !!token;
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!hydrated) return; // wait for rehydration
+
+    if (token) {
+      router.prefetch("/dashboard"); // optional
+    } else {
       router.replace("/auth/login");
     }
-  }, [isAuthenticated, router]);
+  }, [hydrated, token, router]);
 
-  return { isAuthenticated };
+  return { isAuthenticated, hydrated };
 }
