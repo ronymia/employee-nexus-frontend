@@ -2,7 +2,11 @@ import { create } from "zustand";
 import { authSlice, type IAuthSlice } from "./slices/authSlice";
 import { persist } from "zustand/middleware";
 
-const useAppStore = create<IAuthSlice>()(
+type IAppState = IAuthSlice;
+
+// Create the Zustand store with persistence
+
+const appStore = create<IAppState>()(
   persist(
     (...a) => ({
       ...authSlice(...a),
@@ -15,8 +19,14 @@ const useAppStore = create<IAuthSlice>()(
         permissions: state.permissions,
         modules: state.modules,
       }),
+      onRehydrateStorage: () => (state, error) => {
+        if (state) {
+          // ✅ trigger re-render properly
+          state.setHydrated(true);
+        }
+      },
     }
   )
 );
 
-export default useAppStore;
+export default appStore;
