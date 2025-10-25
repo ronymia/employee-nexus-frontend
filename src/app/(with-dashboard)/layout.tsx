@@ -1,5 +1,6 @@
 "use client";
 
+import CustomLoading from "@/components/loader/CustomLoading";
 import Navbar from "@/components/ui/navbar/Navbar";
 import Sidebar from "@/components/ui/sidebar/Sidebar";
 import useAuthGuard from "@/hooks/useAuthGuard";
@@ -10,15 +11,15 @@ import React, { useRef, useState } from "react";
 export default function PrivateLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(isSidebarOpen);
   const containerRef = useRef<HTMLDivElement>(null);
   const { height } = useDimensions(containerRef);
   const { isAuthenticated } = useAuthGuard();
 
-  // if (!isAuthenticated) {
-  //   return <div>Redirecting...</div>;
-  // }
+  if (!isAuthenticated) {
+    return <CustomLoading />;
+  }
 
   return (
     <div className={`h-screen p-4 bg-[#f9fbfc] overflow-hidden relative`}>

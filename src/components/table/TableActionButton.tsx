@@ -4,7 +4,7 @@ import { FiEdit } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
 import { BiShow } from "react-icons/bi";
 import type { TableActionType } from "@/types";
-import useAppStore from "@/stores/useAppStore";
+import useAppStore from "@/stores/appStore";
 import Link from "next/link";
 
 interface IActionButtonsProps {

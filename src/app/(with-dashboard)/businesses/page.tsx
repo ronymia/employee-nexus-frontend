@@ -2,7 +2,7 @@
 
 import { PiPlusCircle } from "react-icons/pi";
 import type { IBusiness, TableActionType, TableColumnType } from "@/types";
-import useAppStore from "@/stores/useAppStore";
+import useAppStore from "@/stores/appStore";
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import CustomTable from "@/components/table/CustomTable";

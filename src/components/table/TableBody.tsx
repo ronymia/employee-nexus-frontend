@@ -96,6 +96,7 @@ export default function TableBody({
                 className={`flex flex-col items-center justify-center gap-4 w-full h-full py-10`}
               >
                 <Image
+                  loading="eager"
                   src={noDataFoundImage}
                   alt="No data found"
                   className={`w-40`}

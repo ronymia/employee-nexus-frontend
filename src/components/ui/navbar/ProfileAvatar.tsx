@@ -2,7 +2,7 @@ import { RxAvatar } from "react-icons/rx";
 import { LuLogOut } from "react-icons/lu";
 import CustomUserAvatar from "@/components/avatar/CustomUserAvatar";
 import { formatText } from "@/utils/format-text.utils";
-import useAppStore from "@/stores/useAppStore";
+import useAppStore from "@/stores/appStore";
 import Link from "next/link";
 
 export default function ProfileAvatar() {
