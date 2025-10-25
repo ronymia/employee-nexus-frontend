@@ -12,10 +12,8 @@ type FormProps = {
   children?: ReactElement | ReactNode;
   submitHandler: SubmitHandler<any>;
   className?: string;
-  actionButtonClassName?: string;
   cancelHandler?: () => void;
   dataAuto?: string;
-  showFormActionButton?: boolean;
 } & FormConfig;
 
 export default function CustomForm({
@@ -36,7 +34,7 @@ export default function CustomForm({
     formState: { errors },
   } = methods;
 
-  console.log({ errors });
+  // console.log({ errors });
 
   const onSubmit = async (data: any) => {
     //
@@ -49,7 +47,7 @@ export default function CustomForm({
       methods.reset(undefined, { keepValues: true });
 
       //
-      console.log(err);
+      // console.log(err);
     }
   };
 

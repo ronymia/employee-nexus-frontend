@@ -1,5 +1,6 @@
 import { getErrorMessageByPropertyName } from "@/utils/schema-validator";
 import { Controller, useFormContext } from "react-hook-form";
+import FieldLabel from "./components/FieldLabel";
 
 interface ICustomTextareaField {
   dataAuto?: string;
@@ -41,20 +42,17 @@ export default function CustomTextareaField({
       } w-full flex flex-col gap-y-1.5`}
     >
       {/* LABEL */}
-      {label && (
-        <label
-          data-auto={`label-${dataAuto}`}
-          htmlFor={id}
-          className="text-sm "
-        >
-          <span className={`font-semibold ${labelClassName}`}>
-            {label}{" "}
-            {label && required && !disabled && (
-              <span className="text-error font-bold text-md">*</span>
-            )}
-          </span>
-        </label>
-      )}
+      {label ? (
+        <FieldLabel
+          key={`${name}-fieldLabel`}
+          htmlFor={id ? id : name}
+          dataAuto={`${dataAuto}`}
+          label={label}
+          required={required}
+          disabled={disabled}
+          labelClassName={labelClassName}
+        />
+      ) : null}
 
       {/* INPUT FIELD */}
       <Controller

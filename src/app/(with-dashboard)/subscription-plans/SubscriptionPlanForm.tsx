@@ -78,6 +78,7 @@ export default function SubscriptionPlanForm({
 
       {/* ACTION BUTTON */}
       <FormActionButton
+        cancelHandler={handleClosePopup}
         isPending={createResult.loading || updateResult.loading}
       />
     </CustomForm>

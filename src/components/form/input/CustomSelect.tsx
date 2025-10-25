@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { RxCrossCircled } from "react-icons/rx";
 import { FaSync } from "react-icons/fa";
 import truncateText from "@/utils/truncateText";
+import FieldLabel from "./components/FieldLabel";
 
 type IOption = { label: string; value: string | number };
 
@@ -128,20 +129,17 @@ export default function CustomSelect({
             className={`${wrapperClassName} flex flex-col justify-start gap-y-1.5 relative h-auto`}
           >
             {/* LABEL */}
-            {label && (
-              <label
-                data-auto={`label-${dataTestId}`}
-                htmlFor={id}
-                className="text-sm"
-              >
-                {label}{" "}
-                <span className={`font-semibold ${labelClassName}`}>
-                  {label && required && !disabled && (
-                    <span className={`text-error font-bold`}>*</span>
-                  )}
-                </span>
-              </label>
-            )}
+            {label ? (
+              <FieldLabel
+                key={`${name}-fieldLabel`}
+                htmlFor={id ? id : name}
+                dataAuto={`${dataTestId}`}
+                label={label}
+                required={required}
+                disabled={disabled}
+                labelClassName={labelClassName}
+              />
+            ) : null}
 
             {/* SELECTED OPTIONS */}
             <ul

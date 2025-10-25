@@ -6,6 +6,7 @@ import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { BiReset } from "react-icons/bi";
 import { generateWeekDays } from "@/utils/date-time.utils";
+import FieldLabel from "./components/FieldLabel";
 
 const generateYears = ({
   startOfYear,
@@ -468,16 +469,15 @@ export default function CustomDatePicker({
     >
       {/* LABEL */}
       {label ? (
-        <label
-          htmlFor={name}
-          data-auto={`${dataAuto}-date_picker_label`}
-          className={`text-sm font-medium ${labelClassName}`}
-        >
-          {label}{" "}
-          {!disabled && required && (
-            <span className="text-error font-bold">*</span>
-          )}
-        </label>
+        <FieldLabel
+          key={`${name}-fieldLabel`}
+          htmlFor={id ? id : name}
+          dataAuto={`${dataAuto}`}
+          label={label}
+          required={required}
+          disabled={disabled}
+          labelClassName={labelClassName}
+        />
       ) : null}
 
       {/* HOOK FORM CONTROLLER */}

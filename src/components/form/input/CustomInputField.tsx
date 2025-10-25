@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { getErrorMessageByPropertyName } from "../../../utils/schema-validator";
+import FieldLabel from "./components/FieldLabel";
+import FieldError from "./components/FieldError";
+import { getErrorMessageByPropertyName } from "@/utils/schema-validator";
 
 interface ICustomInputFieldProps {
   dataAuto?: string;
@@ -27,7 +29,7 @@ interface ICustomInputFieldProps {
 }
 
 export default function CustomInputField({
-  dataAuto,
+  dataAuto = "",
   type = "text",
   inputMode = "text",
   name,
@@ -62,20 +64,17 @@ export default function CustomInputField({
       } w-full flex flex-col gap-y-1.5`}
     >
       {/* LABEL */}
-      {label && (
-        <label
-          data-auto={`label-${dataAuto}`}
-          htmlFor={id}
-          className="text-sm "
-        >
-          <span className={`font-semibold ${labelClassName}`}>
-            {label}{" "}
-            {label && required && !disabled && (
-              <span className="text-error font-bold text-md">*</span>
-            )}
-          </span>
-        </label>
-      )}
+      {label ? (
+        <FieldLabel
+          key={`${name}-fieldLabel`}
+          htmlFor={id ? id : name}
+          dataAuto={dataAuto}
+          label={label}
+          required={required}
+          disabled={disabled}
+          labelClassName={labelClassName}
+        />
+      ) : null}
 
       {/* INPUT FIELD */}
       <Controller
@@ -193,7 +192,7 @@ export default function CustomInputField({
               placeholder={`${placeholder ? placeholder : label}`}
               aria-invalid={!!errorMessage}
               aria-required={required}
-              autoComplete="on"
+              autoComplete="off"
               className={`input input-md bg-base-300 w-full p-2 focus:outline-primary focus:border-primary rounded-field ${
                 fieldClassName ? fieldClassName : ""
               } 
@@ -207,9 +206,9 @@ export default function CustomInputField({
         }
       />
       {/* ERROR MESSAGE */}
-      {!!errorMessage && (
-        <small className={`text-error font-medium`}>{errorMessage}</small>
-      )}
+      {errorMessage ? (
+        <FieldError key={`${name}-field_error`} errorMessage={errorMessage} />
+      ) : null}
     </div>
   );
 }

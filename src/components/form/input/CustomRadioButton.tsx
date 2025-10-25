@@ -2,6 +2,7 @@ import { getErrorMessageByPropertyName } from "@/utils/schema-validator";
 import { ElementType } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { BiSolidCheckCircle } from "react-icons/bi";
+import FieldLabel from "./components/FieldLabel";
 
 export interface IRadioButtonOption {
   title: string;
@@ -11,6 +12,7 @@ export interface IRadioButtonOption {
 
 export default function CustomRadioButton({
   dataAuto,
+  id,
   name,
   label,
   labelClassName = "",
@@ -23,6 +25,7 @@ export default function CustomRadioButton({
   options = [],
 }: {
   dataAuto: string;
+  id?: string;
   name: string;
   label: string;
   defaultChecked?: boolean;
@@ -48,15 +51,17 @@ export default function CustomRadioButton({
       } flex flex-col justify-start gap-y-2`}
     >
       {/* LABEL */}
-      {label && (
-        <label
-          htmlFor={`flex`}
-          data-auto={`${dataAuto}_label`}
-          className={`text-sm font-medium ${labelClassName}`}
-        >
-          {label} {required && <span className="text-error">*</span>}
-        </label>
-      )}
+      {label ? (
+        <FieldLabel
+          key={`${name}-fieldLabel`}
+          htmlFor={id ? id : name}
+          dataAuto={`${dataAuto}`}
+          label={label}
+          required={required}
+          disabled={disabled}
+          labelClassName={labelClassName}
+        />
+      ) : null}
       <Controller
         control={control}
         name={`${name}`}
