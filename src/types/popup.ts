@@ -3,8 +3,8 @@ type IAction_TYPE = "create" | "update" | "delete" | "view";
 type IForm_NAME =
   | ""
   | "SubscriptionPlanForm"
-  | "faculty"
-  | "student"
+  | "job_type"
+  | "designation"
   | "offered_course_section"
   | "academic_semester"
   | "academic_faculty"

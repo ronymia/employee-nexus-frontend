@@ -56,10 +56,40 @@ export default function Sidebar({
     },
     {
       Icon: VscFileSubmodule,
-      label: menuNames.system_modules,
-      path: "/system-modules",
+      label: menuNames.features,
+      path: "/features",
       show: true,
       subMenus: [],
+    },
+    {
+      Icon: VscFileSubmodule,
+      label: "Recruitment",
+      path: "/recruitment",
+      show: true,
+      subMenus: [
+        {
+          Icon: VscFileSubmodule,
+          label: "Job Types",
+          path: "/recruitment/job-types",
+          show: true,
+          subMenus: [],
+        },
+      ],
+    },
+    {
+      Icon: VscFileSubmodule,
+      label: "Administration",
+      path: "/administration",
+      show: true,
+      subMenus: [
+        {
+          Icon: VscFileSubmodule,
+          label: "Job Types",
+          path: "/administration/designations",
+          show: true,
+          subMenus: [],
+        },
+      ],
     },
   ];
 

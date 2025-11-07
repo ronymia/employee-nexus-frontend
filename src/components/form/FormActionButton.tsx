@@ -22,10 +22,10 @@ export default function FormActionButton({
       <button
         type="submit"
         disabled={isPending}
-        className={`btn btn-primary min-w-1/2 rounded-sm flex items-center justify-center gap-2
+        className={`btn btn-primary min-w-1/2 rounded-sm flex items-center justify-center gap-2 text-base-300
     ${
       isPending
-        ? "opacity-50 cursor-not-allowed !bg-primary !text-base-300"
+        ? "opacity-50 cursor-not-allowed !bg-primary"
         : "hover:opacity-90"
     }`}
       >

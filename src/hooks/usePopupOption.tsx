@@ -11,6 +11,7 @@ export default function usePopupOption() {
     title: "",
   });
 
+  // CREATE NEW SUBSCRIPTION PLAN
   const createNewSubscriptionPlan = () => {
     setPopupOption({
       open: true,
@@ -22,5 +23,34 @@ export default function usePopupOption() {
     });
   };
 
-  return { popupOption, setPopupOption, createNewSubscriptionPlan };
+  // CREATE NEW JOB TYPE
+  const createNewJobType = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "job_type",
+      data: null,
+      title: "Create Job Type",
+    });
+  };
+  // CREATE NEW DESIGNATION
+  const createNewDesignation = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "designation",
+      data: null,
+      title: "Create Designation",
+    });
+  };
+
+  return {
+    popupOption,
+    setPopupOption,
+    createNewSubscriptionPlan,
+    createNewJobType,
+    createNewDesignation,
+  };
 }

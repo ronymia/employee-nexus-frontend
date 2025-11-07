@@ -9,6 +9,8 @@ import CustomPopup from "../modal/CustomPopup";
 import CustomLoading from "../loader/CustomLoading";
 
 import type { Variants } from "framer-motion";
+import SubscriptionPlanForm from "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm";
+import JobTypeForm from "@/app/(with-dashboard)/recruitment/job-types/JobTypesForm";
 
 const popupVariants: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -57,18 +59,18 @@ export default function FormModal({
       popupOption?.actionType === "update"
     ) {
       if (popupOption?.form === "SubscriptionPlanForm") {
-        // Dynamically import the SubscriptionPlanForm component
-        // This allows for code-splitting and lazy loading of the form
-        // to improve performance and reduce initial load time.
-        const SubscriptionPlanForm = React.lazy(
-          () =>
-            import(
-              "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm"
-            )
-        );
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <SubscriptionPlanForm
+              handleClosePopup={handleClosePopup}
+              data={popupOption.data}
+            />
+          </React.Suspense>
+        );
+      } else if (popupOption?.form === "job_type") {
+        return (
+          <React.Suspense fallback={<CustomLoading />}>
+            <JobTypeForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />

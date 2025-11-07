@@ -4,4 +4,4 @@ export * from "./table";
 export * from "./common";
 export * from "./business.type";
 export * from "./subscription-plan.type";
-export * from "./system-module.type";
+export * from "./IFeature.type";

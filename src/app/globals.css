@@ -11,6 +11,32 @@
   logs: true;
 }
 
+@theme {
+  --color-de-york-50: #effaf2;
+  --color-de-york-100: #d9f2dd;
+  --color-de-york-200: #b6e4c1;
+  --color-de-york-300: #85d09b;
+  --color-de-york-400: #69be85;
+  --color-de-york-500: #319857;
+  --color-de-york-600: #217a43;
+  --color-de-york-700: #1a6237;
+  --color-de-york-800: #174e2d;
+  --color-de-york-900: #144027;
+  --color-de-york-950: #0a2416;
+
+  --color-emerald-50: #f1fcf2;
+  --color-emerald-100: #dff9e4;
+  --color-emerald-200: #c0f2ca;
+  --color-emerald-300: #8ee7a2;
+  --color-emerald-400: #46ce65;
+  --color-emerald-500: #2fb84e;
+  --color-emerald-600: #21983d;
+  --color-emerald-700: #1e7733;
+  --color-emerald-800: #1c5f2d;
+  --color-emerald-900: #194e27;
+  --color-emerald-950: #082b12;
+}
+
 /* HANDLE NUMBER INPUT */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -31,8 +57,10 @@ button:disabled {
 @plugin "daisyui/theme" {
   name: "light";
   default: true;
-  --color-primary: #da2637;
-  --color-primary-content: #fed9d6;
+  --color-primary: #22c55e;
+  /* --color-primary: #da2637; */
+  --color-primary-content: #6ee7b7;
+  /* --color-primary-content: #fed9d6; */
   --color-primary-focus: #bb0606;
   /* --color-secondary: #28cb38; */
   /* --color-secondary-content: #010f01; */

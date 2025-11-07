@@ -17,10 +17,10 @@ export default function ProfileAvatar() {
         >
           <>
             <div className={`text-right font-semibold leading-0.5`}>
-              <h4 className={`text-sm text-primary`}>
+              <h4 className={`text-sm text-green-950`}>
                 {user?.profile?.fullName}
               </h4>
-              <small className={`text-xs text-gray-600`}>
+              <small className={`text-xs text-green-900`}>
                 {formatText(user?.role?.name)}
               </small>
             </div>

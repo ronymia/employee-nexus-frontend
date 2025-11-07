@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
 
+// GET ALL BUSINESSES
 export const GET_BUSINESSES = gql`
   query Businesses {
     businesses {
@@ -14,7 +15,7 @@ export const GET_BUSINESSES = gql`
         email
         id
         lat
-        long
+        lng
         name
         numberOfEmployeesAllowed
         phone
@@ -25,6 +26,64 @@ export const GET_BUSINESSES = gql`
         updatedAt
         userId
         website
+      }
+    }
+  }
+`;
+
+// GET BUSINESS BY ID
+export const GET_BUSINESS_BY_ID = gql`
+  query BusinessById($id: Int!) {
+    businessById(id: $id) {
+      address
+      city
+      createdAt
+      email
+      id
+      lat
+      lng
+      name
+      numberOfEmployeesAllowed
+      phone
+      postcode
+      registrationDate
+      status
+      subscriptionPlanId
+      updatedAt
+      userId
+      website
+      user {
+        createdAt
+        deletedBy
+        email
+        id
+        roleId
+        status
+        updatedAt
+        profile {
+          address
+          city
+          country
+          createdAt
+          dateOfBirth
+          fullName
+          gender
+          id
+          maritalStatus
+          phone
+          postcode
+          profilePicture
+          updatedAt
+          userId
+        }
+      }
+      businessSchedules {
+        businessId
+        day
+        endTime
+        id
+        isWeekend
+        startTime
       }
     }
   }

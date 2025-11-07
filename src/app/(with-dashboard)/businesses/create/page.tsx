@@ -1,6 +1,5 @@
-import React from "react";
-import BusinessForm from "../BusinessForm";
+import UserBusinessForm from "../UserBusinessForm";
 
 export default function CreateBusinessPage() {
-  return <BusinessForm />;
+  return <UserBusinessForm />;
 }

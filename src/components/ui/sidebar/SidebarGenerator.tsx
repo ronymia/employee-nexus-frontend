@@ -74,7 +74,7 @@ export default function SidebarGenerator({
             <div
               className={` flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
                 isSubmenuActive
-                  ? "bg-[#bb0606] text-base-300"
+                  ? "bg-green-200 text-green-950"
                   : "group-hover:bg-base-100 group-hover:text-primary"
               }`}
             >
@@ -86,7 +86,7 @@ export default function SidebarGenerator({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
-              className="whitespace-nowrap flex-grow text-heading"
+              className="whitespace-nowrap grow text-heading"
             >
               {label}
             </motion.span>
@@ -117,22 +117,15 @@ export default function SidebarGenerator({
                       key={child.path}
                       href={child?.path}
                       onClick={handleLinkClick}
-                      className={`flex items-center justify-start gap-2.5 p-1.5 cursor-pointer text-sm border-l-2 drop-shadow-md group
+                      className={`flex items-center justify-start gap-2.5 p-1.5 cursor-pointer text-sm border-l-2 drop-shadow-md
                                                         ${
                                                           pathname ===
                                                           child?.path
-                                                            ? "text-primary font-medium bg-primary-content border-l-primary"
+                                                            ? "text-green-950 font-medium bg-primary-content border-l-green-950"
                                                             : "hover:bg-primary-content  border-l-base-300"
                                                         }
                                                       `}
                     >
-                      <div
-                        className={`rounded-full w-3 h-3 ${
-                          child?.path === pathname
-                            ? "bg-primary"
-                            : "hover:bg-primary bg-primary-content group-hover:bg-primary group-hover:text-base-300"
-                        }`}
-                      />
                       {child?.label}
                     </Link>
                   ))}
@@ -145,11 +138,11 @@ export default function SidebarGenerator({
           href={path}
           onClick={handleLinkClick}
           className={`
-            flex items-center gap-3 px-3 py-2.5 transition-all duration-200 group
+            flex items-center gap-3 px-3 py-2.5 transition-all duration-200 group text-green-950
             ${
               path === pathname
                 ? "bg-primary text-sm md:text-base font-medium text-base-300"
-                : "hover:bg-secondary-content"
+                : "hover:bg-gray-100"
             }
           `}
         >
@@ -159,8 +152,8 @@ export default function SidebarGenerator({
               flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200
               ${
                 pathname === path
-                  ? "bg-[#bb0606] text-base-300"
-                  : "bg-base-200 text-muted group-hover:bg-base-100 group-hover:text-primary"
+                  ? "bg-green-200 text-green-950"
+                  : "bg-base-200 text-muted group-hover:bg-gray-300 group-hover:text-green-950"
               }
             `}
           >

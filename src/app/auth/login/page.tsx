@@ -77,7 +77,7 @@ export default function LoginPage() {
             type={"submit"}
             disabled={loginResult.loading}
             className={`btn btn-primary bg-primary flex items-center justify-center border-none rounded-field mt-3 transition-all duration-200
-                disabled:!bg-primary disabled:!opacity-70 disabled:!cursor-not-allowed disabled:!text-black ${
+                disabled:bg-primary disabled:opacity-70 disabled:cursor-not-allowed  text-green-950 ${
                   loginResult.loading ? "cursor-not-allowed" : "cursor-grab"
                 }`}
           >
