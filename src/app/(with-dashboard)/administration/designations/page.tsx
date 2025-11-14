@@ -5,6 +5,7 @@ import CustomTable from "@/components/table/CustomTable";
 import {
   PermissionAction,
   PermissionResource,
+  Permissions,
 } from "@/constants/permissions.constant";
 import {
   DELETE_DESIGNATION,
@@ -98,14 +99,14 @@ export default function DesignationsPage() {
     {
       name: "edit",
       type: "button",
-      permissions: [],
+      permissions: [Permissions.DesignationUpdate],
       handler: handleEdit,
       disabledOn: [{ accessorKey: "status", value: "inactive" }],
     },
     {
       name: "delete",
       type: "button",
-      permissions: [],
+      permissions: [Permissions.DesignationDelete],
       handler: (row) => {
         setPopupOption({
           open: true,

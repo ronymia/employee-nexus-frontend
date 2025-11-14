@@ -5,6 +5,7 @@ import CustomTable from "@/components/table/CustomTable";
 import {
   PermissionAction,
   PermissionResource,
+  Permissions,
 } from "@/constants/permissions.constant";
 import { DELETE_JOB_TYPES, GET_JOB_TYPES } from "@/graphql/job-type.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
@@ -84,14 +85,14 @@ export default function JobTypesPage() {
     {
       name: "edit",
       type: "button",
-      permissions: [],
+      permissions: [Permissions.JobTypeUpdate],
       handler: handleEdit,
       disabledOn: [{ accessorKey: "status", value: "inactive" }],
     },
     {
       name: "delete",
       type: "button",
-      permissions: [],
+      permissions: [Permissions.JobTypeDelete],
       handler: (row) => {
         setPopupOption({
           open: true,

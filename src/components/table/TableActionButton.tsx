@@ -23,11 +23,11 @@ export default function TableActionButton({
   return (
     <>
       {actions
-        // .filter((action) =>
-        //   action?.permissions.some((permission) =>
-        //     permissions.includes(permission)
-        //   )
-        // )
+        .filter((action) =>
+          action?.permissions.some((permission) =>
+            permissions.includes(permission)
+          )
+        )
         .filter(
           (action) =>
             !action?.disabledOn?.some(
