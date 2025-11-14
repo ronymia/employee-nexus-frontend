@@ -34,6 +34,18 @@ export default function usePopupOption() {
       title: "Create Job Type",
     });
   };
+
+  // CREATE NEW JOB TYPE
+  const createNewJobPlatforms = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "job_platforms",
+      data: null,
+      title: "Create Job Platforms",
+    });
+  };
   // CREATE NEW DESIGNATION
   const createNewDesignation = () => {
     setPopupOption({
@@ -51,6 +63,7 @@ export default function usePopupOption() {
     setPopupOption,
     createNewSubscriptionPlan,
     createNewJobType,
+    createNewJobPlatforms,
     createNewDesignation,
   };
 }

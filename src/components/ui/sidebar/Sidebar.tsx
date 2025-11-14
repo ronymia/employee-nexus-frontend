@@ -92,7 +92,16 @@ export default function Sidebar({
           Icon: VscFileSubmodule,
           label: "Job Types",
           path: "/recruitment/job-types",
-          show: permissionGuard(PermissionResource.RECRUITMENT_PROCESS, [
+          show: permissionGuard(PermissionResource.JOB_TYPE, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Job Platforms",
+          path: "/recruitment/job-platforms",
+          show: permissionGuard(PermissionResource.JOB_PLATFORM, [
             PermissionAction.READ,
           ]),
           subMenus: [],
