@@ -2,7 +2,12 @@
 
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
+import {
+  PermissionAction,
+  PermissionResource,
+} from "@/constants/permissions.constant";
 import { DELETE_JOB_TYPES, GET_JOB_TYPES } from "@/graphql/job-type.api";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType } from "@/types";
 import { IJobType } from "@/types/job-type.type";
@@ -11,6 +16,7 @@ import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 
 export default function JobTypesPage() {
+  const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption, createNewJobType } = usePopupOption();
   const { data, loading } = useQuery<{
     jobTypes: {
@@ -131,14 +137,18 @@ export default function JobTypesPage() {
           }}
           dataSource={data?.jobTypes?.data || []}
         >
-          <button
-            type="button"
-            className={`btn btn-primary text-base-300`}
-            onClick={createNewJobType}
-          >
-            <PiPlusCircle className={`text-xl`} />
-            Add New
-          </button>
+          {permissionGuard(PermissionResource.JOB_TYPE, [
+            PermissionAction.CREATE,
+          ]) && (
+            <button
+              type="button"
+              className={`btn btn-primary text-base-300`}
+              onClick={createNewJobType}
+            >
+              <PiPlusCircle className={`text-xl`} />
+              Add New
+            </button>
+          )}
         </CustomTable>
       </section>
     </>

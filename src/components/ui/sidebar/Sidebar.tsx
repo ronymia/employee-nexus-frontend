@@ -12,6 +12,12 @@ import type { IMenuItems } from "@/types";
 import { motion } from "motion/react";
 import type { Dispatch, SetStateAction } from "react";
 import { menuNames } from "@/constants/menu";
+import useAppStore from "@/hooks/useAppStore";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import {
+  PermissionAction,
+  PermissionResource,
+} from "@/constants/permissions.constant";
 
 const navVariants = {
   open: {
@@ -31,6 +37,9 @@ export default function Sidebar({
   setIsSidebarOpen,
   setIsOpen,
 }: ISidebarProps) {
+  const { permissionGuard } = usePermissionGuard();
+  const { permissions } = useAppStore((state) => state);
+  console.log({ permissions });
   const menuItems: IMenuItems[] = [
     // DEFAULT USER SIDEBAR
     {
@@ -44,21 +53,33 @@ export default function Sidebar({
       Icon: MdOutlineBusinessCenter,
       label: menuNames.business,
       path: "/businesses",
-      show: true,
+      show: permissionGuard(
+        PermissionResource.BUSINESS,
+        [PermissionAction.READ, PermissionAction.CREATE],
+        true
+      ),
       subMenus: [],
     },
     {
       Icon: MdOutlineSubscriptions,
       label: menuNames.subscription_plans,
       path: "/subscription-plans",
-      show: true,
+      show: permissionGuard(
+        PermissionResource.SUBSCRIPTION_PLAN,
+        [PermissionAction.READ, PermissionAction.CREATE],
+        true
+      ),
       subMenus: [],
     },
     {
       Icon: VscFileSubmodule,
       label: menuNames.features,
       path: "/features",
-      show: true,
+      show: permissionGuard(
+        PermissionResource.FEATURE,
+        [PermissionAction.READ, PermissionAction.CREATE],
+        true
+      ),
       subMenus: [],
     },
     {
@@ -71,7 +92,9 @@ export default function Sidebar({
           Icon: VscFileSubmodule,
           label: "Job Types",
           path: "/recruitment/job-types",
-          show: true,
+          show: permissionGuard(PermissionResource.RECRUITMENT_PROCESS, [
+            PermissionAction.READ,
+          ]),
           subMenus: [],
         },
       ],
@@ -84,9 +107,11 @@ export default function Sidebar({
       subMenus: [
         {
           Icon: VscFileSubmodule,
-          label: "Job Types",
+          label: "Designation",
           path: "/administration/designations",
-          show: true,
+          show: permissionGuard(PermissionResource.DESIGNATION, [
+            PermissionAction.READ,
+          ]),
           subMenus: [],
         },
       ],

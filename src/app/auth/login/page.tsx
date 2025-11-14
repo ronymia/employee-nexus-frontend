@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   // STORE
-  const { setUser, setToken } = useAppStore((state) => state);
+  const { setUser, setToken, setPermissions } = useAppStore((state) => state);
   // NAVIGATE
   const router = useRouter();
   // LOGIN API
@@ -41,6 +41,7 @@ export default function LoginPage() {
       // console.log(data?.login?.accessToken);
       setToken(data?.login?.accessToken);
       setUser(data?.login?.user);
+      setPermissions(data?.login?.user?.permissions);
       router.push("/dashboard");
     }
   };

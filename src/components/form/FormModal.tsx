@@ -11,6 +11,7 @@ import CustomLoading from "../loader/CustomLoading";
 import type { Variants } from "framer-motion";
 import SubscriptionPlanForm from "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm";
 import JobTypeForm from "@/app/(with-dashboard)/recruitment/job-types/JobTypesForm";
+import DesignationForm from "@/app/(with-dashboard)/administration/designations/DesignationForm";
 
 const popupVariants: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -71,6 +72,15 @@ export default function FormModal({
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <JobTypeForm
+              handleClosePopup={handleClosePopup}
+              data={popupOption.data}
+            />
+          </React.Suspense>
+        );
+      } else if (popupOption?.form === "designation") {
+        return (
+          <React.Suspense fallback={<CustomLoading />}>
+            <DesignationForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />

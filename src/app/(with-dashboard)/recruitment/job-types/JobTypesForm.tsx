@@ -52,11 +52,7 @@ export default function JobTypeForm({
       {/* NAME */}
       <CustomInputField name="name" label="Name" required />
       {/* DESCRIPTION */}
-      <CustomTextareaField
-        name="description"
-        label="Description"
-        required={false}
-      />
+      <CustomTextareaField name="description" label="Description" />
 
       {/* ACTION BUTTON */}
       <FormActionButton

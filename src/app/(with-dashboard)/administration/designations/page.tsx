@@ -3,26 +3,33 @@
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
 import {
+  PermissionAction,
+  PermissionResource,
+} from "@/constants/permissions.constant";
+import {
   DELETE_DESIGNATION,
   GET_DESIGNATIONS,
 } from "@/graphql/designation.api";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType } from "@/types";
 import { IDesignation } from "@/types/designation.type";
-import { IJobType } from "@/types/job-type.type";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 
 export default function DesignationsPage() {
+  const { permissionGuard } = usePermissionGuard();
+  // CREATE NEW DESIGNATION
   const { popupOption, setPopupOption, createNewDesignation } =
     usePopupOption();
   const { data, loading } = useQuery<{
     designations: {
-      data: IJobType[];
+      data: IDesignation[];
     };
   }>(GET_DESIGNATIONS, {});
 
+  // DELETE DESIGNATION
   const [deleteSubscriptionPlan, deleteResult] = useMutation(
     DELETE_DESIGNATION,
     {
@@ -32,6 +39,7 @@ export default function DesignationsPage() {
   );
   // console.log({ data });
 
+  // HANDLERS
   const handleEdit = (row: IDesignation) => {
     //
     const data = {
@@ -45,11 +53,13 @@ export default function DesignationsPage() {
       open: true,
       closeOnDocumentClick: true,
       actionType: "update",
-      form: "job_type",
+      form: "designation",
       data: data,
-      title: "Update Job Type",
+      title: "Update Designation",
     });
   };
+
+  // DELETE HANDLER
   const handleDelete = async (row: IDesignation) => {
     await deleteSubscriptionPlan({
       variables: {
@@ -58,6 +68,7 @@ export default function DesignationsPage() {
     });
   };
 
+  // COLUMNS
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -82,6 +93,7 @@ export default function DesignationsPage() {
     },
   ]);
 
+  // ACTIONS
   const actions: TableActionType[] = [
     {
       name: "edit",
@@ -99,9 +111,9 @@ export default function DesignationsPage() {
           open: true,
           closeOnDocumentClick: true,
           actionType: "delete",
-          form: "job_type",
+          form: "designation",
           deleteHandler: () => handleDelete(row),
-          title: "Delete Job Type",
+          title: "Delete Designation",
         });
       },
       disabledOn: [],
@@ -139,14 +151,20 @@ export default function DesignationsPage() {
           }}
           dataSource={data?.designations?.data || []}
         >
-          <button
-            type="button"
-            className={`btn btn-primary text-base-300`}
-            onClick={createNewDesignation}
-          >
-            <PiPlusCircle className={`text-xl`} />
-            Add New
-          </button>
+          {permissionGuard(
+            PermissionResource.DESIGNATION,
+            [PermissionAction.CREATE],
+            false
+          ) && (
+            <button
+              type="button"
+              className={`btn btn-primary text-base-300`}
+              onClick={createNewDesignation}
+            >
+              <PiPlusCircle className={`text-xl`} />
+              Add New
+            </button>
+          )}
         </CustomTable>
       </section>
     </>

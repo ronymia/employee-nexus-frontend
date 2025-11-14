@@ -39,8 +39,7 @@ export const CREATE_JOB_TYPES = gql`
 export const UPDATE_JOB_TYPES = gql`
   mutation UpdateJobType($id: Int!, $name: String!, $description: String) {
     updateJobType(
-      id: $id
-      updateJobTypeInput: { name: $name, description: $description }
+      updateJobTypeInput: { id: $id, name: $name, description: $description }
     ) {
       message
       statusCode

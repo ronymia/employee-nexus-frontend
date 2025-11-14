@@ -4,9 +4,9 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import {
   CREATE_DESIGNATION,
+  GET_DESIGNATIONS,
   UPDATE_DESIGNATION,
 } from "@/graphql/designation.api";
-import { GET_JOB_TYPES } from "@/graphql/job-type.api";
 import { IDesignationFormData } from "@/schemas/designation.schema";
 import { IJobType } from "@/types/job-type.type";
 import { useMutation } from "@apollo/client/react";
@@ -21,11 +21,11 @@ export default function DesignationForm({
   // MUTATION TO CREATE A NEW
   const [createDesignation, createResult] = useMutation(CREATE_DESIGNATION, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_JOB_TYPES }],
+    refetchQueries: [{ query: GET_DESIGNATIONS }],
   });
   const [updateDesignation, updateResult] = useMutation(UPDATE_DESIGNATION, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_JOB_TYPES }],
+    refetchQueries: [{ query: GET_DESIGNATIONS }],
   });
 
   // HANDLER FOR FORM SUBMISSION
@@ -52,11 +52,7 @@ export default function DesignationForm({
       {/* NAME */}
       <CustomInputField name="name" label="Name" required />
       {/* DESCRIPTION */}
-      <CustomTextareaField
-        name="description"
-        label="Description"
-        required={false}
-      />
+      <CustomTextareaField name="description" label="Description" />
 
       {/* ACTION BUTTON */}
       <FormActionButton
