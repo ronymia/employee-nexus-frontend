@@ -6,6 +6,7 @@ type IForm_NAME =
   | "job_type"
   | "recruitment_process"
   | "onboarding_process"
+  | "work_site"
   | "job_platforms"
   | "designation"
   | "offered_course_section"

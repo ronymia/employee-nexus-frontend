@@ -141,6 +141,15 @@ export default function Sidebar({
           ]),
           subMenus: [],
         },
+        {
+          Icon: VscFileSubmodule,
+          label: "Work Sites",
+          path: "/administration/work-sites",
+          show: permissionGuard(PermissionResource.WORK_SITE, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
       ],
     },
   ];

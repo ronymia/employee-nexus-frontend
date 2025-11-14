@@ -59,6 +59,18 @@ export default function usePopupOption() {
     });
   };
 
+  // CREATE NEW WORK SITE
+  const createNewWorkSite = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "work_site",
+      data: null,
+      title: "Create Work Site",
+    });
+  };
+
   // CREATE NEW JOB TYPE
   const createNewJobPlatforms = () => {
     setPopupOption({
@@ -89,6 +101,7 @@ export default function usePopupOption() {
     createNewJobType,
     createNewRecruitmentProcess,
     createNewOnboardingProcess,
+    createNewWorkSite,
     createNewJobPlatforms,
     createNewDesignation,
   };
