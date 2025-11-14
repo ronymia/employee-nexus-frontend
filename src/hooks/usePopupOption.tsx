@@ -47,6 +47,18 @@ export default function usePopupOption() {
     });
   };
 
+  // CREATE NEW ONBOARDING PROCESS
+  const createNewOnboardingProcess = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "onboarding_process",
+      data: null,
+      title: "Create Onboarding Process",
+    });
+  };
+
   // CREATE NEW JOB TYPE
   const createNewJobPlatforms = () => {
     setPopupOption({
@@ -76,6 +88,7 @@ export default function usePopupOption() {
     createNewSubscriptionPlan,
     createNewJobType,
     createNewRecruitmentProcess,
+    createNewOnboardingProcess,
     createNewJobPlatforms,
     createNewDesignation,
   };

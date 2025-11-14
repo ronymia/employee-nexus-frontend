@@ -108,6 +108,15 @@ export default function Sidebar({
         },
         {
           Icon: VscFileSubmodule,
+          label: "Onboarding Processes",
+          path: "/recruitment/onboarding-processes",
+          show: permissionGuard(PermissionResource.ONBOARDING_PROCESS, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
           label: "Job Platforms",
           path: "/recruitment/job-platforms",
           show: permissionGuard(PermissionResource.JOB_PLATFORM, [

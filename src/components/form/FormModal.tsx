@@ -12,6 +12,7 @@ import type { Variants } from "framer-motion";
 import SubscriptionPlanForm from "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm";
 import JobTypeForm from "@/app/(with-dashboard)/recruitment/job-types/JobTypesForm";
 import RecruitmentProcessForm from "@/app/(with-dashboard)/recruitment/recruitment-processes/RecruitmentProcessesForm";
+import OnboardingProcessForm from "@/app/(with-dashboard)/recruitment/onboarding-processes/OnboardingProcessesForm";
 import DesignationForm from "@/app/(with-dashboard)/administration/designations/DesignationForm";
 import JobPlatformsForm from "@/app/(with-dashboard)/recruitment/job-platforms/JobPlatformsForm";
 
@@ -83,6 +84,15 @@ export default function FormModal({
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <RecruitmentProcessForm
+              handleClosePopup={handleClosePopup}
+              data={popupOption.data}
+            />
+          </React.Suspense>
+        );
+      } else if (popupOption?.form === "onboarding_process") {
+        return (
+          <React.Suspense fallback={<CustomLoading />}>
+            <OnboardingProcessForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />
