@@ -4,6 +4,7 @@ type IForm_NAME =
   | ""
   | "SubscriptionPlanForm"
   | "job_type"
+  | "recruitment_process"
   | "job_platforms"
   | "designation"
   | "offered_course_section"

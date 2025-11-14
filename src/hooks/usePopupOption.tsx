@@ -35,6 +35,18 @@ export default function usePopupOption() {
     });
   };
 
+  // CREATE NEW RECRUITMENT PROCESS
+  const createNewRecruitmentProcess = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "recruitment_process",
+      data: null,
+      title: "Create Recruitment Process",
+    });
+  };
+
   // CREATE NEW JOB TYPE
   const createNewJobPlatforms = () => {
     setPopupOption({
@@ -63,6 +75,7 @@ export default function usePopupOption() {
     setPopupOption,
     createNewSubscriptionPlan,
     createNewJobType,
+    createNewRecruitmentProcess,
     createNewJobPlatforms,
     createNewDesignation,
   };

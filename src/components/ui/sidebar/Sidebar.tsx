@@ -99,6 +99,15 @@ export default function Sidebar({
         },
         {
           Icon: VscFileSubmodule,
+          label: "Recruitment Processes",
+          path: "/recruitment/recruitment-processes",
+          show: permissionGuard(PermissionResource.RECRUITMENT_PROCESS, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
           label: "Job Platforms",
           path: "/recruitment/job-platforms",
           show: permissionGuard(PermissionResource.JOB_PLATFORM, [
