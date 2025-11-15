@@ -9,3 +9,4 @@ export * from "./employment-status.schema";
 export * from "./leave-types.schema";
 export * from "./departments.schema";
 export * from "./user.schema";
+export * from "./attendance-settings.schema";

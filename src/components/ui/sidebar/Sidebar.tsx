@@ -4,6 +4,7 @@ import {
   MdOutlineBusinessCenter,
   MdOutlineDashboard,
   MdOutlineSubscriptions,
+  MdSettings,
 } from "react-icons/md";
 import SidebarGenerator from "./SidebarGenerator";
 import { VscFileSubmodule } from "react-icons/vsc";
@@ -173,6 +174,26 @@ export default function Sidebar({
           label: "Departments",
           path: "/administration/departments",
           show: permissionGuard(PermissionResource.DEPARTMENT, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+      ],
+    },
+    // SETTINGS MENU
+    {
+      Icon: MdSettings,
+      label: "Settings",
+      path: "/settings",
+      show: permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
+        PermissionAction.READ,
+      ]),
+      subMenus: [
+        {
+          Icon: VscFileSubmodule,
+          label: "Attendance Settings",
+          path: "/settings/attendance-settings",
+          show: permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
             PermissionAction.READ,
           ]),
           subMenus: [],

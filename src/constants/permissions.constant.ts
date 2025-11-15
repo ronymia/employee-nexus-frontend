@@ -22,6 +22,7 @@ export enum PermissionResource {
   WORK_SCHEDULE = "Work Schedule",
   DEPARTMENT = "Department",
   LEAVE_TYPE = "Leave Type",
+  ATTENDANCE_SETTINGS = "Attendance Settings",
 }
 
 // Permission Constants for easy usage
@@ -121,4 +122,8 @@ export const Permissions = {
   LeaveTypeRead: `${PermissionResource.LEAVE_TYPE}:${PermissionAction.READ}`,
   LeaveTypeUpdate: `${PermissionResource.LEAVE_TYPE}:${PermissionAction.UPDATE}`,
   LeaveTypeDelete: `${PermissionResource.LEAVE_TYPE}:${PermissionAction.DELETE}`,
+
+  // Attendance Settings Permissions
+  AttendanceSettingsRead: `${PermissionResource.ATTENDANCE_SETTINGS}:${PermissionAction.READ}`,
+  AttendanceSettingsUpdate: `${PermissionResource.ATTENDANCE_SETTINGS}:${PermissionAction.UPDATE}`,
 } as const;

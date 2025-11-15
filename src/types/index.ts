@@ -12,3 +12,4 @@ export * from "./work-sites.type";
 export * from "./employment-status.type";
 export * from "./leave-types.type";
 export * from "./departments.type";
+export * from "./attendance-settings.type";
