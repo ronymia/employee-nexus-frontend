@@ -106,6 +106,18 @@ export default function usePopupOption() {
     });
   };
 
+  // CREATE NEW LEAVE TYPE
+  const createNewLeaveType = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "leave_type",
+      data: null,
+      title: "Create Leave Type",
+    });
+  };
+
   return {
     popupOption,
     setPopupOption,
@@ -117,5 +129,6 @@ export default function usePopupOption() {
     createNewJobPlatforms,
     createNewDesignation,
     createNewEmploymentStatus,
+    createNewLeaveType,
   };
 }

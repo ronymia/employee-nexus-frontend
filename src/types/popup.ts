@@ -10,6 +10,7 @@ type IForm_NAME =
   | "job_platforms"
   | "designation"
   | "employment_status"
+  | "leave_type"
   | "offered_course_section"
   | "academic_semester"
   | "academic_faculty"

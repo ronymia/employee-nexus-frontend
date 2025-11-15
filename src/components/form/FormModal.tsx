@@ -17,6 +17,7 @@ import WorkSiteForm from "@/app/(with-dashboard)/administration/work-sites/WorkS
 import DesignationForm from "@/app/(with-dashboard)/administration/designations/DesignationForm";
 import JobPlatformsForm from "@/app/(with-dashboard)/recruitment/job-platforms/JobPlatformsForm";
 import EmploymentStatusForm from "@/app/(with-dashboard)/administration/employment-status/EmploymentStatusForm";
+import LeaveTypesForm from "@/app/(with-dashboard)/administration/leave-types/LeaveTypesForm";
 
 const popupVariants: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -122,6 +123,15 @@ export default function FormModal({
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <EmploymentStatusForm
+              handleClosePopup={handleClosePopup}
+              data={popupOption.data}
+            />
+          </React.Suspense>
+        );
+      } else if (popupOption?.form === "leave_type") {
+        return (
+          <React.Suspense fallback={<CustomLoading />}>
+            <LeaveTypesForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />

@@ -6,3 +6,4 @@ export * from "./recruitment-processes.schema";
 export * from "./onboarding-processes.schema";
 export * from "./work-sites.schema";
 export * from "./employment-status.schema";
+export * from "./leave-types.schema";

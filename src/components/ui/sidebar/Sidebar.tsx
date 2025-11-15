@@ -37,7 +37,7 @@ export default function Sidebar({
   setIsSidebarOpen,
   setIsOpen,
 }: ISidebarProps) {
-  const { permissionGuard } = usePermissionGuard();
+  const { permissionGuard, hasPermission } = usePermissionGuard();
   const { permissions } = useAppStore((state) => state);
   console.log({ permissions });
   const menuItems: IMenuItems[] = [
@@ -155,6 +155,15 @@ export default function Sidebar({
           label: "Employment Status",
           path: "/administration/employment-status",
           show: permissionGuard(PermissionResource.EMPLOYMENT_STATUS, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Leave Types",
+          path: "/administration/leave-types",
+          show: permissionGuard(PermissionResource.LEAVE_TYPE, [
             PermissionAction.READ,
           ]),
           subMenus: [],
