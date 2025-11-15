@@ -154,56 +154,49 @@ export const REGISTER_USER_WITH_BUSINESSES = gql`
     }
   }
 `;
-// export const REGISTER_USER_WITH_BUSINESSES = gql`
-//   mutation CreateUserWithBusiness {
-//     createUserWithBusiness(
-//       createBusinessInput: {
-//         address: null
-//         city: null
-//         country: null
-//         email: null
-//         lat: null
-//         long: null
-//         name: null
-//         numberOfEmployeesAllowed: null
-//         phone: null
-//         postcode: null
-//         registrationDate: null
-//         subscriptionPlanId: null
-//         website: null
-//       }
-//       createProfileInput: {
-//         address: null
-//         city: null
-//         country: null
-//         dateOfBirth: null
-//         fullName: null
-//         gender: null
-//         maritalStatus: null
-//         phone: null
-//         postcode: null
-//         profilePicture: null
-//       }
-//       createUserInput: { email: null, password: null }
-//     ) {
-//       address
-//       city
-//       country
-//       createdAt
-//       email
-//       id
-//       lat
-//       long
-//       name
-//       numberOfEmployeesAllowed
-//       phone
-//       postcode
-//       registrationDate
-//       status
-//       subscriptionPlanId
-//       updatedAt
-//       userId
-//       website
-//     }
-//   }
-// `;
+
+export const BUSINESS_SETTING_BY_BUSINESS_ID = gql`
+  query BusinessSettingByBusinessId {
+    businessSettingByBusinessId {
+      message
+      statusCode
+      success
+      data {
+        businessId
+        businessStartDay
+        businessTimeZone
+        currency
+        deleteReadNotifications
+        id
+        identifierPrefix
+        isSelfRegistered
+        theme
+      }
+    }
+  }
+`;
+
+export const UPDATE_BUSINESS_SETTING = gql`
+  mutation UpdateBusinessSetting(
+    $updateBusinessSettingInput: UpdateBusinessSettingInput!
+  ) {
+    updateBusinessSetting(
+      updateBusinessSettingInput: $updateBusinessSettingInput
+    ) {
+      message
+      statusCode
+      success
+      data {
+        businessId
+        businessStartDay
+        businessTimeZone
+        currency
+        deleteReadNotifications
+        id
+        identifierPrefix
+        isSelfRegistered
+        theme
+      }
+    }
+  }
+`;

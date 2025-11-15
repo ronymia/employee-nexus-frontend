@@ -191,6 +191,9 @@ export default function Sidebar({
         ]) ||
         permissionGuard(PermissionResource.LEAVE_SETTINGS, [
           PermissionAction.READ,
+        ]) ||
+        permissionGuard(PermissionResource.BUSINESS_SETTINGS, [
+          PermissionAction.READ,
         ]),
       subMenus: [
         {
@@ -207,6 +210,15 @@ export default function Sidebar({
           label: "Leave Settings",
           path: "/settings/leave-settings",
           show: permissionGuard(PermissionResource.LEAVE_SETTINGS, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Business Settings",
+          path: "/settings/business-settings",
+          show: permissionGuard(PermissionResource.BUSINESS_SETTINGS, [
             PermissionAction.READ,
           ]),
           subMenus: [],
