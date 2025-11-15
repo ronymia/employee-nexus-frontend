@@ -7,3 +7,5 @@ export * from "./onboarding-processes.schema";
 export * from "./work-sites.schema";
 export * from "./employment-status.schema";
 export * from "./leave-types.schema";
+export * from "./departments.schema";
+export * from "./user.schema";

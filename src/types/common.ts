@@ -14,3 +14,8 @@ export interface IErrorResponse {
   message: string;
   code: number;
 }
+
+export enum Status {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}

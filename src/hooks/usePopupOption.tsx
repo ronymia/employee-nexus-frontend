@@ -118,6 +118,18 @@ export default function usePopupOption() {
     });
   };
 
+  // CREATE NEW DEPARTMENT
+  const createNewDepartment = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "department",
+      data: null,
+      title: "Create Department",
+    });
+  };
+
   return {
     popupOption,
     setPopupOption,
@@ -130,5 +142,6 @@ export default function usePopupOption() {
     createNewDesignation,
     createNewEmploymentStatus,
     createNewLeaveType,
+    createNewDepartment,
   };
 }

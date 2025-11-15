@@ -168,6 +168,15 @@ export default function Sidebar({
           ]),
           subMenus: [],
         },
+        {
+          Icon: VscFileSubmodule,
+          label: "Departments",
+          path: "/administration/departments",
+          show: permissionGuard(PermissionResource.DEPARTMENT, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
       ],
     },
   ];

@@ -1,3 +1,5 @@
+import { Status } from "./common";
+
 export interface ILeaveType {
   id?: number;
   name: string;
@@ -21,9 +23,4 @@ export enum LeaveRolloverType {
   NONE = "NONE",
   CARRY_OVER = "CARRY_OVER",
   CARRY_FORWARD = "CARRY_FORWARD",
-}
-
-export enum Status {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
 }
