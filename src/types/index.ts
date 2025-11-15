@@ -8,3 +8,4 @@ export * from "./IFeature.type";
 export * from "./recruitment-processes.type";
 export * from "./onboarding-processes.type";
 export * from "./work-sites.type";
+export * from "./employment-status.type";

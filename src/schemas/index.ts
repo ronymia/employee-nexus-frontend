@@ -5,3 +5,4 @@ export * from "./business.schema";
 export * from "./recruitment-processes.schema";
 export * from "./onboarding-processes.schema";
 export * from "./work-sites.schema";
+export * from "./employment-status.schema";

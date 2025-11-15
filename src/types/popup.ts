@@ -9,6 +9,7 @@ type IForm_NAME =
   | "work_site"
   | "job_platforms"
   | "designation"
+  | "employment_status"
   | "offered_course_section"
   | "academic_semester"
   | "academic_faculty"

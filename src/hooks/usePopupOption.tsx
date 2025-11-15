@@ -94,6 +94,18 @@ export default function usePopupOption() {
     });
   };
 
+  // CREATE NEW EMPLOYMENT STATUS
+  const createNewEmploymentStatus = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "employment_status",
+      data: null,
+      title: "Create Employment Status",
+    });
+  };
+
   return {
     popupOption,
     setPopupOption,
@@ -104,5 +116,6 @@ export default function usePopupOption() {
     createNewWorkSite,
     createNewJobPlatforms,
     createNewDesignation,
+    createNewEmploymentStatus,
   };
 }

@@ -150,6 +150,15 @@ export default function Sidebar({
           ]),
           subMenus: [],
         },
+        {
+          Icon: VscFileSubmodule,
+          label: "Employment Status",
+          path: "/administration/employment-status",
+          show: permissionGuard(PermissionResource.EMPLOYMENT_STATUS, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
       ],
     },
   ];
