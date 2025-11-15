@@ -185,15 +185,28 @@ export default function Sidebar({
       Icon: MdSettings,
       label: "Settings",
       path: "/settings",
-      show: permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
-        PermissionAction.READ,
-      ]),
+      show:
+        permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
+          PermissionAction.READ,
+        ]) ||
+        permissionGuard(PermissionResource.LEAVE_SETTINGS, [
+          PermissionAction.READ,
+        ]),
       subMenus: [
         {
           Icon: VscFileSubmodule,
           label: "Attendance Settings",
           path: "/settings/attendance-settings",
           show: permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Leave Settings",
+          path: "/settings/leave-settings",
+          show: permissionGuard(PermissionResource.LEAVE_SETTINGS, [
             PermissionAction.READ,
           ]),
           subMenus: [],
