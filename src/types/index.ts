@@ -15,3 +15,4 @@ export * from "./departments.type";
 export * from "./attendance-settings.type";
 export * from "./leave-settings.type";
 export * from "./business-settings.type";
+export * from "./work-schedules.type";

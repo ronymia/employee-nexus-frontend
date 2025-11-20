@@ -178,6 +178,15 @@ export default function Sidebar({
           ]),
           subMenus: [],
         },
+        {
+          Icon: VscFileSubmodule,
+          label: "Work Schedules",
+          path: "/administration/work-schedules",
+          show: permissionGuard(PermissionResource.WORK_SCHEDULE, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
       ],
     },
     // SETTINGS MENU
