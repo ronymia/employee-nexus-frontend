@@ -9,7 +9,7 @@ import {
   UPDATE_DEPARTMENT,
 } from "@/graphql/departments.api";
 import { GET_BUSINESSES } from "@/graphql/business.api";
-import { IDepartmentFormData } from "@/schemas/departments.schema";
+import { IDepartmentFormData } from "@/schemas";
 import { IDepartment, IUser } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";

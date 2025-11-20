@@ -10,7 +10,7 @@ import BusinessSettingsOwnerProfile from "./tabs/BusinessSettingsOwnerProfile";
 import BusinessSettingsSchedule from "./tabs/BusinessSettingsSchedule";
 import BusinessSettingsSubscription from "./tabs/BusinessSettingsSubscription";
 import BusinessSettingsConfig from "./tabs/BusinessSettingsConfig";
-import { IUser } from "@/types/user.type";
+import { IUser } from "@/types";
 import CustomLoading from "@/components/loader/CustomLoading";
 import BusinessSettingsCard from "./components/BusinessSettingsCard";
 import useAppStore from "@/stores/appStore";

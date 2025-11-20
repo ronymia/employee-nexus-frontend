@@ -10,7 +10,7 @@ import {
 import {
   IAttendanceSettings,
   AttendanceTab,
-} from "@/types/attendance-settings.type";
+} from "@/types";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { MdSettings, MdLocationOn } from "react-icons/md";
 import { FaListUl } from "react-icons/fa";

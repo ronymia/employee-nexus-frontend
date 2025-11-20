@@ -8,8 +8,8 @@ import {
   GET_ONBOARDING_PROCESSES,
   UPDATE_ONBOARDING_PROCESSES,
 } from "@/graphql/onboarding-processes.api";
-import { IOnboardingProcessFormData } from "@/schemas/onboarding-processes.schema";
-import { IOnboardingProcess } from "@/types/onboarding-processes.type";
+import { IOnboardingProcessFormData } from "@/schemas";
+import { IOnboardingProcess } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
 export default function OnboardingProcessForm({

@@ -11,6 +11,7 @@ type IForm_NAME =
   | "designation"
   | "employment_status"
   | "leave_type"
+  | "asset_type"
   | "offered_course_section"
   | "academic_semester"
   | "academic_faculty"

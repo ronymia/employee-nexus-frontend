@@ -13,8 +13,7 @@ import {
 } from "@/graphql/recruitment-processes.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType } from "@/types";
-import { IRecruitmentProcess } from "@/types/recruitment-processes.type";
+import { TableActionType, TableColumnType, IRecruitmentProcess } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";

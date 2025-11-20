@@ -10,8 +10,7 @@ import {
 import { DELETE_DEPARTMENT, GET_DEPARTMENTS } from "@/graphql/departments.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType } from "@/types";
-import { IDepartment } from "@/types/departments.type";
+import { TableActionType, TableColumnType, IDepartment } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";

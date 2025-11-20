@@ -9,8 +9,8 @@ import {
   GET_EMPLOYMENT_STATUSES,
   UPDATE_EMPLOYMENT_STATUS,
 } from "@/graphql/employment-status.api";
-import { IEmploymentStatusFormData } from "@/schemas/employment-status.schema";
-import { IEmploymentStatus } from "@/types/employment-status.type";
+import { IEmploymentStatusFormData } from "@/schemas";
+import { IEmploymentStatus } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
 export default function EmploymentStatusForm({

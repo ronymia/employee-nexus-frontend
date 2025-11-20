@@ -7,48 +7,33 @@ import {
   PermissionResource,
   Permissions,
 } from "@/constants/permissions.constant";
-import { DELETE_WORK_SITES, GET_WORK_SITES } from "@/graphql/work-sites.api";
+import { DELETE_ASSET_TYPE, GET_ASSET_TYPES } from "@/graphql/asset-type.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IWorkSite } from "@/types";
+import { TableActionType, TableColumnType, IAssetType } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 
-export default function WorkSitesPage() {
+export default function AssetTypesPage() {
   const { permissionGuard } = usePermissionGuard();
-  const { popupOption, setPopupOption, createNewWorkSite } = usePopupOption();
+  const { popupOption, setPopupOption } = usePopupOption();
   const { data, loading } = useQuery<{
-    workSites: {
-      data: IWorkSite[];
+    assetTypes: {
+      data: IAssetType[];
     };
-  }>(GET_WORK_SITES, {});
+  }>(GET_ASSET_TYPES, {});
 
-  const [deleteWorkSite, deleteResult] = useMutation(DELETE_WORK_SITES, {
+  const [deleteAssetType, deleteResult] = useMutation(DELETE_ASSET_TYPE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_WORK_SITES }],
+    refetchQueries: [{ query: GET_ASSET_TYPES }],
   });
-  // console.log({ data });
 
-  const handleEdit = (row: IWorkSite) => {
-    //
+  const handleEdit = (row: IAssetType) => {
     const data = {
       id: row?.id,
-      name: row?.name,
       description: row?.description,
-      address: row?.address,
-      isLocationEnabled:
-        row?.isLocationEnabled !== undefined
-          ? String(row.isLocationEnabled)
-          : undefined,
-      isGeoLocationEnabled:
-        row?.isGeoLocationEnabled !== undefined
-          ? String(row.isGeoLocationEnabled)
-          : undefined,
-      maxRadius: row?.maxRadius,
-      isIpEnabled:
-        row?.isIpEnabled !== undefined ? String(row.isIpEnabled) : undefined,
-      ipAddress: row?.ipAddress,
+      name: row?.name,
     };
 
     // open the popup for editing the form
@@ -56,16 +41,27 @@ export default function WorkSitesPage() {
       open: true,
       closeOnDocumentClick: true,
       actionType: "update",
-      form: "work_site",
+      form: "asset_type",
       data: data,
-      title: "Update Work Site",
+      title: "Update Asset Type",
     });
   };
-  const handleDelete = async (row: IWorkSite) => {
-    await deleteWorkSite({
+
+  const handleDelete = async (row: IAssetType) => {
+    await deleteAssetType({
       variables: {
         id: Number(row?.id),
       },
+    });
+  };
+
+  const createNewAssetType = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "asset_type",
+      title: "Create Asset Type",
     });
   };
 
@@ -86,34 +82,6 @@ export default function WorkSitesPage() {
     },
     {
       key: "3",
-      header: "Address",
-      accessorKey: "address",
-      show: true,
-      sortDirection: "ascending",
-    },
-    {
-      key: "4",
-      header: "Location Enabled",
-      accessorKey: "customIsLocationEnabled",
-      show: true,
-      sortDirection: "ascending",
-    },
-    {
-      key: "5",
-      header: "Geo Location Enabled",
-      accessorKey: "customIsGeoLocationEnabled",
-      show: true,
-      sortDirection: "ascending",
-    },
-    {
-      key: "6",
-      header: "IP Enabled",
-      accessorKey: "customIsIpEnabled",
-      show: true,
-      sortDirection: "ascending",
-    },
-    {
-      key: "7",
       header: "Status",
       accessorKey: "status",
       show: true,
@@ -125,39 +93,38 @@ export default function WorkSitesPage() {
     {
       name: "edit",
       type: "button",
-      permissions: [Permissions.WorkSiteUpdate],
+      permissions: [Permissions.AssetTypeUpdate],
       handler: handleEdit,
-      disabledOn: [{ accessorKey: "status", value: "inactive" }],
+      disabledOn: [{ accessorKey: "status", value: "INACTIVE" }],
     },
     {
       name: "delete",
       type: "button",
-      permissions: [Permissions.WorkSiteDelete],
+      permissions: [Permissions.AssetTypeDelete],
       handler: (row) => {
         setPopupOption({
           open: true,
           closeOnDocumentClick: true,
           actionType: "delete",
-          form: "work_site",
+          form: "asset_type",
           deleteHandler: () => handleDelete(row),
-          title: "Delete Work Site",
+          title: "Delete Asset Type",
         });
       },
       disabledOn: [],
     },
   ];
 
-  // Modal for adding a new work site
   return (
     <>
-      {/* Popup for adding/editing a work site */}
+      {/* Popup for adding/editing an asset type */}
       <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
 
-      {/* Modal for adding a new work site */}
+      {/* Main content */}
       <section className={``}>
         <header className={`mb-5 flex items-center justify-between`}>
           <div className="">
-            <h1 className={`text-2xl font-medium`}>All Work Sites</h1>
+            <h1 className={`text-2xl font-medium`}>All Asset Types</h1>
           </div>
         </header>
         {/* TABLE */}
@@ -173,27 +140,17 @@ export default function WorkSitesPage() {
             searchableFields: [
               { label: "Name", value: "name" },
               { label: "Description", value: "description" },
-              { label: "Address", value: "address" },
             ],
           }}
-          dataSource={
-            data?.workSites?.data?.map((row) => ({
-              ...row,
-              customIsLocationEnabled: row?.isLocationEnabled ? "Yes" : "No",
-              customIsGeoLocationEnabled: row?.isGeoLocationEnabled
-                ? "Yes"
-                : "No",
-              customIsIpEnabled: row?.isIpEnabled ? "Yes" : "No",
-            })) || []
-          }
+          dataSource={data?.assetTypes?.data || []}
         >
-          {permissionGuard(PermissionResource.WORK_SITE, [
+          {permissionGuard(PermissionResource.ASSET_TYPE, [
             PermissionAction.CREATE,
           ]) && (
             <button
               type="button"
               className={`btn btn-primary text-base-300`}
-              onClick={createNewWorkSite}
+              onClick={createNewAssetType}
             >
               <PiPlusCircle className={`text-xl`} />
               Add New

@@ -9,8 +9,8 @@ import {
   GET_LEAVE_SETTINGS,
   UPDATE_LEAVE_SETTINGS,
 } from "@/graphql/leave-settings.api";
-import { ILeaveSettings, MONTHS } from "@/types/leave-settings.type";
-import { ILeaveSettingsFormData } from "@/schemas/leave-settings.schema";
+import { ILeaveSettings, MONTHS } from "@/types";
+import { ILeaveSettingsFormData } from "@/schemas";
 
 export default function LeaveSettingsPage() {
   // GET LEAVE SETTINGS

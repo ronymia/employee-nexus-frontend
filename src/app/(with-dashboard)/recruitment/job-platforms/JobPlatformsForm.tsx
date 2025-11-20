@@ -7,7 +7,7 @@ import {
   GET_JOB_PLATFORMS,
   UPDATE_JOB_PLATFORMS,
 } from "@/graphql/job-platforms.api";
-import { IJobPlatformsFormData } from "@/schemas/job-platforms.schema";
+import { IJobPlatformsFormData } from "@/schemas";
 import { IJobType } from "@/types/job-type.type";
 import { useMutation } from "@apollo/client/react";
 

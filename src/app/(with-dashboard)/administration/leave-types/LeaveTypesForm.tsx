@@ -9,11 +9,11 @@ import {
   UPDATE_LEAVE_TYPE,
 } from "@/graphql/leave-types.api";
 import { GET_EMPLOYMENT_STATUSES } from "@/graphql/employment-status.api";
-import { ILeaveTypeFormData } from "@/schemas/leave-types.schema";
+import { ILeaveTypeFormData } from "@/schemas";
 import {
   ILeaveType,
   ILeaveTypeEmploymentStatus,
-} from "@/types/leave-types.type";
+} from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 
 export default function LeaveTypesForm({

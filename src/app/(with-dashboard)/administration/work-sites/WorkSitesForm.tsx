@@ -8,8 +8,8 @@ import {
   GET_WORK_SITES,
   UPDATE_WORK_SITES,
 } from "@/graphql/work-sites.api";
-import { IWorkSiteFormData } from "@/schemas/work-sites.schema";
-import { IWorkSite } from "@/types/work-sites.type";
+import { IWorkSiteFormData } from "@/schemas";
+import { IWorkSite } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
 export default function WorkSiteForm({

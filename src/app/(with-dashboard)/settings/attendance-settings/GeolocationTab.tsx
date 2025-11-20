@@ -4,7 +4,7 @@ import { useState } from "react";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
-import { IAttendanceSettings } from "@/types/attendance-settings.type";
+import { IAttendanceSettings } from "@/types";
 
 interface IGeolocationTabProps {
   settings?: IAttendanceSettings;

@@ -1,6 +1,6 @@
 // components/BusinessSettingsOwnerProfile.tsx
 import Image from "next/image";
-import { IUser } from "@/types/user.type";
+import { IUser } from "@/types";
 import FieldView from "@/components/form/FieldView";
 
 interface BusinessSettingsOwnerProfileProps {

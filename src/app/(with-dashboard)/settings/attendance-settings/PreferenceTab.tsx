@@ -3,8 +3,8 @@
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
-import { IAttendanceSettings } from "@/types/attendance-settings.type";
-import { attendanceSettingsSchema } from "@/schemas/attendance-settings.schema";
+import { IAttendanceSettings } from "@/types";
+import { attendanceSettingsSchema } from "@/schemas";
 
 interface IPreferenceTabProps {
   settings?: IAttendanceSettings;

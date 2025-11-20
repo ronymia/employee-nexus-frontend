@@ -7,8 +7,8 @@ import {
   GET_JOB_TYPES,
   UPDATE_JOB_TYPES,
 } from "@/graphql/job-type.api";
-import { IJobTypeFormData } from "@/schemas/job-type.schema";
-import { IJobType } from "@/types/job-type.type";
+import { IJobTypeFormData } from "@/schemas";
+import { IJobType } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
 export default function JobTypeForm({

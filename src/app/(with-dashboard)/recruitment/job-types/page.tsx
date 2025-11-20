@@ -10,8 +10,7 @@ import {
 import { DELETE_JOB_TYPES, GET_JOB_TYPES } from "@/graphql/job-type.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType } from "@/types";
-import { IJobType } from "@/types/job-type.type";
+import { TableActionType, TableColumnType, IJobType } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";

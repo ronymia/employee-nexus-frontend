@@ -8,8 +8,8 @@ import {
   GET_RECRUITMENT_PROCESSES,
   UPDATE_RECRUITMENT_PROCESSES,
 } from "@/graphql/recruitment-processes.api";
-import { IRecruitmentProcessFormData } from "@/schemas/recruitment-processes.schema";
-import { IRecruitmentProcess } from "@/types/recruitment-processes.type";
+import { IRecruitmentProcessFormData } from "@/schemas";
+import { IRecruitmentProcess } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
 export default function RecruitmentProcessForm({

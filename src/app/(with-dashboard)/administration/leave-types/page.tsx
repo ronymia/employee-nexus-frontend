@@ -10,8 +10,7 @@ import {
 import { DELETE_LEAVE_TYPE, GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType } from "@/types";
-import { ILeaveType } from "@/types/leave-types.type";
+import { TableActionType, TableColumnType, ILeaveType } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";

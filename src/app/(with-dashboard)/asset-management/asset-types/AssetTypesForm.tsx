@@ -3,40 +3,40 @@ import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import {
-  CREATE_DESIGNATION,
-  GET_DESIGNATIONS,
-  UPDATE_DESIGNATION,
-} from "@/graphql/designation.api";
-import { IDesignationFormData } from "@/schemas";
-import { IJobType } from "@/types/job-type.type";
+  CREATE_ASSET_TYPE,
+  GET_ASSET_TYPES,
+  UPDATE_ASSET_TYPE,
+} from "@/graphql/asset-type.api";
+import { IAssetTypeFormData } from "@/schemas";
+import { IAssetType } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
-export default function DesignationForm({
+export default function AssetTypeForm({
   handleClosePopup,
   data,
 }: {
   handleClosePopup: () => void;
-  data: IJobType;
+  data: IAssetType;
 }) {
-  // MUTATION TO CREATE A NEW
-  const [createDesignation, createResult] = useMutation(CREATE_DESIGNATION, {
+  // MUTATION TO CREATE A NEW ASSET TYPE
+  const [createAssetType, createResult] = useMutation(CREATE_ASSET_TYPE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_DESIGNATIONS }],
+    refetchQueries: [{ query: GET_ASSET_TYPES }],
   });
-  const [updateDesignation, updateResult] = useMutation(UPDATE_DESIGNATION, {
+  const [updateAssetType, updateResult] = useMutation(UPDATE_ASSET_TYPE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_DESIGNATIONS }],
+    refetchQueries: [{ query: GET_ASSET_TYPES }],
   });
 
   // HANDLER FOR FORM SUBMISSION
-  const handleOnSubmit = async (formValues: IDesignationFormData) => {
+  const handleOnSubmit = async (formValues: IAssetTypeFormData) => {
     if (data?.id) {
       formValues["id"] = Number(data.id);
-      await updateDesignation({
+      await updateAssetType({
         variables: formValues,
       });
     } else {
-      await createDesignation({
+      await createAssetType({
         variables: formValues,
       });
     }
