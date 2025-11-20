@@ -189,6 +189,24 @@ export default function Sidebar({
         },
       ],
     },
+    // ASSET MANAGEMENT MENU
+    {
+      Icon: VscFileSubmodule,
+      label: "Asset Management",
+      path: "/asset-management",
+      show: true,
+      subMenus: [
+        {
+          Icon: VscFileSubmodule,
+          label: "Asset Types",
+          path: "/asset-management/asset-types",
+          show: permissionGuard(PermissionResource.ASSET_TYPE, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+      ],
+    },
     // SETTINGS MENU
     {
       Icon: MdSettings,
