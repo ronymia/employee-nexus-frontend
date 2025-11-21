@@ -1,3 +1,17 @@
+export interface ProjectMember {
+  id: number;
+  userId: number;
+  user: {
+    id: number;
+    email: string;
+    profile: {
+      fullName: string;
+    };
+  };
+  role?: string;
+  joinedAt: string;
+}
+
 export interface Project {
   id: number;
   name: string;
@@ -14,9 +28,12 @@ export interface Project {
   createdBy?: number;
   creator?: {
     id: number;
-    name: string;
+    email: string;
+    profile: {
+      fullName: string;
+    };
   };
-  projectMembers?: any[];
+  projectMembers?: ProjectMember[];
   createdAt: string;
   updatedAt: string;
 }

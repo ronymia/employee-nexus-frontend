@@ -14,8 +14,10 @@ import { TableActionType, TableColumnType, Project } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
+import { useRouter } from "next/navigation";
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
   const { data, loading } = useQuery<{
@@ -107,7 +109,18 @@ export default function ProjectsPage() {
     },
   ]);
 
+  const handleView = (row: Project) => {
+    router.push(`/projects/${row.id}/view`);
+  };
+
   const actions: TableActionType[] = [
+    {
+      name: "view",
+      type: "button",
+      permissions: [Permissions.ProjectRead],
+      handler: handleView,
+      disabledOn: [],
+    },
     {
       name: "edit",
       type: "button",

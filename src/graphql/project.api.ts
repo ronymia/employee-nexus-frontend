@@ -23,6 +23,42 @@ export const GET_PROJECTS = gql`
   }
 `;
 
+export const GET_PROJECT_BY_ID = gql`
+  query ProjectById($id: Int!) {
+    projectById(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
+        name
+        description
+        cover
+        status
+        startDate
+        endDate
+        businessId
+        createdBy
+        # projectMembers {
+        #   id
+        #   userId
+        #   user {
+        #     id
+        #     email
+        #     profile {
+        #       fullName
+        #     }
+        #   }
+        #   role
+        #   joinedAt
+        # }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
 export const CREATE_PROJECT = gql`
   mutation CreateProject(
     $name: String!
@@ -122,6 +158,26 @@ export const DELETE_PROJECT = gql`
         createdAt
         updatedAt
       }
+    }
+  }
+`;
+
+export const ASSIGN_PROJECT_MEMBER = gql`
+  mutation AssignProjectMember($projectId: Int!, $userId: Int!, $role: String) {
+    assignProjectMember(projectId: $projectId, userId: $userId, role: $role) {
+      message
+      statusCode
+      success
+    }
+  }
+`;
+
+export const UNASSIGN_PROJECT_MEMBER = gql`
+  mutation UnassignProjectMember($projectId: Int!, $userId: Int!) {
+    unassignProjectMember(projectId: $projectId, userId: $userId) {
+      message
+      statusCode
+      success
     }
   }
 `;
