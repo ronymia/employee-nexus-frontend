@@ -21,6 +21,7 @@ import LeaveTypesForm from "@/app/(with-dashboard)/administration/leave-types/Le
 import DepartmentsForm from "@/app/(with-dashboard)/administration/departments/DepartmentsForm";
 import AssetTypeForm from "@/app/(with-dashboard)/asset-management/asset-types/AssetTypesForm";
 import AssetsForm from "@/app/(with-dashboard)/asset-management/assets/AssetsForm";
+import ProjectsForm from "@/app/(with-dashboard)/projects/ProjectsForm";
 
 const popupVariants: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -153,6 +154,15 @@ export default function FormModal({
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <AssetsForm
+              handleClosePopup={handleClosePopup}
+              data={popupOption.data}
+            />
+          </React.Suspense>
+        );
+      } else if (popupOption?.form === "project") {
+        return (
+          <React.Suspense fallback={<CustomLoading />}>
+            <ProjectsForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />

@@ -84,6 +84,17 @@ export default function Sidebar({
       subMenus: [],
     },
     {
+      Icon: MdOutlineBusinessCenter,
+      label: menuNames.projects,
+      path: "/projects",
+      show: permissionGuard(
+        PermissionResource.PROJECT,
+        [PermissionAction.READ, PermissionAction.CREATE],
+        true
+      ),
+      subMenus: [],
+    },
+    {
       Icon: VscFileSubmodule,
       label: "Recruitment",
       path: "/recruitment",

@@ -3,4 +3,5 @@ export const menuNames = {
   business: "Businesses",
   subscription_plans: "Subscription Plans",
   features: "Features",
+  projects: "Projects",
 };

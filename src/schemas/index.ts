@@ -18,3 +18,4 @@ export * from "./business-settings.schema";
 export * from "./work-schedules.schema";
 export * from "./asset-type.schema";
 export * from "./asset.schema";
+export * from "./project.schema";
