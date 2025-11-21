@@ -26,6 +26,7 @@ export enum PermissionResource {
   LEAVE_SETTINGS = "Leave Settings",
   BUSINESS_SETTINGS = "Business Settings",
   ASSET_TYPE = "Asset Type",
+  ASSET = "Asset",
 }
 
 // Permission Constants for easy usage
@@ -142,4 +143,10 @@ export const Permissions = {
   AssetTypeRead: `${PermissionResource.ASSET_TYPE}:${PermissionAction.READ}`,
   AssetTypeUpdate: `${PermissionResource.ASSET_TYPE}:${PermissionAction.UPDATE}`,
   AssetTypeDelete: `${PermissionResource.ASSET_TYPE}:${PermissionAction.DELETE}`,
+
+  // Asset Permissions
+  AssetCreate: `${PermissionResource.ASSET}:${PermissionAction.CREATE}`,
+  AssetRead: `${PermissionResource.ASSET}:${PermissionAction.READ}`,
+  AssetUpdate: `${PermissionResource.ASSET}:${PermissionAction.UPDATE}`,
+  AssetDelete: `${PermissionResource.ASSET}:${PermissionAction.DELETE}`,
 } as const;

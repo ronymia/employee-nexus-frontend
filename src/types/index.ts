@@ -20,3 +20,4 @@ export * from "./leave-settings.type";
 export * from "./business-settings.type";
 export * from "./work-schedules.type";
 export * from "./asset-type.type";
+export * from "./asset.type";

@@ -205,6 +205,15 @@ export default function Sidebar({
           ]),
           subMenus: [],
         },
+        {
+          Icon: VscFileSubmodule,
+          label: "Assets",
+          path: "/asset-management/assets",
+          show: permissionGuard(PermissionResource.ASSET, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
       ],
     },
     // SETTINGS MENU
