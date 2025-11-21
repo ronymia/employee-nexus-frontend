@@ -60,7 +60,10 @@ export default function CustomFileUploader({
         control={control}
         name={name}
         render={({ field }) => {
-          const file: File | null = field.value || null;
+          const value = field.value;
+          const file: File | null = value instanceof File ? value : null;
+          const existingImagePath: string | null =
+            typeof value === "string" ? value : null;
 
           // HANDLE ON CHANGE
           const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +91,24 @@ export default function CustomFileUploader({
             if (mime === "application/pdf") return "pdf";
             return "unknown";
           };
+
+          const getImagePreviewUrl = () => {
+            if (file) {
+              return URL.createObjectURL(file);
+            }
+            if (existingImagePath) {
+              const apiUrl =
+                process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+              // Handle both absolute paths and relative paths
+              if (existingImagePath.startsWith("http")) {
+                return existingImagePath;
+              }
+              return `${apiUrl}${existingImagePath}`;
+            }
+            return null;
+          };
+
+          const hasFile = file || existingImagePath;
 
           return (
             <div
@@ -117,7 +138,7 @@ export default function CustomFileUploader({
                   disabled={disabled}
                 />
 
-                {!file ? (
+                {!hasFile ? (
                   /* EMPTY STATE */
                   <>
                     <IoCloudUploadSharp className="text-3xl text-gray-600 mb-2" />
@@ -138,20 +159,27 @@ export default function CustomFileUploader({
                   /* FILE DISPLAY */
                   <div className="flex flex-col items-center relative">
                     <div className="relative w-[200px] sm:w-[100px] h-[200px] sm:h-[100px] shadow-md rounded-xl group flex justify-center items-center overflow-hidden">
-                      {getFileType(file) === "image" && (
+                      {file && getFileType(file) === "image" && (
                         <img
-                          src={URL.createObjectURL(file)}
+                          src={getImagePreviewUrl() || ""}
                           alt={file.name}
                           className="h-full w-full object-cover rounded-xl"
                         />
                       )}
-                      {getFileType(file) === "pdf" && (
+                      {existingImagePath && !file && (
+                        <img
+                          src={getImagePreviewUrl() || ""}
+                          alt="Existing"
+                          className="h-full w-full object-cover rounded-xl"
+                        />
+                      )}
+                      {file && getFileType(file) === "pdf" && (
                         <div className="flex flex-col items-center">
                           <span className="text-2xl">📄</span>
                           <span className="text-xs mt-1">PDF</span>
                         </div>
                       )}
-                      {getFileType(file) === "unknown" && (
+                      {file && getFileType(file) === "unknown" && (
                         <div className="flex flex-col items-center">
                           <span className="text-2xl">📎</span>
                           <span className="text-xs mt-1">File</span>
@@ -168,8 +196,15 @@ export default function CustomFileUploader({
                       </button>
                     </div>
                     <span className="text-xs text-gray-600 mt-1 max-w-[100px] truncate">
-                      {file.name}
+                      {file ? file.name : existingImagePath?.split("/").pop()}
                     </span>
+                    {/* CHANGE IMAGE BUTTON */}
+                    <label
+                      htmlFor={`file-input-${name}`}
+                      className="text-xs text-primary cursor-pointer hover:underline mt-2"
+                    >
+                      Change Image
+                    </label>
                   </div>
                 )}
               </div>

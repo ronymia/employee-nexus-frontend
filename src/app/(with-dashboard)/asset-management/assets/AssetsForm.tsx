@@ -10,6 +10,8 @@ import { GET_ASSET_TYPES } from "@/graphql/asset-type.api";
 import { AssetFormData } from "@/schemas";
 import { Asset } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
+import { useState } from "react";
+import useAppStore from "@/hooks/useAppStore";
 
 export default function AssetsForm({
   handleClosePopup,
@@ -18,6 +20,9 @@ export default function AssetsForm({
   handleClosePopup: () => void;
   data: Asset;
 }) {
+  const [isUploading, setIsUploading] = useState(false);
+  const token = useAppStore((state) => state.token);
+
   // QUERY TO GET ASSET TYPES FOR DROPDOWN
   const { data: assetTypesData } = useQuery<{
     assetTypes: { data: { id: number; name: string }[] };
@@ -33,12 +38,52 @@ export default function AssetsForm({
     refetchQueries: [{ query: GET_ASSETS }],
   });
 
+  // UPLOAD IMAGE TO BACKEND
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        }/assets/upload-file`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const result = await response.json();
+      return result?.imagePath || null;
+    } catch (error) {
+      console.error("Image upload error:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: AssetFormData) => {
-    // Convert File to base64 string if image is a File
+    // Upload image only if a new File is provided (not a string path)
     if (formValues.image && formValues.image instanceof File) {
-      const base64 = await fileToBase64(formValues.image);
-      formValues.image = base64;
+      const imagePath = await uploadImage(formValues.image);
+      formValues.image = imagePath || "";
+    } else if (
+      typeof formValues.image === "string" &&
+      !formValues.image.startsWith("/")
+    ) {
+      // If it's a string but not a path, clear it
+      formValues.image = "";
     }
 
     formValues["assetTypeId"] = Number(formValues.assetTypeId);
@@ -54,16 +99,6 @@ export default function AssetsForm({
       });
     }
     handleClosePopup?.();
-  };
-
-  // Helper function to convert File to base64
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   // OPTIONS FOR ASSET TYPE DROPDOWN
@@ -113,7 +148,7 @@ export default function AssetsForm({
       {/* ACTION BUTTON */}
       <FormActionButton
         cancelHandler={handleClosePopup}
-        isPending={createResult.loading || updateResult.loading}
+        isPending={createResult.loading || updateResult.loading || isUploading}
       />
     </CustomForm>
   );
