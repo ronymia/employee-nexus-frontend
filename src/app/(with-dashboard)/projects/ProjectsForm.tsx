@@ -4,6 +4,7 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomImageRadioButton from "@/components/form/input/CustomImageRadioButton";
 import {
   CREATE_PROJECT,
   GET_PROJECTS,
@@ -17,6 +18,25 @@ const STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
   { value: "ongoing", label: "Ongoing" },
   { value: "complete", label: "Complete" },
+];
+
+const COVER_OPTIONS = [
+  {
+    name: "beach",
+    image: "/assets/project_cover/beach.jpg",
+  },
+  {
+    name: "default",
+    image: "/assets/project_cover/default.jpg",
+  },
+  {
+    name: "fire",
+    image: "/assets/project_cover/fire.jpg",
+  },
+  {
+    name: "moon",
+    image: "/assets/project_cover/moon.jpg",
+  },
 ];
 
 export default function ProjectsForm({
@@ -59,14 +79,14 @@ export default function ProjectsForm({
     >
       {/* NAME */}
       <CustomInputField name="name" label="Name" required />
-      {/* DESCRIPTION */}
-      <CustomTextareaField name="description" label="Description" />
+
       {/* COVER */}
-      <CustomInputField
+      <CustomImageRadioButton
         name="cover"
-        label="Cover Image URL"
-        placeholder="e.g., /uploads/images/project-cover.jpg"
-        required
+        label="Cover Photo"
+        options={COVER_OPTIONS}
+        dataAuto="project-cover"
+        required={true}
       />
       {/* STATUS */}
       <CustomSelect
@@ -92,6 +112,9 @@ export default function ProjectsForm({
         dataAuto="project-end-date"
         required={false}
       />
+
+      {/* DESCRIPTION */}
+      <CustomTextareaField name="description" label="Description" />
 
       {/* ACTION BUTTON */}
       <FormActionButton
