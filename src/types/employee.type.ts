@@ -3,6 +3,7 @@ import { IDesignation } from "./designation.type";
 import { IEmploymentStatus } from "./employment-status.type";
 import { IWorkSite } from "./work-sites.type";
 import { IWorkSchedule } from "./work-schedules.type";
+import { IProfile } from "./user.type";
 
 export interface IEmergencyContact {
   name: string;
@@ -11,24 +12,6 @@ export interface IEmergencyContact {
   createdAt?: string;
   updatedAt?: string;
   profileId?: number;
-}
-
-export interface IProfile {
-  id?: number;
-  userId?: number;
-  fullName: string;
-  dateOfBirth?: string;
-  gender?: string;
-  maritalStatus?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  postcode?: string;
-  profilePicture?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  emergencyContact?: IEmergencyContact;
 }
 
 export interface IRole {
