@@ -6,9 +6,7 @@ export const projectSchema = z
     description: z.string().optional(),
     cover: z.string().min(1, "Cover image is required"),
     status: z.enum(["pending", "ongoing", "complete"], {
-      errorMap: () => ({
-        message: "Status must be pending, ongoing, or complete",
-      }),
+      error: "Status must be pending, ongoing, or complete",
     }),
     startDate: z.string().optional(),
     endDate: z.string().optional(),

@@ -1,4 +1,5 @@
 import { Status } from "./common";
+import { IEmergencyContact } from "./employee.type";
 
 export interface IProfile {
   id: number;
@@ -15,8 +16,8 @@ export interface IProfile {
   profilePicture: string | null;
   createdAt: Date;
   updatedAt: Date;
+  emergencyContact?: IEmergencyContact;
 }
-
 export interface IUser {
   id: number;
   name: string;

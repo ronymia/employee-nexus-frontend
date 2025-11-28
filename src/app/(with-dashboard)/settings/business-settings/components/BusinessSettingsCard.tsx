@@ -36,46 +36,44 @@ export default function BusinessSettingsCard({
   // HANDLE TOGGLE
   // TOGGLE FUNCTION
   const handleToggleActivate = async (row: IBusiness) => {
-    await toggleActivateBusiness(row.id)
-      .unwrap()
-      .then(() => {
-        // toast.custom((t) => (
-        //   <CustomToaster
-        //     t={t}
-        //     type={"success"}
-        //     text={`Business status updated successfully!`}
-        //   />
-        // ));
-      });
+    // await toggleActivateBusiness(row.id)
+    //   .then(() => {
+    // toast.custom((t) => (
+    //   <CustomToaster
+    //     t={t}
+    //     type={"success"}
+    //     text={`Business status updated successfully!`}
+    //   />
+    // ));
+    // });
     // .catch((error) => {
     //   errorHandler({ error: error });
     // });
   };
 
-  const updateFunction = async (logo) => {
-    // update business
-    await updateBusiness({
-      ...formData,
-      business: {
-        ...formData.business,
-        logo: logo,
-      },
-    })
-      .unwrap()
-      .then(() => {
-        // toast.custom((t) => (
-        //   <CustomToaster
-        //     t={t}
-        //     type={"success"}
-        //     text={`Business updated successfully!`}
-        //   />
-        // ));
-        // navigate(`/business/view/${params?.businessId}?tab=business_details`);
-      });
-    // .catch((error) => {
-    //   errorHandler({ error });
-    // });
-  };
+  // const updateFunction = async (logo) => {
+  // update business
+  // await updateBusiness({
+  //   ...formData,
+  //   business: {
+  //     ...formData.business,
+  //     logo: logo,
+  //   },
+  // })
+  // .then(() => {
+  // toast.custom((t) => (
+  //   <CustomToaster
+  //     t={t}
+  //     type={"success"}
+  //     text={`Business updated successfully!`}
+  //   />
+  // ));
+  // navigate(`/business/view/${params?.businessId}?tab=business_details`);
+  // });
+  // .catch((error) => {
+  //   errorHandler({ error });
+  // });
+  // };
   return (
     <section
       className={`max-w-5xl flex flex-col items-center justify-center overflow-hidden`}

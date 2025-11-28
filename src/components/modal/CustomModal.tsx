@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { motion, AnimatePresence } from "motion/react-client";
+import { motion, AnimatePresence } from "motion/react";
 import { MdClose } from "react-icons/md";
 
 interface CustomModalProps {
