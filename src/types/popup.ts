@@ -14,6 +14,7 @@ type IForm_NAME =
   | "asset_type"
   | "asset"
   | "project"
+  | "employee"
   | "offered_course_section"
   | "academic_semester"
   | "academic_faculty"

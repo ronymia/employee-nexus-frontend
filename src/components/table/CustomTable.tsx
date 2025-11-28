@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
   type Dispatch,
@@ -87,10 +88,22 @@ export default function CustomTable({
 }: ICustomTableProps) {
   // GET DEVICE WIDTH
   const windowInnerWidth = useDeviceWidth();
-  const [sortedData, setSortedData] = useState(dataSource);
 
-  // SORTED ROWS
-  const sortedRows = useMemo(() => sortedData, [sortedData]);
+  // SORTED ROWS - Use dataSource directly, no separate state needed
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState("");
+
+  const sortedRows = useMemo(() => {
+    if (!searchTerm || !searchField) {
+      return dataSource;
+    }
+    return dataSource.filter((item) =>
+      item[searchField]
+        ?.toString()
+        ?.toLowerCase()
+        ?.includes(searchTerm.toLowerCase())
+    );
+  }, [dataSource, searchTerm, searchField]);
 
   // UPDATE COLUMNS TO SHOW ONLY VISIBLE ONES
   const visibleColumns = columns.filter((col) => col?.show === true);
@@ -113,14 +126,8 @@ export default function CustomTable({
             defaultValue={searchConfig?.defaultField}
             changeHandler={(searchCondition) => {
               /** Handle search */
-              setSortedData(
-                dataSource.filter((item) =>
-                  item[searchCondition.field]
-                    ?.toString()
-                    ?.toLowerCase()
-                    ?.includes(searchCondition.value.toLowerCase())
-                )
-              );
+              setSearchTerm(searchCondition.value);
+              setSearchField(searchCondition.field);
             }}
             searchableFields={searchConfig?.searchableFields}
           />
@@ -147,7 +154,7 @@ export default function CustomTable({
             actions={actions}
             dataSource={sortedRows}
             originalDataSource={dataSource}
-            setDataSource={setSortedData}
+            setDataSource={() => {}} // Not needed since we're using different approach
           />
 
           {/* <===================================== Table Body ===================================> */}

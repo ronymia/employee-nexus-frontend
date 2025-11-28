@@ -8,6 +8,7 @@ import {
 } from "react-icons/md";
 import SidebarGenerator from "./SidebarGenerator";
 import { VscFileSubmodule } from "react-icons/vsc";
+import { FiUsers } from "react-icons/fi";
 import MenuToggle from "./MenuToggle";
 import type { IMenuItems } from "@/types";
 import { motion } from "motion/react";
@@ -93,6 +94,28 @@ export default function Sidebar({
         true
       ),
       subMenus: [],
+    },
+    // USER MANAGEMENT MENU
+    {
+      Icon: FiUsers,
+      label: "User Management",
+      path: "/user-management",
+      show: permissionGuard(
+        PermissionResource.USER,
+        [PermissionAction.READ],
+        true
+      ),
+      subMenus: [
+        {
+          Icon: FiUsers,
+          label: "Employees",
+          path: "/employee-management/employees",
+          show: permissionGuard(PermissionResource.USER, [
+            PermissionAction.READ,
+          ]),
+          subMenus: [],
+        },
+      ],
     },
     {
       Icon: VscFileSubmodule,

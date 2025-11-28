@@ -22,3 +22,4 @@ export * from "./work-schedules.type";
 export * from "./asset-type.type";
 export * from "./asset.type";
 export * from "./project.type";
+export * from "./employee.type";

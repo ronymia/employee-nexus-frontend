@@ -80,9 +80,6 @@ export default function ProjectsForm({
       {/* NAME */}
       <CustomInputField name="name" label="Name" required />
 
-      {/* DESCRIPTION */}
-      <CustomTextareaField name="description" label="Description" />
-
       {/* COVER */}
       <CustomImageRadioButton
         name="cover"
@@ -115,6 +112,9 @@ export default function ProjectsForm({
         dataAuto="project-end-date"
         required={false}
       />
+
+      {/* DESCRIPTION */}
+      <CustomTextareaField name="description" label="Description" />
 
       {/* ACTION BUTTON */}
       <FormActionButton
