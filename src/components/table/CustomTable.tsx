@@ -177,23 +177,43 @@ export default function CustomTable({
           )}
         </table>
       )}
-      {windowInnerWidth < 768 &&
-        sortedRows.length > 0 &&
-        sortedRows.map((row, rowIndex) => (
-          <table key={rowIndex}>
-            <thead>
-              <TableActionButton row={row} actions={actions} dataAuto="" />
-            </thead>
-            <tbody>
-              {visibleColumns.map((col, columnIndex) => (
-                <tr key={columnIndex}>
-                  <td>{col?.header} : </td>
-                  <td>{row[col.accessorKey]} </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ))}
+      {windowInnerWidth < 768 && sortedRows.length > 0 && (
+        <div className="flex flex-col gap-4 mt-4">
+          {sortedRows.map((row, rowIndex) => (
+            <div
+              key={rowIndex}
+              className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md"
+            >
+              {/* Card Header with Actions */}
+              <div className="bg-gray-50/50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Item #{rowIndex + 1}
+                </span>
+                <div className="flex items-center gap-2">
+                  <TableActionButton row={row} actions={actions} dataAuto="" />
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-4 flex flex-col gap-3">
+                {visibleColumns.map((col, columnIndex) => (
+                  <div
+                    key={columnIndex}
+                    className="flex justify-between items-start gap-4 text-sm group"
+                  >
+                    <span className="text-gray-500 font-medium min-w-[100px] pt-0.5">
+                      {col?.header}
+                    </span>
+                    <span className="text-gray-900 font-medium text-right break-words flex-1">
+                      {row[col.accessorKey]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
