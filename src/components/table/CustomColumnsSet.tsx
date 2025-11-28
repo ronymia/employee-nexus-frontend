@@ -20,7 +20,11 @@ export default function CustomColumnsSet({
   // if (!mounted) return null;
   return (
     <div className={`dropdown`}>
-      <div tabIndex={0} role="button" className={`btn btn-primary m-1`}>
+      <div
+        tabIndex={0}
+        role="button"
+        className={`btn btn-primary m-1 text-base-300`}
+      >
         Columns
       </div>
       <ul

@@ -15,9 +15,9 @@ export const subscriptionPlanSchema = z
     setupFee: z
       .number({ error: `Description is Required` })
       .gt(0, { error: "Setup Fee can not be empty" }),
-    moduleIds: z
-      .array(z.number(), { error: `Modules Must br Array` })
-      .nonempty({ error: `At least one module is required` }),
+    featureIds: z
+      .array(z.number(), { error: `Feature Must br Array` })
+      .nonempty({ error: `At least one Feature is required` }),
   })
   .refine((data) => data.setupFee < data.price, {
     path: ["setupFee"],

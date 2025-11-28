@@ -31,8 +31,8 @@ export default function AllBusinesses() {
       accessorKey: "name",
       show: true,
       sortDirection: "ascending",
-      sortable: true,
-      filterable: true,
+      sortable: false,
+      filterable: false,
       minWidth: 15,
     },
     {
@@ -41,8 +41,8 @@ export default function AllBusinesses() {
       accessorKey: "email",
       show: true,
       sortDirection: "ascending",
-      sortable: true,
-      filterable: true,
+      sortable: false,
+      filterable: false,
       minWidth: 20,
     },
     {
@@ -59,8 +59,8 @@ export default function AllBusinesses() {
       accessorKey: "address",
       show: true,
       sortDirection: "ascending",
-      sortable: true,
-      filterable: true,
+      sortable: false,
+      filterable: false,
       minWidth: 15,
     },
     {
@@ -69,14 +69,22 @@ export default function AllBusinesses() {
       accessorKey: "status",
       show: true,
       sortDirection: "ascending",
-      sortable: true,
-      filterable: true,
+      sortable: false,
+      filterable: false,
       minWidth: 10,
     },
   ]);
   const columns = useMemo(() => columnHelper, [columnHelper]);
 
   const actions: TableActionType[] = [
+    {
+      name: "view",
+      type: "link",
+      handler: () => {},
+      href: (row) => `/businesses/${row?.id}/view`,
+      permissions: [],
+      disabledOn: [{ accessorKey: "status", value: "inactive" }],
+    },
     {
       name: "edit",
       type: "button",
@@ -92,8 +100,6 @@ export default function AllBusinesses() {
       disabledOn: [],
     },
   ];
-
-  console.log({ columns });
 
   return (
     <section className={``}>
@@ -120,7 +126,10 @@ export default function AllBusinesses() {
         }}
         dataSource={data?.businesses?.data || []}
       >
-        <Link href={`/businesses/create`} className={`btn btn-primary`}>
+        <Link
+          href={`/businesses/create`}
+          className={`btn btn-primary text-base-300`}
+        >
           <PiPlusCircle className={`text-xl`} />
           Add Business
         </Link>

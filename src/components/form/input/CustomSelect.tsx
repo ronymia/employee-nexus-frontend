@@ -95,7 +95,7 @@ export default function CustomSelect({
                 field.value?.filter((item: any) => item !== option?.value)
               );
             } else {
-              field.onChange?.([...field.value, option?.value]);
+              field?.onChange?.([...field.value, option?.value]);
             }
           } else {
             if (isSelected) {

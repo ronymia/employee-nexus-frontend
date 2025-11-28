@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   // STORE
-  const { setUser, setToken } = useAppStore((state) => state);
+  const { setUser, setToken, setPermissions } = useAppStore((state) => state);
   // NAVIGATE
   const router = useRouter();
   // LOGIN API
@@ -41,6 +41,7 @@ export default function LoginPage() {
       // console.log(data?.login?.accessToken);
       setToken(data?.login?.accessToken);
       setUser(data?.login?.user);
+      setPermissions(data?.login?.user?.permissions);
       router.push("/dashboard");
     }
   };
@@ -77,7 +78,7 @@ export default function LoginPage() {
             type={"submit"}
             disabled={loginResult.loading}
             className={`btn btn-primary bg-primary flex items-center justify-center border-none rounded-field mt-3 transition-all duration-200
-                disabled:!bg-primary disabled:!opacity-70 disabled:!cursor-not-allowed disabled:!text-black ${
+                disabled:bg-primary disabled:opacity-70 disabled:cursor-not-allowed  text-green-950 ${
                   loginResult.loading ? "cursor-not-allowed" : "cursor-grab"
                 }`}
           >

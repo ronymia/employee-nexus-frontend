@@ -8,6 +8,7 @@ import CustomRadioButton from "@/components/form/input/CustomRadioButton";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomLoading from "@/components/loader/CustomLoading";
 import {
+  GET_BUSINESS_BY_ID,
   GET_BUSINESSES,
   REGISTER_USER_WITH_BUSINESSES,
 } from "@/graphql/business.api";
@@ -16,12 +17,11 @@ import {
   IUserRegisterWithBusiness,
   userRegisterWithBusinessSchema,
 } from "@/schemas";
-import { ISubscriptionPlan } from "@/types";
+import { IBusiness, ISubscriptionPlan } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
-import React from "react";
 
-export default function BusinessForm({ id = undefined }: { id?: number }) {
+export default function UserBusinessForm({ id = undefined }: { id?: number }) {
   const router = useRouter();
 
   // GET ALL SUBSCRIPTION PLANS
@@ -31,6 +31,17 @@ export default function BusinessForm({ id = undefined }: { id?: number }) {
     };
   }>(GET_SUBSCRIPTION_PLANS, {});
 
+  // console.log({ data });
+  const businessByIdQuery = useQuery<{
+    businessById: {
+      data: IBusiness;
+    };
+  }>(GET_BUSINESS_BY_ID, {
+    variables: { id },
+    skip: !id,
+  });
+  const singleBusinessData = businessByIdQuery.data?.businessById;
+  console.log({ singleBusinessData });
   // MUTATION
   const [userRegisterWithBusiness, userRegisterWithBusinessResult] =
     useMutation(REGISTER_USER_WITH_BUSINESSES, {
@@ -40,7 +51,6 @@ export default function BusinessForm({ id = undefined }: { id?: number }) {
 
   // HANDLE SUBMIT
   const handleSubmit = async (formValues: IUserRegisterWithBusiness) => {
-    console.log({ formValues });
     const { email, password, ...userInput } = formValues.user;
 
     await userRegisterWithBusiness({

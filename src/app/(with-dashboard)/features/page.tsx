@@ -1,8 +1,8 @@
 "use client";
 
 import CustomTable from "@/components/table/CustomTable";
-import { GET_SYSTEM_MODULES } from "@/graphql/system-modules.api";
-import { ISystemModule } from "@/types";
+import { GET_FEATURES } from "@/graphql/feature.api";
+import { IFeature } from "@/types";
 import { formatText } from "@/utils/format-text.utils";
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
@@ -10,10 +10,10 @@ import { useMemo, useState } from "react";
 export default function AllSystemModules() {
   // GET ALL SYSTEM MODULES
   const { data, loading } = useQuery<{
-    systemModules: {
-      data: ISystemModule[];
+    allFeatures: {
+      data: IFeature[];
     };
-  }>(GET_SYSTEM_MODULES);
+  }>(GET_FEATURES);
   // console.log({ data });
 
   // TABLE COLUMNS
@@ -31,7 +31,7 @@ export default function AllSystemModules() {
   return (
     <section className={``}>
       <div className={`mb-5`}>
-        <h1 className={`text-2xl font-medium`}>All System Modules</h1>
+        <h1 className={`text-2xl font-medium`}>All Features</h1>
       </div>
       {/* TABLE */}
       <CustomTable
@@ -46,7 +46,7 @@ export default function AllSystemModules() {
           searchableFields: [{ label: "Name", value: "name" }],
         }}
         dataSource={
-          data?.systemModules?.data?.map((row) => ({
+          data?.allFeatures?.data?.map((row) => ({
             ...row,
             customName: formatText(row?.name),
           })) || []

@@ -37,11 +37,10 @@ export default function SubscriptionPlanForm({
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: ISubscriptionPlanFormData) => {
     // ADDED MODULE ID
-    formValues["moduleIds"] = [1];
+    formValues["featureIds"] = [1];
     formValues["price"] = Number(formValues["price"]);
     formValues["setupFee"] = Number(formValues["setupFee"]);
 
-    console.log({ formValues });
     if (data?.id) {
       formValues["id"] = Number(data.id);
       await updateSubscriptionPlan({
@@ -55,7 +54,6 @@ export default function SubscriptionPlanForm({
     handleClosePopup?.();
   };
 
-  // const defaultValues = d
   return (
     <CustomForm
       submitHandler={handleOnSubmit}

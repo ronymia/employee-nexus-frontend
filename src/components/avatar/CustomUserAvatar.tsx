@@ -25,7 +25,7 @@ export default function CustomUserAvatar({
           className="w-full h-full rounded-full object-cover"
         />
       ) : (
-        <span className="text-sm font-semibold text-primary">{initials}</span>
+        <span className="text-sm font-semibold text-green-950">{initials}</span>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import BusinessForm from "../../BusinessForm";
+import UserBusinessForm from "../../UserBusinessForm";
 
 export default function BusinessUpdatePage({
   params,
@@ -9,6 +9,6 @@ export default function BusinessUpdatePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  console.log({ id });
-  return <BusinessForm id={Number(id)} />;
+  // console.log({ id });
+  return <UserBusinessForm id={Number(id)} />;
 }

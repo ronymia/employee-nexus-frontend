@@ -5,17 +5,31 @@ export const LOGIN_MUTATION = gql`
     login(loginInput: { email: $email, password: $password }) {
       accessToken
       user {
-        id
+        createdAt
+        deletedBy
         email
-        business {
-          id
-          name
-        }
-        profile {
-          fullName
-        }
+        id
+        status
+        updatedAt
         role {
           name
+        }
+        permissions
+        profile {
+          address
+          city
+          country
+          createdAt
+          dateOfBirth
+          fullName
+          gender
+          id
+          maritalStatus
+          phone
+          postcode
+          profilePicture
+          updatedAt
+          userId
         }
       }
     }

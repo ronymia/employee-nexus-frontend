@@ -290,7 +290,7 @@ export default function AllSubscriptionPlan() {
         >
           <button
             type="button"
-            className={`btn btn-primary`}
+            className={`btn btn-primary text-base-300`}
             onClick={createNewSubscriptionPlan}
           >
             <PiPlusCircle className={`text-xl`} />

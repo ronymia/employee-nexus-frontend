@@ -27,7 +27,7 @@ export const CREATE_SUBSCRIPTION_PLAN = gql`
     $description: String!
     $price: Int!
     $setupFee: Int!
-    $moduleIds: [Int!]!
+    $featureIds: [Int!]!
   ) {
     createSubscriptionPlan(
       createSubscriptionPlanInput: {
@@ -35,7 +35,7 @@ export const CREATE_SUBSCRIPTION_PLAN = gql`
         description: $description
         price: $price
         setupFee: $setupFee
-        moduleIds: $moduleIds
+        featureIds: $featureIds
       }
     ) {
       message
@@ -62,7 +62,7 @@ export const UPDATE_SUBSCRIPTION_PLAN = gql`
     $description: String!
     $price: Int!
     $setupFee: Int!
-    $moduleIds: [Int!]!
+    $featureIds: [Int!]!
   ) {
     updateSubscriptionPlan(
       id: $id
@@ -71,7 +71,7 @@ export const UPDATE_SUBSCRIPTION_PLAN = gql`
         description: $description
         price: $price
         setupFee: $setupFee
-        moduleIds: $moduleIds
+        featureIds: $featureIds
       }
     ) {
       message
