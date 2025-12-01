@@ -3,25 +3,16 @@
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
-import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { useFormContext, useWatch } from "react-hook-form";
-
-interface IEducationHistory {
-  id: number;
-  userId: number;
-  degree: string;
-  fieldOfStudy: string;
-  institution: string;
-  country: string;
-  city?: string;
-  startDate: string;
-  endDate?: string;
-  isCurrentlyStudying: boolean;
-  grade?: string;
-  description?: string;
-}
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_EDUCATION_HISTORY,
+  UPDATE_EDUCATION_HISTORY,
+  GET_EDUCATION_HISTORY_BY_USER_ID,
+} from "@/graphql/education-history.api";
+import { IEducationHistory } from "@/types";
 
 interface EducationFormProps {
   userId: number;
@@ -36,14 +27,52 @@ export default function EducationForm({
   actionType,
   onClose,
 }: EducationFormProps) {
+  const [createEducation, createResult] = useMutation(
+    CREATE_EDUCATION_HISTORY,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        { query: GET_EDUCATION_HISTORY_BY_USER_ID, variables: { userId } },
+      ],
+    }
+  );
+
+  const [updateEducation, updateResult] = useMutation(
+    UPDATE_EDUCATION_HISTORY,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        { query: GET_EDUCATION_HISTORY_BY_USER_ID, variables: { userId } },
+      ],
+    }
+  );
+
   const handleSubmit = async (data: any) => {
-    console.log("Education Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      if (actionType === "create") {
+        await createEducation({
+          variables: {
+            createEducationHistoryInput: {
+              ...data,
+              userId,
+            },
+          },
+        });
+      } else {
+        await updateEducation({
+          variables: {
+            updateEducationHistoryInput: {
+              ...data,
+              id: Number(education?.id),
+              userId: Number(userId),
+            },
+          },
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error submitting education:", error);
+    }
   };
 
   const defaultValues = {
@@ -62,7 +91,10 @@ export default function EducationForm({
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <EducationFormFields />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <FormActionButton
+        isPending={createResult.loading || updateResult.loading}
+        cancelHandler={onClose}
+      />
     </CustomForm>
   );
 }
@@ -159,7 +191,7 @@ function EducationFormFields() {
           )}
           <div className="md:col-span-2">
             <ToggleSwitch
-              dataAuto="isCurrentlyStudying"
+              // dataAuto="isCurrentlyStudying"
               name="isCurrentlyStudying"
               label="Currently Studying"
             />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IPopupOption } from "@/types";
+import { IPopupOption, IEducationHistory } from "@/types";
 import CustomPopup from "@/components/modal/CustomPopup";
 import {
   PiPencilSimple,
@@ -10,33 +10,19 @@ import {
   PiPlus,
 } from "react-icons/pi";
 import EducationForm from "./components/EducationForm";
-
-interface IEducationHistory {
-  id: number;
-  userId: number;
-  degree: string;
-  fieldOfStudy: string;
-  institution: string;
-  country: string;
-  city?: string;
-  startDate: string;
-  endDate?: string;
-  isCurrentlyStudying: boolean;
-  grade?: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_EDUCATION_HISTORY_BY_USER_ID,
+  DELETE_EDUCATION_HISTORY,
+} from "@/graphql/education-history.api";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 
 interface EducationContentProps {
   userId: number;
-  educationHistory?: IEducationHistory[];
 }
 
-export default function EducationContent({
-  userId,
-  educationHistory = [],
-}: EducationContentProps) {
+export default function EducationContent({ userId }: EducationContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -45,6 +31,28 @@ export default function EducationContent({
     data: null,
     title: "",
   });
+
+  // Fetch education history
+  const { data, loading, refetch } = useQuery<{
+    educationHistoryByUserId: {
+      data: IEducationHistory[];
+    };
+  }>(GET_EDUCATION_HISTORY_BY_USER_ID, {
+    variables: { userId },
+  });
+
+  // Delete mutation
+  const [deleteEducation] = useMutation(DELETE_EDUCATION_HISTORY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      {
+        query: GET_EDUCATION_HISTORY_BY_USER_ID,
+        variables: { userId },
+      },
+    ],
+  });
+
+  const educationHistory = data?.educationHistoryByUserId?.data || [];
 
   const handleOpenForm = (
     actionType: "create" | "update",
@@ -71,10 +79,30 @@ export default function EducationContent({
     });
   };
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Delete education:", id);
+  const handleDelete = async ({ id }: { id: number }) => {
+    try {
+      await deleteEducation({
+        variables: { id: Number(id), userId: Number(userId) },
+      });
+    } catch (error) {
+      console.error("Error deleting education:", error);
+    }
   };
+
+  const educationDeleteHandler = async (id: number) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "delete",
+      form: "",
+      deleteHandler: () => handleDelete({ id }),
+      title: "",
+    });
+  };
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!educationHistory || educationHistory.length === 0) {
     return (
@@ -145,7 +173,7 @@ export default function EducationContent({
                 <PiPencilSimple size={18} />
               </button>
               <button
-                onClick={() => handleDelete(education.id)}
+                onClick={() => educationDeleteHandler(education.id)}
                 className="btn btn-sm btn-ghost btn-circle text-error hover:bg-error/10"
                 title="Delete Education"
               >
@@ -219,20 +247,24 @@ export default function EducationContent({
       </div>
 
       {/* Popup Modal */}
-      <CustomPopup
-        popupOption={popupOption}
-        setPopupOption={setPopupOption}
-        customWidth="60%"
-      >
-        {popupOption.form === "education" && (
-          <EducationForm
-            userId={userId}
-            education={popupOption.data}
-            actionType={popupOption.actionType as "create" | "update"}
-            onClose={handleCloseForm}
-          />
-        )}
-      </CustomPopup>
+      {popupOption.actionType === "delete" ? (
+        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      ) : (
+        <CustomPopup
+          popupOption={popupOption}
+          setPopupOption={setPopupOption}
+          customWidth="60%"
+        >
+          {popupOption.form === "education" && (
+            <EducationForm
+              userId={userId}
+              education={popupOption.data}
+              actionType={popupOption.actionType as "create" | "update"}
+              onClose={handleCloseForm}
+            />
+          )}
+        </CustomPopup>
+      )}
     </div>
   );
 }
