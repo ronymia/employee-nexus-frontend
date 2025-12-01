@@ -1,3 +1,16 @@
+export interface IUser {
+  id: number;
+  email: string;
+  profile?: {
+    fullName: string;
+  };
+}
+
+export interface IAssetType {
+  id: number;
+  name: string;
+}
+
 export interface Asset {
   id: number;
   name: string;
@@ -5,10 +18,7 @@ export interface Asset {
   date: string;
   note?: string;
   assetTypeId?: number;
-  assetType?: {
-    id: number;
-    name: string;
-  };
+  assetType?: IAssetType;
   image?: string;
   status: string;
   businessId?: number;
@@ -21,7 +31,7 @@ export interface Asset {
     id: number;
     name: string;
   };
-  assetAssignments?: any[];
+  assetAssignments?: IAssetAssignment[];
   createdAt: string;
   updatedAt: string;
   user?: {
@@ -31,6 +41,22 @@ export interface Asset {
   userId?: number;
 }
 
+export interface IAssetAssignment {
+  id: number;
+  assetId: number;
+  asset?: Asset;
+  assignedTo: number;
+  assignedToUser?: IUser;
+  assignedBy: number;
+  assignedByUser?: IUser;
+  assignedAt: string;
+  returnedAt?: string | null;
+  status: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AssetInput {
   name: string;
   code: string;
@@ -38,4 +64,16 @@ export interface AssetInput {
   note?: string;
   assetTypeId?: number;
   image?: string;
+}
+
+export interface AssignAssetInput {
+  assetId: number;
+  assignedTo: number;
+  assignedAt: string;
+  note?: string;
+}
+
+export interface ReturnAssetInput {
+  assetId: number;
+  note?: string;
 }

@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { IPopupOption } from "@/types";
+import { IAssetAssignment } from "@/types/asset.type";
 import CustomPopup from "@/components/modal/CustomPopup";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 import {
   PiPencilSimple,
   PiTrash,
@@ -17,60 +20,14 @@ import {
 } from "react-icons/pi";
 import AssetAssignmentForm from "./components/AssetAssignmentForm";
 import moment from "moment";
-
-interface IAssetType {
-  id: number;
-  name: string;
-}
-
-interface IAsset {
-  id: number;
-  name: string;
-  code: string;
-  date: string;
-  note?: string;
-  assetTypeId?: number;
-  assetType?: IAssetType;
-  image?: string;
-  status: string;
-  businessId?: number;
-  createdBy?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface IUser {
-  id: number;
-  email: string;
-  profile?: {
-    fullName: string;
-  };
-}
-
-interface IAssetAssignment {
-  id: number;
-  assetId: number;
-  asset: IAsset;
-  assignedTo: number;
-  assignedToUser?: IUser;
-  assignedBy: number;
-  assignedByUser?: IUser;
-  assignedAt: string;
-  returnedAt?: string | null;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import { GET_USER_ASSET_ASSIGNMENTS, RETURN_ASSET } from "@/graphql/asset.api";
 
 interface AssetsContentProps {
   userId: number;
-  assetAssignments?: IAssetAssignment[];
 }
 
-export default function AssetsContent({
-  userId,
-  assetAssignments = [],
-}: AssetsContentProps) {
+export default function AssetsContent({ userId }: AssetsContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -79,6 +36,25 @@ export default function AssetsContent({
     data: null,
     title: "",
   });
+
+  // Query to get asset assignments
+  const { data, loading } = useQuery(GET_USER_ASSET_ASSIGNMENTS, {
+    variables: { userId },
+  });
+
+  // Return asset mutation
+  const [returnAsset, { loading: returningAsset }] = useMutation(RETURN_ASSET, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_USER_ASSET_ASSIGNMENTS, variables: { userId } },
+    ],
+    // onCompleted: () => {
+    //   refetch();
+    // },
+  });
+
+  const assetAssignments: IAssetAssignment[] =
+    (data as any)?.userAssetAssignments?.data || [];
 
   const handleOpenForm = (
     actionType: "create" | "update",
@@ -106,14 +82,19 @@ export default function AssetsContent({
     });
   };
 
-  const handleReturn = (id: number) => {
-    // TODO: Implement return asset mutation
-    console.log("Return asset:", id);
-  };
-
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Delete asset assignment:", id);
+  const handleReturn = async (assetId: number) => {
+    // console.log(assetId);
+    try {
+      await returnAsset({
+        variables: {
+          returnAssetInput: {
+            assetId: assetId,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error returning asset:", error);
+    }
   };
 
   // Group assets by status
@@ -153,6 +134,10 @@ export default function AssetsContent({
     }
   };
 
+  if (loading) {
+    return <CustomLoading />;
+  }
+
   if (!assetAssignments || assetAssignments.length === 0) {
     return (
       <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20">
@@ -191,6 +176,9 @@ export default function AssetsContent({
 
   const renderAssetCard = (assignment: IAssetAssignment) => {
     const asset = assignment.asset;
+    console.log({ assignment });
+    if (!asset) return null;
+
     const isAssigned =
       assignment.status === "assigned" && !assignment.returnedAt;
 
@@ -203,7 +191,7 @@ export default function AssetsContent({
         {asset.image ? (
           <div className="h-40 overflow-hidden bg-base-200">
             <img
-              src={asset.image}
+              src={`${process.env.NEXT_PUBLIC_API_URL}${asset.image}`}
               alt={asset.name}
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -229,27 +217,13 @@ export default function AssetsContent({
           <div className="absolute top-3 right-3 flex gap-2">
             {isAssigned && (
               <button
-                onClick={() => handleReturn(assignment.id)}
+                onClick={() => handleReturn(assignment.asset?.id!)}
                 className="btn btn-xs btn-ghost btn-circle text-info hover:bg-info/10"
                 title="Return Asset"
               >
                 <PiClock size={16} />
               </button>
             )}
-            <button
-              onClick={() => handleOpenForm("update", assignment)}
-              className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
-              title="Edit Assignment"
-            >
-              <PiPencilSimple size={16} />
-            </button>
-            <button
-              onClick={() => handleDelete(assignment.id)}
-              className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
-              title="Remove Assignment"
-            >
-              <PiTrash size={16} />
-            </button>
           </div>
 
           {/* Asset Details */}

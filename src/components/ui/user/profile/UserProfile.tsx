@@ -1152,7 +1152,6 @@ export default function UserProfile({ userId }: UserProfileProps) {
         {activeTab === "assets" && (
           <AssetsContent
             userId={userId}
-            assetAssignments={dummyAssetAssignments}
           />
         )}
         {activeTab === "social" && <SocialLinksContent userId={userId} />}

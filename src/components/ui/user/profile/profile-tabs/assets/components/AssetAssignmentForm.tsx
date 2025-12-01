@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomSelect from "@/components/form/input/CustomSelect";
@@ -7,6 +8,18 @@ import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import { useFormContext, useWatch } from "react-hook-form";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_ASSETS,
+  ASSIGN_ASSET,
+  GET_USER_ASSET_ASSIGNMENTS,
+} from "@/graphql/asset.api";
+import { IAssetAssignment } from "@/types/asset.type";
+import useAppStore from "@/hooks/useAppStore";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 interface IAssetType {
   id: number;
@@ -37,21 +50,6 @@ interface IUser {
   };
 }
 
-interface IAssetAssignment {
-  id: number;
-  assetId: number;
-  asset: IAsset;
-  assignedTo: number;
-  assignedToUser?: IUser;
-  assignedBy: number;
-  assignedByUser?: IUser;
-  assignedAt: string;
-  returnedAt?: string | null;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 interface AssetAssignmentFormProps {
   userId: number;
   assetAssignment?: IAssetAssignment;
@@ -65,36 +63,75 @@ export default function AssetAssignmentForm({
   actionType,
   onClose,
 }: AssetAssignmentFormProps) {
+  // const [isPending, setIsPending] = useState(false);
+
+  // Fetch available assets
+  const { data: assetsData, loading: loadingAssets } = useQuery(GET_ASSETS, {
+    variables: {
+      query: { status: "unassigned" },
+    },
+  });
+
+  // Assign asset mutation
+  const [assignAsset] = useMutation(ASSIGN_ASSET, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_USER_ASSET_ASSIGNMENTS, variables: { userId } },
+    ],
+    // onCompleted: () => {
+    //   setIsPending(false);
+    //   onClose();
+    // },
+    // onError: (error: any) => {
+    //   setIsPending(false);
+    //   console.error("Error assigning asset:", error);
+    // },
+  });
+
   const handleSubmit = async (data: any) => {
-    console.log("Asset Assignment Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      // Parse dates using dayjs
+      const assignedAt = data.assignedAt
+        ? dayjs(data.assignedAt, "DD-MM-YYYY").toISOString()
+        : new Date().toISOString();
+
+      // Prepare mutation variables
+      const variables = {
+        assignAssetInput: {
+          assetId: parseInt(data.assetId),
+          assignedTo: userId,
+          assignedAt,
+          note: data.note || "",
+        },
+      };
+
+      await assignAsset({ variables });
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
   };
 
   const defaultValues = {
-    assetId: assetAssignment?.assetId.toString() || "",
-    assignedAt: assetAssignment?.assignedAt || new Date().toISOString(),
-    returnedAt: assetAssignment?.returnedAt || "",
+    assetId: Number(assetAssignment?.asset?.id) || "",
+    assignedAt: assetAssignment?.assignedAt
+      ? dayjs(assetAssignment.assignedAt).format("DD-MM-YYYY")
+      : dayjs().format("DD-MM-YYYY"),
+    returnedAt: assetAssignment?.returnedAt
+      ? dayjs(assetAssignment.returnedAt).format("DD-MM-YYYY")
+      : "",
     status: assetAssignment?.status || "assigned",
     isCurrentlyAssigned: !assetAssignment?.returnedAt,
-    note: assetAssignment?.asset.note || "",
+    note: assetAssignment?.note || assetAssignment?.asset?.note || "",
   };
 
+  console.log({ defaultValues, assetAssignment });
+
   // TODO: Fetch available assets from GraphQL (status: unassigned or available)
-  const assetOptions = [
-    { label: "Dell Laptop - LPT001", value: "1" },
-    { label: "iPhone 13 Pro - PH001", value: "2" },
-    { label: 'MacBook Pro 16" - LPT002', value: "3" },
-    { label: 'Samsung Monitor 27" - MON001', value: "4" },
-    { label: "Wireless Mouse - ACC001", value: "5" },
-    { label: "Mechanical Keyboard - ACC002", value: "6" },
-    { label: "Desk Chair - FUR001", value: "7" },
-    { label: "Standing Desk - FUR002", value: "8" },
-  ];
+  const assetOptions =
+    (assetsData as any)?.assets?.data?.map((asset: IAsset) => ({
+      label: `${asset.name} - ${asset.code}`,
+      value: asset.id.toString(),
+    })) || [];
 
   const statusOptions = [
     { label: "Assigned", value: "assigned" },
@@ -109,8 +146,10 @@ export default function AssetAssignmentForm({
         actionType={actionType}
         assetOptions={assetOptions}
         statusOptions={statusOptions}
+        loadingAssets={loadingAssets}
+        isPending={loadingAssets}
       />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <FormActionButton isPending={loadingAssets} cancelHandler={onClose} />
     </CustomForm>
   );
 }
@@ -119,10 +158,14 @@ function AssetAssignmentFormFields({
   actionType,
   assetOptions,
   statusOptions,
+  loadingAssets,
+  isPending,
 }: {
   actionType: "create" | "update";
   assetOptions: { label: string; value: string }[];
   statusOptions: { label: string; value: string }[];
+  loadingAssets: boolean;
+  isPending: boolean;
 }) {
   const { control } = useFormContext();
   const isCurrentlyAssigned = useWatch({
@@ -144,7 +187,7 @@ function AssetAssignmentFormFields({
             label="Select Asset"
             placeholder="Choose an asset to assign"
             required={true}
-            isLoading={false}
+            isLoading={loadingAssets}
             options={assetOptions}
             disabled={actionType === "update"}
           />
