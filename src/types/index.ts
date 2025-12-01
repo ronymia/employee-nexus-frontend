@@ -24,3 +24,4 @@ export * from "./asset.type";
 export * from "./project.type";
 export * from "./employee.type";
 export * from "./education-history.type";
+export * from "./job-history.type";

@@ -5,22 +5,16 @@ import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { useFormContext, useWatch } from "react-hook-form";
-
-interface IJobHistory {
-  id: number;
-  userId: number;
-  jobTitle: string;
-  companyName: string;
-  employmentType: string;
-  country: string;
-  city?: string;
-  startDate: string;
-  endDate?: string;
-  responsibilities?: string;
-  achievements?: string;
-}
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_JOB_HISTORY,
+  UPDATE_JOB_HISTORY,
+  GET_JOB_HISTORY_BY_USER_ID,
+} from "@/graphql/job-history.api";
+import { IJobHistory } from "@/types";
 
 interface ExperienceFormProps {
   userId: number;
@@ -35,14 +29,49 @@ export default function ExperienceForm({
   actionType,
   onClose,
 }: ExperienceFormProps) {
+  const [createJobHistory, createResult] = useMutation(CREATE_JOB_HISTORY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_JOB_HISTORY_BY_USER_ID, variables: { userId } },
+    ],
+  });
+
+  const [updateJobHistory, updateResult] = useMutation(UPDATE_JOB_HISTORY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_JOB_HISTORY_BY_USER_ID, variables: { userId } },
+    ],
+  });
+
   const handleSubmit = async (data: any) => {
-    console.log("Experience Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      // Remove isCurrentJob toggle field from submission
+      const { isCurrentJob, ...jobData } = data;
+
+      if (actionType === "create") {
+        await createJobHistory({
+          variables: {
+            createJobHistoryInput: {
+              ...jobData,
+              userId,
+            },
+          },
+        });
+      } else {
+        await updateJobHistory({
+          variables: {
+            updateJobHistoryInput: {
+              ...jobData,
+              id: Number(jobHistory?.id),
+              userId: Number(userId),
+            },
+          },
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error submitting job history:", error);
+    }
   };
 
   const defaultValues = {
@@ -61,7 +90,10 @@ export default function ExperienceForm({
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <ExperienceFormFields />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <FormActionButton
+        isPending={createResult.loading || updateResult.loading}
+        cancelHandler={onClose}
+      />
     </CustomForm>
   );
 }
@@ -148,30 +180,24 @@ function ExperienceFormFields() {
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Duration</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomInputField
+          <CustomDatePicker
             dataAuto="startDate"
             name="startDate"
-            type="text"
             label="Start Date"
-            placeholder="MM-YYYY or YYYY"
             required={true}
+            formatDate="MM-YYYY"
           />
           {!isCurrentJob && (
-            <CustomInputField
+            <CustomDatePicker
               dataAuto="endDate"
               name="endDate"
-              type="text"
               label="End Date"
-              placeholder="MM-YYYY or YYYY"
               required={false}
+              formatDate="MM-YYYY"
             />
           )}
           <div className="md:col-span-2">
-            <ToggleSwitch
-              dataAuto="isCurrentJob"
-              name="isCurrentJob"
-              label="I currently work here"
-            />
+            <ToggleSwitch name="isCurrentJob" label="I currently work here" />
           </div>
         </div>
       </div>

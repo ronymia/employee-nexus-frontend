@@ -1,36 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { IPopupOption } from "@/types";
+import { IPopupOption, IJobHistory } from "@/types";
 import CustomPopup from "@/components/modal/CustomPopup";
 import { PiPencilSimple, PiTrash, PiBriefcase, PiPlus } from "react-icons/pi";
 import ExperienceForm from "./components/ExperienceForm";
-
-interface IJobHistory {
-  id: number;
-  userId: number;
-  jobTitle: string;
-  companyName: string;
-  employmentType: string;
-  country: string;
-  city?: string;
-  startDate: string;
-  endDate?: string;
-  responsibilities?: string;
-  achievements?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_JOB_HISTORY_BY_USER_ID,
+  DELETE_JOB_HISTORY,
+} from "@/graphql/job-history.api";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 
 interface ExperienceContentProps {
   userId: number;
-  jobHistory?: IJobHistory[];
 }
 
-export default function ExperienceContent({
-  userId,
-  jobHistory = [],
-}: ExperienceContentProps) {
+export default function ExperienceContent({ userId }: ExperienceContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -39,6 +26,28 @@ export default function ExperienceContent({
     data: null,
     title: "",
   });
+
+  // Fetch job history
+  const { data, loading } = useQuery<{
+    jobHistoryByUserId: {
+      data: IJobHistory[];
+    };
+  }>(GET_JOB_HISTORY_BY_USER_ID, {
+    variables: { userId },
+  });
+
+  // Delete mutation
+  const [deleteJobHistory] = useMutation(DELETE_JOB_HISTORY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      {
+        query: GET_JOB_HISTORY_BY_USER_ID,
+        variables: { userId },
+      },
+    ],
+  });
+
+  const jobHistory = data?.jobHistoryByUserId?.data || [];
 
   const handleOpenForm = (
     actionType: "create" | "update",
@@ -65,10 +74,39 @@ export default function ExperienceContent({
     });
   };
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Delete job history:", id);
+  const handleDelete = async ({ id }: { id: number }) => {
+    try {
+      await deleteJobHistory({
+        variables: { id: Number(id), userId: Number(userId) },
+      });
+
+      setPopupOption({
+        open: false,
+        closeOnDocumentClick: true,
+        actionType: "create",
+        form: "",
+        data: null,
+        title: "",
+      });
+    } catch (error) {
+      console.error("Error deleting job history:", error);
+    }
   };
+
+  const jobHistoryDeleteHandler = async (id: number) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "delete",
+      form: "",
+      deleteHandler: () => handleDelete({ id }),
+      title: "",
+    });
+  };
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!jobHistory || jobHistory.length === 0) {
     return (
@@ -142,7 +180,7 @@ export default function ExperienceContent({
                   <PiPencilSimple size={18} />
                 </button>
                 <button
-                  onClick={() => handleDelete(job.id)}
+                  onClick={() => jobHistoryDeleteHandler(job.id)}
                   className="btn btn-sm btn-ghost btn-circle text-error hover:bg-error/10"
                   title="Delete Experience"
                 >
@@ -214,20 +252,24 @@ export default function ExperienceContent({
       </div>
 
       {/* Popup Modal */}
-      <CustomPopup
-        popupOption={popupOption}
-        setPopupOption={setPopupOption}
-        customWidth="60%"
-      >
-        {popupOption.form === "experience" && (
-          <ExperienceForm
-            userId={userId}
-            jobHistory={popupOption.data}
-            actionType={popupOption.actionType as "create" | "update"}
-            onClose={handleCloseForm}
-          />
-        )}
-      </CustomPopup>
+      {popupOption.actionType === "delete" ? (
+        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      ) : (
+        <CustomPopup
+          popupOption={popupOption}
+          setPopupOption={setPopupOption}
+          customWidth="60%"
+        >
+          {popupOption.form === "experience" && (
+            <ExperienceForm
+              userId={userId}
+              jobHistory={popupOption.data}
+              actionType={popupOption.actionType as "create" | "update"}
+              onClose={handleCloseForm}
+            />
+          )}
+        </CustomPopup>
+      )}
     </div>
   );
 }

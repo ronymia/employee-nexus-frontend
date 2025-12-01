@@ -1115,15 +1115,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
       {/* Content */}
       <div className="p-6">
         {activeTab === "profile" && <ProfileContent employee={employee} />}
-        {activeTab === "education" && (
-          <EducationContent
-            userId={userId}
-            educationHistory={dummyEducationHistory}
-          />
-        )}
-        {activeTab === "experience" && (
-          <ExperienceContent userId={userId} jobHistory={dummyJobHistory} />
-        )}
+        {activeTab === "education" && <EducationContent userId={userId} />}
+        {activeTab === "experience" && <ExperienceContent userId={userId} />}
         {activeTab === "schedule" && (
           <ScheduleContent
             userId={userId}
