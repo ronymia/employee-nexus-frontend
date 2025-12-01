@@ -163,21 +163,102 @@ export const DELETE_PROJECT = gql`
 `;
 
 export const ASSIGN_PROJECT_MEMBER = gql`
-  mutation AssignProjectMember($projectId: Int!, $userId: Int!, $role: String) {
-    assignProjectMember(projectId: $projectId, userId: $userId, role: $role) {
+  mutation AssignProjectMember(
+    $assignProjectMemberInput: AssignProjectMemberInput!
+  ) {
+    assignProjectMember(assignProjectMemberInput: $assignProjectMemberInput) {
       message
       statusCode
       success
+      data {
+        id
+        projectId
+        userId
+        role
+        createdAt
+      }
     }
   }
 `;
 
 export const UNASSIGN_PROJECT_MEMBER = gql`
-  mutation UnassignProjectMember($projectId: Int!, $userId: Int!) {
-    unassignProjectMember(projectId: $projectId, userId: $userId) {
+  mutation UnassignProjectMember(
+    $unassignProjectMemberInput: UnassignProjectMemberInput!
+  ) {
+    unassignProjectMember(
+      unassignProjectMemberInput: $unassignProjectMemberInput
+    ) {
       message
       statusCode
       success
+      data {
+        id
+        projectId
+        userId
+        role
+      }
+    }
+  }
+`;
+
+export const GET_USER_PROJECTS = gql`
+  query GetUserProjects($userId: Int!) {
+    userProjects(userId: $userId) {
+      success
+      statusCode
+      message
+      data {
+        id
+        role
+        projectId
+        userId
+        project {
+          id
+          name
+          description
+          status
+          startDate
+          endDate
+          cover
+          business {
+            id
+            name
+          }
+          creator {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+          projectMembers {
+            id
+            role
+            user {
+              id
+              email
+              profile {
+                fullName
+              }
+            }
+          }
+        }
+        user {
+          id
+          email
+          profile {
+            fullName
+          }
+          role {
+            id
+            name
+          }
+        }
+        createdAt
+      }
+      meta {
+        total
+      }
     }
   }
 `;

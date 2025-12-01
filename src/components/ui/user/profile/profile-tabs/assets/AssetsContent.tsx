@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { IPopupOption } from "@/types";
-import { IAssetAssignment } from "@/types/asset.type";
+import { IAssetAssignment } from "@/types/assets.type";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
 import FormModal from "@/components/form/FormModal";

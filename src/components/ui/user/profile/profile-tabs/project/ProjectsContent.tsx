@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { IPopupOption } from "@/types";
+import { IUserProjectMember } from "@/types/project.type";
 import CustomPopup from "@/components/modal/CustomPopup";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 import {
   PiPencilSimple,
   PiTrash,
@@ -12,40 +15,18 @@ import {
   PiUsers,
 } from "react-icons/pi";
 import ProjectMemberForm from "./components/ProjectMemberForm";
-
-interface IProject {
-  id: number;
-  name: string;
-  description?: string;
-  cover: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  businessId?: number;
-  createdBy?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface IProjectMember {
-  id: number;
-  projectId: number;
-  project: IProject;
-  userId: number;
-  role?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_USER_PROJECTS,
+  UNASSIGN_PROJECT_MEMBER,
+} from "@/graphql/project.api";
+import moment from "moment";
 
 interface ProjectsContentProps {
   userId: number;
-  projectMembers?: IProjectMember[];
 }
 
-export default function ProjectsContent({
-  userId,
-  projectMembers = [],
-}: ProjectsContentProps) {
+export default function ProjectsContent({ userId }: ProjectsContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -55,9 +36,35 @@ export default function ProjectsContent({
     title: "",
   });
 
+  // Query to get user projects
+  const { data, loading, refetch } = useQuery<{
+    userProjects: {
+      data: IUserProjectMember[];
+    };
+  }>(GET_USER_PROJECTS, {
+    variables: { userId },
+  });
+
+  // Unassign project member mutation
+  const [unassignProjectMember] = useMutation(UNASSIGN_PROJECT_MEMBER, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_USER_PROJECTS, variables: { userId } }],
+    onCompleted: () => {
+      setPopupOption({
+        open: false,
+        closeOnDocumentClick: true,
+        actionType: "create",
+        form: "",
+        data: null,
+        title: "",
+      });
+    },
+  });
+
+  const projectMembers = data?.userProjects?.data || [];
   const handleOpenForm = (
     actionType: "create" | "update",
-    member?: IProjectMember
+    member?: IUserProjectMember
   ) => {
     setPopupOption({
       open: true,
@@ -83,9 +90,19 @@ export default function ProjectsContent({
     });
   };
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Remove from project:", id);
+  const handleDelete = async (member: IUserProjectMember) => {
+    try {
+      await unassignProjectMember({
+        variables: {
+          unassignProjectMemberInput: {
+            projectId: member.projectId,
+            userId: member.userId,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error unassigning project member:", error);
+    }
   };
 
   // Group projects by status
@@ -119,6 +136,10 @@ export default function ProjectsContent({
         return "badge-ghost";
     }
   };
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!projectMembers || projectMembers.length === 0) {
     return (
@@ -156,21 +177,21 @@ export default function ProjectsContent({
     );
   }
 
-  const renderProjectCard = (member: IProjectMember) => {
+  const renderProjectCard = (member: IUserProjectMember) => {
     const project = member.project;
     const isOngoing =
       project.status === "ACTIVE" || project.status === "IN_PROGRESS";
 
     return (
       <div
-        key={member.id}
+        key={project.id}
         className="bg-base-100 rounded-lg shadow-sm border border-primary/20 overflow-hidden"
       >
         {/* Project Cover Image */}
         {project.cover && (
           <div className="h-32 overflow-hidden bg-linear-to-r from-primary/20 to-primary/5">
             <img
-              src={project.cover}
+              src={`${process.env.NEXT_PUBLIC_API_URL}${project.cover}`}
               alt={project.name}
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -182,16 +203,9 @@ export default function ProjectsContent({
 
         <div className="p-5 relative">
           {/* Action Buttons */}
-          <div className="absolute top-3 right-3 flex gap-2">
+          <div className="absolute top-3 right-3">
             <button
-              onClick={() => handleOpenForm("update", member)}
-              className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
-              title="Edit Assignment"
-            >
-              <PiPencilSimple size={16} />
-            </button>
-            <button
-              onClick={() => handleDelete(member.id)}
+              onClick={() => handleDelete(member)}
               className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
               title="Remove from Project"
             >
@@ -232,13 +246,28 @@ export default function ProjectsContent({
               </div>
             )}
 
+            {/* Team Size */}
+            {project.projectMembers && project.projectMembers.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-base-content/60">
+                <PiUsers size={16} />
+                <span>Team: {project.projectMembers.length} members</span>
+              </div>
+            )}
+
             {/* Project Duration */}
             {(project.startDate || project.endDate) && (
               <div className="flex items-center gap-2 text-sm text-base-content/60">
                 <PiCalendar size={16} />
                 <span>
-                  {project.startDate || "N/A"} -{" "}
-                  {isOngoing ? "Present" : project.endDate || "N/A"}
+                  {project.startDate
+                    ? moment(project.startDate).format("MMM DD, YYYY")
+                    : "N/A"}{" "}
+                  -{" "}
+                  {isOngoing
+                    ? "Present"
+                    : project.endDate
+                    ? moment(project.endDate).format("MMM DD, YYYY")
+                    : "N/A"}
                 </span>
               </div>
             )}
@@ -315,6 +344,8 @@ export default function ProjectsContent({
           />
         )}
       </CustomPopup>
+
+      {/* Delete Confirmation Modal */}
     </div>
   );
 }

@@ -1,15 +1,5 @@
-export interface IUser {
-  id: number;
-  email: string;
-  profile?: {
-    fullName: string;
-  };
-}
-
-export interface IAssetType {
-  id: number;
-  name: string;
-}
+import { IAssetType } from "./asset-type.type";
+import { IUser } from "./user.type";
 
 export interface Asset {
   id: number;

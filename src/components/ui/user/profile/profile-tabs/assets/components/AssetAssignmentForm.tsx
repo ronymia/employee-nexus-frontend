@@ -14,7 +14,7 @@ import {
   ASSIGN_ASSET,
   GET_USER_ASSET_ASSIGNMENTS,
 } from "@/graphql/asset.api";
-import { IAssetAssignment } from "@/types/asset.type";
+import { IAssetAssignment } from "@/types/assets.type";
 import useAppStore from "@/hooks/useAppStore";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";

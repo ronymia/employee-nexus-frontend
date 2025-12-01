@@ -1,31 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomInputField from "@/components/form/input/CustomInputField";
-
-interface IProject {
-  id: number;
-  name: string;
-  description?: string;
-  cover: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-}
-
-interface IProjectMember {
-  id: number;
-  projectId: number;
-  project: IProject;
-  userId: number;
-  role?: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_PROJECTS,
+  ASSIGN_PROJECT_MEMBER,
+  GET_USER_PROJECTS,
+} from "@/graphql/project.api";
+import { IProject, IUserProjectMember } from "@/types/project.type";
 
 interface ProjectMemberFormProps {
   userId: number;
-  projectMember?: IProjectMember;
+  projectMember?: IUserProjectMember;
   actionType: "create" | "update";
   onClose: () => void;
 }
@@ -36,29 +26,48 @@ export default function ProjectMemberForm({
   actionType,
   onClose,
 }: ProjectMemberFormProps) {
-  const handleSubmit = async (data: any) => {
-    console.log("Project Member Form Submit:", {
-      ...data,
-      userId,
-      actionType,
+  // Fetch all projects
+  const { data: projectsData, loading: loadingProjects } = useQuery<{
+    projects: {
+      data: IProject[];
+    };
+  }>(GET_PROJECTS);
+
+  // Assign project member mutation
+  const [assignProjectMember, { loading: assigningProjectMemberLoading }] =
+    useMutation(ASSIGN_PROJECT_MEMBER, {
+      awaitRefetchQueries: true,
+      refetchQueries: [{ query: GET_USER_PROJECTS, variables: { userId } }],
+      onCompleted: () => onClose(),
     });
-    // TODO: Implement GraphQL mutation
-    onClose();
+
+  const handleSubmit = async (data: any) => {
+    try {
+      const variables = {
+        assignProjectMemberInput: {
+          projectId: parseInt(data.projectId),
+          userId: userId,
+          role: data.role || null,
+        },
+      };
+
+      await assignProjectMember({ variables });
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
   };
 
   const defaultValues = {
-    projectId: projectMember?.projectId || "",
+    projectId: projectMember?.projectId?.toString() || "",
     role: projectMember?.role || "",
   };
 
-  // TODO: Fetch projects from GraphQL
-  const projectOptions = [
-    { label: "E-commerce Platform", value: "1" },
-    { label: "Mobile App Development", value: "2" },
-    { label: "Data Analytics Dashboard", value: "3" },
-    { label: "CRM System", value: "4" },
-    { label: "Inventory Management", value: "5" },
-  ];
+  // Map projects to options
+  const projectOptions =
+    (projectsData as any)?.projects?.data?.map((project: any) => ({
+      label: project.name,
+      value: project.id.toString(),
+    })) || [];
 
   const roleOptions = [
     { label: "Project Manager", value: "Project Manager" },
@@ -92,7 +101,7 @@ export default function ProjectMemberForm({
               label="Select Project"
               placeholder="Choose a project"
               required={true}
-              isLoading={false}
+              isLoading={loadingProjects}
               options={projectOptions}
               disabled={actionType === "update"}
             />
@@ -143,7 +152,10 @@ export default function ProjectMemberForm({
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={assigningProjectMemberLoading}
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );
