@@ -6,16 +6,14 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import { useState } from "react";
 import { PiUploadSimple, PiFile, PiX } from "react-icons/pi";
-
-interface IDocument {
-  id: number;
-  userId: number;
-  title: string;
-  description?: string;
-  attachment: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_DOCUMENT,
+  UPDATE_DOCUMENT,
+  GET_DOCUMENTS_BY_USER_ID,
+} from "@/graphql/document.api";
+import { IDocument } from "@/types";
+import useAppStore from "@/hooks/useAppStore";
 
 interface DocumentFormProps {
   userId: number;
@@ -34,16 +32,101 @@ export default function DocumentForm({
   const [filePreview, setFilePreview] = useState<string>(
     document?.attachment || ""
   );
+  const [isUploading, setIsUploading] = useState(false);
+  const token = useAppStore((state) => state.token);
+
+  const [createDocument, createResult] = useMutation(CREATE_DOCUMENT, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_DOCUMENTS_BY_USER_ID, variables: { userId } },
+    ],
+  });
+
+  const [updateDocument, updateResult] = useMutation(UPDATE_DOCUMENT, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_DOCUMENTS_BY_USER_ID, variables: { userId } },
+    ],
+  });
+
+  // Upload file to backend
+  const uploadFile = async (file: File): Promise<string | null> => {
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        }/documents/upload-attachment`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      const result = await response.json();
+      return result?.attachmentPath || null;
+    } catch (error) {
+      console.error("File upload error:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSubmit = async (data: any) => {
-    console.log("Document Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-      file: selectedFile,
-    });
-    // TODO: Implement GraphQL mutation with file upload
-    onClose();
+    try {
+      let attachmentPath = document?.attachment || "";
+
+      // Upload file if a new file is selected
+      if (selectedFile) {
+        const filePath = await uploadFile(selectedFile);
+        if (!filePath) {
+          console.error("File upload failed");
+          return;
+        }
+        attachmentPath = filePath;
+      }
+
+      const documentData = {
+        title: data.title,
+        description: data.description || "",
+        attachment: attachmentPath,
+      };
+
+      if (actionType === "create") {
+        await createDocument({
+          variables: {
+            createDocumentInput: {
+              ...documentData,
+              userId,
+            },
+          },
+        });
+      } else {
+        await updateDocument({
+          variables: {
+            updateDocumentInput: {
+              ...documentData,
+              id: Number(document?.id),
+              userId: Number(userId),
+            },
+          },
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error submitting document:", error);
+    }
   };
 
   const defaultValues = {
@@ -217,7 +300,12 @@ export default function DocumentForm({
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={
+            isUploading || createResult.loading || updateResult.loading
+          }
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );

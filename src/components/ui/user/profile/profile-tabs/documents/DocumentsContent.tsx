@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IPopupOption } from "@/types";
+import { IPopupOption, IDocument } from "@/types";
 import CustomPopup from "@/components/modal/CustomPopup";
 import {
   PiPencilSimple,
@@ -19,26 +19,19 @@ import {
 } from "react-icons/pi";
 import DocumentForm from "./components/DocumentForm";
 import moment from "moment";
-
-interface IDocument {
-  id: number;
-  userId: number;
-  title: string;
-  description?: string;
-  attachment: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_DOCUMENTS_BY_USER_ID,
+  DELETE_DOCUMENT,
+} from "@/graphql/document.api";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 
 interface DocumentsContentProps {
   userId: number;
-  documents?: IDocument[];
 }
 
-export default function DocumentsContent({
-  userId,
-  documents = [],
-}: DocumentsContentProps) {
+export default function DocumentsContent({ userId }: DocumentsContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -47,6 +40,28 @@ export default function DocumentsContent({
     data: null,
     title: "",
   });
+
+  // Fetch documents
+  const { data, loading } = useQuery<{
+    documentsByUserId: {
+      data: IDocument[];
+    };
+  }>(GET_DOCUMENTS_BY_USER_ID, {
+    variables: { userId },
+  });
+
+  // Delete mutation
+  const [deleteDocument] = useMutation(DELETE_DOCUMENT, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      {
+        query: GET_DOCUMENTS_BY_USER_ID,
+        variables: { userId },
+      },
+    ],
+  });
+
+  const documents = data?.documentsByUserId?.data || [];
 
   const handleOpenForm = (
     actionType: "create" | "update",
@@ -73,14 +88,47 @@ export default function DocumentsContent({
     });
   };
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Delete document:", id);
+  const handleDelete = async ({ id }: { id: number }) => {
+    try {
+      await deleteDocument({
+        variables: { id: Number(id), userId: Number(userId) },
+      });
+
+      setPopupOption({
+        open: false,
+        closeOnDocumentClick: true,
+        actionType: "create",
+        form: "",
+        data: null,
+        title: "",
+      });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+    }
+  };
+
+  const documentDeleteHandler = async (id: number) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "delete",
+      form: "",
+      deleteHandler: () => handleDelete({ id }),
+      title: "",
+    });
   };
 
   const handleDownload = (attachment: string, title: string) => {
-    // TODO: Implement download logic
-    console.log("Download document:", attachment);
+    const fileUrl = `${
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+    }${attachment}`;
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = title;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const getFileIcon = (filename: string) => {
@@ -118,6 +166,10 @@ export default function DocumentsContent({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!documents || documents.length === 0) {
     return (
@@ -202,7 +254,7 @@ export default function DocumentsContent({
                   <PiPencilSimple size={16} />
                 </button>
                 <button
-                  onClick={() => handleDelete(document.id)}
+                  onClick={() => documentDeleteHandler(document.id)}
                   className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
                   title="Delete"
                 >
@@ -267,20 +319,24 @@ export default function DocumentsContent({
       </div>
 
       {/* Popup Modal */}
-      <CustomPopup
-        popupOption={popupOption}
-        setPopupOption={setPopupOption}
-        customWidth="60%"
-      >
-        {popupOption.form === "document" && (
-          <DocumentForm
-            userId={userId}
-            document={popupOption.data}
-            actionType={popupOption.actionType as "create" | "update"}
-            onClose={handleCloseForm}
-          />
-        )}
-      </CustomPopup>
+      {popupOption.actionType === "delete" ? (
+        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      ) : (
+        <CustomPopup
+          popupOption={popupOption}
+          setPopupOption={setPopupOption}
+          customWidth="60%"
+        >
+          {popupOption.form === "document" && (
+            <DocumentForm
+              userId={userId}
+              document={popupOption.data}
+              actionType={popupOption.actionType as "create" | "update"}
+              onClose={handleCloseForm}
+            />
+          )}
+        </CustomPopup>
+      )}
     </div>
   );
 }

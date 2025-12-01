@@ -25,3 +25,4 @@ export * from "./project.type";
 export * from "./employee.type";
 export * from "./education-history.type";
 export * from "./job-history.type";
+export * from "./document.type";
