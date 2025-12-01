@@ -6,6 +6,7 @@ import {
   MdOutlineSubscriptions,
   MdSettings,
 } from "react-icons/md";
+import { PiClock } from "react-icons/pi";
 import SidebarGenerator from "./SidebarGenerator";
 import { VscFileSubmodule } from "react-icons/vsc";
 import { FiUsers } from "react-icons/fi";
@@ -109,7 +110,7 @@ export default function Sidebar({
         {
           Icon: FiUsers,
           label: "Employees",
-          path: "/employee-management/employees",
+          path: "/user-management/employees",
           show: permissionGuard(PermissionResource.USER, [
             PermissionAction.READ,
           ]),
@@ -246,6 +247,45 @@ export default function Sidebar({
           show: permissionGuard(PermissionResource.ASSET, [
             PermissionAction.READ,
           ]),
+          subMenus: [],
+        },
+      ],
+    },
+    // ATTENDANCE MANAGEMENT MENU
+    {
+      Icon: PiClock,
+      label: menuNames.attendance_management,
+      path: "/attendance-management",
+      show: true,
+      subMenus: [
+        {
+          Icon: PiClock,
+          label: "Attendance",
+          path: "/attendance-management/attendance",
+          show: true,
+          subMenus: [],
+        },
+      ],
+    },
+    // LEAVE MANAGEMENT MENU
+    {
+      Icon: VscFileSubmodule,
+      label: menuNames.leave_management,
+      path: "/leave-management",
+      show: true,
+      subMenus: [
+        {
+          Icon: VscFileSubmodule,
+          label: "Leave Records",
+          path: "/leave-management/leave-records",
+          show: true,
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Holidays",
+          path: "/leave-management/holidays",
+          show: true,
           subMenus: [],
         },
       ],

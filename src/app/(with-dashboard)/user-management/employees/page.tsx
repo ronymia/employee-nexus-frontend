@@ -41,7 +41,7 @@ export default function EmployeesPage() {
   });
 
   const handleEdit = (row: IEmployee) => {
-    router.push(`/employee-management/employees/${row.id}/update`);
+    router.push(`/user-management/employees/${row.id}/update`);
   };
 
   const handleDelete = async (row: IEmployee) => {
@@ -58,11 +58,11 @@ export default function EmployeesPage() {
   };
 
   const handleView = (row: IEmployee) => {
-    router.push(`/employee-management/employees/${row.id}`);
+    router.push(`/user-management/employees/${row.id}/view`);
   };
 
   const createNewEmployee = () => {
-    router.push("/employee-management/employees/create");
+    router.push("/user-management/employees/create");
   };
 
   const [columns, setColumns] = useState<TableColumnType[]>([

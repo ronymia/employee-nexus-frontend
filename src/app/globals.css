@@ -54,13 +54,23 @@ button:disabled {
   pointer-events: all !important;
 }
 
+/* HIDE SCROLLBAR */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 @plugin "daisyui/theme" {
   name: "light";
   default: true;
-  --color-primary: #22c55e;
-  /* --color-primary: #da2637; */
-  --color-primary-content: #6ee7b7;
-  /* --color-primary-content: #fed9d6; */
+  /* --color-primary: #22c55e; */
+  --color-primary: #2563eb;
+  /* --color-primary-content: #6ee7b7; */
+  --color-primary-content: #61c2e2;
   --color-primary-focus: #bb0606;
   /* --color-secondary: #28cb38; */
   /* --color-secondary-content: #010f01; */
