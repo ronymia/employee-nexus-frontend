@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IPopupOption } from "@/types";
+import { IPopupOption, INote } from "@/types";
 import CustomPopup from "@/components/modal/CustomPopup";
 import {
   PiPencilSimple,
@@ -16,38 +16,18 @@ import {
 } from "react-icons/pi";
 import NoteForm from "./components/NoteForm";
 import moment from "moment";
-
-interface IUser {
-  id: number;
-  email: string;
-  profile?: {
-    fullName: string;
-  };
-}
-
-interface INote {
-  id: number;
-  userId: number;
-  user?: IUser;
-  createdBy: number;
-  creator?: IUser;
-  title: string;
-  content: string;
-  category?: string;
-  isPrivate: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import { GET_NOTES_BY_USER_ID, DELETE_NOTE } from "@/graphql/note.api";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 
 interface NotesContentProps {
   userId: number;
-  notes?: INote[];
   currentUserId?: number; // The logged-in user ID to check permissions
 }
 
 export default function NotesContent({
   userId,
-  notes = [],
   currentUserId,
 }: NotesContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
@@ -60,6 +40,28 @@ export default function NotesContent({
   });
 
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
+
+  // Fetch notes
+  const { data, loading } = useQuery<{
+    notesByUserId: {
+      data: INote[];
+    };
+  }>(GET_NOTES_BY_USER_ID, {
+    variables: { userId },
+  });
+
+  // Delete mutation
+  const [deleteNote] = useMutation(DELETE_NOTE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      {
+        query: GET_NOTES_BY_USER_ID,
+        variables: { userId },
+      },
+    ],
+  });
+
+  const notes = data?.notesByUserId?.data || [];
 
   const handleOpenForm = (actionType: "create" | "update", note?: INote) => {
     setPopupOption({
@@ -83,9 +85,34 @@ export default function NotesContent({
     });
   };
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Delete note:", id);
+  const handleDelete = async ({ id }: { id: number }) => {
+    try {
+      await deleteNote({
+        variables: { id: Number(id), userId: Number(userId) },
+      });
+
+      setPopupOption({
+        open: false,
+        closeOnDocumentClick: true,
+        actionType: "create",
+        form: "",
+        data: null,
+        title: "",
+      });
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+  };
+
+  const noteDeleteHandler = async (id: number) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "delete",
+      form: "",
+      deleteHandler: () => handleDelete({ id }),
+      title: "",
+    });
   };
 
   const toggleExpand = (noteId: number) => {
@@ -124,6 +151,10 @@ export default function NotesContent({
     acc[category].push(note);
     return acc;
   }, {} as Record<string, INote[]>);
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!notes || notes.length === 0) {
     return (
@@ -210,7 +241,7 @@ export default function NotesContent({
                         <PiPencilSimple size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(note.id)}
+                        onClick={() => noteDeleteHandler(note.id)}
                         className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
                         title="Delete"
                       >
@@ -320,20 +351,24 @@ export default function NotesContent({
       ))}
 
       {/* Popup Modal */}
-      <CustomPopup
-        popupOption={popupOption}
-        setPopupOption={setPopupOption}
-        customWidth="60%"
-      >
-        {popupOption.form === "note" && (
-          <NoteForm
-            userId={userId}
-            note={popupOption.data}
-            actionType={popupOption.actionType as "create" | "update"}
-            onClose={handleCloseForm}
-          />
-        )}
-      </CustomPopup>
+      {popupOption.actionType === "delete" ? (
+        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      ) : (
+        <CustomPopup
+          popupOption={popupOption}
+          setPopupOption={setPopupOption}
+          customWidth="60%"
+        >
+          {popupOption.form === "note" && (
+            <NoteForm
+              userId={userId}
+              note={popupOption.data}
+              actionType={popupOption.actionType as "create" | "update"}
+              onClose={handleCloseForm}
+            />
+          )}
+        </CustomPopup>
+      )}
     </div>
   );
 }

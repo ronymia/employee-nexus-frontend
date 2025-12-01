@@ -6,28 +6,14 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
-
-interface IUser {
-  id: number;
-  email: string;
-  profile?: {
-    fullName: string;
-  };
-}
-
-interface INote {
-  id: number;
-  userId: number;
-  user?: IUser;
-  createdBy: number;
-  creator?: IUser;
-  title: string;
-  content: string;
-  category?: string;
-  isPrivate: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_NOTE,
+  UPDATE_NOTE,
+  GET_NOTES_BY_USER_ID,
+} from "@/graphql/note.api";
+import { INote } from "@/types";
+import useAppStore from "@/hooks/useAppStore";
 
 interface NoteFormProps {
   userId: number;
@@ -42,14 +28,51 @@ export default function NoteForm({
   actionType,
   onClose,
 }: NoteFormProps) {
+  const currentUser = useAppStore((state) => state.user);
+
+  const [createNote, createResult] = useMutation(CREATE_NOTE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_NOTES_BY_USER_ID, variables: { userId } }],
+  });
+
+  const [updateNote, updateResult] = useMutation(UPDATE_NOTE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_NOTES_BY_USER_ID, variables: { userId } }],
+  });
+
   const handleSubmit = async (data: any) => {
-    console.log("Note Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      const noteData = {
+        title: data.title,
+        content: data.content,
+        category: data.category || "General",
+        isPrivate: data.isPrivate ?? true,
+      };
+
+      if (actionType === "create") {
+        await createNote({
+          variables: {
+            createNoteInput: {
+              ...noteData,
+              userId,
+            },
+          },
+        });
+      } else {
+        await updateNote({
+          variables: {
+            updateNoteInput: {
+              ...noteData,
+              id: Number(note?.id),
+              userId: Number(userId),
+            },
+          },
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error submitting note:", error);
+    }
   };
 
   const defaultValues = {
@@ -147,7 +170,10 @@ export default function NoteForm({
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={createResult.loading || updateResult.loading}
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );
