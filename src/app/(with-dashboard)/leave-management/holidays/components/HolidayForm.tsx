@@ -8,25 +8,19 @@ import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { useFormContext, useWatch } from "react-hook-form";
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_HOLIDAY,
+  UPDATE_HOLIDAY,
+  GET_HOLIDAYS,
+} from "@/graphql/holiday.api";
+import { IHoliday, HolidayType } from "@/types/holiday.type";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import moment from "moment";
+import { useState } from "react";
 
-enum HolidayType {
-  PUBLIC = "PUBLIC",
-  RELIGIOUS = "RELIGIOUS",
-  COMPANY_SPECIFIC = "COMPANY_SPECIFIC",
-  REGIONAL = "REGIONAL",
-}
-
-interface IHoliday {
-  id?: number;
-  name: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  isRecurring: boolean;
-  isPaid: boolean;
-  holidayType: HolidayType;
-  businessId?: number;
-}
+dayjs.extend(customParseFormat);
 
 interface HolidayFormProps {
   holiday?: IHoliday;
@@ -39,20 +33,75 @@ export default function HolidayForm({
   actionType,
   onClose,
 }: HolidayFormProps) {
+  const [isPending, setIsPending] = useState(false);
+
+  // Create mutation
+  const [createHoliday] = useMutation(CREATE_HOLIDAY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_HOLIDAYS }],
+  });
+
+  // Update mutation
+  const [updateHoliday] = useMutation(UPDATE_HOLIDAY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_HOLIDAYS }],
+  });
+
   const handleSubmit = async (data: any) => {
-    console.log("Holiday Form Submit:", {
-      ...data,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      setIsPending(true);
+
+      const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
+      const endDate = dayjs(data.endDate, "DD-MM-YYYY").toISOString();
+
+      if (actionType === "create") {
+        await createHoliday({
+          variables: {
+            createHolidayInput: {
+              name: data.name,
+              description: data.description || null,
+              startDate,
+              endDate,
+              isRecurring: data.isRecurring,
+              isPaid: data.isPaid,
+              holidayType: data.holidayType,
+            },
+          },
+        });
+      } else {
+        await updateHoliday({
+          variables: {
+            id: holiday?.id,
+            updateHolidayInput: {
+              name: data.name,
+              description: data.description || null,
+              startDate,
+              endDate,
+              isRecurring: data.isRecurring,
+              isPaid: data.isPaid,
+              holidayType: data.holidayType,
+            },
+          },
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error submitting holiday:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const defaultValues = {
     name: holiday?.name || "",
     description: holiday?.description || "",
-    startDate: holiday?.startDate || new Date().toISOString().split("T")[0],
-    endDate: holiday?.endDate || new Date().toISOString().split("T")[0],
+    startDate: holiday?.startDate
+      ? moment(holiday.startDate).format("DD-MM-YYYY")
+      : "",
+    endDate: holiday?.endDate
+      ? moment(holiday.endDate).format("DD-MM-YYYY")
+      : "",
     holidayType: holiday?.holidayType || HolidayType.PUBLIC,
     isRecurring: holiday?.isRecurring || false,
     isPaid: holiday?.isPaid !== undefined ? holiday.isPaid : true,
@@ -61,7 +110,7 @@ export default function HolidayForm({
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <HolidayFormFields />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
@@ -135,6 +184,7 @@ function HolidayFormFields() {
             label="Start Date"
             placeholder="Select Start Date"
             required={true}
+            formatDate="DD-MM-YYYY"
           />
           <CustomDatePicker
             dataAuto="endDate"
@@ -142,6 +192,7 @@ function HolidayFormFields() {
             label="End Date"
             placeholder="Select End Date"
             required={true}
+            formatDate="DD-MM-YYYY"
           />
         </div>
         <p className="text-xs text-base-content/60 mt-2">
@@ -162,11 +213,7 @@ function HolidayFormFields() {
                 This holiday repeats annually
               </p>
             </div>
-            <ToggleSwitch
-              dataAuto="isRecurring"
-              name="isRecurring"
-              defaultChecked={isRecurring}
-            />
+            <ToggleSwitch name="isRecurring" />
           </div>
 
           <div className="flex items-center justify-between p-3 bg-base-200 rounded-lg">
@@ -176,11 +223,7 @@ function HolidayFormFields() {
                 Employees receive paid time off
               </p>
             </div>
-            <ToggleSwitch
-              dataAuto="isPaid"
-              name="isPaid"
-              defaultChecked={isPaid}
-            />
+            <ToggleSwitch name="isPaid" />
           </div>
         </div>
       </div>
