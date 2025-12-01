@@ -4,6 +4,7 @@ import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useMutation } from "@apollo/client/react";
@@ -171,27 +172,24 @@ function EducationFormFields() {
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Duration</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomInputField
+          <CustomDatePicker
             dataAuto="startDate"
             name="startDate"
-            type="text"
             label="Start Date"
-            placeholder="MM-YYYY or YYYY"
             required={true}
+            formatDate="MM-YYYY"
           />
           {!isCurrentlyStudying && (
-            <CustomInputField
+            <CustomDatePicker
               dataAuto="endDate"
               name="endDate"
-              type="text"
               label="End Date"
-              placeholder="MM-YYYY or YYYY"
               required={false}
+              formatDate="MM-YYYY"
             />
           )}
           <div className="md:col-span-2">
             <ToggleSwitch
-              // dataAuto="isCurrentlyStudying"
               name="isCurrentlyStudying"
               label="Currently Studying"
             />
