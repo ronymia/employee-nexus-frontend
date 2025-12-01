@@ -7,12 +7,17 @@ import ProfileInfoForm from "./components/ProfileInfoForm";
 import EmergencyContactForm from "./components/EmergencyContactForm";
 import EmploymentDetailsForm from "./components/EmploymentDetailsForm";
 import { PiPencilSimple } from "react-icons/pi";
+import { UPDATE_PROFILE } from "@/graphql/profile.api";
+import { useMutation } from "@apollo/client/react";
+import { GET_EMPLOYEES } from "@/graphql/employee.api";
+import dayjs from "dayjs";
 
 interface ProfileContentProps {
   employee?: IEmployee;
 }
 
 export default function ProfileContent({ employee }: ProfileContentProps) {
+  // POPUP STATE MANAGEMENT
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -22,6 +27,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
     title: "",
   });
 
+  // CHECK IF EMPLOYEE DATA IS AVAILABLE
   if (!employee) {
     return (
       <div className="bg-base-100 rounded-lg p-6 shadow-sm">
@@ -32,7 +38,8 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
     );
   }
 
-  const handleOpenForm = (formType: string, title: string) => {
+  // HANDLERS FOR OPENING AND CLOSING FORMS
+  const handleOpenForm = (formType: any, title: string) => {
     setPopupOption({
       open: true,
       closeOnDocumentClick: false,
@@ -227,23 +234,23 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Employee ID
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.employeeId || "-"}
+              {employee?.employee?.employeeId || "-"}
             </p>
           </div>
-          <div>
+          {/* <div>
             <label className="text-sm text-base-content/60 font-medium">
               Role
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.role?.name || "-"}
+              {employee?.employee?.role?.name || "-"}
             </p>
-          </div>
+          </div> */}
           <div>
             <label className="text-sm text-base-content/60 font-medium">
               Department
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.department?.name || "-"}
+              {employee?.employee?.department?.name || "-"}
             </p>
           </div>
           <div>
@@ -251,7 +258,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Designation
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.designation?.name || "-"}
+              {employee?.employee?.designation?.name || "-"}
             </p>
           </div>
           <div>
@@ -259,7 +266,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Employment Status
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.employmentStatus?.name || "-"}
+              {employee?.employee?.employmentStatus?.name || "-"}
             </p>
           </div>
           <div>
@@ -267,8 +274,8 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Joining Date
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.joiningDate
-                ? new Date(employee.joiningDate).toLocaleDateString()
+              {employee?.employee?.joiningDate
+                ? dayjs(employee?.employee.joiningDate).format("DD-MM-YYYY")
                 : "-"}
             </p>
           </div>
@@ -277,7 +284,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Work Site
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.workSite?.name || "-"}
+              {employee?.employee?.workSite?.name || "-"}
             </p>
           </div>
           <div>
@@ -285,7 +292,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Work Schedule
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.workSchedule?.name || "-"}
+              {employee?.employee?.workSchedule?.name || "-"}
             </p>
           </div>
           <div>
@@ -293,7 +300,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               NID Number
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.nidNumber || "-"}
+              {employee?.employee?.nidNumber || "-"}
             </p>
           </div>
           <div>
@@ -301,8 +308,8 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Salary (Monthly)
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.salaryPerMonth
-                ? `${employee.salaryPerMonth.toLocaleString()} BDT`
+              {employee?.employee?.salaryPerMonth
+                ? `${employee?.employee?.salaryPerMonth.toLocaleString()} BDT`
                 : "-"}
             </p>
           </div>
@@ -311,7 +318,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Working Days/Week
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.workingDaysPerWeek || "-"}
+              {employee?.employee?.workingDaysPerWeek || "-"}
             </p>
           </div>
           <div>
@@ -319,29 +326,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Working Hours/Week
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.workingHoursPerWeek || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Rota Type
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee.rotaType || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Status
-            </label>
-            <p className="text-base font-semibold">
-              <span
-                className={`badge ${
-                  employee.status === "ACTIVE" ? "badge-success" : "badge-error"
-                }`}
-              >
-                {employee.status}
-              </span>
+              {employee?.employee?.workingHoursPerWeek || "-"}
             </p>
           </div>
         </div>

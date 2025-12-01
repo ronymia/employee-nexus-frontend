@@ -53,6 +53,7 @@ export interface IEmployee {
 }
 
 export interface IEmployeeDetails {
+  id: number;
   employeeId?: string;
   departmentId: number;
   designationId: number;

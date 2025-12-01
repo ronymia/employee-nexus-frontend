@@ -3,10 +3,17 @@
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
-import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import DepartmentSelect from "@/components/input-fields/DepartmentSelect";
+import DesignationSelect from "@/components/input-fields/DesignationSelect";
+import EmploymentStatusSelect from "@/components/input-fields/EmploymentStatusSelect";
+import WorkSiteSelect from "@/components/input-fields/WorkSiteSelect";
+import WorkScheduleSelect from "@/components/input-fields/WorkScheduleSelect";
 import { IEmployee } from "@/types";
-import moment from "moment";
+import dayjs from "dayjs";
+import { UPDATE_EMPLOYMENT_DETAILS } from "@/graphql/profile.api";
+import { useMutation } from "@apollo/client/react";
+import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 
 interface EmploymentDetailsFormProps {
   employee?: IEmployee;
@@ -17,28 +24,55 @@ export default function EmploymentDetailsForm({
   employee,
   onClose,
 }: EmploymentDetailsFormProps) {
+  // MUTATION TO UPDATE PROFILE
+  const [updateEmploymentDetails, updateResult] = useMutation(
+    UPDATE_EMPLOYMENT_DETAILS,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        {
+          query: GET_EMPLOYEE_BY_ID,
+          variables: { id: Number(employee?.id) },
+        },
+      ],
+    }
+  );
   const handleSubmit = async (data: any) => {
-    console.log("Employment Details Update:", data);
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      const result = await updateEmploymentDetails({
+        variables: {
+          updateEmploymentDetailsInput: {
+            ...data,
+            id: Number(employee?.employee?.id),
+            joiningDate: dayjs(data.joiningDate),
+          },
+        },
+        fetchPolicy: "no-cache",
+      });
+
+      if (result.data) {
+        console.log(result);
+        onClose();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const defaultValues = {
-    employeeId: employee?.employeeId || "",
-    departmentId: employee?.departmentId || "",
-    designationId: employee?.designationId || "",
-    employmentStatusId: employee?.employmentStatusId || "",
-    joiningDate: employee?.joiningDate
-      ? new Date(employee.joiningDate).toISOString().split("T")[0]
+    employeeId: employee?.employee?.employeeId || "",
+    departmentId: employee?.employee?.departmentId || "",
+    designationId: employee?.employee?.designationId || "",
+    employmentStatusId: employee?.employee?.employmentStatusId || "",
+    joiningDate: employee?.employee?.joiningDate
+      ? dayjs(employee.joiningDate).format("DD-MM-YYYY")
       : "",
-    workSiteId: employee?.workSiteId || "",
-    workScheduleId: employee?.workScheduleId || "",
-    nidNumber: employee?.nidNumber || "",
-    salaryPerMonth: employee?.salaryPerMonth || "",
-    workingDaysPerWeek: employee?.workingDaysPerWeek || "",
-    workingHoursPerWeek: employee?.workingHoursPerWeek || "",
-    rotaType: employee?.rotaType || "",
-    status: employee?.status || "",
+    workSiteId: employee?.employee?.workSiteId || "",
+    workScheduleId: employee?.employee?.workScheduleId || "",
+    nidNumber: employee?.employee?.nidNumber || "",
+    salaryPerMonth: employee?.employee?.salaryPerMonth || "",
+    workingDaysPerWeek: employee?.employee?.workingDaysPerWeek || "",
+    workingHoursPerWeek: employee?.employee?.workingHoursPerWeek || "",
   };
 
   return (
@@ -64,50 +98,40 @@ export default function EmploymentDetailsForm({
               required={false}
               formatDate="DD-MM-YYYY"
             />
-            <CustomInputField
+            <DepartmentSelect
               dataAuto="departmentId"
               name="departmentId"
-              type="text"
               label="Department"
-              placeholder="Department"
+              placeholder="Select Department"
               required={false}
-              disabled={true}
             />
-            <CustomInputField
+            <DesignationSelect
               dataAuto="designationId"
               name="designationId"
-              type="text"
               label="Designation"
-              placeholder="Designation"
+              placeholder="Select Designation"
               required={false}
-              disabled={true}
             />
-            <CustomInputField
+            <EmploymentStatusSelect
               dataAuto="employmentStatusId"
               name="employmentStatusId"
-              type="text"
               label="Employment Status"
-              placeholder="Employment Status"
+              placeholder="Select Employment Status"
               required={false}
-              disabled={true}
             />
-            <CustomInputField
+            <WorkSiteSelect
               dataAuto="workSiteId"
               name="workSiteId"
-              type="text"
               label="Work Site"
-              placeholder="Work Site"
+              placeholder="Select Work Site"
               required={false}
-              disabled={true}
             />
-            <CustomInputField
+            <WorkScheduleSelect
               dataAuto="workScheduleId"
               name="workScheduleId"
-              type="text"
               label="Work Schedule"
-              placeholder="Work Schedule"
+              placeholder="Select Work Schedule"
               required={false}
-              disabled={true}
             />
             <CustomInputField
               dataAuto="nidNumber"
@@ -141,31 +165,14 @@ export default function EmploymentDetailsForm({
               placeholder="Enter working hours"
               required={false}
             />
-            <CustomInputField
-              dataAuto="rotaType"
-              name="rotaType"
-              type="text"
-              label="Rota Type"
-              placeholder="Enter rota type"
-              required={false}
-            />
-            <CustomSelect
-              dataAuto="status"
-              name="status"
-              label="Status"
-              placeholder="Select status"
-              required={false}
-              isLoading={false}
-              options={[
-                { label: "Active", value: "ACTIVE" },
-                { label: "Inactive", value: "INACTIVE" },
-              ]}
-            />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={updateResult.loading}
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );

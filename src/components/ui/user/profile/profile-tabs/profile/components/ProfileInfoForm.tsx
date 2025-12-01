@@ -7,8 +7,10 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import { IEmployee } from "@/types";
-import moment from "moment";
 import dayjs from "dayjs";
+import { useMutation } from "@apollo/client/react";
+import { UPDATE_PROFILE } from "@/graphql/profile.api";
+import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 
 interface ProfileInfoFormProps {
   employee?: IEmployee;
@@ -19,10 +21,37 @@ export default function ProfileInfoForm({
   employee,
   onClose,
 }: ProfileInfoFormProps) {
-  const handleSubmit = async (data: any) => {
-    console.log("Profile Info Update:", data);
-    // TODO: Implement GraphQL mutation
-    onClose();
+  // MUTATION TO UPDATE PROFILE
+  const [updateProfile, updateResult] = useMutation(UPDATE_PROFILE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_EMPLOYEE_BY_ID, variables: { id: Number(employee?.id) } },
+    ],
+  });
+
+  const handleSubmit = async (formValues: any) => {
+    try {
+      // Remove email from submission as it's not part of profile update
+      const { email, ...profileData } = formValues;
+
+      const result = await updateProfile({
+        variables: {
+          updateProfileInput: {
+            ...profileData,
+            id: Number(employee?.profile?.id),
+            profilePicture: employee?.profile?.profilePicture || "",
+          },
+        },
+        fetchPolicy: "no-cache",
+      });
+
+      if (result.data) {
+        console.log(result);
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error submitting employee:", error);
+    }
   };
 
   const defaultValues = {
@@ -64,6 +93,7 @@ export default function ProfileInfoForm({
               label="Email"
               placeholder="Enter email"
               required={true}
+              readOnly={true}
             />
             <CustomInputField
               dataAuto="phone"
@@ -154,7 +184,10 @@ export default function ProfileInfoForm({
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={updateResult.loading}
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );

@@ -3,7 +3,11 @@
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
+import { RelationSelect } from "@/components/input-fields";
+import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
+import { UPDATE_EMERGENCY_CONTACT } from "@/graphql/profile.api";
 import { IEmployee } from "@/types";
+import { useMutation } from "@apollo/client/react";
 
 interface EmergencyContactFormProps {
   employee?: IEmployee;
@@ -14,10 +18,38 @@ export default function EmergencyContactForm({
   employee,
   onClose,
 }: EmergencyContactFormProps) {
+  // MUTATION TO UPDATE PROFILE
+  const [updateEmergencyContact, updateResult] = useMutation(
+    UPDATE_EMERGENCY_CONTACT,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        {
+          query: GET_EMPLOYEE_BY_ID,
+          variables: { id: Number(employee?.id) },
+        },
+      ],
+    }
+  );
   const handleSubmit = async (data: any) => {
-    console.log("Emergency Contact Update:", data);
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      const result = await updateEmergencyContact({
+        variables: {
+          updateEmergencyContactInput: {
+            ...data,
+            id: Number(employee?.profile?.id),
+          },
+        },
+        fetchPolicy: "no-cache",
+      });
+
+      if (result.data) {
+        console.log(result);
+        onClose();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const defaultValues = {
@@ -51,20 +83,16 @@ export default function EmergencyContactForm({
               required={false}
             />
             <div className="md:col-span-2">
-              <CustomInputField
-                dataAuto="relation"
-                name="relation"
-                type="text"
-                label="Relation"
-                placeholder="Enter relation (e.g., Spouse, Parent, Sibling)"
-                required={false}
-              />
+              <RelationSelect name="relation" label="Relation" required />
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={updateResult.loading}
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );
