@@ -1,8 +1,7 @@
 "use client";
 
+import dayjs from "dayjs";
 import ImageUploader from "../../uploader/ImageUploader";
-// import WorkScheduleChart from "@/components/charts/WorkScheduleChart";
-import { PiPencilSimple } from "react-icons/pi";
 
 interface ProfileHeaderProps {
   employee?: {
@@ -11,7 +10,6 @@ interface ProfileHeaderProps {
     designation: string;
     employeeId: string;
     joiningDate: string;
-    updatedAt: string;
     phone: string;
     email: string;
     dateOfBirth: string;
@@ -39,14 +37,12 @@ interface ProfileHeaderProps {
   //     leave: number;
   //   };
   // };
-  onEdit?: () => void;
 }
 
 export default function ProfileHeader({
   employee,
-  // workSchedule,
-  onEdit,
-}: ProfileHeaderProps) {
+}: // workSchedule,
+ProfileHeaderProps) {
   // Default mock data
   const defaultEmployee = {
     fullName: "Mr Saadman Galib",
@@ -97,21 +93,10 @@ export default function ProfileHeader({
       <div className="w-full">
         {/* Avatar and Basic Info */}
         <div className="shadow-md rounded-xl text-base-300 p-6 md:p-8 bg-linear-to-tr from-primary to-primary/50 relative">
-          {/* Edit Button - Absolute positioned */}
-          {onEdit && (
-            <button
-              onClick={onEdit}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-base-100/20 transition-colors backdrop-blur-sm"
-              aria-label="Edit Profile"
-            >
-              <PiPencilSimple className="text-xl text-base-300" />
-            </button>
-          )}
-
           {/* Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Avatar Section */}
-            <div className="flex flex-col items-center lg:items-start gap-4">
+            <div className="flex flex-col items-center gap-4 justify-center">
               <div className="shrink-0">
                 <ImageUploader
                   name={`Profile`}
@@ -170,7 +155,9 @@ export default function ProfileHeader({
                     Date of Birth
                   </label>
                   <p className="text-sm font-semibold text-base-300">
-                    {emp.dateOfBirth}
+                    {dayjs(emp.dateOfBirth, "DD-MM-YYYY").format(
+                      "DD MMM, YYYY"
+                    )}
                   </p>
                 </div>
                 <div>
@@ -191,21 +178,13 @@ export default function ProfileHeader({
                 </div>
               </div>
 
-              <div className="sm:col-span-2 pt-2">
-                <div className="flex flex-wrap gap-4 text-xs">
-                  <div>
-                    <span className="text-base-300/60">Joined: </span>
-                    <span className="text-base-300 font-medium">
-                      {emp.joiningDate}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-base-300/60">Updated: </span>
-                    <span className="text-base-300 font-medium">
-                      {emp.updatedAt}
-                    </span>
-                  </div>
-                </div>
+              <div>
+                <label className="text-xs text-base-300/60 font-medium uppercase tracking-wide">
+                  Joined At
+                </label>
+                <p className="text-sm font-semibold text-base-300">
+                  {dayjs(emp.joiningDate).format("DD MMM, YYYY")}
+                </p>
               </div>
             </div>
           </div>

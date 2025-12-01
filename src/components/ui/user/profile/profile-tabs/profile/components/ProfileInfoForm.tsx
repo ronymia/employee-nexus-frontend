@@ -8,6 +8,7 @@ import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import { IEmployee } from "@/types";
 import moment from "moment";
+import dayjs from "dayjs";
 
 interface ProfileInfoFormProps {
   employee?: IEmployee;
@@ -29,7 +30,7 @@ export default function ProfileInfoForm({
     email: employee?.email || "",
     phone: employee?.profile?.phone || "",
     dateOfBirth: employee?.profile?.dateOfBirth
-      ? new Date(employee.profile.dateOfBirth).toISOString().split("T")[0]
+      ? dayjs(employee.profile.dateOfBirth, "DD-MM-YYYY").format("DD-MM-YYYY")
       : "",
     gender: employee?.profile?.gender || "",
     maritalStatus: employee?.profile?.maritalStatus || "",

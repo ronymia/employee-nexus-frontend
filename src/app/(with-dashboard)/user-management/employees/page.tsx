@@ -9,7 +9,7 @@ import {
 import { DELETE_EMPLOYEE, GET_EMPLOYEES } from "@/graphql/employee.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IEmployee } from "@/types";
+import { TableActionType, TableColumnType, IEmployee, IMeta } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -27,7 +27,7 @@ export default function EmployeesPage() {
       statusCode: number;
       success: boolean;
       data: IEmployee[];
-      meta: any;
+      meta: IMeta;
     };
   }>(GET_EMPLOYEES, {
     variables: {

@@ -1090,31 +1090,22 @@ export default function UserProfile({ userId }: UserProfileProps) {
           employee
             ? {
                 fullName: employee.profile?.fullName || "",
-                employmentType:
-                  employee.employeeDetails?.employmentStatus?.name || "",
-                designation: employee.employeeDetails?.designation?.name || "",
-                employeeId: employee.employeeDetails?.employeeId || "",
-                joiningDate: employee.employeeDetails?.joiningDate
-                  ? new Date(
-                      employee.employeeDetails.joiningDate
-                    ).toLocaleDateString()
-                  : "",
-                updatedAt: employee.updatedAt
-                  ? new Date(employee.updatedAt).toLocaleDateString()
+                employmentType: employee.employee?.employmentStatus?.name || "",
+                designation: employee.employee?.designation?.name || "",
+                employeeId: employee.employee?.employeeId || "",
+                joiningDate: employee.employee?.joiningDate
+                  ? employee.employee.joiningDate
                   : "",
                 phone: employee.profile?.phone || "",
                 email: employee.email || "",
                 dateOfBirth: employee.profile?.dateOfBirth
-                  ? new Date(employee.profile.dateOfBirth).toLocaleDateString()
+                  ? employee.profile.dateOfBirth
                   : "",
-                department: employee.employeeDetails?.department?.name || "",
+                department: employee.employee?.department?.name || "",
                 gender: employee.profile?.gender || "",
-                profileImage: employee.profile?.profilePicture,
+                profileImage: employee.profile?.profilePicture || "",
               }
             : undefined
-        }
-        onEdit={() =>
-          router.push(`/user-management/employees/${userId}/update`)
         }
       />
 
