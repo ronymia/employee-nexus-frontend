@@ -1140,12 +1140,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
             projectMembers={dummyProjectMembers}
           />
         )}
-        {activeTab === "documents" && (
-          <DocumentsContent userId={userId} documents={dummyDocuments} />
-        )}
-        {activeTab === "notes" && (
-          <NotesContent userId={userId} notes={dummyNotes} currentUserId={1} />
-        )}
+        {activeTab === "documents" && <DocumentsContent userId={userId} />}
+        {activeTab === "notes" && <NotesContent userId={userId} />}
         {activeTab === "letters" && (
           <div className="bg-base-100 rounded-lg p-6 shadow-sm">
             <p className="text-base-content/60 text-center py-8">
@@ -1159,9 +1155,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
             assetAssignments={dummyAssetAssignments}
           />
         )}
-        {activeTab === "social" && (
-          <SocialLinksContent userId={userId} socialLinks={dummySocialLinks} />
-        )}
+        {activeTab === "social" && <SocialLinksContent userId={userId} />}
       </div>
     </div>
   );

@@ -27,3 +27,4 @@ export * from "./education-history.type";
 export * from "./job-history.type";
 export * from "./document.type";
 export * from "./note.type";
+export * from "./social-links.type";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IPopupOption } from "@/types";
+import { IPopupOption, ISocialLinks } from "@/types";
 import CustomPopup from "@/components/modal/CustomPopup";
 import {
   PiPencilSimple,
@@ -15,26 +15,16 @@ import {
   PiLink,
 } from "react-icons/pi";
 import SocialLinkForm from "./components/SocialLinkForm";
-
-interface ISocialLink {
-  profileId: number;
-  facebook?: string;
-  twitter?: string;
-  linkedin?: string;
-  instagram?: string;
-  github?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery } from "@apollo/client/react";
+import { GET_SOCIAL_LINKS_BY_PROFILE_ID } from "@/graphql/social-links.api";
+import CustomLoading from "@/components/loader/CustomLoading";
 
 interface SocialLinksContentProps {
   userId: number;
-  socialLinks?: ISocialLink;
 }
 
 export default function SocialLinksContent({
   userId,
-  socialLinks,
 }: SocialLinksContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
@@ -44,6 +34,17 @@ export default function SocialLinksContent({
     data: null,
     title: "",
   });
+
+  // Fetch social links
+  const { data, loading } = useQuery<{
+    socialLinksByProfileId: {
+      data: ISocialLinks;
+    };
+  }>(GET_SOCIAL_LINKS_BY_PROFILE_ID, {
+    variables: { profileId: userId },
+  });
+
+  const socialLinks = data?.socialLinksByProfileId?.data;
 
   const handleOpenForm = () => {
     setPopupOption({
@@ -74,7 +75,7 @@ export default function SocialLinksContent({
       color: "text-[#1877F2]",
       bg: "bg-[#1877F2]/10",
       url: socialLinks?.facebook,
-      key: "facebook" as keyof ISocialLink,
+      key: "facebook" as keyof ISocialLinks,
     },
     {
       name: "Twitter",
@@ -82,7 +83,7 @@ export default function SocialLinksContent({
       color: "text-[#1DA1F2]",
       bg: "bg-[#1DA1F2]/10",
       url: socialLinks?.twitter,
-      key: "twitter" as keyof ISocialLink,
+      key: "twitter" as keyof ISocialLinks,
     },
     {
       name: "LinkedIn",
@@ -90,7 +91,7 @@ export default function SocialLinksContent({
       color: "text-[#0A66C2]",
       bg: "bg-[#0A66C2]/10",
       url: socialLinks?.linkedin,
-      key: "linkedin" as keyof ISocialLink,
+      key: "linkedin" as keyof ISocialLinks,
     },
     {
       name: "Instagram",
@@ -98,7 +99,7 @@ export default function SocialLinksContent({
       color: "text-[#E4405F]",
       bg: "bg-[#E4405F]/10",
       url: socialLinks?.instagram,
-      key: "instagram" as keyof ISocialLink,
+      key: "instagram" as keyof ISocialLinks,
     },
     {
       name: "GitHub",
@@ -106,11 +107,15 @@ export default function SocialLinksContent({
       color: "text-[#333333]",
       bg: "bg-[#333333]/10",
       url: socialLinks?.github,
-      key: "github" as keyof ISocialLink,
+      key: "github" as keyof ISocialLinks,
     },
   ];
 
   const hasAnySocialLink = socialPlatforms.some((platform) => platform.url);
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!socialLinks || !hasAnySocialLink) {
     return (
@@ -137,7 +142,7 @@ export default function SocialLinksContent({
         >
           {popupOption.form === "socialLink" && (
             <SocialLinkForm
-              userId={userId}
+              profileId={userId}
               socialLinks={popupOption.data}
               actionType={popupOption.actionType as "create" | "update"}
               onClose={handleCloseForm}
@@ -248,7 +253,7 @@ export default function SocialLinksContent({
       >
         {popupOption.form === "socialLink" && (
           <SocialLinkForm
-            userId={userId}
+            profileId={userId}
             socialLinks={popupOption.data}
             actionType={popupOption.actionType as "create" | "update"}
             onClose={handleCloseForm}

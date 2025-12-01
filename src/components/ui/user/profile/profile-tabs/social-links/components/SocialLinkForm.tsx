@@ -10,39 +10,74 @@ import {
   PiInstagramLogo,
   PiGithubLogo,
 } from "react-icons/pi";
-
-interface ISocialLink {
-  profileId: number;
-  facebook?: string;
-  twitter?: string;
-  linkedin?: string;
-  instagram?: string;
-  github?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_SOCIAL_LINKS,
+  UPDATE_SOCIAL_LINKS,
+  GET_SOCIAL_LINKS_BY_PROFILE_ID,
+} from "@/graphql/social-links.api";
+import { ISocialLinks } from "@/types";
 
 interface SocialLinkFormProps {
-  userId: number;
-  socialLinks?: ISocialLink;
+  profileId: number;
+  socialLinks?: ISocialLinks;
   actionType: "create" | "update";
   onClose: () => void;
 }
 
 export default function SocialLinkForm({
-  userId,
+  profileId,
   socialLinks,
   actionType,
   onClose,
 }: SocialLinkFormProps) {
+  const [createSocialLinks, createResult] = useMutation(CREATE_SOCIAL_LINKS, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_SOCIAL_LINKS_BY_PROFILE_ID, variables: { profileId } },
+    ],
+  });
+
+  const [updateSocialLinks, updateResult] = useMutation(UPDATE_SOCIAL_LINKS, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_SOCIAL_LINKS_BY_PROFILE_ID, variables: { profileId } },
+    ],
+  });
+
   const handleSubmit = async (data: any) => {
-    console.log("Social Link Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      const socialLinksData = {
+        facebook: data.facebook || "",
+        twitter: data.twitter || "",
+        linkedin: data.linkedin || "",
+        instagram: data.instagram || "",
+        github: data.github || "",
+      };
+
+      if (actionType === "create") {
+        await createSocialLinks({
+          variables: {
+            createSocialLinkInput: {
+              ...socialLinksData,
+              profileId: Number(profileId),
+            },
+          },
+        });
+      } else {
+        await updateSocialLinks({
+          variables: {
+            updateSocialLinkInput: {
+              ...socialLinksData,
+              profileId: Number(profileId),
+            },
+          },
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error submitting social links:", error);
+    }
   };
 
   const defaultValues = {
@@ -171,7 +206,10 @@ export default function SocialLinkForm({
         </div>
 
         {/* Action Buttons */}
-        <FormActionButton isPending={false} cancelHandler={onClose} />
+        <FormActionButton
+          isPending={createResult.loading || updateResult.loading}
+          cancelHandler={onClose}
+        />
       </div>
     </CustomForm>
   );
