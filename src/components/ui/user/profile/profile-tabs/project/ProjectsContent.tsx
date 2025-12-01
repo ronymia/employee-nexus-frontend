@@ -37,7 +37,7 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
   });
 
   // Query to get user projects
-  const { data, loading, refetch } = useQuery<{
+  const { data, loading } = useQuery<{
     userProjects: {
       data: IUserProjectMember[];
     };

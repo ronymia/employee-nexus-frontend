@@ -161,3 +161,123 @@ export const DELETE_WORK_SCHEDULE = gql`
     }
   }
 `;
+
+// GET USER SCHEDULE ASSIGNMENTS
+export const GET_USER_SCHEDULE_ASSIGNMENTS = gql`
+  query UserScheduleAssignments($userId: Int!) {
+    employeeScheduleAssignmentsByUser(userId: $userId) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        workScheduleId
+        startDate
+        endDate
+        isActive
+        assignedBy
+        notes
+        createdAt
+        updatedAt
+        workSchedule {
+          id
+          name
+          description
+          status
+          scheduleType
+          breakType
+          breakHours
+          schedules {
+            id
+            day
+            isWeekend
+            workScheduleId
+            timeSlots {
+              startTime
+              endTime
+              scheduleId
+            }
+          }
+        }
+        assignedByUser {
+          id
+          email
+          profile {
+            fullName
+          }
+        }
+      }
+    }
+  }
+`;
+
+// CREATE EMPLOYEE SCHEDULE ASSIGNMENT
+export const CREATE_EMPLOYEE_SCHEDULE_ASSIGNMENT = gql`
+  mutation CreateEmployeeScheduleAssignment(
+    $createEmployeeScheduleAssignmentInput: CreateEmployeeScheduleAssignmentInput!
+  ) {
+    createEmployeeScheduleAssignment(
+      createEmployeeScheduleAssignmentInput: $createEmployeeScheduleAssignmentInput
+    ) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        workScheduleId
+        startDate
+        endDate
+        isActive
+        assignedBy
+        notes
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+// UPDATE EMPLOYEE SCHEDULE ASSIGNMENT
+export const UPDATE_EMPLOYEE_SCHEDULE_ASSIGNMENT = gql`
+  mutation UpdateEmployeeScheduleAssignment(
+    $id: Int!
+    $updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!
+  ) {
+    updateEmployeeScheduleAssignment(
+      id: $id
+      updateEmployeeScheduleAssignmentInput: $updateEmployeeScheduleAssignmentInput
+    ) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        workScheduleId
+        startDate
+        endDate
+        isActive
+        assignedBy
+        notes
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+// DELETE EMPLOYEE SCHEDULE ASSIGNMENT
+export const DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT = gql`
+  mutation DeleteEmployeeScheduleAssignment($id: Int!) {
+    deleteEmployeeScheduleAssignment(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
+      }
+    }
+  }
+`;

@@ -1117,12 +1117,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
         {activeTab === "profile" && <ProfileContent employee={employee} />}
         {activeTab === "education" && <EducationContent userId={userId} />}
         {activeTab === "experience" && <ExperienceContent userId={userId} />}
-        {activeTab === "schedule" && (
-          <ScheduleContent
-            userId={userId}
-            scheduleAssignments={dummyScheduleAssignments}
-          />
-        )}
+        {activeTab === "schedule" && <ScheduleContent userId={userId} />}
         {activeTab === "attendance" && (
           <AttendanceContent userId={userId} attendances={dummyAttendances} />
         )}
@@ -1134,12 +1129,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
           </div>
         )}
         {activeTab === "payslip" && <PaySlipContent />}
-        {activeTab === "projects" && (
-          <ProjectsContent
-            userId={userId}
-            projectMembers={dummyProjectMembers}
-          />
-        )}
+        {activeTab === "projects" && <ProjectsContent userId={userId} />}
         {activeTab === "documents" && <DocumentsContent userId={userId} />}
         {activeTab === "notes" && <NotesContent userId={userId} />}
         {activeTab === "letters" && (
@@ -1149,11 +1139,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
             </p>
           </div>
         )}
-        {activeTab === "assets" && (
-          <AssetsContent
-            userId={userId}
-          />
-        )}
+        {activeTab === "assets" && <AssetsContent userId={userId} />}
         {activeTab === "social" && <SocialLinksContent userId={userId} />}
       </div>
     </div>

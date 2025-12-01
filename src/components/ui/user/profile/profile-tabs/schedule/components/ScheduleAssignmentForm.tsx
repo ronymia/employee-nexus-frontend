@@ -7,28 +7,23 @@ import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { useFormContext, useWatch } from "react-hook-form";
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_WORK_SCHEDULES,
+  CREATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
+  UPDATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
+  GET_USER_SCHEDULE_ASSIGNMENTS,
+} from "@/graphql/work-schedules.api";
+import {
+  IWorkSchedule,
+  IScheduleAssignment,
+} from "@/types/work-schedules.type";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
+import { useState } from "react";
 
-interface IWorkSchedule {
-  id: number;
-  name: string;
-  description: string;
-  status: "ACTIVE" | "INACTIVE";
-  scheduleType: "REGULAR" | "FLEXIBLE" | "SHIFT" | "ROTATIONAL";
-  breakType: "PAID" | "UNPAID";
-  breakHours: number;
-}
-
-interface IScheduleAssignment {
-  id: number;
-  userId: number;
-  workScheduleId: number;
-  workSchedule: IWorkSchedule;
-  startDate: string;
-  endDate?: string;
-  isActive: boolean;
-  notes?: string;
-}
+dayjs.extend(customParseFormat);
 
 interface ScheduleAssignmentFormProps {
   userId: number;
@@ -43,14 +38,82 @@ export default function ScheduleAssignmentForm({
   actionType,
   onClose,
 }: ScheduleAssignmentFormProps) {
+  const [isPending, setIsPending] = useState(false);
+
+  // Query to get all work schedules
+  const { data: schedulesData, loading: schedulesLoading } = useQuery<{
+    workSchedules: {
+      data: IWorkSchedule[];
+    };
+  }>(GET_WORK_SCHEDULES);
+
+  // Create mutation
+  const [createScheduleAssignment] = useMutation(
+    CREATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        { query: GET_USER_SCHEDULE_ASSIGNMENTS, variables: { userId } },
+      ],
+    }
+  );
+
+  // Update mutation
+  const [updateScheduleAssignment] = useMutation(
+    UPDATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        { query: GET_USER_SCHEDULE_ASSIGNMENTS, variables: { userId } },
+      ],
+    }
+  );
+
   const handleSubmit = async (data: any) => {
-    console.log("Schedule Assignment Form Submit:", {
-      ...data,
-      userId,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+    try {
+      setIsPending(true);
+
+      const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
+      const endDate = data.isCurrent
+        ? null
+        : data.endDate
+        ? dayjs(data.endDate, "DD-MM-YYYY").toISOString()
+        : null;
+
+      if (actionType === "create") {
+        await createScheduleAssignment({
+          variables: {
+            createEmployeeScheduleAssignmentInput: {
+              userId,
+              workScheduleId: parseInt(data.workScheduleId),
+              startDate,
+              endDate,
+              isActive: data.isActive ?? true,
+              notes: data.notes || null,
+            },
+          },
+        });
+      } else {
+        await updateScheduleAssignment({
+          variables: {
+            id: assignment?.id,
+            updateEmployeeScheduleAssignmentInput: {
+              workScheduleId: parseInt(data.workScheduleId),
+              startDate,
+              endDate,
+              isActive: data.isActive,
+              notes: data.notes || null,
+            },
+          },
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error submitting schedule assignment:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const defaultValues = {
@@ -68,16 +131,24 @@ export default function ScheduleAssignmentForm({
 
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
-      <ScheduleAssignmentFormFields actionType={actionType} />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <ScheduleAssignmentFormFields
+        actionType={actionType}
+        schedules={schedulesData?.workSchedules?.data || []}
+        schedulesLoading={schedulesLoading}
+      />
+      <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
 
 function ScheduleAssignmentFormFields({
   actionType,
+  schedules,
+  schedulesLoading,
 }: {
   actionType: "create" | "update";
+  schedules: IWorkSchedule[];
+  schedulesLoading: boolean;
 }) {
   const { control } = useFormContext();
   const isCurrent = useWatch({
@@ -86,13 +157,12 @@ function ScheduleAssignmentFormFields({
     defaultValue: false,
   });
 
-  // TODO: Fetch work schedules from GraphQL
-  const workScheduleOptions = [
-    { label: "Regular Schedule (9-5)", value: "1" },
-    { label: "Shift Schedule (Rotating)", value: "2" },
-    { label: "Flexible Schedule", value: "3" },
-    { label: "Part-time Schedule", value: "4" },
-  ];
+  const workScheduleOptions = schedules
+    .filter((schedule) => schedule.status === "ACTIVE")
+    .map((schedule) => ({
+      label: `${schedule.name} (${schedule.scheduleType})`,
+      value: schedule.id.toString(),
+    }));
 
   return (
     <div className="space-y-4">
@@ -108,7 +178,7 @@ function ScheduleAssignmentFormFields({
             label="Select Schedule"
             placeholder="Choose a work schedule"
             required={true}
-            isLoading={false}
+            isLoading={schedulesLoading}
             options={workScheduleOptions}
           />
           <div className="alert alert-info text-sm">
@@ -159,7 +229,6 @@ function ScheduleAssignmentFormFields({
           )}
           <div className="md:col-span-2">
             <ToggleSwitch
-              dataAuto="isCurrent"
               name="isCurrent"
               label="This is the current schedule (no end date)"
             />
@@ -172,7 +241,6 @@ function ScheduleAssignmentFormFields({
         <div className="border border-primary/20 rounded-lg p-4">
           <h4 className="text-base font-semibold mb-3 text-primary">Status</h4>
           <ToggleSwitch
-            dataAuto="isActive"
             name="isActive"
             label="Mark this assignment as active"
           />

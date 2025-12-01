@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { IPopupOption } from "@/types";
+import { IScheduleAssignment } from "@/types/work-schedules.type";
 import CustomPopup from "@/components/modal/CustomPopup";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
 import {
   PiPencilSimple,
   PiTrash,
@@ -12,57 +15,18 @@ import {
   PiXCircle,
 } from "react-icons/pi";
 import ScheduleAssignmentForm from "./components/ScheduleAssignmentForm";
-
-interface IDaySchedule {
-  id: number;
-  workScheduleId: number;
-  day: string;
-  startTime: string;
-  endTime: string;
-  isWorkingDay: boolean;
-}
-
-interface IWorkSchedule {
-  id: number;
-  name: string;
-  description: string;
-  status: "ACTIVE" | "INACTIVE";
-  scheduleType: "REGULAR" | "FLEXIBLE" | "SHIFT" | "ROTATIONAL";
-  breakType: "PAID" | "UNPAID";
-  breakHours: number;
-  schedules?: IDaySchedule[];
-}
-
-interface IScheduleAssignment {
-  id: number;
-  userId: number;
-  workScheduleId: number;
-  workSchedule: IWorkSchedule;
-  startDate: string;
-  endDate?: string;
-  isActive: boolean;
-  assignedBy: number;
-  assignedByUser?: {
-    id: number;
-    email: string;
-    profile?: {
-      fullName: string;
-    };
-  };
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_USER_SCHEDULE_ASSIGNMENTS,
+  DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
+} from "@/graphql/work-schedules.api";
+import moment from "moment";
 
 interface ScheduleContentProps {
   userId: number;
-  scheduleAssignments?: IScheduleAssignment[];
 }
 
-export default function ScheduleContent({
-  userId,
-  scheduleAssignments = [],
-}: ScheduleContentProps) {
+export default function ScheduleContent({ userId }: ScheduleContentProps) {
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -71,6 +35,32 @@ export default function ScheduleContent({
     data: null,
     title: "",
   });
+
+  // Query to get user schedule assignments
+  const { data, loading, refetch } = useQuery<{
+    employeeScheduleAssignmentsByUser: {
+      data: IScheduleAssignment[];
+    };
+  }>(GET_USER_SCHEDULE_ASSIGNMENTS, {
+    variables: { userId },
+  });
+
+  // Delete schedule assignment mutation
+  const [deleteScheduleAssignment] = useMutation(
+    DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        { query: GET_USER_SCHEDULE_ASSIGNMENTS, variables: { userId } },
+      ],
+      onCompleted: () => {
+        setPopupOption({ ...popupOption, open: false });
+      },
+    }
+  );
+
+  const scheduleAssignments =
+    data?.employeeScheduleAssignmentsByUser?.data || [];
 
   const handleOpenForm = (
     actionType: "create" | "update",
@@ -98,16 +88,36 @@ export default function ScheduleContent({
       data: null,
       title: "",
     });
+    refetch();
   };
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete mutation
-    console.log("Delete schedule assignment:", id);
+  const handleDelete = (assignment: IScheduleAssignment) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: false,
+      actionType: "delete",
+      form: "scheduleAssignment",
+      data: { id: assignment.id },
+      title: "Delete Schedule Assignment",
+      deleteHandler: async () => {
+        try {
+          await deleteScheduleAssignment({
+            variables: { id: assignment.id },
+          });
+        } catch (error) {
+          console.error("Error deleting schedule assignment:", error);
+        }
+      },
+    });
   };
 
   const activeAssignment = scheduleAssignments.find(
     (assignment) => assignment.isActive
   );
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   if (!scheduleAssignments || scheduleAssignments.length === 0) {
     return (
@@ -163,7 +173,7 @@ export default function ScheduleContent({
 
       {/* Active Schedule Card */}
       {activeAssignment && (
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6 shadow-sm border-2 border-primary/30">
+        <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-6 shadow-sm border-2 border-primary/30">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
               <PiCheckCircle size={24} className="text-primary" />
@@ -241,26 +251,39 @@ export default function ScheduleContent({
                       <div
                         key={daySchedule.id}
                         className={`p-3 rounded-lg border ${
-                          daySchedule.isWorkingDay
+                          !daySchedule.isWeekend
                             ? "bg-base-100 border-primary/20"
                             : "bg-base-200 border-base-300"
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-sm">
-                            {daySchedule.day}
+                            {
+                              [
+                                "Sunday",
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                              ][daySchedule.day]
+                            }
                           </span>
-                          {daySchedule.isWorkingDay ? (
+                          {!daySchedule.isWeekend ? (
                             <PiCheckCircle size={16} className="text-success" />
                           ) : (
                             <PiXCircle size={16} className="text-error" />
                           )}
                         </div>
-                        {daySchedule.isWorkingDay && (
-                          <p className="text-xs text-base-content/60 mt-1">
-                            {daySchedule.startTime} - {daySchedule.endTime}
-                          </p>
-                        )}
+                        {!daySchedule.isWeekend &&
+                          daySchedule.timeSlots &&
+                          daySchedule.timeSlots.length > 0 && (
+                            <p className="text-xs text-base-content/60 mt-1">
+                              {daySchedule.timeSlots[0].startTime} -{" "}
+                              {daySchedule.timeSlots[0].endTime}
+                            </p>
+                          )}
                       </div>
                     )
                   )}
@@ -285,16 +308,9 @@ export default function ScheduleContent({
                   className="bg-base-100 rounded-lg p-4 shadow-sm border border-primary/20 relative"
                 >
                   {/* Action Buttons */}
-                  <div className="absolute top-3 right-3 flex gap-2">
+                  <div className="absolute top-3 right-3">
                     <button
-                      onClick={() => handleOpenForm("update", assignment)}
-                      className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
-                      title="Edit Assignment"
-                    >
-                      <PiPencilSimple size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(assignment.id)}
+                      onClick={() => handleDelete(assignment)}
                       className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
                       title="Delete Assignment"
                     >
@@ -316,9 +332,9 @@ export default function ScheduleContent({
                         Period
                       </label>
                       <p className="text-sm text-base-content">
-                        {new Date(assignment.startDate).toLocaleDateString()} -{" "}
+                        {moment(assignment.startDate).format("MMM DD, YYYY")} -{" "}
                         {assignment.endDate
-                          ? new Date(assignment.endDate).toLocaleDateString()
+                          ? moment(assignment.endDate).format("MMM DD, YYYY")
                           : "Present"}
                       </p>
                     </div>
@@ -360,6 +376,9 @@ export default function ScheduleContent({
           />
         )}
       </CustomPopup>
+
+      {/* Delete Confirmation Modal */}
+      <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
     </div>
   );
 }
