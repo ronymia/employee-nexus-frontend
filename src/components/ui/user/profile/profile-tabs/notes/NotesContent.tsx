@@ -309,7 +309,7 @@ export default function NotesContent({
                             <PiUser size={14} />
                             <span>
                               Created by:{" "}
-                              {note.creator.profile?.fullName ||
+                              {note.creator?.profile?.fullName ||
                                 note.creator.email}
                             </span>
                           </div>

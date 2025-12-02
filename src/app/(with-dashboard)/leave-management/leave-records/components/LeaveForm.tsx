@@ -312,7 +312,7 @@ function LeaveFormFields({
           dataAuto="attachments"
           name="attachments"
           label="Attachments"
-          placeholder="Upload supporting documents"
+          // placeholder="Upload supporting documents"
           required={false}
           multiple={true}
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"

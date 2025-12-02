@@ -8,9 +8,9 @@ import {
   ASSIGN_PROJECT_MEMBER,
   UNASSIGN_PROJECT_MEMBER,
 } from "@/graphql/project.api";
-import { Project, ProjectMember } from "@/types/project.type";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { MdArrowBack, MdDelete, MdPersonAdd } from "react-icons/md";
+import { IProject, IProjectMember } from "@/types";
 
 export default function ProjectViewPage({
   params,
@@ -25,7 +25,7 @@ export default function ProjectViewPage({
 
   const { data, loading, refetch } = useQuery<{
     projectById: {
-      data: Project;
+      data: IProject;
     };
   }>(GET_PROJECT_BY_ID, {
     variables: { id: Number(id) },
@@ -85,7 +85,7 @@ export default function ProjectViewPage({
     );
   }
 
-  const coverImagePath = project.cover.startsWith("/assets")
+  const coverImagePath = project?.cover?.startsWith("/assets")
     ? project.cover
     : `/assets/project_cover/${project.cover}.jpg`;
 
@@ -203,7 +203,7 @@ export default function ProjectViewPage({
           </div>
           <div className="space-y-3">
             {project.projectMembers && project.projectMembers.length > 0 ? (
-              project.projectMembers.map((member: ProjectMember) => (
+              project.projectMembers.map((member: IProjectMember) => (
                 <div
                   key={member.id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"

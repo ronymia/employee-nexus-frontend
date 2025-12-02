@@ -1,6 +1,6 @@
 import { IBusiness } from "./business.type";
 import { IUser } from "./user.type";
-import { Status } from "./common";
+import { Status } from "./common.type";
 
 export interface IDepartment {
   id?: number;

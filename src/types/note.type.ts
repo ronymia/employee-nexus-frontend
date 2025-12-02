@@ -1,12 +1,10 @@
+import { IUser } from "./user.type";
+
 export interface INote {
   id: number;
   userId: number;
   createdBy: number;
-  creator?: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  creator?: IUser;
   title: string;
   content: string;
   category?: string; // "Performance", "Incident", "General", "Feedback"
