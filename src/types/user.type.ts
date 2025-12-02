@@ -1,4 +1,4 @@
-import { Status } from "./common";
+import { Status } from "./common.type";
 import { IEmergencyContact } from "./employee.type";
 
 export interface IProfile {

@@ -20,6 +20,7 @@ export default function WorkScheduleSchedules({
             const dayName = weekDays.find(
               (day) => day.value === schedule.day
             )?.name;
+            const timeSlot = schedule.timeSlots?.[0];
             return (
               <div
                 key={schedule.id}
@@ -27,9 +28,13 @@ export default function WorkScheduleSchedules({
               >
                 <span className="font-medium">{dayName}</span>
                 <div className="flex items-center space-x-4">
-                  <span>
-                    {schedule.startTime} - {schedule.endTime}
-                  </span>
+                  {timeSlot ? (
+                    <span>
+                      {timeSlot.startTime} - {timeSlot.endTime}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">No time set</span>
+                  )}
                   {schedule.isWeekend && (
                     <span className="text-red-500 text-sm">(Weekend)</span>
                   )}

@@ -11,7 +11,7 @@ import {
   UPDATE_PROJECT,
 } from "@/graphql/project.api";
 import { ProjectFormData } from "@/schemas";
-import { Project } from "@/types";
+import { IProject } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
 const STATUS_OPTIONS = [
@@ -44,7 +44,7 @@ export default function ProjectsForm({
   data,
 }: {
   handleClosePopup: () => void;
-  data: Project;
+  data: IProject;
 }) {
   // MUTATION TO CREATE A NEW PROJECT
   const [createProject, createResult] = useMutation(CREATE_PROJECT, {

@@ -9,7 +9,7 @@ import {
 import { DELETE_EMPLOYEE, GET_EMPLOYEES } from "@/graphql/employee.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IEmployee } from "@/types";
+import { TableActionType, TableColumnType, IEmployee, IMeta } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -27,7 +27,7 @@ export default function EmployeesPage() {
       statusCode: number;
       success: boolean;
       data: IEmployee[];
-      meta: any;
+      meta: IMeta;
     };
   }>(GET_EMPLOYEES, {
     variables: {
@@ -41,7 +41,7 @@ export default function EmployeesPage() {
   });
 
   const handleEdit = (row: IEmployee) => {
-    router.push(`/employee-management/employees/${row.id}/update`);
+    router.push(`/user-management/employees/${row.id}/update`);
   };
 
   const handleDelete = async (row: IEmployee) => {
@@ -58,11 +58,11 @@ export default function EmployeesPage() {
   };
 
   const handleView = (row: IEmployee) => {
-    router.push(`/employee-management/employees/${row.id}`);
+    router.push(`/user-management/employees/${row.id}/view`);
   };
 
   const createNewEmployee = () => {
-    router.push("/employee-management/employees/create");
+    router.push("/user-management/employees/create");
   };
 
   const [columns, setColumns] = useState<TableColumnType[]>([

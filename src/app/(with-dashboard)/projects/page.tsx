@@ -10,7 +10,7 @@ import {
 import { DELETE_PROJECT, GET_PROJECTS } from "@/graphql/project.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, Project } from "@/types";
+import { TableActionType, TableColumnType, IProject } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -22,7 +22,7 @@ export default function ProjectsPage() {
   const { popupOption, setPopupOption } = usePopupOption();
   const { data, loading } = useQuery<{
     projects: {
-      data: Project[];
+      data: IProject[];
     };
   }>(GET_PROJECTS, {});
 
@@ -31,7 +31,7 @@ export default function ProjectsPage() {
     refetchQueries: [{ query: GET_PROJECTS }],
   });
 
-  const handleEdit = (row: Project) => {
+  const handleEdit = (row: IProject) => {
     const data = {
       id: row?.id,
       name: row?.name,
@@ -53,7 +53,7 @@ export default function ProjectsPage() {
     });
   };
 
-  const handleDelete = async (row: Project) => {
+  const handleDelete = async (row: IProject) => {
     await deleteProject({
       variables: {
         id: Number(row?.id),
@@ -109,7 +109,7 @@ export default function ProjectsPage() {
     },
   ]);
 
-  const handleView = (row: Project) => {
+  const handleView = (row: IProject) => {
     router.push(`/projects/${row.id}/view`);
   };
 

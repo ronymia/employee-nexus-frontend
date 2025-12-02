@@ -94,7 +94,7 @@ export default function AssetsPage() {
     {
       key: "4",
       header: "Asset Type",
-      accessorKey: "assetType.name",
+      accessorKey: "customAssetTypeName",
       show: true,
       sortDirection: "ascending",
     },
@@ -161,7 +161,12 @@ export default function AssetsPage() {
               { label: "Asset Type", value: "assetType.name" },
             ],
           }}
-          dataSource={data?.assets?.data || []}
+          dataSource={
+            data?.assets?.data?.map((row) => ({
+              ...row,
+              customAssetTypeName: row.assetType?.name || "-",
+            })) || []
+          }
         >
           {permissionGuard(PermissionResource.ASSET, [
             PermissionAction.CREATE,

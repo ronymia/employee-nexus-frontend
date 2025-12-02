@@ -1,22 +1,18 @@
-export interface ProjectMember {
+import { IUser } from "./user.type";
+
+export interface IProjectMember {
   id: number;
   userId: number;
-  user: {
-    id: number;
-    email: string;
-    profile: {
-      fullName: string;
-    };
-  };
+  user: IUser;
   role?: string;
-  joinedAt: string;
+  joinedAt?: string;
 }
 
-export interface Project {
+export interface IProject {
   id: number;
   name: string;
   description?: string;
-  cover: string;
+  cover?: string;
   status: string;
   startDate?: string;
   endDate?: string;
@@ -26,19 +22,23 @@ export interface Project {
     name: string;
   };
   createdBy?: number;
-  creator?: {
-    id: number;
-    email: string;
-    profile: {
-      fullName: string;
-    };
-  };
-  projectMembers?: ProjectMember[];
+  creator?: IUser;
+  projectMembers?: IProjectMember[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ProjectInput {
+export interface IUserProjectMember {
+  id: number;
+  role?: string;
+  projectId: number;
+  userId: number;
+  project: IProject;
+  user: IUser;
+  createdAt: string;
+}
+
+export interface IProjectInput {
   name: string;
   description?: string;
   cover: string;

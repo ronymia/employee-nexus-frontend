@@ -85,7 +85,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
             updateEmployeeInput: formValues,
           },
         }).then(() => {
-          router.push("/employee-management/employees");
+          router.push("/user-management/employees");
         });
       } else {
         await createEmployee({
@@ -93,7 +93,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
             createEmployeeInput: formValues,
           },
         }).then(() => {
-          router.push("/employee-management/employees");
+          router.push("/user-management/employees");
         });
       }
     } catch (error) {
@@ -229,7 +229,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
 
       {/* ACTION BUTTONS */}
       <FormActionButton
-        cancelHandler={() => router.push("/employee-management/employees")}
+        cancelHandler={() => router.push("/user-management/employees")}
         isPending={createResult.loading || updateResult.loading}
       />
     </CustomForm>

@@ -29,7 +29,21 @@ type IForm_NAME =
   | "admin_basic_info"
   | "faculty_basic_info"
   | "assign_course_into_faculty"
-  | "guardian_info";
+  | "guardian_info"
+  | "profileInfo"
+  | "emergencyContact"
+  | "employmentDetails"
+  | "education"
+  | "experience"
+  | "scheduleAssignment"
+  | "projectMember"
+  | "assetAssignment"
+  | "document"
+  | "note"
+  | "socialLink"
+  | "attendance"
+  | "leave"
+  | "holiday";
 
 export interface IPopupOption {
   open: boolean;
