@@ -323,7 +323,7 @@ export default function HolidaysPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -367,7 +367,7 @@ export default function HolidaysPage() {
             <PiCalendarBlank size={32} className="text-warning" />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Holiday Table */}
       <CustomTable

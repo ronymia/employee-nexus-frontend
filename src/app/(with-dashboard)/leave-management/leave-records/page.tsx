@@ -1,55 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
-import { TableColumnType, IEmployee } from "@/types";
+import CustomLoading from "@/components/loader/CustomLoading";
+import FormModal from "@/components/form/FormModal";
+import { TableColumnType, IEmployee, ILeave, LeaveDuration } from "@/types";
 import {
-  PiCalendarBlank,
   PiClock,
   PiCheckCircle,
   PiXCircle,
   PiWarning,
   PiPlusCircle,
-  PiFileText,
-  PiUser,
+  PiPencil,
+  PiTrash,
 } from "react-icons/pi";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
+import { GET_LEAVES, DELETE_LEAVE } from "@/graphql/leave.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import LeaveForm from "./components/LeaveForm";
-
-enum LeaveDuration {
-  SINGLE_DAY = "SINGLE_DAY",
-  MULTI_DAY = "MULTI_DAY",
-  HALF_DAY = "HALF_DAY",
-}
-
-interface ILeave {
-  id: number;
-  userId: number;
-  user?: IEmployee;
-  leaveTypeId: number;
-  leaveType?: {
-    id: number;
-    name: string;
-  };
-  leaveYear: number;
-  leaveDuration: LeaveDuration;
-  startDate: string;
-  endDate?: string;
-  totalHours: number;
-  status: string;
-  reviewedAt?: string;
-  reviewedBy?: number;
-  reviewer?: IEmployee;
-  rejectionReason?: string;
-  attachments?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export default function LeaveRecordsPage() {
   const [columns, setColumns] = useState<TableColumnType[]>([
@@ -91,11 +62,15 @@ export default function LeaveRecordsPage() {
     },
   ]);
 
-  // Popup state management
+  // Popup and modal state management
   const { popupOption, setPopupOption } = usePopupOption();
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    id: number | null;
+  }>({ open: false, id: null });
 
-  // Fetch employees for the table
-  const { data: employeesData, loading } = useQuery<{
+  // Fetch employees for the form
+  const { data: employeesData } = useQuery<{
     employees: {
       data: IEmployee[];
     };
@@ -107,68 +82,52 @@ export default function LeaveRecordsPage() {
 
   const employees = employeesData?.employees?.data || [];
 
-  // TODO: Replace with actual leave data from GraphQL
-  const dummyLeaves: ILeave[] = [
-    {
-      id: 1,
-      userId: 1,
-      user: employees[0],
-      leaveTypeId: 1,
-      leaveType: {
-        id: 1,
-        name: "Annual Leave",
-      },
-      leaveYear: 2025,
-      leaveDuration: LeaveDuration.MULTI_DAY,
-      startDate: moment().add(7, "days").format("YYYY-MM-DD"),
-      endDate: moment().add(10, "days").format("YYYY-MM-DD"),
-      totalHours: 32,
-      status: "pending",
-      notes: "Family vacation",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  // Fetch leave records
+  const {
+    data: leavesData,
+    loading,
+    refetch,
+  } = useQuery<{
+    leaves: {
+      data: ILeave[];
+    };
+  }>(GET_LEAVES, {
+    variables: {
+      query: {},
     },
-    {
-      id: 2,
-      userId: 1,
-      user: employees[0],
-      leaveTypeId: 2,
-      leaveType: {
-        id: 2,
-        name: "Sick Leave",
-      },
-      leaveYear: 2025,
-      leaveDuration: LeaveDuration.SINGLE_DAY,
-      startDate: moment().subtract(2, "days").format("YYYY-MM-DD"),
-      totalHours: 8,
-      status: "approved",
-      reviewedAt: moment().subtract(1, "days").toISOString(),
-      reviewedBy: 2,
-      notes: "Medical appointment",
-      createdAt: moment().subtract(2, "days").toISOString(),
-      updatedAt: moment().subtract(1, "days").toISOString(),
-    },
-    {
-      id: 3,
-      userId: 1,
-      user: employees[0],
-      leaveTypeId: 1,
-      leaveType: {
-        id: 1,
-        name: "Annual Leave",
-      },
-      leaveYear: 2025,
-      leaveDuration: LeaveDuration.HALF_DAY,
-      startDate: moment().subtract(5, "days").format("YYYY-MM-DD"),
-      totalHours: 4,
-      status: "approved",
-      reviewedAt: moment().subtract(4, "days").toISOString(),
-      reviewedBy: 2,
-      notes: "Personal work",
-      createdAt: moment().subtract(5, "days").toISOString(),
-      updatedAt: moment().subtract(4, "days").toISOString(),
-    },
-  ];
+  });
+
+  const leaves = leavesData?.leaves?.data || [];
+
+  // Delete mutation
+  const [deleteLeave, { loading: deleting }] = useMutation(DELETE_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+  });
+
+  const handleDelete = async () => {
+    if (deleteModal.id) {
+      try {
+        await deleteLeave({
+          variables: { id: deleteModal.id },
+        });
+        setDeleteModal({ open: false, id: null });
+      } catch (error) {
+        console.error("Error deleting leave:", error);
+      }
+    }
+  };
+
+  const handleEdit = (leave: ILeave) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "update",
+      form: "leave",
+      data: leave,
+      title: "Update Leave Request",
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -233,13 +192,13 @@ export default function LeaveRecordsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-base-content/60">Pending</p>
               <p className="text-2xl font-bold text-warning">
-                {dummyLeaves.filter((l) => l.status === "pending").length}
+                {leaves.filter((l) => l.status === "pending").length}
               </p>
             </div>
             <PiWarning size={32} className="text-warning" />
@@ -251,7 +210,7 @@ export default function LeaveRecordsPage() {
             <div>
               <p className="text-xs text-base-content/60">Approved</p>
               <p className="text-2xl font-bold text-success">
-                {dummyLeaves.filter((l) => l.status === "approved").length}
+                {leaves.filter((l) => l.status === "approved").length}
               </p>
             </div>
             <PiCheckCircle size={32} className="text-success" />
@@ -263,7 +222,7 @@ export default function LeaveRecordsPage() {
             <div>
               <p className="text-xs text-base-content/60">Rejected</p>
               <p className="text-2xl font-bold text-error">
-                {dummyLeaves.filter((l) => l.status === "rejected").length}
+                {leaves.filter((l) => l.status === "rejected").length}
               </p>
             </div>
             <PiXCircle size={32} className="text-error" />
@@ -275,61 +234,83 @@ export default function LeaveRecordsPage() {
             <div>
               <p className="text-xs text-base-content/60">Total Hours</p>
               <p className="text-2xl font-bold text-primary">
-                {dummyLeaves.reduce((sum, l) => sum + l.totalHours, 0)}h
+                {leaves.reduce((sum, l) => sum + l.totalHours, 0)}h
               </p>
             </div>
             <PiClock size={32} className="text-primary" />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Leave Table */}
-      <CustomTable
-        isLoading={loading}
-        actions={[]}
-        columns={columns}
-        setColumns={setColumns}
-        dataSource={dummyLeaves.map((row) => ({
-          ...row,
-          customEmployeeName: row.user?.profile?.fullName || "N/A",
-          customLeaveType: row.leaveType?.name || "N/A",
-          customDuration: getDurationLabel(row.leaveDuration),
-          customLeavePeriod: row.endDate
-            ? `${moment(row.startDate).format("MMM DD, YYYY")} - ${moment(
-                row.endDate
-              ).format("MMM DD, YYYY")}`
-            : moment(row.startDate).format("MMM DD, YYYY"),
-          customTotalHours: `${row.totalHours}h`,
-          customStatus: row.status,
-        }))}
-        searchConfig={{
-          searchable: true,
-          debounceDelay: 500,
-          defaultField: "customEmployeeName",
-          searchableFields: [
-            { label: "Employee Name", value: "customEmployeeName" },
-            { label: "Leave Type", value: "customLeaveType" },
-            { label: "Status", value: "customStatus" },
-          ],
-        }}
-      >
-        <button
-          className="btn btn-primary gap-2"
-          onClick={() =>
-            setPopupOption({
-              open: true,
-              closeOnDocumentClick: true,
-              actionType: "create",
-              form: "leave",
-              data: null,
-              title: "Create Leave Request",
-            })
-          }
+      {loading ? (
+        <CustomLoading />
+      ) : (
+        <CustomTable
+          isLoading={loading}
+          actions={[
+            {
+              name: "Edit",
+              type: "button" as const,
+              handler: handleEdit,
+              Icon: PiPencil,
+              permissions: [],
+              disabledOn: [],
+            },
+            {
+              name: "Delete",
+              type: "button" as const,
+              handler: (leave: ILeave) =>
+                setDeleteModal({ open: true, id: leave.id }),
+              Icon: PiTrash,
+              permissions: [],
+              disabledOn: [],
+            },
+          ]}
+          columns={columns}
+          setColumns={setColumns}
+          dataSource={leaves.map((row) => ({
+            ...row,
+            customEmployeeName: row.user?.profile?.fullName || "N/A",
+            customLeaveType: row.leaveType?.name || "N/A",
+            customDuration: getDurationLabel(row.leaveDuration),
+            customLeavePeriod: row.endDate
+              ? `${moment(row.startDate).format("MMM DD, YYYY")} - ${moment(
+                  row.endDate
+                ).format("MMM DD, YYYY")}`
+              : moment(row.startDate).format("MMM DD, YYYY"),
+            customTotalHours: `${row.totalHours}h`,
+            customStatus: getStatusBadge(row.status),
+          }))}
+          searchConfig={{
+            searchable: true,
+            debounceDelay: 500,
+            defaultField: "customEmployeeName",
+            searchableFields: [
+              { label: "Employee Name", value: "customEmployeeName" },
+              { label: "Leave Type", value: "customLeaveType" },
+              { label: "Status", value: "status" },
+            ],
+          }}
         >
-          <PiPlusCircle size={18} />
-          Add Leave
-        </button>
-      </CustomTable>
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "create",
+                form: "leave",
+                data: null,
+                title: "Create Leave Request",
+              })
+            }
+          >
+            <PiPlusCircle size={18} />
+            Add Leave
+          </button>
+        </CustomTable>
+      )}
 
       {/* Leave Form Modal */}
       <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
@@ -344,9 +325,40 @@ export default function LeaveRecordsPage() {
                 open: false,
               })
             }
+            refetch={refetch}
           />
         )}
       </CustomPopup>
+
+      {/* Delete Confirmation Modal */}
+      <FormModal
+        popupOption={{
+          open: deleteModal.open,
+          closeOnDocumentClick: false,
+          actionType: "delete",
+          form: "leave",
+          data: null,
+          title: "Delete Leave",
+          deleteHandler: handleDelete,
+        }}
+        setPopupOption={(value) => {
+          if (typeof value === "function") {
+            setDeleteModal((prev) => {
+              const newPopup = value({
+                open: prev.open,
+                closeOnDocumentClick: false,
+                actionType: "delete",
+                form: "leave",
+                data: null,
+                title: "Delete Leave",
+              });
+              return { open: newPopup.open, id: prev.id };
+            });
+          } else {
+            setDeleteModal({ open: value.open, id: deleteModal.id });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -2,43 +2,28 @@
 
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
-import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomFileUploader from "@/components/form/input/CustomFileUploader";
 import { useFormContext, useWatch } from "react-hook-form";
-import { IEmployee } from "@/types";
-import { useQuery } from "@apollo/client/react";
+import { IEmployee, ILeave, LeaveDuration } from "@/types";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
+import { CREATE_LEAVE, UPDATE_LEAVE } from "@/graphql/leave.api";
+import { useState } from "react";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import useAppStore from "@/hooks/useAppStore";
 
-enum LeaveDuration {
-  SINGLE_DAY = "SINGLE_DAY",
-  MULTI_DAY = "MULTI_DAY",
-  HALF_DAY = "HALF_DAY",
-}
-
-interface ILeave {
-  id?: number;
-  userId: number;
-  leaveTypeId: number;
-  leaveYear: number;
-  leaveDuration: LeaveDuration;
-  startDate: string;
-  endDate?: string;
-  totalHours: number;
-  status: string;
-  reviewedAt?: string;
-  reviewedBy?: number;
-  rejectionReason?: string;
-  attachments?: string;
-  notes?: string;
-}
+dayjs.extend(customParseFormat);
 
 interface LeaveFormProps {
   employees: IEmployee[];
   leave?: ILeave;
   actionType: "create" | "update";
   onClose: () => void;
+  refetch?: () => void;
 }
 
 export default function LeaveForm({
@@ -46,14 +31,139 @@ export default function LeaveForm({
   leave,
   actionType,
   onClose,
+  refetch,
 }: LeaveFormProps) {
-  const handleSubmit = async (data: any) => {
-    console.log("Leave Form Submit:", {
-      ...data,
-      actionType,
+  const [isPending, setIsPending] = useState(false);
+  const token = useAppStore((state) => state.token);
+  const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const [createLeave] = useMutation(CREATE_LEAVE);
+  const [updateLeave] = useMutation(UPDATE_LEAVE);
+
+  // Upload attachments function
+  const uploadAttachments = async (files: File[]): Promise<string[]> => {
+    const uploadPromises = files.map(async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        `${NEXT_PUBLIC_API_URL}/assets/upload-file`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to upload file: ${file.name}`);
+      }
+
+      const result = await response.json();
+      return result.imagePath;
     });
-    // TODO: Implement GraphQL mutation
-    onClose();
+
+    return Promise.all(uploadPromises);
+  };
+
+  // Calculate total hours based on dates and duration
+  const calculateTotalHours = (
+    startDate: string,
+    endDate: string | undefined,
+    duration: LeaveDuration
+  ): number => {
+    if (duration === LeaveDuration.HALF_DAY) {
+      return 4;
+    }
+
+    if (duration === LeaveDuration.SINGLE_DAY) {
+      return 8;
+    }
+
+    // MULTI_DAY - calculate days between dates
+    if (duration === LeaveDuration.MULTI_DAY && endDate) {
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+      const days = end.diff(start, "day") + 1; // Include both start and end date
+      return days * 8;
+    }
+
+    return 8; // Default to single day
+  };
+
+  const handleSubmit = async (data: any) => {
+    try {
+      setIsPending(true);
+
+      // Handle file upload
+      let attachmentPaths: string[] = [];
+      if (data.attachments && data.attachments.length > 0) {
+        // Check if attachments are new files
+        const newFiles: File[] = [];
+        for (let i = 0; i < data.attachments.length; i++) {
+          const file = data.attachments[i];
+          if (file instanceof File) {
+            newFiles.push(file);
+          }
+        }
+
+        if (newFiles.length > 0) {
+          attachmentPaths = await uploadAttachments(newFiles);
+        }
+      }
+
+      // Calculate total hours
+      const totalHours = calculateTotalHours(
+        data.startDate,
+        data.endDate,
+        data.leaveDuration
+      );
+
+      // Format dates to ISO 8601
+      const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
+      const endDate =
+        data.endDate && data.leaveDuration === LeaveDuration.MULTI_DAY
+          ? dayjs(data.endDate, "DD-MM-YYYY").toISOString()
+          : undefined;
+
+      const input = {
+        leaveTypeId: Number(data.leaveTypeId),
+        leaveYear: Number(data.leaveYear),
+        leaveDuration: data.leaveDuration,
+        startDate,
+        endDate,
+        totalHours,
+        attachments:
+          attachmentPaths.length > 0
+            ? JSON.stringify(attachmentPaths)
+            : leave?.attachments || undefined,
+        notes: data.notes || undefined,
+      };
+
+      if (actionType === "create") {
+        await createLeave({
+          variables: {
+            createLeaveInput: input,
+          },
+        });
+      } else {
+        await updateLeave({
+          variables: {
+            id: Number(leave?.id),
+            updateLeaveInput: input,
+          },
+        });
+      }
+
+      refetch?.();
+      onClose();
+    } catch (error) {
+      console.error("Error submitting leave:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const defaultValues = {
@@ -61,16 +171,18 @@ export default function LeaveForm({
     leaveTypeId: leave?.leaveTypeId || "",
     leaveYear: leave?.leaveYear || new Date().getFullYear(),
     leaveDuration: leave?.leaveDuration || LeaveDuration.SINGLE_DAY,
-    startDate: leave?.startDate || new Date().toISOString().split("T")[0],
-    endDate: leave?.endDate || "",
-    attachments: leave?.attachments || "",
+    startDate: leave?.startDate
+      ? dayjs(leave.startDate).format("DD-MM-YYYY")
+      : dayjs().format("DD-MM-YYYY"),
+    endDate: leave?.endDate ? dayjs(leave.endDate).format("DD-MM-YYYY") : "",
+    attachments: [],
     notes: leave?.notes || "",
   };
 
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <LeaveFormFields employees={employees} actionType={actionType} />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
@@ -196,22 +308,18 @@ function LeaveFormFields({
         <h4 className="text-base font-semibold mb-3 text-primary">
           Supporting Documents
         </h4>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Attachments</span>
-          </label>
-          <input
-            type="file"
-            name="attachments"
-            className="file-input file-input-bordered w-full"
-            data-auto="attachments"
-            multiple
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-          />
-          <p className="text-xs text-base-content/60 mt-1">
-            You can upload multiple files (PDF, DOC, DOCX, JPG, PNG)
-          </p>
-        </div>
+        <CustomFileUploader
+          dataAuto="attachments"
+          name="attachments"
+          label="Attachments"
+          placeholder="Upload supporting documents"
+          required={false}
+          multiple={true}
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+        />
+        <p className="text-xs text-base-content/60 mt-1">
+          You can upload multiple files (PDF, DOC, DOCX, JPG, PNG)
+        </p>
       </div>
 
       {/* Notes */}

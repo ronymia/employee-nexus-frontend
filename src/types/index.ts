@@ -31,3 +31,4 @@ export * from "./social-links.type";
 export * from "./project.type";
 export * from "./holiday.type";
 export * from "./attendance.type";
+export * from "./leave.type";
