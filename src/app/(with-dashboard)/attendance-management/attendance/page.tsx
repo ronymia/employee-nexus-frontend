@@ -1,63 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@apollo/client/react";
+import { useState } from "react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
-import { TableColumnType, IEmployee, IPopupOption } from "@/types";
+import { TableColumnType, IEmployee } from "@/types";
+import { IAttendance } from "@/types/attendance.type";
 import {
-  PiCalendarBlank,
-  PiClock,
-  PiMapPin,
-  PiUser,
   PiCheckCircle,
   PiXCircle,
   PiWarning,
   PiMinus,
   PiAirplaneTilt,
   PiPlusCircle,
+  PiTrash,
+  PiPencilSimple,
 } from "react-icons/pi";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
+import { GET_ATTENDANCES, DELETE_ATTENDANCE } from "@/graphql/attendance.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
+import CustomLoading from "@/components/loader/CustomLoading";
 import AttendanceForm from "./components/AttendanceForm";
 import usePopupOption from "@/hooks/usePopupOption";
-
-interface IAttendancePunch {
-  id: number;
-  attendanceId: number;
-  projectId?: number;
-  workSiteId?: number;
-  punchIn: string;
-  punchOut?: string;
-  breakStart?: string;
-  breakEnd?: string;
-  workHours?: number;
-  breakHours?: number;
-  punchInIp?: string;
-  punchOutIp?: string;
-  punchInLat?: number;
-  punchInLng?: number;
-  punchOutLat?: number;
-  punchOutLng?: number;
-  punchInDevice?: string;
-  punchOutDevice?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface IAttendance {
-  id: number;
-  userId: number;
-  user?: IEmployee;
-  date: string;
-  totalHours?: number;
-  breakHours?: number;
-  status: string;
-  punchRecords: IAttendancePunch[];
-  createdAt: string;
-  updatedAt: string;
-}
 
 export default function AttendancePage() {
   const [selectedDate, setSelectedDate] = useState(
@@ -68,7 +32,7 @@ export default function AttendancePage() {
   const { popupOption, setPopupOption } = usePopupOption();
 
   // Fetch employees for the table
-  const { data: employeesData, loading } = useQuery<{
+  const { data: employeesData, loading: employeesLoading } = useQuery<{
     employees: {
       data: IEmployee[];
     };
@@ -78,9 +42,66 @@ export default function AttendancePage() {
     },
   });
 
-  const employees = employeesData?.employees?.data || [];
+  // Fetch attendances
+  const {
+    data: attendancesData,
+    loading: attendancesLoading,
+    refetch,
+  } = useQuery<{
+    attendances: {
+      data: IAttendance[];
+    };
+  }>(GET_ATTENDANCES, {
+    variables: {
+      query: {},
+    },
+  });
 
-  // TODO: Replace with actual attendance data from GraphQL
+  // Delete attendance mutation
+  const [deleteAttendance] = useMutation(DELETE_ATTENDANCE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    onCompleted: () => {
+      setPopupOption({ ...popupOption, open: false });
+    },
+  });
+
+  const employees = employeesData?.employees?.data || [];
+  const attendances = attendancesData?.attendances?.data || [];
+  const loading = employeesLoading || attendancesLoading;
+
+  const handleDelete = (attendance: IAttendance) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: false,
+      actionType: "delete",
+      form: "attendance",
+      data: { id: attendance.id },
+      title: "Delete Attendance Record",
+      deleteHandler: async () => {
+        try {
+          await deleteAttendance({
+            variables: { id: attendance.id },
+          });
+        } catch (error) {
+          console.error("Error deleting attendance:", error);
+        }
+      },
+    });
+  };
+
+  const handleEdit = (attendance: IAttendance) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: false,
+      actionType: "update",
+      form: "attendance",
+      data: attendance,
+      title: "Update Attendance Record",
+    });
+  };
+
+  // Old dummy data for reference
   const dummyAttendances: IAttendance[] = [
     {
       id: 1,
@@ -116,6 +137,17 @@ export default function AttendancePage() {
       updatedAt: new Date().toISOString(),
     },
   ];
+
+  // Calculate stats
+  const presentCount = attendances.filter(
+    (a) => a.status.toLowerCase() === "present"
+  ).length;
+  const absentCount = attendances.filter(
+    (a) => a.status.toLowerCase() === "absent"
+  ).length;
+  const lateCount = attendances.filter(
+    (a) => a.status.toLowerCase() === "late"
+  ).length;
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -230,12 +262,14 @@ export default function AttendancePage() {
       {/* Date Picker & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Stats Cards */}
-        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-success/10 border border-success/20 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-base-content/60">Present</p>
-                <p className="text-2xl font-bold text-success">0</p>
+                <p className="text-2xl font-bold text-success">
+                  {presentCount}
+                </p>
               </div>
               <PiCheckCircle size={32} className="text-success" />
             </div>
@@ -245,7 +279,7 @@ export default function AttendancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-base-content/60">Absent</p>
-                <p className="text-2xl font-bold text-error">0</p>
+                <p className="text-2xl font-bold text-error">{absentCount}</p>
               </div>
               <PiXCircle size={32} className="text-error" />
             </div>
@@ -255,21 +289,40 @@ export default function AttendancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-base-content/60">Late</p>
-                <p className="text-2xl font-bold text-warning">0</p>
+                <p className="text-2xl font-bold text-warning">{lateCount}</p>
               </div>
               <PiWarning size={32} className="text-warning" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
+
+      {loading && <CustomLoading />}
 
       {/* Attendance Table */}
       <CustomTable
         isLoading={loading}
-        actions={[]}
+        actions={[
+          {
+            name: "Edit",
+            type: "button" as const,
+            Icon: PiPencilSimple,
+            handler: (row: any) => handleEdit(row),
+            permissions: [],
+            disabledOn: [],
+          },
+          {
+            name: "Delete",
+            type: "button" as const,
+            Icon: PiTrash,
+            handler: (row: any) => handleDelete(row),
+            permissions: [],
+            disabledOn: [],
+          },
+        ]}
         columns={columns}
         setColumns={setColumns}
-        dataSource={dummyAttendances.map((row) => ({
+        dataSource={attendances.map((row) => ({
           ...row,
           customEmployeeName: row.user?.profile?.fullName || "N/A",
           customDate: moment(row.date).format("MMM DD, YYYY"),
@@ -325,20 +378,25 @@ export default function AttendancePage() {
 
       {/* Attendance Form Modal */}
       <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
-        {popupOption.form === "attendance" && (
-          <AttendanceForm
-            employees={employees}
-            attendance={popupOption.data}
-            actionType={popupOption.actionType as "create" | "update"}
-            onClose={() =>
-              setPopupOption({
-                ...popupOption,
-                open: false,
-              })
-            }
-          />
-        )}
+        {popupOption.form === "attendance" &&
+          popupOption.actionType !== "delete" && (
+            <AttendanceForm
+              employees={employees}
+              attendance={popupOption.data}
+              actionType={popupOption.actionType as "create" | "update"}
+              onClose={() => {
+                setPopupOption({
+                  ...popupOption,
+                  open: false,
+                });
+                refetch();
+              }}
+            />
+          )}
       </CustomPopup>
+
+      {/* Delete Confirmation Modal */}
+      {/* <FormModal popupOption={popupOption} setPopupOption={setPopupOption} /> */}
     </div>
   );
 }

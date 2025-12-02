@@ -1,0 +1,167 @@
+import { gql } from "@apollo/client";
+
+// GET ALL ATTENDANCES
+export const GET_ATTENDANCES = gql`
+  query Attendances($query: QueryAttendanceInput) {
+    attendances(query: $query) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        date
+        totalHours
+        breakHours
+        status
+        createdAt
+        updatedAt
+        user {
+          id
+          email
+          profile {
+            fullName
+          }
+        }
+        punchRecords {
+          id
+          attendanceId
+          projectId
+          workSiteId
+          punchIn
+          punchOut
+          breakStart
+          breakEnd
+          workHours
+          breakHours
+          punchInIp
+          punchOutIp
+          punchInLat
+          punchInLng
+          punchOutLat
+          punchOutLng
+          punchInDevice
+          punchOutDevice
+          notes
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+
+// GET ATTENDANCE BY ID
+export const GET_ATTENDANCE_BY_ID = gql`
+  query AttendanceById($id: Int!) {
+    attendanceById(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        date
+        totalHours
+        breakHours
+        status
+        createdAt
+        updatedAt
+        user {
+          id
+          email
+          profile {
+            fullName
+          }
+        }
+        punchRecords {
+          id
+          attendanceId
+          projectId
+          workSiteId
+          punchIn
+          punchOut
+          breakStart
+          breakEnd
+          workHours
+          breakHours
+          punchInIp
+          punchOutIp
+          punchInLat
+          punchInLng
+          punchOutLat
+          punchOutLng
+          punchInDevice
+          punchOutDevice
+          notes
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+
+// CREATE ATTENDANCE
+export const CREATE_ATTENDANCE = gql`
+  mutation CreateAttendance($createAttendanceInput: CreateAttendanceInput!) {
+    createAttendance(createAttendanceInput: $createAttendanceInput) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        date
+        totalHours
+        breakHours
+        status
+        createdAt
+        updatedAt
+        punchRecords {
+          id
+          punchIn
+          punchOut
+          workHours
+          breakHours
+          notes
+        }
+      }
+    }
+  }
+`;
+
+// UPDATE ATTENDANCE
+export const UPDATE_ATTENDANCE = gql`
+  mutation UpdateAttendance($updateAttendanceInput: UpdateAttendanceInput!) {
+    updateAttendance(updateAttendanceInput: $updateAttendanceInput) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        date
+        totalHours
+        breakHours
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+// DELETE ATTENDANCE
+export const DELETE_ATTENDANCE = gql`
+  mutation DeleteAttendance($id: Int!) {
+    deleteAttendance(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
+      }
+    }
+  }
+`;

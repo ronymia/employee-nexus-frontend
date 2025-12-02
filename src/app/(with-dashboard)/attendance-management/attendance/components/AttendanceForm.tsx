@@ -2,47 +2,22 @@
 
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
-import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
-import { useFormContext, useWatch } from "react-hook-form";
+import CustomDateTimeInput from "@/components/form/input/CustomDateTimeInput";
 import { IEmployee } from "@/types";
-import { GET_PROJECTS } from "@/graphql/project.api";
-import { GET_WORK_SITES } from "@/graphql/work-sites.api";
-import { useQuery } from "@apollo/client/react";
-
-interface IAttendancePunch {
-  id?: number;
-  attendanceId?: number;
-  projectId?: number;
-  workSiteId?: number;
-  punchIn: string;
-  punchOut?: string;
-  breakStart?: string;
-  breakEnd?: string;
-  workHours?: number;
-  breakHours?: number;
-  punchInIp?: string;
-  punchOutIp?: string;
-  punchInLat?: number;
-  punchInLng?: number;
-  punchOutLat?: number;
-  punchOutLng?: number;
-  punchInDevice?: string;
-  punchOutDevice?: string;
-  notes?: string;
-}
-
-interface IAttendance {
-  id?: number;
-  userId: number;
-  date: string;
-  totalHours?: number;
-  breakHours?: number;
-  status: string;
-  punchRecords?: IAttendancePunch[];
-}
+import { IAttendance } from "@/types/attendance.type";
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_ATTENDANCE,
+  UPDATE_ATTENDANCE,
+  GET_ATTENDANCES,
+} from "@/graphql/attendance.api";
+import moment from "moment";
+import { useState } from "react";
+import dayjs from "dayjs";
+import { WorkSiteSelect, ProjectSelect } from "@/components/input-fields";
 
 interface AttendanceFormProps {
   employees: IEmployee[];
@@ -57,29 +32,123 @@ export default function AttendanceForm({
   actionType,
   onClose,
 }: AttendanceFormProps) {
-  const handleSubmit = async (data: any) => {
-    console.log("Attendance Form Submit:", {
-      ...data,
-      actionType,
-    });
-    // TODO: Implement GraphQL mutation
-    onClose();
+  const [isPending, setIsPending] = useState(false);
+
+  // Create mutation
+  const [createAttendance] = useMutation(CREATE_ATTENDANCE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+  });
+
+  // Update mutation
+  const [updateAttendance] = useMutation(UPDATE_ATTENDANCE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+  });
+
+  const handleSubmit = async (formValues: any) => {
+    console.log({ formValues });
+    try {
+      setIsPending(true);
+
+      const punchInTime = moment(formValues.punchIn).toISOString();
+      const punchOutTime = formValues.punchOut
+        ? moment(formValues.punchOut).toISOString()
+        : null;
+
+      // Calculate work hours and break hours
+      let workHours = 0;
+      let breakHours = 0;
+      if (punchOutTime) {
+        const totalMinutes = moment(punchOutTime).diff(
+          moment(punchInTime),
+          "minutes"
+        );
+        workHours = totalMinutes / 60;
+        breakHours = 0; // Can be adjusted based on break tracking
+      }
+
+      // Get default values for IP, device, and location
+      const defaultPunchData = {
+        punchInIp: "192.168.1.100",
+        punchOutIp: "192.168.1.100",
+        punchInLat: 23.8103,
+        punchInLng: 90.4125,
+        punchOutLat: 23.8103,
+        punchOutLng: 90.4125,
+        punchInDevice: "Windows 10 - Chrome",
+        punchOutDevice: "Windows 10 - Chrome",
+      };
+
+      if (actionType === "create") {
+        await createAttendance({
+          variables: {
+            createAttendanceInput: {
+              userId: parseInt(formValues.userId),
+              date: dayjs(formValues.date, "DD-MM-YYYY"),
+              totalHours: workHours,
+              breakHours: breakHours,
+              status: "present",
+              punchRecords: [
+                {
+                  projectId: formValues.projectId
+                    ? parseInt(formValues.projectId)
+                    : null,
+                  workSiteId: formValues.workSiteId
+                    ? parseInt(formValues.workSiteId)
+                    : null,
+                  punchIn: punchInTime,
+                  punchOut: punchOutTime,
+                  workHours: workHours,
+                  breakHours: breakHours,
+                  notes: formValues.notes || null,
+                  ...defaultPunchData,
+                },
+              ],
+            },
+          },
+        });
+      } else {
+        await updateAttendance({
+          variables: {
+            updateAttendanceInput: {
+              id: attendance?.id,
+              totalHours: workHours,
+              breakHours: breakHours,
+              status: "present",
+            },
+          },
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error submitting attendance:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const defaultValues = {
-    userId: attendance?.userId || "",
-    date: attendance?.date || new Date().toISOString().split("T")[0],
-    projectId: attendance?.punchRecords?.[0]?.projectId || "",
-    workSiteId: attendance?.punchRecords?.[0]?.workSiteId || "",
-    punchIn: attendance?.punchRecords?.[0]?.punchIn || "",
-    punchOut: attendance?.punchRecords?.[0]?.punchOut || "",
+    userId: attendance?.userId?.toString() || "",
+    date: attendance?.date
+      ? dayjs(attendance.date).format("DD-MM-YYYY")
+      : dayjs().format("DD-MM-YYYY"),
+    projectId: attendance?.punchRecords?.[0]?.projectId?.toString() || "",
+    workSiteId: attendance?.punchRecords?.[0]?.workSiteId?.toString() || "",
+    punchIn: attendance?.punchRecords?.[0]?.punchIn
+      ? dayjs(attendance.punchRecords[0].punchIn).format("YYYY-MM-DDTHH:mm")
+      : "",
+    punchOut: attendance?.punchRecords?.[0]?.punchOut
+      ? dayjs(attendance.punchRecords[0].punchOut).format("YYYY-MM-DDTHH:mm")
+      : "",
     notes: attendance?.punchRecords?.[0]?.notes || "",
   };
 
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <AttendanceFormFields employees={employees} actionType={actionType} />
-      <FormActionButton isPending={false} cancelHandler={onClose} />
+      <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
@@ -91,41 +160,10 @@ function AttendanceFormFields({
   employees: IEmployee[];
   actionType: "create" | "update";
 }) {
-  const { control } = useFormContext();
-  const status = useWatch({
-    control,
-    name: "status",
-    defaultValue: "present",
-  });
-
-  // Fetch projects
-  const { data: projectsData } = useQuery<{
-    projects: { data: any[] };
-  }>(GET_PROJECTS);
-
-  // Fetch work sites
-  const { data: workSitesData } = useQuery<{
-    workSites: { data: any[] };
-  }>(GET_WORK_SITES);
-
   const employeeOptions = employees.map((emp) => ({
     label: emp.profile?.fullName || emp.email,
     value: emp.id.toString(),
   }));
-
-  const projectOptions = (projectsData?.projects?.data || []).map(
-    (project) => ({
-      label: project.name,
-      value: project.id.toString(),
-    })
-  );
-
-  const workSiteOptions = (workSitesData?.workSites?.data || []).map(
-    (site) => ({
-      label: site.name,
-      value: site.id.toString(),
-    })
-  );
 
   return (
     <div className="space-y-4">
@@ -152,6 +190,7 @@ function AttendanceFormFields({
             placeholder="Select Date"
             required={true}
             disabled={actionType === "update"}
+            formatDate="DD-MM-YYYY"
           />
         </div>
       </div>
@@ -162,24 +201,8 @@ function AttendanceFormFields({
           Assignment Details
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomSelect
-            dataAuto="projectId"
-            name="projectId"
-            label="Project"
-            placeholder="Select Project"
-            required={false}
-            options={projectOptions}
-            isLoading={false}
-          />
-          <CustomSelect
-            dataAuto="workSiteId"
-            name="workSiteId"
-            label="Work Site"
-            placeholder="Select Work Site"
-            required={false}
-            options={workSiteOptions}
-            isLoading={false}
-          />
+          <ProjectSelect name="projectId" required={true} />
+          <WorkSiteSelect name="workSiteId" required={true} />
         </div>
       </div>
 
@@ -189,31 +212,20 @@ function AttendanceFormFields({
           Punch Times
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">
-                Punch In <span className="text-error">*</span>
-              </span>
-            </label>
-            <input
-              type="datetime-local"
-              name="punchIn"
-              className="input input-bordered"
-              data-auto="punchIn"
-              required
-            />
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Punch Out</span>
-            </label>
-            <input
-              type="datetime-local"
-              name="punchOut"
-              className="input input-bordered"
-              data-auto="punchOut"
-            />
-          </div>
+          <CustomDateTimeInput
+            dataAuto="punchIn"
+            name="punchIn"
+            label="Punch In"
+            placeholder="Select punch in time"
+            required={true}
+          />
+          <CustomDateTimeInput
+            dataAuto="punchOut"
+            name="punchOut"
+            label="Punch Out"
+            placeholder="Select punch out time"
+            required={false}
+          />
         </div>
       </div>
 
@@ -227,7 +239,7 @@ function AttendanceFormFields({
           name="notes"
           label="Notes"
           placeholder="Add any additional notes or remarks..."
-          required={false}
+          required={true}
           rows={3}
         />
       </div>
