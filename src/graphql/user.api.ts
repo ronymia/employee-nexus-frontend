@@ -14,7 +14,6 @@ export const GET_USERS = gql`
       success
       data {
         id
-        name
         email
         roleId
         status
@@ -208,8 +207,8 @@ export const CHANGE_USER_PASSWORD = gql`
 `;
 
 export const UPDATE_USER_PROFILE = gql`
-  mutation UpdateProfile($id: Int!, $profile: UpdateProfileInput!) {
-    updateProfile(updateProfileInput: { id: $id, profile: $profile }) {
+  mutation UpdateProfile($updateProfileInput: UpdateProfileInput!) {
+    updateProfile(updateProfileInput: $updateProfileInput) {
       message
       statusCode
       success

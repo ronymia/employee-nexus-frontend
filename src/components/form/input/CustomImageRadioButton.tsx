@@ -66,7 +66,7 @@ export default function CustomImageRadioButton({
                 )}
                 <img
                   className="object-cover h-full w-full group-hover:scale-110 transition-all duration-300 ease-in-out"
-                  src={cover?.image}
+                  src={`${process.env.NEXT_PUBLIC_FRONTEND_URL}${cover?.image}`}
                   alt={cover?.name}
                 />
               </button>

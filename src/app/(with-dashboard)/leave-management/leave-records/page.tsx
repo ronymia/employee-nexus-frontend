@@ -112,7 +112,7 @@ export default function LeaveRecordsPage() {
     if (deleteModal.id) {
       try {
         await deleteLeave({
-          variables: { id: deleteModal.id },
+          variables: { id: Number(deleteModal.id) },
         });
         setDeleteModal({ open: false, id: null });
       } catch (error) {
@@ -286,7 +286,7 @@ export default function LeaveRecordsPage() {
             customStatus: getStatusBadge(row.status),
           }))}
           searchConfig={{
-            searchable: true,
+            searchable: false,
             debounceDelay: 500,
             defaultField: "customEmployeeName",
             searchableFields: [

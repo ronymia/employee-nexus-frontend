@@ -71,8 +71,8 @@ export default function HolidayForm({
       } else {
         await updateHoliday({
           variables: {
-            id: holiday?.id,
             updateHolidayInput: {
+              id: Number(holiday?.id),
               name: data.name,
               description: data.description || null,
               startDate,
@@ -201,7 +201,7 @@ function HolidayFormFields() {
       </div>
 
       {/* Holiday Settings */}
-      <div className="border border-primary/20 rounded-lg p-4">
+      <div className="border border-primary/20 rounded-lg p-4 mb-4">
         <h4 className="text-base font-semibold mb-3 text-primary">
           Holiday Settings
         </h4>

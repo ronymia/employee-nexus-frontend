@@ -5,12 +5,14 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import {
   GET_PROJECT_BY_ID,
-  ASSIGN_PROJECT_MEMBER,
   UNASSIGN_PROJECT_MEMBER,
 } from "@/graphql/project.api";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { MdArrowBack, MdDelete, MdPersonAdd } from "react-icons/md";
-import { IProject, IProjectMember } from "@/types";
+import { IPopupOption, IProject, IProjectMember } from "@/types";
+import moment from "moment";
+import CustomPopup from "@/components/modal/CustomPopup";
+import AssignProjectMemberForm from "./AssignProjectMemberForm";
 
 export default function ProjectViewPage({
   params,
@@ -19,10 +21,15 @@ export default function ProjectViewPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState("");
-  const [memberRole, setMemberRole] = useState("Member");
 
+  const [popupOption, setPopupOption] = useState<IPopupOption>({
+    open: false,
+    closeOnDocumentClick: true,
+    actionType: "create",
+    form: "assign_project_member" as any,
+    data: null,
+    title: "Assign Project Member",
+  });
   const { data, loading, refetch } = useQuery<{
     projectById: {
       data: IProject;
@@ -31,46 +38,40 @@ export default function ProjectViewPage({
     variables: { id: Number(id) },
   });
 
-  const [assignMember, assignResult] = useMutation(ASSIGN_PROJECT_MEMBER, {
-    onCompleted: () => {
-      setShowAssignModal(false);
-      setSelectedUserId("");
-      setMemberRole("Member");
-      refetch();
-    },
-  });
-
   const [unassignMember, unassignResult] = useMutation(
     UNASSIGN_PROJECT_MEMBER,
     {
-      onCompleted: () => {
-        refetch();
-      },
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        { query: GET_PROJECT_BY_ID, variables: { id: Number(id) } },
+      ],
     }
   );
 
   const project = data?.projectById?.data;
 
-  const handleAssignMember = async () => {
-    if (!selectedUserId) return;
-    await assignMember({
-      variables: {
-        projectId: Number(id),
-        userId: Number(selectedUserId),
-        role: memberRole,
-      },
-    });
-  };
-
   const handleUnassignMember = async (userId: number) => {
     if (confirm("Are you sure you want to remove this member?")) {
       await unassignMember({
         variables: {
-          projectId: Number(id),
-          userId: userId,
+          unassignProjectMemberInput: {
+            projectId: Number(id),
+            userId: userId,
+          },
         },
       });
     }
+  };
+
+  const handleOpenAssignModal = () => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "create",
+      form: "assign_project_member" as any,
+      data: null,
+      title: "Assign Project Member",
+    });
   };
 
   if (loading) {
@@ -149,12 +150,6 @@ export default function ProjectViewPage({
                   </span>
                 </p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Business
-                </label>
-                <p className="text-base">{project.business?.name || "N/A"}</p>
-              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -163,7 +158,9 @@ export default function ProjectViewPage({
                 </label>
                 <p className="text-base">
                   {project.startDate
-                    ? new Date(project.startDate).toLocaleDateString()
+                    ? moment(project.startDate, "DD-MM-YYYY").format(
+                        "DD/MM/YYYY"
+                      )
                     : "Not set"}
                 </p>
               </div>
@@ -173,7 +170,7 @@ export default function ProjectViewPage({
                 </label>
                 <p className="text-base">
                   {project.endDate
-                    ? new Date(project.endDate).toLocaleDateString()
+                    ? moment(project.endDate, "DD-MM-YYYY").format("DD/MM/YYYY")
                     : "Not set"}
                 </p>
               </div>
@@ -194,7 +191,7 @@ export default function ProjectViewPage({
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Project Members</h2>
             <button
-              onClick={() => setShowAssignModal(true)}
+              onClick={handleOpenAssignModal}
               className="btn btn-primary btn-sm"
             >
               <MdPersonAdd size={18} />
@@ -238,59 +235,17 @@ export default function ProjectViewPage({
           </div>
         </div>
       </div>
-
       {/* Assign Member Modal */}
-      {showAssignModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h3 className="text-xl font-semibold mb-4">Assign Member</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  User ID
-                </label>
-                <input
-                  type="number"
-                  value={selectedUserId}
-                  onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="input input-bordered w-full"
-                  placeholder="Enter user ID"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Role</label>
-                <select
-                  value={memberRole}
-                  onChange={(e) => setMemberRole(e.target.value)}
-                  className="select select-bordered w-full"
-                >
-                  <option value="Member">Member</option>
-                  <option value="Lead">Lead</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Developer">Developer</option>
-                  <option value="Designer">Designer</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowAssignModal(false)}
-                className="btn btn-outline flex-1"
-                disabled={assignResult.loading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAssignMember}
-                className="btn btn-primary flex-1"
-                disabled={assignResult.loading || !selectedUserId}
-              >
-                {assignResult.loading ? "Assigning..." : "Assign"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+        {popupOption.form === ("assign_project_member" as any) && (
+          <AssignProjectMemberForm
+            projectId={Number(id)}
+            handleClosePopup={() =>
+              setPopupOption((prev) => ({ ...prev, open: false }))
+            }
+          />
+        )}
+      </CustomPopup>
     </div>
   );
 }

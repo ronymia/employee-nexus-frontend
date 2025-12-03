@@ -88,20 +88,20 @@ export default function LeaveTypesPage() {
       show: true,
       sortDirection: "ascending",
     },
-    {
-      key: "4",
-      header: "Rollover Type",
-      accessorKey: "leaveRolloverType",
-      show: true,
-      sortDirection: "ascending",
-    },
-    {
-      key: "5",
-      header: "Carry Over Limit",
-      accessorKey: "carryOverLimit",
-      show: true,
-      sortDirection: "ascending",
-    },
+    // {
+    //   key: "4",
+    //   header: "Rollover Type",
+    //   accessorKey: "leaveRolloverType",
+    //   show: true,
+    //   sortDirection: "ascending",
+    // },
+    // {
+    //   key: "5",
+    //   header: "Carry Over Limit",
+    //   accessorKey: "carryOverLimit",
+    //   show: true,
+    //   sortDirection: "ascending",
+    // },
   ]);
 
   const actions: TableActionType[] = [
@@ -141,6 +141,10 @@ export default function LeaveTypesPage() {
         <header className={`mb-5 flex items-center justify-between`}>
           <div className="">
             <h1 className={`text-2xl font-medium`}>All Leave Types</h1>
+            <p className="text-base-content/70 mt-1">
+              Manage and configure different types of leave available in your
+              organization
+            </p>
           </div>
         </header>
         {/* TABLE */}

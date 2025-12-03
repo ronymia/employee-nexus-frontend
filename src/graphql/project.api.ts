@@ -39,19 +39,26 @@ export const GET_PROJECT_BY_ID = gql`
         endDate
         businessId
         createdBy
-        # projectMembers {
-        #   id
-        #   userId
-        #   user {
-        #     id
-        #     email
-        #     profile {
-        #       fullName
-        #     }
-        #   }
-        #   role
-        #   joinedAt
-        # }
+        projectMembers {
+          id
+          userId
+          user {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+          role
+          # joinedAt
+        }
+        creator {
+          id
+          email
+          profile {
+            fullName
+          }
+        }
         createdAt
         updatedAt
       }

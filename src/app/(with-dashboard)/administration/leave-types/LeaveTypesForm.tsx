@@ -10,10 +10,7 @@ import {
 } from "@/graphql/leave-types.api";
 import { GET_EMPLOYMENT_STATUSES } from "@/graphql/employment-status.api";
 import { ILeaveTypeFormData } from "@/schemas";
-import {
-  ILeaveType,
-  ILeaveTypeEmploymentStatus,
-} from "@/types";
+import { ILeaveType, ILeaveTypeEmploymentStatus } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 
 export default function LeaveTypesForm({
@@ -63,11 +60,17 @@ export default function LeaveTypesForm({
     if (data?.id) {
       formValues["id"] = Number(data.id);
       await updateLeaveType({
-        variables: formValues,
+        variables: {
+          ...formValues,
+          leaveRolloverType: formValues.leaveRolloverType || "NONE",
+        },
       });
     } else {
       await createLeaveType({
-        variables: formValues,
+        variables: {
+          ...formValues,
+          leaveRolloverType: formValues.leaveRolloverType || "NONE",
+        },
       });
     }
     handleClosePopup?.();
@@ -121,7 +124,7 @@ export default function LeaveTypesForm({
       />
 
       {/* LEAVE ROLLOVER TYPE */}
-      <CustomRadioButton
+      {/* <CustomRadioButton
         dataAuto="leaveRolloverType"
         required
         name="leaveRolloverType"
@@ -141,14 +144,14 @@ export default function LeaveTypesForm({
             value: "CARRY_FORWARD",
           },
         ]}
-      />
+      /> */}
 
       {/* CARRY OVER LIMIT */}
-      <CustomInputField
+      {/* <CustomInputField
         name="carryOverLimit"
         label="Carry Over Limit"
         type="number"
-      />
+      /> */}
 
       {/* EMPLOYMENT STATUSES - MULTI SELECT DROPDOWN */}
       <CustomSelect

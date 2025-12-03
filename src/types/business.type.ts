@@ -1,3 +1,4 @@
+import { ISubscriptionPlan } from "./subscription-plan.type";
 import { IUser } from "./user.type";
 
 export interface IBusinessSchedule {
@@ -6,6 +7,7 @@ export interface IBusinessSchedule {
   day: string;
   startTime: string;
   endTime: string;
+  isWeekend?: boolean;
   // createdAt: string;
   // updatedAt: string;
 }
@@ -23,8 +25,9 @@ export interface IBusiness {
   registrationDate: string;
   status: string;
   subscriptionPlanId: number;
+  subscriptionPlan: ISubscriptionPlan;
   userId: number;
-  user: IUser;
+  owner: IUser;
   logo: string;
   website?: string;
   lat?: number;

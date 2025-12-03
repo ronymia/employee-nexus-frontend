@@ -3,6 +3,7 @@ export interface IMeta {
   page: number;
   limit: number;
   skip: number;
+  totalPages: number;
 }
 
 export interface IResponse<T> {

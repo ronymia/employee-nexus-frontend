@@ -1,18 +1,52 @@
-// components/BusinessSettingsOwnerProfile.tsx
-import Image from "next/image";
+"use client";
 import { IUser } from "@/types";
 import FieldView from "@/components/form/FieldView";
+import CustomPopup from "@/components/modal/CustomPopup";
+import usePopupOption from "@/hooks/usePopupOption";
+import CustomForm from "@/components/form/CustomForm";
+import CustomInputField from "@/components/form/input/CustomInputField";
+import CustomSelect from "@/components/form/input/CustomSelect";
+import FormActionButton from "@/components/form/FormActionButton";
+import { UPDATE_USER_PROFILE } from "@/graphql/user.api";
+import { useMutation } from "@apollo/client/react";
+import { GET_BUSINESS_BY_ID } from "@/graphql/business.api";
+import useAppStore from "@/stores/appStore";
+import { userProfileSchema } from "@/schemas/user.schema";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
 
 interface BusinessSettingsOwnerProfileProps {
   ownerData: IUser;
-  onEdit?: () => void;
 }
 
 export default function BusinessSettingsOwnerProfile({
   ownerData,
-  onEdit,
 }: BusinessSettingsOwnerProfileProps) {
-  // const { profile, email, status, roleId } = ownerData;
+  const { popupOption, setPopupOption } = usePopupOption();
+  const { user } = useAppStore((state) => state);
+  const { hasPermission } = usePermissionGuard();
+
+  const [updateUserProfile, updateResult] = useMutation(UPDATE_USER_PROFILE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_BUSINESS_BY_ID, variables: { id: user.businessId } },
+    ],
+  });
+
+  const handleSubmit = async (formValues: any) => {
+    await updateUserProfile({
+      variables: {
+        updateProfileInput: {
+          id: Number(ownerData.profile.id),
+          ...formValues,
+        },
+      },
+    }).then(() => {
+      setPopupOption((prev) => ({ ...prev, open: false }));
+    });
+  };
 
   return (
     <div className={`max-w-3xl mx-auto p-6 space-y-6`}>
@@ -39,13 +73,24 @@ export default function BusinessSettingsOwnerProfile({
             </small>
           </div>
         </div>
-        <button
-          type={`button`}
-          onClick={onEdit}
-          className={`bg-linear-to-tl to-primary shadow-md from-primary hover:bg-green-700 text-base-300 font-semibold px-4 py-2 rounded-md`}
-        >
-          Edit Profile
-        </button>
+        {hasPermission(Permissions.UserUpdate) && (
+          <button
+            type={`button`}
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "update",
+                form: "",
+                data: ownerData,
+                title: "Edit Owner Profile",
+              })
+            }
+            className={`bg-linear-to-tl to-primary shadow-md from-primary hover:bg-green-700 text-base-300 font-semibold px-4 py-2 rounded-md`}
+          >
+            Edit Profile
+          </button>
+        )}
       </div>
 
       {/* Contact Information */}
@@ -67,6 +112,84 @@ export default function BusinessSettingsOwnerProfile({
           value={ownerData?.profile?.maritalStatus}
         />
       </div>
+
+      {/* Edit Modal */}
+      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+        <CustomForm
+          submitHandler={handleSubmit}
+          resolver={userProfileSchema}
+          defaultValues={{
+            fullName: ownerData?.profile?.fullName || "",
+            address: ownerData?.profile?.address || "",
+            city: ownerData?.profile?.city || "",
+            country: ownerData?.profile?.country || "",
+            postcode: ownerData?.profile?.postcode || "",
+            phone: ownerData?.profile?.phone || "",
+            dateOfBirth: ownerData?.profile?.dateOfBirth || "",
+            gender: ownerData?.profile?.gender || "",
+            maritalStatus: ownerData?.profile?.maritalStatus || "",
+          }}
+          className={`flex flex-col gap-3 p-3`}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <CustomInputField
+              name="fullName"
+              label="Full Name"
+              required
+              placeholder="Enter full name"
+            />
+            <CustomInputField
+              name="phone"
+              label="Phone"
+              required
+              placeholder="Enter phone number"
+            />
+            <CustomDatePicker
+              dataAuto="dateOfBirth"
+              name="dateOfBirth"
+              label="Date of Birth"
+              required
+            />
+            <GenderRadio
+              name="gender"
+              required={true}
+              radioGroupClassName="grid-cols-2"
+            />
+            <MaritalStatusRadio name="maritalStatus" required={true} />
+            <CustomInputField
+              name="address"
+              label="Address"
+              required
+              placeholder="Enter address"
+            />
+            <CustomInputField
+              name="city"
+              label="City"
+              required
+              placeholder="Enter city"
+            />
+            <CustomInputField
+              name="country"
+              label="Country"
+              required
+              placeholder="Enter country"
+            />
+            <CustomInputField
+              name="postcode"
+              label="Postcode"
+              required
+              placeholder="Enter postcode"
+            />
+          </div>
+
+          <FormActionButton
+            isPending={updateResult.loading}
+            cancelHandler={() =>
+              setPopupOption((prev) => ({ ...prev, open: false }))
+            }
+          />
+        </CustomForm>
+      </CustomPopup>
     </div>
   );
 }

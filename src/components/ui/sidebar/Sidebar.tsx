@@ -7,6 +7,7 @@ import {
   MdSettings,
 } from "react-icons/md";
 import { PiClock } from "react-icons/pi";
+import { IoNotificationsOutline } from "react-icons/io5";
 import SidebarGenerator from "./SidebarGenerator";
 import { VscFileSubmodule } from "react-icons/vsc";
 import { FiUsers } from "react-icons/fi";
@@ -49,6 +50,20 @@ export default function Sidebar({
       Icon: MdOutlineDashboard,
       label: menuNames.dashboard,
       path: "/dashboard",
+      show: true,
+      subMenus: [],
+    },
+    {
+      Icon: IoNotificationsOutline,
+      label: menuNames.notifications,
+      path: "/notifications",
+      show: true,
+      subMenus: [],
+    },
+    {
+      Icon: FiUsers,
+      label: menuNames.profile,
+      path: "/profile",
       show: true,
       subMenus: [],
     },

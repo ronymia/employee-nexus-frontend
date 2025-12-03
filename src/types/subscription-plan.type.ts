@@ -4,4 +4,5 @@ export interface ISubscriptionPlan {
   description: string;
   price: number;
   setupFee: number;
+  status: string;
 }

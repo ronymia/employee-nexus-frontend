@@ -99,8 +99,8 @@ export const CREATE_HOLIDAY = gql`
 
 // UPDATE HOLIDAY
 export const UPDATE_HOLIDAY = gql`
-  mutation UpdateHoliday($id: Int!, $updateHolidayInput: UpdateHolidayInput!) {
-    updateHoliday(id: $id, updateHolidayInput: $updateHolidayInput) {
+  mutation UpdateHoliday($updateHolidayInput: UpdateHolidayInput!) {
+    updateHoliday(updateHolidayInput: $updateHolidayInput) {
       message
       statusCode
       success
