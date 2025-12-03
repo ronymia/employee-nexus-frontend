@@ -1,3 +1,4 @@
+import { ISubscriptionPlan } from "./subscription-plan.type";
 import { IUser } from "./user.type";
 
 export interface IBusinessSchedule {
@@ -23,6 +24,7 @@ export interface IBusiness {
   registrationDate: string;
   status: string;
   subscriptionPlanId: number;
+  subscriptionPlan: ISubscriptionPlan;
   userId: number;
   user: IUser;
   logo: string;

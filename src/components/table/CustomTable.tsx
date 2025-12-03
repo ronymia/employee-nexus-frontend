@@ -120,17 +120,19 @@ export default function CustomTable({
         )}
 
         <div className={`flex items-center gap-3 flex-col-reverse md:flex-row`}>
-          <CustomSearchField
-            searchable={searchConfig?.searchable}
-            debounceDelay={searchConfig?.debounceDelay}
-            defaultValue={searchConfig?.defaultField}
-            changeHandler={(searchCondition) => {
-              /** Handle search */
-              setSearchTerm(searchCondition.value);
-              setSearchField(searchCondition.field);
-            }}
-            searchableFields={searchConfig?.searchableFields}
-          />
+          {searchConfig?.searchable && (
+            <CustomSearchField
+              searchable={searchConfig?.searchable}
+              debounceDelay={searchConfig?.debounceDelay}
+              defaultValue={searchConfig?.defaultField}
+              changeHandler={(searchCondition) => {
+                /** Handle search */
+                setSearchTerm(searchCondition.value);
+                setSearchField(searchCondition.field);
+              }}
+              searchableFields={searchConfig?.searchableFields}
+            />
+          )}
           {/* TABLE CHILDREN */}
           <div className="w-full md:w-auto flex flex-row items-center justify-between md:justify-end">
             {" "}

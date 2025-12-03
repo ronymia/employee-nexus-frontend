@@ -1,7 +1,6 @@
 "use client";
 
 import ProfileAvatar from "./ProfileAvatar";
-import QuickSearchSearchInput from "../../QuickSearch/QuickSearchInput";
 import { MdMenuOpen } from "react-icons/md";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -22,7 +21,7 @@ export default function Navbar({ setIsSidebarOpen }: INavbarProps) {
           onClick={() => setIsSidebarOpen(true)}
           className=""
         />
-        <QuickSearchSearchInput />
+        {/* <QuickSearchSearchInput /> */}
       </div>
 
       {/* RIGHT SIDE */}

@@ -94,23 +94,25 @@ export default function LeaveForm({
   };
 
   const handleSubmit = async (data: any) => {
+    // console.log({ data });
     try {
       setIsPending(true);
 
       // Handle file upload
       let attachmentPaths: string[] = [];
-      if (data.attachments && data.attachments.length > 0) {
+      if (data.attachments && data.attachments instanceof File) {
         // Check if attachments are new files
-        const newFiles: File[] = [];
-        for (let i = 0; i < data.attachments.length; i++) {
-          const file = data.attachments[i];
-          if (file instanceof File) {
-            newFiles.push(file);
-          }
-        }
+        const newFiles: File[] = [data.attachments];
+        // for (let i = 0; i < data.attachments.length; i++) {
+        //   const file = data.attachments[i];
+        //   if (file instanceof File) {
+        //     newFiles.push(file);
+        //   }
+        // }
 
         if (newFiles.length > 0) {
           attachmentPaths = await uploadAttachments(newFiles);
+          console.log({ attachmentPaths });
         }
       }
 
@@ -129,6 +131,7 @@ export default function LeaveForm({
           : undefined;
 
       const input = {
+        userId: Number(data.userId),
         leaveTypeId: Number(data.leaveTypeId),
         leaveYear: Number(data.leaveYear),
         leaveDuration: data.leaveDuration,
@@ -151,8 +154,7 @@ export default function LeaveForm({
       } else {
         await updateLeave({
           variables: {
-            id: Number(leave?.id),
-            updateLeaveInput: input,
+            updateLeaveInput: { ...input, id: Number(leave?.id) },
           },
         });
       }
@@ -168,14 +170,14 @@ export default function LeaveForm({
 
   const defaultValues = {
     userId: leave?.userId || "",
-    leaveTypeId: leave?.leaveTypeId || "",
+    leaveTypeId: leave?.leaveTypeId ? Number(leave.leaveTypeId) : "",
     leaveYear: leave?.leaveYear || new Date().getFullYear(),
     leaveDuration: leave?.leaveDuration || LeaveDuration.SINGLE_DAY,
     startDate: leave?.startDate
       ? dayjs(leave.startDate).format("DD-MM-YYYY")
       : dayjs().format("DD-MM-YYYY"),
     endDate: leave?.endDate ? dayjs(leave.endDate).format("DD-MM-YYYY") : "",
-    attachments: [],
+    attachments: leave?.attachments ? JSON.parse(leave.attachments)?.at(0) : [],
     notes: leave?.notes || "",
   };
 
@@ -208,13 +210,13 @@ function LeaveFormFields({
 
   const employeeOptions = employees.map((emp) => ({
     label: emp.profile?.fullName || emp.email,
-    value: emp.id.toString(),
+    value: emp.id,
   }));
 
   const leaveTypeOptions = (leaveTypesData?.leaveTypes?.data || []).map(
     (type) => ({
       label: type.name,
-      value: type.id.toString(),
+      value: type.id,
     })
   );
 
@@ -227,7 +229,7 @@ function LeaveFormFields({
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 3 }, (_, i) => ({
     label: (currentYear - 1 + i).toString(),
-    value: (currentYear - 1 + i).toString(),
+    value: currentYear - 1 + i,
   }));
 
   return (
@@ -309,17 +311,15 @@ function LeaveFormFields({
           Supporting Documents
         </h4>
         <CustomFileUploader
-          dataAuto="attachments"
           name="attachments"
-          label="Attachments"
-          // placeholder="Upload supporting documents"
-          required={false}
-          multiple={true}
+          // label="Attachments"
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          dataAuto="attachments"
+          multiple={true}
         />
-        <p className="text-xs text-base-content/60 mt-1">
+        {/* <p className="text-xs text-base-content/60 mt-1">
           You can upload multiple files (PDF, DOC, DOCX, JPG, PNG)
-        </p>
+        </p> */}
       </div>
 
       {/* Notes */}

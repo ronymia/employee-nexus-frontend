@@ -200,3 +200,48 @@ export const UPDATE_BUSINESS_SETTING = gql`
     }
   }
 `;
+
+export const UPDATE_BUSINESS_SCHEDULE = gql`
+  mutation UpdateBusinessSchedule(
+    $updateBusinessScheduleInput: UpdateBusinessScheduleInput!
+  ) {
+    updateBusinessSchedule(
+      updateBusinessScheduleInput: $updateBusinessScheduleInput
+    ) {
+      message
+      statusCode
+      success
+      data {
+        id
+        businessId
+        day
+        startTime
+        endTime
+        isWeekend
+      }
+    }
+  }
+`;
+
+export const UPDATE_BUSINESS = gql`
+  mutation UpdateBusiness($updateBusinessInput: UpdateBusinessInput!) {
+    updateBusiness(updateBusinessInput: $updateBusinessInput) {
+      message
+      statusCode
+      success
+      data {
+        id
+        name
+        email
+        phone
+        address
+        city
+        country
+        postcode
+        logo
+        website
+        status
+      }
+    }
+  }
+`;

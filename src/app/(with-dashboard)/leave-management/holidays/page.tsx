@@ -154,7 +154,7 @@ export default function HolidaysPage() {
       deleteHandler: async () => {
         try {
           await deleteHoliday({
-            variables: { id: holiday.id },
+            variables: { id: Number(holiday.id) },
           });
         } catch (error) {
           console.error("Error deleting holiday:", error);
@@ -409,7 +409,7 @@ export default function HolidaysPage() {
           customIsRecurring: row.isRecurring ? "Yes" : "No",
         }))}
         searchConfig={{
-          searchable: true,
+          searchable: false,
           debounceDelay: 500,
           defaultField: "customName",
           searchableFields: [
@@ -439,9 +439,9 @@ export default function HolidaysPage() {
       </CustomTable>
 
       {/* Holiday Form Modal */}
-      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
-        {popupOption.form === "holiday" &&
-          popupOption.actionType !== "delete" && (
+      {popupOption.actionType !== "delete" ? (
+        <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+          {popupOption.form === "holiday" && (
             <HolidayForm
               holiday={popupOption.data}
               actionType={popupOption.actionType as "create" | "update"}
@@ -454,10 +454,11 @@ export default function HolidaysPage() {
               }}
             />
           )}
-      </CustomPopup>
-
+        </CustomPopup>
+      ) : (
+        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      )}
       {/* Delete Confirmation Modal */}
-      {/* <FormModal popupOption={popupOption} setPopupOption={setPopupOption} /> */}
     </div>
   );
 }

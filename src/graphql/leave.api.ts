@@ -124,8 +124,8 @@ export const CREATE_LEAVE = gql`
 
 // UPDATE LEAVE
 export const UPDATE_LEAVE = gql`
-  mutation UpdateLeave($id: Int!, $updateLeaveInput: UpdateLeaveInput!) {
-    updateLeave(id: $id, updateLeaveInput: $updateLeaveInput) {
+  mutation UpdateLeave($updateLeaveInput: UpdateLeaveInput!) {
+    updateLeave(updateLeaveInput: $updateLeaveInput) {
       message
       statusCode
       success
