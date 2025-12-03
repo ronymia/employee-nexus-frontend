@@ -21,12 +21,15 @@ import {
   DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
 } from "@/graphql/work-schedules.api";
 import moment from "moment";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface ScheduleContentProps {
   userId: number;
 }
 
 export default function ScheduleContent({ userId }: ScheduleContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -127,13 +130,15 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
           <p className="text-base-content/60 text-center">
             No work schedule assigned yet
           </p>
-          <button
-            onClick={() => handleOpenForm("create")}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Assign Schedule
-          </button>
+          {hasPermission(Permissions.WorkScheduleUpdate) ? (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Assign Schedule
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -162,13 +167,15 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
         <h3 className="text-lg font-semibold text-base-content">
           Work Schedule Assignments
         </h3>
-        <button
-          onClick={() => handleOpenForm("create")}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <PiPlus size={18} />
-          Assign Schedule
-        </button>
+        {hasPermission(Permissions.WorkScheduleUpdate) ? (
+          <button
+            onClick={() => handleOpenForm("create")}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <PiPlus size={18} />
+            Assign Schedule
+          </button>
+        ) : null}
       </div>
 
       {/* Active Schedule Card */}
@@ -294,7 +301,7 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
       )}
 
       {/* Assignment History */}
-      {scheduleAssignments.length > 1 && (
+      {/* {scheduleAssignments.length > 1 && (
         <div>
           <h4 className="text-base font-semibold text-base-content mb-3">
             Assignment History
@@ -307,15 +314,17 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
                   key={assignment.id}
                   className="bg-base-100 rounded-lg p-4 shadow-sm border border-primary/20 relative"
                 >
-                  {/* Action Buttons */}
+                  Action Buttons
                   <div className="absolute top-3 right-3">
-                    <button
-                      onClick={() => handleDelete(assignment)}
-                      className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
-                      title="Delete Assignment"
-                    >
-                      <PiTrash size={16} />
-                    </button>
+                    {hasPermission(Permissions.WorkScheduleUpdate) ? (
+                      <button
+                        onClick={() => handleDelete(assignment)}
+                        className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
+                        title="Delete Assignment"
+                      >
+                        <PiTrash size={16} />
+                      </button>
+                    ) : null}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-16">
@@ -359,7 +368,7 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
               ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Popup Modal */}
       <CustomPopup
@@ -378,7 +387,7 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
       </CustomPopup>
 
       {/* Delete Confirmation Modal */}
-      <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      {/* <FormModal popupOption={popupOption} setPopupOption={setPopupOption} /> */}
     </div>
   );
 }

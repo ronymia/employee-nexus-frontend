@@ -290,6 +290,29 @@ export default function Sidebar({
         },
       ],
     },
+    // PAYROLL MANAGEMENT MENU
+    {
+      Icon: MdOutlineBusinessCenter,
+      label: menuNames.payroll_management,
+      path: "/payroll-management",
+      show: true,
+      subMenus: [
+        {
+          Icon: VscFileSubmodule,
+          label: "Payroll Components",
+          path: "/payroll-management/payroll-components",
+          show: true,
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Payroll Cycles",
+          path: "/payroll-management/payroll-cycles",
+          show: true,
+          subMenus: [],
+        },
+      ],
+    },
     // SETTINGS MENU
     {
       Icon: MdSettings,

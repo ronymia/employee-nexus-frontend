@@ -14,6 +14,7 @@ import {
   GET_EDUCATION_HISTORY_BY_USER_ID,
 } from "@/graphql/education-history.api";
 import { IEducationHistory } from "@/types";
+import dayjs from "dayjs";
 
 interface EducationFormProps {
   userId: number;
@@ -82,8 +83,12 @@ export default function EducationForm({
     institution: education?.institution || "",
     country: education?.country || "",
     city: education?.city || "",
-    startDate: education?.startDate || "",
-    endDate: education?.endDate || "",
+    startDate: education?.startDate
+      ? dayjs(education.startDate, "DD-MM-YYYY").format("DD-MM-YYYY")
+      : "",
+    endDate: education?.endDate
+      ? dayjs(education.endDate, "DD-MM-YYYY").format("DD-MM-YYYY")
+      : "",
     isCurrentlyStudying: education?.isCurrentlyStudying || false,
     grade: education?.grade || "",
     description: education?.description || "",
@@ -177,7 +182,7 @@ function EducationFormFields() {
             name="startDate"
             label="Start Date"
             required={true}
-            formatDate="MM-YYYY"
+            // formatDate="MM-YYYY"
           />
           {!isCurrentlyStudying && (
             <CustomDatePicker
@@ -185,7 +190,7 @@ function EducationFormFields() {
               name="endDate"
               label="End Date"
               required={false}
-              formatDate="MM-YYYY"
+              // formatDate="MM-YYYY"
             />
           )}
           <div className="md:col-span-2">

@@ -16,6 +16,9 @@ import {
   PiShareNetwork,
 } from "react-icons/pi";
 import type { IconType } from "react-icons";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
+import { useMemo } from "react";
 
 interface ProfileTabsProps {
   activeTab: string;
@@ -26,28 +29,103 @@ interface Tab {
   id: string;
   label: string;
   icon: IconType;
+  permission?: string;
 }
 
-const TABS: Tab[] = [
-  { id: "profile", label: "Profile", icon: PiUser },
-  { id: "education", label: "Education History", icon: PiGraduationCap },
-  { id: "experience", label: "Experience", icon: PiBriefcase },
-  { id: "schedule", label: "Work Schedule", icon: PiCalendar },
-  { id: "attendance", label: "Attendance", icon: PiClipboardText },
-  { id: "leave", label: "Leave Management", icon: PiClock },
-  { id: "payslip", label: "Pay Slip", icon: PiReceipt },
-  { id: "projects", label: "Projects", icon: PiFolderOpen },
-  { id: "documents", label: "Documents", icon: PiFileText },
-  { id: "notes", label: "Notes", icon: PiClipboardText },
-  { id: "letters", label: "Letters", icon: PiEnvelope },
-  { id: "assets", label: "Assets", icon: PiWallet },
-  { id: "social", label: "Social Links", icon: PiShareNetwork },
+const ALL_TABS: Tab[] = [
+  {
+    id: "profile",
+    label: "Profile",
+    icon: PiUser,
+    permission: Permissions.ProfileRead,
+  },
+  {
+    id: "education",
+    label: "Education History",
+    icon: PiGraduationCap,
+    permission: Permissions.EducationHistoryRead,
+  },
+  {
+    id: "experience",
+    label: "Experience",
+    icon: PiBriefcase,
+    permission: Permissions.JobHistoryRead,
+  },
+  {
+    id: "schedule",
+    label: "Work Schedule",
+    icon: PiCalendar,
+    permission: Permissions.WorkScheduleRead,
+  },
+  {
+    id: "attendance",
+    label: "Attendance",
+    icon: PiClipboardText,
+    permission: Permissions.AttendanceRead,
+  },
+  {
+    id: "leave",
+    label: "Leave Management",
+    icon: PiClock,
+    permission: Permissions.LeaveRead,
+  },
+  {
+    id: "payslip",
+    label: "Pay Slip",
+    icon: PiReceipt,
+    permission: Permissions.PayrollItemRead,
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    icon: PiFolderOpen,
+    permission: Permissions.ProjectRead,
+  },
+  {
+    id: "documents",
+    label: "Documents",
+    icon: PiFileText,
+    permission: Permissions.DocumentRead,
+  },
+  {
+    id: "notes",
+    label: "Notes",
+    icon: PiClipboardText,
+    permission: Permissions.NoteRead,
+  },
+  {
+    id: "letters",
+    label: "Letters",
+    icon: PiEnvelope,
+    permission: Permissions.DocumentRead,
+  },
+  {
+    id: "assets",
+    label: "Assets",
+    icon: PiWallet,
+    permission: Permissions.AssetRead,
+  },
+  {
+    id: "social",
+    label: "Social Links",
+    icon: PiShareNetwork,
+    permission: Permissions.SocialLinkRead,
+  },
 ];
 
 export default function ProfileTabs({
   activeTab,
   setActiveTab,
 }: ProfileTabsProps) {
+  const { hasPermission } = usePermissionGuard();
+
+  // Filter tabs based on permissions
+  const TABS = useMemo(() => {
+    return ALL_TABS.filter((tab) => {
+      if (!tab.permission) return true;
+      return hasPermission(tab.permission);
+    });
+  }, [hasPermission]);
   return (
     <HorizontalScrollbar>
       <div className="flex gap-1 min-w-max">

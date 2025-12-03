@@ -6,4 +6,5 @@ export const menuNames = {
   projects: "Projects",
   attendance_management: "Attendance Management",
   leave_management: "Leave Management",
+  payroll_management: "Payroll Management",
 };

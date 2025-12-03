@@ -22,12 +22,15 @@ import AssetAssignmentForm from "./components/AssetAssignmentForm";
 import moment from "moment";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_USER_ASSET_ASSIGNMENTS, RETURN_ASSET } from "@/graphql/asset.api";
+import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 
 interface AssetsContentProps {
   userId: number;
 }
 
 export default function AssetsContent({ userId }: AssetsContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -146,13 +149,15 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
           <p className="text-base-content/60 text-center">
             No assets assigned yet
           </p>
-          <button
-            onClick={() => handleOpenForm("create")}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Assign Asset
-          </button>
+          {hasPermission(Permissions.AssetUpdate) ? (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Assign Asset
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -214,17 +219,19 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
 
         <div className="p-5 relative">
           {/* Action Buttons */}
-          <div className="absolute top-3 right-3 flex gap-2">
-            {isAssigned && (
-              <button
-                onClick={() => handleReturn(assignment.asset?.id!)}
-                className="btn btn-xs btn-ghost btn-circle text-info hover:bg-info/10"
-                title="Return Asset"
-              >
-                <PiClock size={16} />
-              </button>
-            )}
-          </div>
+          {hasPermission(Permissions.AssetUpdate) ? (
+            <div className="absolute top-3 right-3 flex gap-2">
+              {isAssigned && (
+                <button
+                  onClick={() => handleReturn(assignment.asset?.id!)}
+                  className="btn btn-xs btn-ghost btn-circle text-info hover:bg-info/10"
+                  title="Return Asset"
+                >
+                  <PiClock size={16} />
+                </button>
+              )}
+            </div>
+          ) : null}
 
           {/* Asset Details */}
           <div className="space-y-3 pr-24">
@@ -320,13 +327,15 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
             | Returned: {returnedAssets.length}
           </p>
         </div>
-        <button
-          onClick={() => handleOpenForm("create")}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <PiPlus size={18} />
-          Assign Asset
-        </button>
+        {hasPermission(Permissions.AssetUpdate) ? (
+          <button
+            onClick={() => handleOpenForm("create")}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <PiPlus size={18} />
+            Assign Asset
+          </button>
+        ) : null}
       </div>
 
       {/* Currently Assigned Assets */}

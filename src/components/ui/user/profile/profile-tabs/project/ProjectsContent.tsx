@@ -21,12 +21,15 @@ import {
   UNASSIGN_PROJECT_MEMBER,
 } from "@/graphql/project.api";
 import moment from "moment";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface ProjectsContentProps {
   userId: number;
 }
 
 export default function ProjectsContent({ userId }: ProjectsContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -149,13 +152,15 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
           <p className="text-base-content/60 text-center">
             Not assigned to any project yet
           </p>
-          <button
-            onClick={() => handleOpenForm("create")}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Assign to Project
-          </button>
+          {hasPermission(Permissions.ProjectMemberCreate) ? (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Assign to Project
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -204,13 +209,15 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
         <div className="p-5 relative">
           {/* Action Buttons */}
           <div className="absolute top-3 right-3">
-            <button
-              onClick={() => handleDelete(member)}
-              className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
-              title="Remove from Project"
-            >
-              <PiTrash size={16} />
-            </button>
+            {hasPermission(Permissions.ProjectMemberDelete) ? (
+              <button
+                onClick={() => handleDelete(member)}
+                className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
+                title="Remove from Project"
+              >
+                <PiTrash size={16} />
+              </button>
+            ) : null}
           </div>
 
           {/* Project Details */}
@@ -284,13 +291,15 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
         <h3 className="text-lg font-semibold text-base-content">
           Project Assignments
         </h3>
-        <button
-          onClick={() => handleOpenForm("create")}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <PiPlus size={18} />
-          Assign to Project
-        </button>
+        {hasPermission(Permissions.NoteCreate) ? (
+          <button
+            onClick={() => handleOpenForm("create")}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <PiPlus size={18} />
+            Assign to Project
+          </button>
+        ) : null}
       </div>
 
       {/* Active/In Progress Projects */}

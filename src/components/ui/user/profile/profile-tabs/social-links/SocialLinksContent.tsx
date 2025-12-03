@@ -18,6 +18,8 @@ import SocialLinkForm from "./components/SocialLinkForm";
 import { useQuery } from "@apollo/client/react";
 import { GET_SOCIAL_LINKS_BY_PROFILE_ID } from "@/graphql/social-links.api";
 import CustomLoading from "@/components/loader/CustomLoading";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface SocialLinksContentProps {
   userId: number;
@@ -26,6 +28,7 @@ interface SocialLinksContentProps {
 export default function SocialLinksContent({
   userId,
 }: SocialLinksContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -125,13 +128,15 @@ export default function SocialLinksContent({
           <p className="text-base-content/60 text-center">
             No social links added yet
           </p>
-          <button
-            onClick={handleOpenForm}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Add Social Links
-          </button>
+          {hasPermission(Permissions.SocialLinkCreate) ? (
+            <button
+              onClick={handleOpenForm}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Add Social Links
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -165,13 +170,15 @@ export default function SocialLinksContent({
             Connect and share social profiles
           </p>
         </div>
-        <button
-          onClick={handleOpenForm}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <PiPencilSimple size={18} />
-          Edit Links
-        </button>
+        {hasPermission(Permissions.SocialLinkUpdate) ? (
+          <button
+            onClick={handleOpenForm}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <PiPencilSimple size={18} />
+            Edit Links
+          </button>
+        ) : null}
       </div>
 
       {/* Social Links Grid */}

@@ -22,6 +22,8 @@ import usePopupOption from "@/hooks/usePopupOption";
 import { GET_HOLIDAYS, DELETE_HOLIDAY } from "@/graphql/holiday.api";
 import { IHoliday, HolidayType } from "@/types/holiday.type";
 import CustomLoading from "@/components/loader/CustomLoading";
+import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 const dummyHolidays: IHoliday[] = [
   {
     id: 1,
@@ -86,6 +88,7 @@ const dummyHolidays: IHoliday[] = [
 ];
 
 export default function HolidaysPage() {
+  const { hasPermission } = usePermissionGuard();
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -323,7 +326,7 @@ export default function HolidaysPage() {
       </div>
 
       {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -367,7 +370,7 @@ export default function HolidaysPage() {
             <PiCalendarBlank size={32} className="text-warning" />
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* Holiday Table */}
       <CustomTable
@@ -378,7 +381,7 @@ export default function HolidaysPage() {
             type: "button" as const,
             Icon: PiPencilSimple,
             handler: (row: any) => handleEdit(row),
-            permissions: [],
+            permissions: [Permissions.HolidayRead],
             disabledOn: [],
           },
           {
@@ -386,7 +389,7 @@ export default function HolidaysPage() {
             type: "button" as const,
             Icon: PiTrash,
             handler: (row: any) => handleDelete(row),
-            permissions: [],
+            permissions: [Permissions.HolidayDelete],
             disabledOn: [],
           },
         ]}
@@ -415,22 +418,24 @@ export default function HolidaysPage() {
           ],
         }}
       >
-        <button
-          className="btn btn-primary gap-2"
-          onClick={() =>
-            setPopupOption({
-              open: true,
-              closeOnDocumentClick: true,
-              actionType: "create",
-              form: "holiday",
-              data: null,
-              title: "Add Holiday",
-            })
-          }
-        >
-          <PiPlusCircle size={18} />
-          Add Holiday
-        </button>
+        {hasPermission(Permissions.AttendanceCreate) ? (
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "create",
+                form: "holiday",
+                data: null,
+                title: "Add Holiday",
+              })
+            }
+          >
+            <PiPlusCircle size={18} />
+            Add Holiday
+          </button>
+        ) : null}
       </CustomTable>
 
       {/* Holiday Form Modal */}

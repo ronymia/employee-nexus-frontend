@@ -185,7 +185,7 @@ function ExperienceFormFields() {
             name="startDate"
             label="Start Date"
             required={true}
-            formatDate="MM-YYYY"
+            // formatDate="MM-YYYY"
           />
           {!isCurrentJob && (
             <CustomDatePicker
@@ -193,7 +193,7 @@ function ExperienceFormFields() {
               name="endDate"
               label="End Date"
               required={false}
-              formatDate="MM-YYYY"
+              // formatDate="MM-YYYY"
             />
           )}
           <div className="md:col-span-2">

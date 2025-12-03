@@ -26,12 +26,15 @@ import {
 } from "@/graphql/document.api";
 import CustomLoading from "@/components/loader/CustomLoading";
 import FormModal from "@/components/form/FormModal";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface DocumentsContentProps {
   userId: number;
 }
 
 export default function DocumentsContent({ userId }: DocumentsContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -179,13 +182,15 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
           <p className="text-base-content/60 text-center">
             No documents uploaded yet
           </p>
-          <button
-            onClick={() => handleOpenForm("create")}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Upload Document
-          </button>
+          {hasPermission(Permissions.DocumentCreate) ? (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Upload Document
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -218,13 +223,15 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
             {documents.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={() => handleOpenForm("create")}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <PiPlus size={18} />
-          Upload Document
-        </button>
+        {hasPermission(Permissions.DocumentCreate) ? (
+          <button
+            onClick={() => handleOpenForm("create")}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <PiPlus size={18} />
+            Upload Document
+          </button>
+        ) : null}
       </div>
 
       {/* Documents Grid */}
@@ -246,20 +253,24 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
                 >
                   <PiDownload size={16} />
                 </button>
-                <button
-                  onClick={() => handleOpenForm("update", document)}
-                  className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
-                  title="Edit"
-                >
-                  <PiPencilSimple size={16} />
-                </button>
-                <button
-                  onClick={() => documentDeleteHandler(document.id)}
-                  className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
-                  title="Delete"
-                >
-                  <PiTrash size={16} />
-                </button>
+                {hasPermission(Permissions.DocumentUpdate) ? (
+                  <button
+                    onClick={() => handleOpenForm("update", document)}
+                    className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
+                    title="Edit"
+                  >
+                    <PiPencilSimple size={16} />
+                  </button>
+                ) : null}
+                {hasPermission(Permissions.DocumentDelete) ? (
+                  <button
+                    onClick={() => documentDeleteHandler(document.id)}
+                    className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
+                    title="Delete"
+                  >
+                    <PiTrash size={16} />
+                  </button>
+                ) : null}
               </div>
 
               {/* Document Content */}
