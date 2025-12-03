@@ -1,5 +1,6 @@
 export const menuNames = {
   dashboard: "Dashboard",
+  notifications: "Notifications",
   business: "Businesses",
   subscription_plans: "Subscription Plans",
   features: "Features",
