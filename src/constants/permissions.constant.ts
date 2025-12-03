@@ -22,12 +22,27 @@ export enum PermissionResource {
   WORK_SCHEDULE = "Work Schedule",
   DEPARTMENT = "Department",
   LEAVE_TYPE = "Leave Type",
-  ATTENDANCE_SETTINGS = "Attendance Settings",
-  LEAVE_SETTINGS = "Leave Settings",
-  BUSINESS_SETTINGS = "Business Settings",
   ASSET_TYPE = "Asset Type",
   ASSET = "Asset",
   PROJECT = "Project",
+  PROJECT_MEMBER = "Project Member",
+  ATTENDANCE_SETTINGS = "Attendance Settings",
+  LEAVE_SETTINGS = "Leave Settings",
+  BUSINESS_SETTINGS = "Business Settings",
+  DOCUMENT = "Document",
+  NOTE = "Note",
+  SOCIAL_LINK = "Social Link",
+  ATTENDANCE = "Attendance",
+  LEAVE = "Leave",
+  HOLIDAY = "Holiday",
+  PAYROLL_COMPONENT = "Payroll Component",
+  PAYROLL_CYCLE = "Payroll Cycle",
+  PAYROLL_ITEM = "Payroll Item",
+  PROFILE = "Profile",
+  EDUCATION_HISTORY = "Education History",
+  JOB_HISTORY = "Job History",
+  EMERGENCY_CONTACT = "Emergency Contact",
+  EMPLOYMENT_DETAILS = "Employment Details",
 }
 
 // Permission Constants for easy usage
@@ -156,4 +171,94 @@ export const Permissions = {
   ProjectRead: `${PermissionResource.PROJECT}:${PermissionAction.READ}`,
   ProjectUpdate: `${PermissionResource.PROJECT}:${PermissionAction.UPDATE}`,
   ProjectDelete: `${PermissionResource.PROJECT}:${PermissionAction.DELETE}`,
+
+  // Project Member Permissions
+  ProjectMemberCreate: `${PermissionResource.PROJECT_MEMBER}:${PermissionAction.CREATE}`,
+  ProjectMemberRead: `${PermissionResource.PROJECT_MEMBER}:${PermissionAction.READ}`,
+  ProjectMemberUpdate: `${PermissionResource.PROJECT_MEMBER}:${PermissionAction.UPDATE}`,
+  ProjectMemberDelete: `${PermissionResource.PROJECT_MEMBER}:${PermissionAction.DELETE}`,
+
+  // Document Permissions
+  DocumentCreate: `${PermissionResource.DOCUMENT}:${PermissionAction.CREATE}`,
+  DocumentRead: `${PermissionResource.DOCUMENT}:${PermissionAction.READ}`,
+  DocumentUpdate: `${PermissionResource.DOCUMENT}:${PermissionAction.UPDATE}`,
+  DocumentDelete: `${PermissionResource.DOCUMENT}:${PermissionAction.DELETE}`,
+
+  // Note Permissions
+  NoteCreate: `${PermissionResource.NOTE}:${PermissionAction.CREATE}`,
+  NoteRead: `${PermissionResource.NOTE}:${PermissionAction.READ}`,
+  NoteUpdate: `${PermissionResource.NOTE}:${PermissionAction.UPDATE}`,
+  NoteDelete: `${PermissionResource.NOTE}:${PermissionAction.DELETE}`,
+
+  // Social Link Permissions
+  SocialLinkCreate: `${PermissionResource.SOCIAL_LINK}:${PermissionAction.CREATE}`,
+  SocialLinkRead: `${PermissionResource.SOCIAL_LINK}:${PermissionAction.READ}`,
+  SocialLinkUpdate: `${PermissionResource.SOCIAL_LINK}:${PermissionAction.UPDATE}`,
+  SocialLinkDelete: `${PermissionResource.SOCIAL_LINK}:${PermissionAction.DELETE}`,
+
+  // Attendance Permissions
+  AttendanceCreate: `${PermissionResource.ATTENDANCE}:${PermissionAction.CREATE}`,
+  AttendanceRead: `${PermissionResource.ATTENDANCE}:${PermissionAction.READ}`,
+  AttendanceUpdate: `${PermissionResource.ATTENDANCE}:${PermissionAction.UPDATE}`,
+  AttendanceDelete: `${PermissionResource.ATTENDANCE}:${PermissionAction.DELETE}`,
+
+  // Leave Permissions
+  LeaveCreate: `${PermissionResource.LEAVE}:${PermissionAction.CREATE}`,
+  LeaveRead: `${PermissionResource.LEAVE}:${PermissionAction.READ}`,
+  LeaveUpdate: `${PermissionResource.LEAVE}:${PermissionAction.UPDATE}`,
+  LeaveDelete: `${PermissionResource.LEAVE}:${PermissionAction.DELETE}`,
+
+  // Holiday Permissions
+  HolidayCreate: `${PermissionResource.HOLIDAY}:${PermissionAction.CREATE}`,
+  HolidayRead: `${PermissionResource.HOLIDAY}:${PermissionAction.READ}`,
+  HolidayUpdate: `${PermissionResource.HOLIDAY}:${PermissionAction.UPDATE}`,
+  HolidayDelete: `${PermissionResource.HOLIDAY}:${PermissionAction.DELETE}`,
+
+  // Payroll Component Permissions
+  PayrollComponentCreate: `${PermissionResource.PAYROLL_COMPONENT}:${PermissionAction.CREATE}`,
+  PayrollComponentRead: `${PermissionResource.PAYROLL_COMPONENT}:${PermissionAction.READ}`,
+  PayrollComponentUpdate: `${PermissionResource.PAYROLL_COMPONENT}:${PermissionAction.UPDATE}`,
+  PayrollComponentDelete: `${PermissionResource.PAYROLL_COMPONENT}:${PermissionAction.DELETE}`,
+
+  // Payroll Cycle Permissions
+  PayrollCycleCreate: `${PermissionResource.PAYROLL_CYCLE}:${PermissionAction.CREATE}`,
+  PayrollCycleRead: `${PermissionResource.PAYROLL_CYCLE}:${PermissionAction.READ}`,
+  PayrollCycleUpdate: `${PermissionResource.PAYROLL_CYCLE}:${PermissionAction.UPDATE}`,
+  PayrollCycleDelete: `${PermissionResource.PAYROLL_CYCLE}:${PermissionAction.DELETE}`,
+
+  // Payroll Item Permissions
+  PayrollItemCreate: `${PermissionResource.PAYROLL_ITEM}:${PermissionAction.CREATE}`,
+  PayrollItemRead: `${PermissionResource.PAYROLL_ITEM}:${PermissionAction.READ}`,
+  PayrollItemUpdate: `${PermissionResource.PAYROLL_ITEM}:${PermissionAction.UPDATE}`,
+  PayrollItemDelete: `${PermissionResource.PAYROLL_ITEM}:${PermissionAction.DELETE}`,
+
+  // Profile Permissions
+  ProfileCreate: `${PermissionResource.PROFILE}:${PermissionAction.CREATE}`,
+  ProfileRead: `${PermissionResource.PROFILE}:${PermissionAction.READ}`,
+  ProfileUpdate: `${PermissionResource.PROFILE}:${PermissionAction.UPDATE}`,
+  ProfileDelete: `${PermissionResource.PROFILE}:${PermissionAction.DELETE}`,
+
+  // Education History Permissions
+  EducationHistoryCreate: `${PermissionResource.EDUCATION_HISTORY}:${PermissionAction.CREATE}`,
+  EducationHistoryRead: `${PermissionResource.EDUCATION_HISTORY}:${PermissionAction.READ}`,
+  EducationHistoryUpdate: `${PermissionResource.EDUCATION_HISTORY}:${PermissionAction.UPDATE}`,
+  EducationHistoryDelete: `${PermissionResource.EDUCATION_HISTORY}:${PermissionAction.DELETE}`,
+
+  // Job History Permissions
+  JobHistoryCreate: `${PermissionResource.JOB_HISTORY}:${PermissionAction.CREATE}`,
+  JobHistoryRead: `${PermissionResource.JOB_HISTORY}:${PermissionAction.READ}`,
+  JobHistoryUpdate: `${PermissionResource.JOB_HISTORY}:${PermissionAction.UPDATE}`,
+  JobHistoryDelete: `${PermissionResource.JOB_HISTORY}:${PermissionAction.DELETE}`,
+
+  // Emergency Contact Permissions
+  EmergencyContactCreate: `${PermissionResource.EMERGENCY_CONTACT}:${PermissionAction.CREATE}`,
+  EmergencyContactRead: `${PermissionResource.EMERGENCY_CONTACT}:${PermissionAction.READ}`,
+  EmergencyContactUpdate: `${PermissionResource.EMERGENCY_CONTACT}:${PermissionAction.UPDATE}`,
+  EmergencyContactDelete: `${PermissionResource.EMERGENCY_CONTACT}:${PermissionAction.DELETE}`,
+
+  // Employment Details Permissions
+  EmploymentDetailsCreate: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.CREATE}`,
+  EmploymentDetailsRead: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.READ}`,
+  EmploymentDetailsUpdate: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.UPDATE}`,
+  EmploymentDetailsDelete: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.DELETE}`,
 } as const;
