@@ -32,3 +32,4 @@ export * from "./project.type";
 export * from "./holiday.type";
 export * from "./attendance.type";
 export * from "./leave.type";
+export * from "./payroll.type";
