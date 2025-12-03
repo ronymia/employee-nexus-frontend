@@ -12,12 +12,15 @@ import {
 } from "@/graphql/job-history.api";
 import CustomLoading from "@/components/loader/CustomLoading";
 import FormModal from "@/components/form/FormModal";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface ExperienceContentProps {
   userId: number;
 }
 
 export default function ExperienceContent({ userId }: ExperienceContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -116,13 +119,15 @@ export default function ExperienceContent({ userId }: ExperienceContentProps) {
           <p className="text-base-content/60 text-center">
             No work experience added yet
           </p>
-          <button
-            onClick={() => handleOpenForm("create")}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Add Experience
-          </button>
+          {hasPermission(Permissions.JobHistoryCreate) ? (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Add Experience
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -172,20 +177,24 @@ export default function ExperienceContent({ userId }: ExperienceContentProps) {
             >
               {/* Action Buttons */}
               <div className="absolute top-4 right-4 flex gap-2">
-                <button
-                  onClick={() => handleOpenForm("update", job)}
-                  className="btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
-                  title="Edit Experience"
-                >
-                  <PiPencilSimple size={18} />
-                </button>
-                <button
-                  onClick={() => jobHistoryDeleteHandler(job.id)}
-                  className="btn btn-sm btn-ghost btn-circle text-error hover:bg-error/10"
-                  title="Delete Experience"
-                >
-                  <PiTrash size={18} />
-                </button>
+                {hasPermission(Permissions.JobHistoryUpdate) ? (
+                  <button
+                    onClick={() => handleOpenForm("update", job)}
+                    className="btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
+                    title="Edit Experience"
+                  >
+                    <PiPencilSimple size={18} />
+                  </button>
+                ) : null}
+                {hasPermission(Permissions.JobHistoryDelete) ? (
+                  <button
+                    onClick={() => jobHistoryDeleteHandler(job.id)}
+                    className="btn btn-sm btn-ghost btn-circle text-error hover:bg-error/10"
+                    title="Delete Experience"
+                  >
+                    <PiTrash size={18} />
+                  </button>
+                ) : null}
               </div>
 
               {/* Job Details */}

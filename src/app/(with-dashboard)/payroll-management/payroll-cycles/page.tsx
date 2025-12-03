@@ -33,8 +33,10 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayrollCycleForm from "./PayrollCycleForm";
 import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 
 export default function PayrollCyclesPage() {
+  const { hasPermission } = usePermissionGuard();
   const router = useRouter();
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
@@ -307,7 +309,7 @@ export default function PayrollCyclesPage() {
               handler: (cycle: IPayrollCycle) =>
                 setDeleteModal({ open: true, id: cycle.id }),
               Icon: PiTrash,
-              permissions: [Permissions.DepartmentUpdate],
+              permissions: [Permissions.PayrollCycleDelete],
               disabledOn: [
                 { accessorKey: "status", value: PayrollCycleStatus.PAID },
                 { accessorKey: "status", value: PayrollCycleStatus.APPROVED },
@@ -336,22 +338,24 @@ export default function PayrollCyclesPage() {
             ],
           }}
         >
-          <button
-            className="btn btn-primary gap-2"
-            onClick={() =>
-              setPopupOption({
-                open: true,
-                closeOnDocumentClick: true,
-                actionType: "create",
-                form: "payrollCycle" as any,
-                data: null,
-                title: "Create Payroll Cycle",
-              })
-            }
-          >
-            <PiPlusCircle size={18} />
-            Add Cycle
-          </button>
+          {hasPermission(Permissions.PayrollCycleCreate) ? (
+            <button
+              className="btn btn-primary gap-2"
+              onClick={() =>
+                setPopupOption({
+                  open: true,
+                  closeOnDocumentClick: true,
+                  actionType: "create",
+                  form: "payrollCycle" as any,
+                  data: null,
+                  title: "Create Payroll Cycle",
+                })
+              }
+            >
+              <PiPlusCircle size={18} />
+              Add Cycle
+            </button>
+          ) : null}
         </CustomTable>
       )}
 

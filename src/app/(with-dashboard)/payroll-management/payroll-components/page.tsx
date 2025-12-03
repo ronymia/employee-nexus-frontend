@@ -28,8 +28,10 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayrollComponentForm from "./PayrollComponentForm";
 import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 
 export default function PayrollComponentsPage() {
+  const { hasPermission } = usePermissionGuard();
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -213,7 +215,7 @@ export default function PayrollComponentsPage() {
       </div>
 
       {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -257,7 +259,7 @@ export default function PayrollComponentsPage() {
             <PiToggleLeft size={32} className="text-info" />
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* Components Table */}
       {loading ? (
@@ -271,7 +273,7 @@ export default function PayrollComponentsPage() {
               type: "button" as const,
               handler: handleEdit,
               Icon: PiPencil,
-              permissions: [Permissions.DepartmentUpdate],
+              permissions: [Permissions.PayrollComponentUpdate],
               disabledOn: [],
             },
             {
@@ -280,7 +282,7 @@ export default function PayrollComponentsPage() {
               handler: (component: IPayrollComponent) =>
                 setDeleteModal({ open: true, id: component.id }),
               Icon: PiTrash,
-              permissions: [Permissions.DepartmentUpdate],
+              permissions: [Permissions.PayrollComponentDelete],
               disabledOn: [],
             },
           ]}
@@ -321,22 +323,24 @@ export default function PayrollComponentsPage() {
             ],
           }}
         >
-          <button
-            className="btn btn-primary gap-2"
-            onClick={() =>
-              setPopupOption({
-                open: true,
-                closeOnDocumentClick: true,
-                actionType: "create",
-                form: "payrollComponent" as any,
-                data: null,
-                title: "Create Payroll Component",
-              })
-            }
-          >
-            <PiPlusCircle size={18} />
-            Add Component
-          </button>
+          {hasPermission(Permissions.PayrollComponentCreate) ? (
+            <button
+              className="btn btn-primary gap-2"
+              onClick={() =>
+                setPopupOption({
+                  open: true,
+                  closeOnDocumentClick: true,
+                  actionType: "create",
+                  form: "payrollComponent" as any,
+                  data: null,
+                  title: "Create Payroll Component",
+                })
+              }
+            >
+              <PiPlusCircle size={18} />
+              Add Component
+            </button>
+          ) : null}
         </CustomTable>
       )}
 

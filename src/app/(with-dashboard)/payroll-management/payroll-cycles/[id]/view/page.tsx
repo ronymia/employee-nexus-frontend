@@ -40,8 +40,10 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayrollItemForm from "./PayrollItemForm";
 import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 
 export default function PayrollCycleDetailPage() {
+  const { hasPermission } = usePermissionGuard();
   const params = useParams();
   const cycleId = params.id as string;
 
@@ -404,23 +406,23 @@ export default function PayrollCycleDetailPage() {
         <CustomTable
           isLoading={itemsLoading}
           actions={[
-            {
-              name: "View",
-              type: "button" as const,
-              handler: (item: IPayrollItem) => {
-                // TODO: Navigate to item detail
-                console.log("View item:", item);
-              },
-              Icon: PiEye,
-              permissions: [Permissions.DepartmentUpdate],
-              disabledOn: [],
-            },
+            // {
+            //   name: "View",
+            //   type: "button" as const,
+            //   handler: (item: IPayrollItem) => {
+            //     // TODO: Navigate to item detail
+            //     console.log("View item:", item);
+            //   },
+            //   Icon: PiEye,
+            //   permissions: [Permissions.PayrollItemRead],
+            //   disabledOn: [],
+            // },
             // {
             //   name: "Edit",
             //   type: "button" as const,
             //   handler: handleEdit,
             //   Icon: PiPencil,
-            //   permissions: [Permissions.DepartmentUpdate],
+            //   permissions: [Permissions.PayrollItemUpdate],
             //   disabledOn: [
             //     { accessorKey: "status", value: PayrollItemStatus.PAID },
             //   ],
@@ -430,7 +432,7 @@ export default function PayrollCycleDetailPage() {
               type: "button" as const,
               handler: handleApproveItem,
               Icon: PiCheckCircle,
-              permissions: [Permissions.DepartmentUpdate],
+              permissions: [Permissions.PayrollItemUpdate],
               disabledOn: [
                 { accessorKey: "status", value: PayrollItemStatus.APPROVED },
                 { accessorKey: "status", value: PayrollItemStatus.PAID },
@@ -441,7 +443,7 @@ export default function PayrollCycleDetailPage() {
               type: "button" as const,
               handler: handleMarkPaid,
               Icon: PiCurrencyDollar,
-              permissions: [Permissions.DepartmentUpdate],
+              permissions: [Permissions.PayrollItemUpdate],
               disabledOn: [
                 { accessorKey: "status", value: PayrollItemStatus.PAID },
               ],
@@ -452,7 +454,7 @@ export default function PayrollCycleDetailPage() {
             //   handler: (item: IPayrollItem) =>
             //     setDeleteModal({ open: true, id: item.id, type: "item" }),
             //   Icon: PiTrash,
-            //   permissions: [Permissions.DepartmentUpdate],
+            //   permissions: [Permissions.PayrollItemUpdate],
             //   disabledOn: [
             //     { accessorKey: "status", value: PayrollItemStatus.PAID },
             //   ],
@@ -479,22 +481,24 @@ export default function PayrollCycleDetailPage() {
             ],
           }}
         >
-          <button
-            className="btn btn-primary gap-2"
-            onClick={() =>
-              setPopupOption({
-                open: true,
-                closeOnDocumentClick: true,
-                actionType: "create",
-                form: "payrollItem" as any,
-                data: { payrollCycleId: Number(cycleId) },
-                title: "Add Payroll Item",
-              })
-            }
-          >
-            <PiPlusCircle size={18} />
-            Add Employee
-          </button>
+          {hasPermission(Permissions.PayrollItemCreate) ? (
+            <button
+              className="btn btn-primary gap-2"
+              onClick={() =>
+                setPopupOption({
+                  open: true,
+                  closeOnDocumentClick: true,
+                  actionType: "create",
+                  form: "payrollItem" as any,
+                  data: { payrollCycleId: Number(cycleId) },
+                  title: "Add Payroll Item",
+                })
+              }
+            >
+              <PiPlusCircle size={18} />
+              Add Employee
+            </button>
+          ) : null}
         </CustomTable>
       )}
 

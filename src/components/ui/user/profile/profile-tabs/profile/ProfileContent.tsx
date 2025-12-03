@@ -11,12 +11,15 @@ import { UPDATE_PROFILE } from "@/graphql/profile.api";
 import { useMutation } from "@apollo/client/react";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
 import dayjs from "dayjs";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface ProfileContentProps {
   employee?: IEmployee;
 }
 
 export default function ProfileContent({ employee }: ProfileContentProps) {
+  const { hasPermission } = usePermissionGuard();
   // POPUP STATE MANAGEMENT
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
@@ -65,15 +68,17 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
     <div className="space-y-6">
       {/* Personal Information */}
       <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20 relative">
-        <button
-          onClick={() =>
-            handleOpenForm("profileInfo", "Update Profile Information")
-          }
-          className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
-          title="Edit Profile Info"
-        >
-          <PiPencilSimple size={18} />
-        </button>
+        {hasPermission(Permissions.ProfileUpdate) ? (
+          <button
+            onClick={() =>
+              handleOpenForm("profileInfo", "Update Profile Information")
+            }
+            className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
+            title="Edit Profile Info"
+          >
+            <PiPencilSimple size={18} />
+          </button>
+        ) : null}
         <h3 className="text-lg font-semibold mb-4 pb-2 border-b border-primary/30">
           Personal Information
         </h3>
@@ -174,15 +179,17 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
 
       {/* Emergency Contact */}
       <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20 relative">
-        <button
-          onClick={() =>
-            handleOpenForm("emergencyContact", "Update Emergency Contact")
-          }
-          className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
-          title="Edit Emergency Contact"
-        >
-          <PiPencilSimple size={18} />
-        </button>
+        {hasPermission(Permissions.ProfileUpdate) ? (
+          <button
+            onClick={() =>
+              handleOpenForm("emergencyContact", "Update Emergency Contact")
+            }
+            className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
+            title="Edit Emergency Contact"
+          >
+            <PiPencilSimple size={18} />
+          </button>
+        ) : null}
         <h3 className="text-lg font-semibold mb-4 pb-2 border-b border-primary/30">
           Emergency Contact
         </h3>
@@ -216,15 +223,17 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
 
       {/* Employment Details */}
       <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20 relative">
-        <button
-          onClick={() =>
-            handleOpenForm("employmentDetails", "Update Employment Details")
-          }
-          className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
-          title="Edit Employment Details"
-        >
-          <PiPencilSimple size={18} />
-        </button>
+        {hasPermission(Permissions.ProfileUpdate) ? (
+          <button
+            onClick={() =>
+              handleOpenForm("employmentDetails", "Update Employment Details")
+            }
+            className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
+            title="Edit Employment Details"
+          >
+            <PiPencilSimple size={18} />
+          </button>
+        ) : null}
         <h3 className="text-lg font-semibold mb-4 pb-2 border-b border-primary/30">
           Employment Details
         </h3>

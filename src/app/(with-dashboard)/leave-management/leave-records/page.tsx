@@ -21,8 +21,11 @@ import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import LeaveForm from "./components/LeaveForm";
+import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 
 export default function LeaveRecordsPage() {
+  const { hasPermission } = usePermissionGuard();
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -192,7 +195,7 @@ export default function LeaveRecordsPage() {
       </div>
 
       {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -240,7 +243,7 @@ export default function LeaveRecordsPage() {
             <PiClock size={32} className="text-primary" />
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* Leave Table */}
       {loading ? (
@@ -254,7 +257,7 @@ export default function LeaveRecordsPage() {
               type: "button" as const,
               handler: handleEdit,
               Icon: PiPencil,
-              permissions: [],
+              permissions: [Permissions.LeaveUpdate],
               disabledOn: [],
             },
             {
@@ -263,7 +266,7 @@ export default function LeaveRecordsPage() {
               handler: (leave: ILeave) =>
                 setDeleteModal({ open: true, id: leave.id }),
               Icon: PiTrash,
-              permissions: [],
+              permissions: [Permissions.LeaveDelete],
               disabledOn: [],
             },
           ]}
@@ -293,22 +296,24 @@ export default function LeaveRecordsPage() {
             ],
           }}
         >
-          <button
-            className="btn btn-primary gap-2"
-            onClick={() =>
-              setPopupOption({
-                open: true,
-                closeOnDocumentClick: true,
-                actionType: "create",
-                form: "leave",
-                data: null,
-                title: "Create Leave Request",
-              })
-            }
-          >
-            <PiPlusCircle size={18} />
-            Add Leave
-          </button>
+          {hasPermission(Permissions.LeaveCreate) ? (
+            <button
+              className="btn btn-primary gap-2"
+              onClick={() =>
+                setPopupOption({
+                  open: true,
+                  closeOnDocumentClick: true,
+                  actionType: "create",
+                  form: "leave",
+                  data: null,
+                  title: "Create Leave Request",
+                })
+              }
+            >
+              <PiPlusCircle size={18} />
+              Add Leave
+            </button>
+          ) : null}
         </CustomTable>
       )}
 

@@ -22,8 +22,11 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
 import AttendanceForm from "./components/AttendanceForm";
 import usePopupOption from "@/hooks/usePopupOption";
+import { Permissions } from "@/constants/permissions.constant";
+import usePermissionGuard from "@/guards/usePermissionGuard";
 
 export default function AttendancePage() {
+  const { hasPermission } = usePermissionGuard();
   const [selectedDate, setSelectedDate] = useState(
     moment().format("YYYY-MM-DD")
   );
@@ -308,7 +311,7 @@ export default function AttendancePage() {
             type: "button" as const,
             Icon: PiPencilSimple,
             handler: (row: any) => handleEdit(row),
-            permissions: [],
+            permissions: [Permissions.AttendanceUpdate],
             disabledOn: [],
           },
           {
@@ -316,7 +319,7 @@ export default function AttendancePage() {
             type: "button" as const,
             Icon: PiTrash,
             handler: (row: any) => handleDelete(row),
-            permissions: [],
+            permissions: [Permissions.AttendanceDelete],
             disabledOn: [],
           },
         ]}
@@ -358,22 +361,24 @@ export default function AttendancePage() {
           ],
         }}
       >
-        <button
-          className="btn btn-primary gap-2"
-          onClick={() =>
-            setPopupOption({
-              open: true,
-              closeOnDocumentClick: true,
-              actionType: "create",
-              form: "attendance",
-              data: null,
-              title: "Add Attendance Record",
-            })
-          }
-        >
-          <PiPlusCircle size={18} />
-          Add Attendance
-        </button>
+        {hasPermission(Permissions.AttendanceCreate) ? (
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "create",
+                form: "attendance",
+                data: null,
+                title: "Add Attendance Record",
+              })
+            }
+          >
+            <PiPlusCircle size={18} />
+            Add Attendance
+          </button>
+        ) : null}
       </CustomTable>
 
       {/* Attendance Form Modal */}

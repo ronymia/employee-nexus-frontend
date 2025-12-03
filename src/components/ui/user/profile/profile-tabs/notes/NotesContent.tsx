@@ -20,6 +20,8 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_NOTES_BY_USER_ID, DELETE_NOTE } from "@/graphql/note.api";
 import CustomLoading from "@/components/loader/CustomLoading";
 import FormModal from "@/components/form/FormModal";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import { Permissions } from "@/constants/permissions.constant";
 
 interface NotesContentProps {
   userId: number;
@@ -30,6 +32,7 @@ export default function NotesContent({
   userId,
   currentUserId,
 }: NotesContentProps) {
+  const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -162,13 +165,15 @@ export default function NotesContent({
         <div className="flex flex-col items-center justify-center py-12 gap-4">
           <PiNote size={64} className="text-base-content/30" />
           <p className="text-base-content/60 text-center">No notes added yet</p>
-          <button
-            onClick={() => handleOpenForm("create")}
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <PiPlus size={18} />
-            Add Note
-          </button>
+          {hasPermission(Permissions.NoteCreate) ? (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Add Note
+            </button>
+          ) : null}
         </div>
 
         {/* Popup Modal */}
@@ -200,13 +205,15 @@ export default function NotesContent({
             Total: {notes.length} note{notes.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={() => handleOpenForm("create")}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <PiPlus size={18} />
-          Add Note
-        </button>
+        {hasPermission(Permissions.NoteCreate) ? (
+          <button
+            onClick={() => handleOpenForm("create")}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <PiPlus size={18} />
+            Add Note
+          </button>
+        ) : null}
       </div>
 
       {/* Notes by Category */}
@@ -233,20 +240,24 @@ export default function NotesContent({
                   <div className="relative">
                     {/* Action Buttons */}
                     <div className="absolute top-0 right-0 flex gap-2">
-                      <button
-                        onClick={() => handleOpenForm("update", note)}
-                        className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
-                        title="Edit"
-                      >
-                        <PiPencilSimple size={16} />
-                      </button>
-                      <button
-                        onClick={() => noteDeleteHandler(note.id)}
-                        className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
-                        title="Delete"
-                      >
-                        <PiTrash size={16} />
-                      </button>
+                      {hasPermission(Permissions.NoteUpdate) ? (
+                        <button
+                          onClick={() => handleOpenForm("update", note)}
+                          className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
+                          title="Edit"
+                        >
+                          <PiPencilSimple size={16} />
+                        </button>
+                      ) : null}
+                      {hasPermission(Permissions.NoteDelete) ? (
+                        <button
+                          onClick={() => noteDeleteHandler(note.id)}
+                          className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
+                          title="Delete"
+                        >
+                          <PiTrash size={16} />
+                        </button>
+                      ) : null}
                     </div>
 
                     {/* Note Content */}
