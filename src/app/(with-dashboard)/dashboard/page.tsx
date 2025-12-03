@@ -1,7 +1,7 @@
 import { underConstructionImage } from "@/assets";
 import Image from "next/image";
 
-export default function Dashboard() {
+export default function DashboardContainer() {
   return (
     <div className={`relative`}>
       <Image

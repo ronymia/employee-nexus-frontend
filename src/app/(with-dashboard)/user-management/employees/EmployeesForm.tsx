@@ -23,6 +23,7 @@ import {
   RoleSelect,
   RelationSelect,
 } from "@/components/input-fields";
+import dayjs from "dayjs";
 
 export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
   const router = useRouter();
@@ -77,12 +78,15 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
         formValues["workingHoursPerWeek"]
       );
     }
-    console.log({ formValues });
+    // console.log({ formValues });
     try {
       if (data?.id) {
         await updateEmployee({
           variables: {
-            updateEmployeeInput: formValues,
+            updateEmployeeInput: {
+              ...formValues,
+              joiningDate: dayjs(formValues["joiningDate"], "DD-MM-YYYY"),
+            },
           },
         }).then(() => {
           router.push("/user-management/employees");
@@ -90,7 +94,10 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       } else {
         await createEmployee({
           variables: {
-            createEmployeeInput: formValues,
+            createEmployeeInput: {
+              ...formValues,
+              joiningDate: dayjs(formValues["joiningDate"], "DD-MM-YYYY"),
+            },
           },
         }).then(() => {
           router.push("/user-management/employees");
@@ -101,7 +108,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
     }
   };
 
-  console.log({ data });
+  // console.log({ data });
 
   return (
     <CustomForm

@@ -265,7 +265,7 @@ export default function AttendancePage() {
       {/* Date Picker & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Stats Cards */}
-        {/* <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-success/10 border border-success/20 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -297,7 +297,7 @@ export default function AttendancePage() {
               <PiWarning size={32} className="text-warning" />
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
 
       {loading && <CustomLoading />}

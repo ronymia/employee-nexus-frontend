@@ -1,5 +1,11 @@
 import { gql } from "@apollo/client";
 
+export const GENERATE_USER_EMPLOYEE_ID = gql`
+  query GenerateEmployeeId {
+    generateEmployeeId
+  }
+`;
+
 export const GET_USERS = gql`
   query Users {
     users {
@@ -191,7 +197,9 @@ export const DELETE_USER = gql`
 
 export const CHANGE_USER_PASSWORD = gql`
   mutation ChangePassword($id: Int!, $newPassword: String!) {
-    changePassword(changePasswordInput: { id: $id, newPassword: $newPassword }) {
+    changePassword(
+      changePasswordInput: { id: $id, newPassword: $newPassword }
+    ) {
       message
       statusCode
       success
