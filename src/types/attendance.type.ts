@@ -1,8 +1,14 @@
+import { IProject } from "./project.type";
+import { IUser } from "./user.type";
+import { IWorkSite } from "./work-sites.type";
+
 export interface IAttendancePunch {
   id?: number;
   attendanceId?: number;
   projectId?: number;
+  project?: IProject;
   workSiteId?: number;
+  workSite?: IWorkSite;
   punchIn: string;
   punchOut?: string;
   breakStart?: string;
@@ -25,14 +31,7 @@ export interface IAttendancePunch {
 export interface IAttendance {
   id: number;
   userId: number;
-  user?: {
-    id: number;
-    email: string;
-    profile?: {
-      fullName: string;
-      avatar?: string;
-    };
-  };
+  user?: IUser;
   date: string;
   totalHours?: number;
   breakHours?: number;

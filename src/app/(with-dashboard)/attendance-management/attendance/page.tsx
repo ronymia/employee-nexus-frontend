@@ -243,6 +243,12 @@ export default function AttendancePage() {
       accessorKey: "customLocation",
       show: true,
     },
+    {
+      key: "9",
+      header: "Project",
+      accessorKey: "customProject",
+      show: true,
+    },
   ]);
 
   return (
@@ -265,7 +271,7 @@ export default function AttendancePage() {
       {/* Date Picker & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Stats Cards */}
-        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-success/10 border border-success/20 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -297,7 +303,7 @@ export default function AttendancePage() {
               <PiWarning size={32} className="text-warning" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {loading && <CustomLoading />}
@@ -345,11 +351,8 @@ export default function AttendancePage() {
             ? `${row.breakHours.toFixed(2)}h`
             : "0h",
           customStatus: row.status,
-          customLocation:
-            row.punchRecords?.[0]?.punchInLat &&
-            row.punchRecords?.[0]?.punchInLng
-              ? "Available"
-              : "--",
+          customLocation: row.punchRecords?.[0]?.workSite?.name,
+          customProject: row.punchRecords?.[0]?.project?.name,
         }))}
         searchConfig={{
           searchable: false,

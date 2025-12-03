@@ -88,7 +88,7 @@ export default function AttendanceForm({
               date: dayjs(formValues.date, "DD-MM-YYYY"),
               totalHours: workHours,
               breakHours: breakHours,
-              status: "present",
+              status: "approved",
               punchRecords: [
                 {
                   projectId: formValues.projectId
@@ -112,10 +112,27 @@ export default function AttendanceForm({
         await updateAttendance({
           variables: {
             updateAttendanceInput: {
-              id: attendance?.id,
+              id: Number(attendance?.id),
+              userId: parseInt(formValues.userId),
               totalHours: workHours,
               breakHours: breakHours,
-              status: "present",
+              status: "approved",
+              punchRecords: [
+                {
+                  projectId: formValues.projectId
+                    ? parseInt(formValues.projectId)
+                    : null,
+                  workSiteId: formValues.workSiteId
+                    ? parseInt(formValues.workSiteId)
+                    : null,
+                  punchIn: punchInTime,
+                  punchOut: punchOutTime,
+                  workHours: workHours,
+                  breakHours: breakHours,
+                  notes: formValues.notes || null,
+                  ...defaultPunchData,
+                },
+              ],
             },
           },
         });
@@ -129,13 +146,15 @@ export default function AttendanceForm({
     }
   };
 
+  console.log({ attendance });
+
   const defaultValues = {
-    userId: attendance?.userId?.toString() || "",
+    userId: attendance?.userId || "",
     date: attendance?.date
       ? dayjs(attendance.date).format("DD-MM-YYYY")
       : dayjs().format("DD-MM-YYYY"),
-    projectId: attendance?.punchRecords?.[0]?.projectId?.toString() || "",
-    workSiteId: attendance?.punchRecords?.[0]?.workSiteId?.toString() || "",
+    projectId: attendance?.punchRecords?.[0]?.projectId || "",
+    workSiteId: attendance?.punchRecords?.[0]?.workSiteId || "",
     punchIn: attendance?.punchRecords?.[0]?.punchIn
       ? dayjs(attendance.punchRecords[0].punchIn).format("YYYY-MM-DDTHH:mm")
       : "",

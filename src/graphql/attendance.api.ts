@@ -27,7 +27,15 @@ export const GET_ATTENDANCES = gql`
           id
           attendanceId
           projectId
+          project {
+            id
+            name
+          }
           workSiteId
+          workSite {
+            id
+            name
+          }
           punchIn
           punchOut
           breakStart
@@ -140,7 +148,7 @@ export const UPDATE_ATTENDANCE = gql`
       success
       data {
         id
-        userId
+        # userId
         date
         totalHours
         breakHours
