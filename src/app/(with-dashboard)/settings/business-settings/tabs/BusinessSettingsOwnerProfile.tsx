@@ -14,6 +14,8 @@ import useAppStore from "@/stores/appStore";
 import { userProfileSchema } from "@/schemas/user.schema";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
 
 interface BusinessSettingsOwnerProfileProps {
   ownerData: IUser;
@@ -37,6 +39,7 @@ export default function BusinessSettingsOwnerProfile({
     await updateUserProfile({
       variables: {
         updateProfileInput: {
+          id: Number(ownerData.profile.id),
           ...formValues,
         },
       },
@@ -141,33 +144,18 @@ export default function BusinessSettingsOwnerProfile({
               required
               placeholder="Enter phone number"
             />
-            <CustomInputField
+            <CustomDatePicker
+              dataAuto="dateOfBirth"
               name="dateOfBirth"
               label="Date of Birth"
-              type="date"
               required
             />
-            <CustomSelect
+            <GenderRadio
               name="gender"
-              label="Gender"
-              required
-              options={[
-                { label: "Male", value: "Male" },
-                { label: "Female", value: "Female" },
-                { label: "Other", value: "Other" },
-              ]}
+              required={true}
+              radioGroupClassName="grid-cols-2"
             />
-            <CustomSelect
-              name="maritalStatus"
-              label="Marital Status"
-              required
-              options={[
-                { label: "Single", value: "Single" },
-                { label: "Married", value: "Married" },
-                { label: "Divorced", value: "Divorced" },
-                { label: "Widowed", value: "Widowed" },
-              ]}
-            />
+            <MaritalStatusRadio name="maritalStatus" required={true} />
             <CustomInputField
               name="address"
               label="Address"

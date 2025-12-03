@@ -35,55 +35,71 @@ export const GET_BUSINESSES = gql`
 export const GET_BUSINESS_BY_ID = gql`
   query BusinessById($id: Int!) {
     businessById(id: $id) {
-      address
-      city
-      createdAt
-      email
-      id
-      lat
-      lng
-      name
-      numberOfEmployeesAllowed
-      phone
-      postcode
-      registrationDate
-      status
-      subscriptionPlanId
-      updatedAt
-      userId
-      website
-      user {
+      success
+      statusCode
+      message
+      data {
+        address
+        city
         createdAt
-        deletedBy
         email
         id
-        roleId
+        lat
+        lng
+        name
+        numberOfEmployeesAllowed
+        phone
+        country
+        postcode
+        registrationDate
         status
+        subscriptionPlanId
         updatedAt
-        profile {
-          address
-          city
-          country
+        userId
+        website
+        owner {
           createdAt
-          dateOfBirth
-          fullName
-          gender
+          deletedBy
+          email
           id
-          maritalStatus
-          phone
-          postcode
-          profilePicture
+          roleId
+          status
           updatedAt
-          userId
+          profile {
+            userId
+            id
+            fullName
+            address
+            phone
+            city
+            country
+            postcode
+            gender
+            dateOfBirth
+            maritalStatus
+            profilePicture
+            updatedAt
+            createdAt
+          }
         }
-      }
-      businessSchedules {
-        businessId
-        day
-        endTime
-        id
-        isWeekend
-        startTime
+        businessSchedules {
+          businessId
+          day
+          endTime
+          id
+          isWeekend
+          startTime
+        }
+        subscriptionPlan {
+          id
+          name
+          price
+          setupFee
+          status
+          description
+          createdAt
+          updatedAt
+        }
       }
     }
   }
@@ -238,7 +254,6 @@ export const UPDATE_BUSINESS = gql`
         city
         country
         postcode
-        logo
         website
         status
       }

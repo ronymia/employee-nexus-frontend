@@ -1,5 +1,4 @@
 "use client";
-import SubscriptionPlanCard from "@/components/ui/subscription/SubscriptionCard";
 import { GET_BUSINESS_BY_ID } from "@/graphql/business.api";
 import { GET_SUBSCRIPTION_PLANS } from "@/graphql/subscription-plans.api";
 import useAppStore from "@/stores/appStore";
@@ -7,11 +6,14 @@ import { IBusiness, ISubscriptionPlan } from "@/types";
 import { useQuery } from "@apollo/client/react";
 import CustomLoading from "@/components/loader/CustomLoading";
 import dayjs from "dayjs";
-import { PiCheckCircle, PiXCircle } from "react-icons/pi";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 
-export default function BusinessSettingsSubscription() {
+export default function BusinessSettingsSubscription({
+  subscriptionPlan,
+}: {
+  subscriptionPlan: ISubscriptionPlan;
+}) {
   const { user } = useAppStore((state) => state);
   const { hasPermission } = usePermissionGuard();
 
@@ -30,7 +32,7 @@ export default function BusinessSettingsSubscription() {
     return <CustomLoading />;
   }
 
-  const currentPlan = businessData?.businessById?.subscriptionPlan;
+  const currentPlan = subscriptionPlan;
   const allPlans = plansData?.subscriptionPlans?.data || [];
 
   return (
@@ -52,9 +54,7 @@ export default function BusinessSettingsSubscription() {
               <label className="text-sm font-medium text-base-content/70">
                 Price
               </label>
-              <p className="text-lg font-semibold">
-                ${currentPlan.price}/{currentPlan.billingCycle}
-              </p>
+              <p className="text-lg font-semibold">${currentPlan.price}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-base-content/70">
@@ -131,9 +131,9 @@ export default function BusinessSettingsSubscription() {
                   <div className="mt-4">
                     <div className="text-3xl font-bold">
                       ${plan.price}
-                      <span className="text-sm font-normal text-base-content/70">
+                      {/* <span className="text-sm font-normal text-base-content/70">
                         /{plan.billingCycle}
-                      </span>
+                      </span> */}
                     </div>
                     <div className="text-sm text-base-content/70 mt-1">
                       Setup fee: ${plan.setupFee}
@@ -141,7 +141,7 @@ export default function BusinessSettingsSubscription() {
                   </div>
 
                   {/* Features */}
-                  {plan.features && plan.features.length > 0 && (
+                  {/* {plan.features && plan.features.length > 0 && (
                     <div className="mt-4 space-y-2">
                       {plan.features
                         .slice(0, 5)
@@ -155,7 +155,7 @@ export default function BusinessSettingsSubscription() {
                           </div>
                         ))}
                     </div>
-                  )}
+                  )} */}
 
                   <div className="card-actions justify-end mt-4">
                     {currentPlan?.id === plan.id ? (

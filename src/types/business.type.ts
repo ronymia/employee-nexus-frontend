@@ -7,6 +7,7 @@ export interface IBusinessSchedule {
   day: string;
   startTime: string;
   endTime: string;
+  isWeekend?: boolean;
   // createdAt: string;
   // updatedAt: string;
 }
@@ -26,7 +27,7 @@ export interface IBusiness {
   subscriptionPlanId: number;
   subscriptionPlan: ISubscriptionPlan;
   userId: number;
-  user: IUser;
+  owner: IUser;
   logo: string;
   website?: string;
   lat?: number;

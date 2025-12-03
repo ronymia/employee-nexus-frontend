@@ -27,13 +27,15 @@ export default function BusinessSettingsPage() {
   const activeTab = searchParams.get("tab") || "owner";
 
   const businessByIdQuery = useQuery<{
-    businessById: IBusiness;
+    businessById: {
+      data: IBusiness;
+    };
   }>(GET_BUSINESS_BY_ID, {
     variables: { id: user.businessId },
     skip: !user.businessId,
   });
 
-  const singleBusinessData = businessByIdQuery.data?.businessById;
+  const singleBusinessData = businessByIdQuery.data?.businessById.data;
 
   // Handle tab change and update search params
   const handleTabChange = (tabId: string) => {
@@ -54,7 +56,7 @@ export default function BusinessSettingsPage() {
       {
         title: "Subscription",
         id: "subscription",
-        permission: Permissions.SubscriptionPlanRead,
+        permission: Permissions.WorkScheduleRead,
       },
       {
         title: "Config",
@@ -101,7 +103,7 @@ export default function BusinessSettingsPage() {
         {activeTab === "owner" && (
           <BusinessSettingsOwnerProfile
             key={`owner_information`}
-            ownerData={singleBusinessData?.user as IUser}
+            ownerData={singleBusinessData?.owner as IUser}
           />
         )}
         {activeTab === "schedule" && (
@@ -110,7 +112,11 @@ export default function BusinessSettingsPage() {
             businessSchedules={singleBusinessData?.businessSchedules || []}
           />
         )}
-        {activeTab === "subscription" && <BusinessSettingsSubscription />}
+        {activeTab === "subscription" && (
+          <BusinessSettingsSubscription
+            subscriptionPlan={singleBusinessData?.subscriptionPlan as any}
+          />
+        )}
         {activeTab === "config" && <BusinessSettingsConfig />}
       </div>
     </div>

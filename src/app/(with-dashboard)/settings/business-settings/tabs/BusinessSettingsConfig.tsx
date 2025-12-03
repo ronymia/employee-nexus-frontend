@@ -16,11 +16,12 @@ import { IBusinessSetting } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { generateWeekDays } from "@/utils/date-time.utils";
 import usePopupOption from "@/hooks/usePopupOption";
+import CustomRadioButton from "@/components/form/input/CustomRadioButton";
 
 export default function BusinessSettingsConfig() {
   const { popupOption, setPopupOption } = usePopupOption();
 
-  const { data, loading, refetch } = useQuery<{
+  const { data, loading } = useQuery<{
     businessSettingByBusinessId: {
       data: IBusinessSetting;
     };
@@ -35,7 +36,6 @@ export default function BusinessSettingsConfig() {
   );
 
   const handleSubmit = async (formValues: IBusinessSettingsFormData) => {
-    console.log({ formValues });
     const input = {
       businessStartDay: formValues.businessStartDay,
       businessTimeZone: formValues.businessTimeZone || null,
@@ -47,7 +47,10 @@ export default function BusinessSettingsConfig() {
     };
     await updateBusinessSetting({
       variables: {
-        updateBusinessSettingInput: input,
+        updateBusinessSettingInput: {
+          ...input,
+          id: Number(data?.businessSettingByBusinessId.data.id),
+        },
       },
     }).then(() => {
       setPopupOption((prev) => ({ ...prev, open: false }));
@@ -60,7 +63,7 @@ export default function BusinessSettingsConfig() {
   const businessStartDayName = weekDays.find(
     (day) => day.value === parseInt(businessSetting?.businessStartDay || "0")
   )?.name;
-
+  // console.log({ weekDays });
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -107,7 +110,7 @@ export default function BusinessSettingsConfig() {
         {/* <FieldView label="Currency" value={businessSetting?.currency || ""} /> */}
         <FieldView
           label="Delete Read Notifications"
-          value={businessSetting?.deleteReadNotifications ? "Yes" : "No"}
+          value={businessSetting?.deleteReadNotifications || ""}
         />
         <FieldView
           label="Identifier Prefix"
@@ -147,7 +150,7 @@ export default function BusinessSettingsConfig() {
             isLoading={false}
             options={weekDays.map((day) => ({
               label: day.name,
-              value: day.value.toString(),
+              value: day.value,
             }))}
           />
 
@@ -157,10 +160,16 @@ export default function BusinessSettingsConfig() {
           />
 
           {/* <CustomInputField name="currency" label="Currency" /> */}
-
-          <ToggleSwitch
-            name="deleteReadNotifications"
-            label="Delete Read Notifications"
+          <CustomRadioButton
+            dataAuto={"deleteReadNotifications"}
+            name={"deleteReadNotifications"}
+            label={"Delete Read Notifications"}
+            required={true}
+            options={[
+              { title: "After 7 days", value: "7_days" },
+              { title: "After 30 Days", value: "30_days" },
+            ]}
+            // radioGroupClassName={radioGroupClassName}
           />
 
           <CustomInputField name="identifierPrefix" label="Identifier Prefix" />

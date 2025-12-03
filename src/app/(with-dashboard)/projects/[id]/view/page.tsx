@@ -26,7 +26,7 @@ export default function ProjectViewPage({
     open: false,
     closeOnDocumentClick: true,
     actionType: "create",
-    form: "assign_project_member",
+    form: "assign_project_member" as any,
     data: null,
     title: "Assign Project Member",
   });
@@ -68,7 +68,7 @@ export default function ProjectViewPage({
       open: true,
       closeOnDocumentClick: true,
       actionType: "create",
-      form: "assign_project_member",
+      form: "assign_project_member" as any,
       data: null,
       title: "Assign Project Member",
     });
@@ -237,7 +237,7 @@ export default function ProjectViewPage({
       </div>
       {/* Assign Member Modal */}
       <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
-        {popupOption.form === "assign_project_member" && (
+        {popupOption.form === ("assign_project_member" as any) && (
           <AssignProjectMemberForm
             projectId={Number(id)}
             handleClosePopup={() =>

@@ -43,7 +43,8 @@ type IForm_NAME =
   | "socialLink"
   | "attendance"
   | "leave"
-  | "holiday";
+  | "holiday"
+  | "bulk_schedule";
 
 export interface IPopupOption {
   open: boolean;

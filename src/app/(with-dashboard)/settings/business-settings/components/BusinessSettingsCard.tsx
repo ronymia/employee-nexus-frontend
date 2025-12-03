@@ -51,8 +51,15 @@ export default function BusinessSettingsCard({
     ],
   });
 
-  const handleLogoUpload = async (imageUrl: string) => {
-    if (!imageUrl) return;
+  const handleLogoUpload = async (file: File) => {
+    if (!file) return;
+
+    // TODO: Upload file to storage and get URL
+    // For now, you need to implement file upload to your backend or storage service
+    // const imageUrl = await uploadFileToStorage(file);
+
+    // Temporary: Create object URL for preview (this won't persist)
+    const imageUrl = URL.createObjectURL(file);
 
     await updateBusiness({
       variables: {
@@ -81,91 +88,117 @@ export default function BusinessSettingsCard({
     <section
       className={`max-w-5xl flex flex-col items-center justify-center overflow-hidden`}
     >
-      <div
-        className={`w-full border shadow-md rounded-xl text-base-300 gap-y-5 sm:gap-x-3 py-5 px-2 md:py-8 md:px-8 bg-linear-to-tr from-primary to-primary/50 flex flex-col  sm:flex-row justify-center sm:justify-start items-center sm:items-start relative`}
-      >
-        {/* IMAGE */}
-        <ImageUploader
-          name={`Logo`}
-          type="circular"
-          defaultImage={businessData?.logo}
-          handleGetImage={handleLogoUpload}
-          isLoading={updateResult.loading}
-        />
-
-        {/* BUSINESS INFO */}
-        <div className="flex flex-col gap-6 text-center md:text-left flex-1">
-          {/* Name */}
-          <div className="flex items-center gap-2 justify-center md:justify-start">
-            <h2 className="text-xl font-semibold drop-shadow text-green-950">
-              {businessData?.name}
-            </h2>
-            {hasPermission(Permissions.BusinessUpdate) && (
-              <button
-                onClick={() =>
-                  setPopupOption({
-                    open: true,
-                    closeOnDocumentClick: true,
-                    actionType: "update",
-                    form: "",
-                    data: businessData,
-                    title: "Edit Business Information",
-                  })
-                }
-                className="btn btn-circle btn-sm btn-ghost text-green-950"
-              >
-                <PiPencilSimple className="text-lg" />
-              </button>
-            )}
+      {/* BUSINESS CARD */}
+      <div className="w-full border shadow-md rounded-xl text-base-300 py-6 px-4 md:py-8 md:px-8 bg-linear-to-tr from-primary to-primary/50">
+        <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+          {/* LOGO */}
+          <div className="flex-shrink-0">
+            <ImageUploader
+              name="Logo"
+              type="circular"
+              defaultImage={businessData?.logo}
+              handleGetImage={handleLogoUpload}
+              isLoading={updateResult.loading}
+            />
           </div>
 
-          {/* Business Info Grid */}
-          <div className="flex  flex-wrap gap-y-3 gap-x-5 text-sm text-green-900 justify-center md:justify-start font-medium overflow-hidden">
-            <div className="flex items-center gap-2 drop-shadow-sm">
-              <HiOutlineCalendar className="text-lg" />
-              <span>
-                {dayjs(businessData?.registrationDate, "DD-MM-YYYY").format(
-                  "DD MMMM YYYY"
-                )}
+          {/* BUSINESS INFO */}
+          <div className="flex-1 w-full space-y-4">
+            {/* Header: Name & Edit Button */}
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-2xl font-bold drop-shadow text-green-950">
+                {businessData?.name}
+              </h2>
+              {hasPermission(Permissions.BusinessUpdate) && (
+                <button
+                  onClick={() =>
+                    setPopupOption({
+                      open: true,
+                      closeOnDocumentClick: true,
+                      actionType: "update",
+                      form: "",
+                      data: businessData,
+                      title: "Edit Business Information",
+                    })
+                  }
+                  className="btn btn-circle btn-sm btn-ghost text-green-950 hover:bg-green-950/10"
+                  title="Edit Business"
+                >
+                  <PiPencilSimple className="text-lg" />
+                </button>
+              )}
+            </div>
+
+            {/* Status Badge */}
+            <div>
+              <span
+                className={`badge badge-lg ${
+                  businessData?.status === "ACTIVE"
+                    ? "badge-success"
+                    : "badge-error"
+                }`}
+              >
+                {businessData?.status}
               </span>
             </div>
 
-            <div className="flex items-center gap-2 wrap-break-word drop-shadow-sm">
-              <HiOutlineMail className="text-lg" />
-              <span>{businessData?.email}</span>
-            </div>
-
-            <div className="flex items-center gap-2 drop-shadow-sm">
-              <HiOutlinePhone className="text-lg" />
-              <span>{businessData?.phone}</span>
-            </div>
-
-            {businessData?.website && (
-              <div className="flex items-center gap-2 drop-shadow-sm">
-                <span>🌐</span>
-                <a
-                  href={businessData.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {businessData.website}
-                </a>
+            {/* Contact Information Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-white font-medium">
+              {/* Registration Date */}
+              <div className="flex items-center gap-2">
+                <HiOutlineCalendar className="text-lg flex-shrink-0" />
+                <div>
+                  <div className="text-xs text-white opacity-80">
+                    Registered
+                  </div>
+                  <div className="font-semibold">
+                    {dayjs(businessData?.registrationDate, "DD-MM-YYYY").format(
+                      "DD MMMM YYYY"
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* Status Badge */}
-          <div className="flex justify-center md:justify-start">
-            <span
-              className={`badge ${
-                businessData?.status === "ACTIVE"
-                  ? "badge-success"
-                  : "badge-error"
-              }`}
-            >
-              {businessData?.status}
-            </span>
+              {/* Email */}
+              <div className="flex items-center gap-2">
+                <HiOutlineMail className="text-lg flex-shrink-0" />
+                <div className="truncate">
+                  <div className="text-xs  opacity-80">Email</div>
+                  <div className="font-semibold truncate">
+                    {businessData?.email}
+                  </div>
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="flex items-center gap-2">
+                <HiOutlinePhone className="text-lg flex-shrink-0" />
+                <div>
+                  <div className="text-xs text-white opacity-80">Phone</div>
+                  <div className="font-semibold">{businessData?.phone}</div>
+                </div>
+              </div>
+
+              {/* Website */}
+              {businessData?.website && (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg flex-shrink-0">🌐</span>
+                  <div className="truncate">
+                    <div className="text-xs text-green-800 opacity-80">
+                      Website
+                    </div>
+                    <a
+                      href={businessData.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold hover:underline truncate block"
+                    >
+                      {businessData.website}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -179,63 +212,86 @@ export default function BusinessSettingsCard({
             name: businessData?.name || "",
             email: businessData?.email || "",
             phone: businessData?.phone || "",
+            website: businessData?.website || "",
             address: businessData?.address || "",
             city: businessData?.city || "",
             country: businessData?.country || "",
             postcode: businessData?.postcode || "",
-            website: businessData?.website || "",
           }}
-          className={`flex flex-col gap-3 p-3`}
+          className={`flex flex-col gap-4 p-4`}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <CustomInputField
-              name="name"
-              label="Business Name"
-              required
-              placeholder="Enter business name"
-            />
-            <CustomInputField
-              name="email"
-              label="Email"
-              type="email"
-              required
-              placeholder="Enter email"
-            />
-            <CustomInputField
-              name="phone"
-              label="Phone"
-              required
-              placeholder="Enter phone number"
-            />
-            <CustomInputField
-              name="website"
-              label="Website"
-              placeholder="Enter website URL"
-            />
-            <CustomInputField
-              name="address"
-              label="Address"
-              required
-              placeholder="Enter address"
-            />
-            <CustomInputField
-              name="city"
-              label="City"
-              required
-              placeholder="Enter city"
-            />
-            <CustomInputField
-              name="country"
-              label="Country"
-              required
-              placeholder="Enter country"
-            />
-            <CustomInputField
-              name="postcode"
-              label="Postcode"
-              required
-              placeholder="Enter postcode"
-            />
+          {/* Basic Information */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-base-content border-b pb-2">
+              Basic Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="md:col-span-2">
+                <CustomInputField
+                  name="name"
+                  label="Business Name"
+                  required
+                  placeholder="Enter business name"
+                />
+              </div>
+              <CustomInputField
+                name="email"
+                label="Email Address"
+                type="email"
+                required
+                placeholder="business@example.com"
+              />
+              <CustomInputField
+                name="phone"
+                label="Phone Number"
+                required
+                placeholder="+1 (555) 000-0000"
+              />
+              <div className="md:col-span-2">
+                <CustomInputField
+                  name="website"
+                  label="Website URL"
+                  placeholder="https://www.example.com"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Address Information */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-base-content border-b pb-2">
+              Address Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="md:col-span-2">
+                <CustomInputField
+                  name="address"
+                  label="Street Address"
+                  required
+                  placeholder="123 Business Street"
+                />
+              </div>
+              <CustomInputField
+                name="city"
+                label="City"
+                required
+                placeholder="Enter city"
+              />
+              <CustomInputField
+                name="postcode"
+                label="Postal Code"
+                required
+                placeholder="12345"
+              />
+              <div className="md:col-span-2">
+                <CustomInputField
+                  name="country"
+                  label="Country"
+                  required
+                  placeholder="Enter country"
+                />
+              </div>
+            </div>
           </div>
 
           <FormActionButton

@@ -60,7 +60,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         {activeTab === "owner" && (
           <OwnerProfile
             key={`owner_information`}
-            ownerData={singleBusinessData?.user as IUser}
+            ownerData={singleBusinessData?.owner as IUser}
           />
         )}
         {activeTab === "schedule" && (
