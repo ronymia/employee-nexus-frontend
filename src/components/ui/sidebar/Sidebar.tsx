@@ -118,50 +118,50 @@ export default function Sidebar({
         },
       ],
     },
-    {
-      Icon: VscFileSubmodule,
-      label: "Recruitment",
-      path: "/recruitment",
-      show: true,
-      subMenus: [
-        {
-          Icon: VscFileSubmodule,
-          label: "Job Types",
-          path: "/recruitment/job-types",
-          show: permissionGuard(PermissionResource.JOB_TYPE, [
-            PermissionAction.READ,
-          ]),
-          subMenus: [],
-        },
-        {
-          Icon: VscFileSubmodule,
-          label: "Recruitment Processes",
-          path: "/recruitment/recruitment-processes",
-          show: permissionGuard(PermissionResource.RECRUITMENT_PROCESS, [
-            PermissionAction.READ,
-          ]),
-          subMenus: [],
-        },
-        {
-          Icon: VscFileSubmodule,
-          label: "Onboarding Processes",
-          path: "/recruitment/onboarding-processes",
-          show: permissionGuard(PermissionResource.ONBOARDING_PROCESS, [
-            PermissionAction.READ,
-          ]),
-          subMenus: [],
-        },
-        {
-          Icon: VscFileSubmodule,
-          label: "Job Platforms",
-          path: "/recruitment/job-platforms",
-          show: permissionGuard(PermissionResource.JOB_PLATFORM, [
-            PermissionAction.READ,
-          ]),
-          subMenus: [],
-        },
-      ],
-    },
+    // {
+    //   Icon: VscFileSubmodule,
+    //   label: "Recruitment",
+    //   path: "/recruitment",
+    //   show: true,
+    //   subMenus: [
+    //     {
+    //       Icon: VscFileSubmodule,
+    //       label: "Job Types",
+    //       path: "/recruitment/job-types",
+    //       show: permissionGuard(PermissionResource.JOB_TYPE, [
+    //         PermissionAction.READ,
+    //       ]),
+    //       subMenus: [],
+    //     },
+    //     {
+    //       Icon: VscFileSubmodule,
+    //       label: "Recruitment Processes",
+    //       path: "/recruitment/recruitment-processes",
+    //       show: permissionGuard(PermissionResource.RECRUITMENT_PROCESS, [
+    //         PermissionAction.READ,
+    //       ]),
+    //       subMenus: [],
+    //     },
+    //     {
+    //       Icon: VscFileSubmodule,
+    //       label: "Onboarding Processes",
+    //       path: "/recruitment/onboarding-processes",
+    //       show: permissionGuard(PermissionResource.ONBOARDING_PROCESS, [
+    //         PermissionAction.READ,
+    //       ]),
+    //       subMenus: [],
+    //     },
+    //     {
+    //       Icon: VscFileSubmodule,
+    //       label: "Job Platforms",
+    //       path: "/recruitment/job-platforms",
+    //       show: permissionGuard(PermissionResource.JOB_PLATFORM, [
+    //         PermissionAction.READ,
+    //       ]),
+    //       subMenus: [],
+    //     },
+    //   ],
+    // },
     {
       Icon: VscFileSubmodule,
       label: "Administration",

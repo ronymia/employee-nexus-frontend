@@ -44,7 +44,7 @@ export default function EmploymentDetailsForm({
           updateEmploymentDetailsInput: {
             ...data,
             id: Number(employee?.employee?.id),
-            joiningDate: dayjs(data.joiningDate),
+            joiningDate: dayjs(data.joiningDate, "DD-MM-YYYY"),
           },
         },
         fetchPolicy: "no-cache",

@@ -243,6 +243,12 @@ export default function AttendancePage() {
       accessorKey: "customLocation",
       show: true,
     },
+    {
+      key: "9",
+      header: "Project",
+      accessorKey: "customProject",
+      show: true,
+    },
   ]);
 
   return (
@@ -345,11 +351,8 @@ export default function AttendancePage() {
             ? `${row.breakHours.toFixed(2)}h`
             : "0h",
           customStatus: row.status,
-          customLocation:
-            row.punchRecords?.[0]?.punchInLat &&
-            row.punchRecords?.[0]?.punchInLng
-              ? "Available"
-              : "--",
+          customLocation: row.punchRecords?.[0]?.workSite?.name,
+          customProject: row.punchRecords?.[0]?.project?.name,
         }))}
         searchConfig={{
           searchable: false,
