@@ -61,6 +61,13 @@ export default function Sidebar({
       subMenus: [],
     },
     {
+      Icon: FiUsers,
+      label: menuNames.profile,
+      path: "/profile",
+      show: true,
+      subMenus: [],
+    },
+    {
       Icon: MdOutlineBusinessCenter,
       label: menuNames.business,
       path: "/businesses",
