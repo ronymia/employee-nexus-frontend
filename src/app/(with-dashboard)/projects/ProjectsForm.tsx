@@ -14,6 +14,8 @@ import { ProjectFormData } from "@/schemas";
 import { IProject } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
+// OPTIONS FOR PROJECT STATUS DROPDOWN
+
 const STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
   { value: "ongoing", label: "Ongoing" },
@@ -70,7 +72,7 @@ export default function ProjectsForm({
     }
     handleClosePopup?.();
   };
-
+  console.log({ COVER_OPTIONS });
   return (
     <CustomForm
       submitHandler={handleOnSubmit}

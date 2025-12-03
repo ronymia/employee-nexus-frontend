@@ -14,7 +14,6 @@ export const GET_USERS = gql`
       success
       data {
         id
-        name
         email
         roleId
         status
