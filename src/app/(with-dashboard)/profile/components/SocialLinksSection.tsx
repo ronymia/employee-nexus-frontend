@@ -15,9 +15,11 @@ import {
   FiInstagram,
   FiGithub,
 } from "react-icons/fi";
+import { IUser } from "@/types";
+import { CREATE_SOCIAL_LINKS } from "@/graphql/social-links.api";
 
 interface SocialLinksSectionProps {
-  user: any;
+  user: IUser;
   refetch: () => void;
 }
 
@@ -27,7 +29,14 @@ export default function SocialLinksSection({
 }: SocialLinksSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [updateSocialLinks, { loading }] = useMutation(UPDATE_SOCIAL_LINKS, {
+  const [createSocialLinks, createResult] = useMutation(CREATE_SOCIAL_LINKS, {
+    onCompleted: () => {
+      setIsEditing(false);
+      refetch();
+    },
+  });
+
+  const [updateSocialLinks, updateResult] = useMutation(UPDATE_SOCIAL_LINKS, {
     onCompleted: () => {
       setIsEditing(false);
       refetch();
@@ -35,19 +44,34 @@ export default function SocialLinksSection({
   });
 
   const handleSubmit = async (formValues: any) => {
+    const socialLinksData = {
+      facebook: formValues.facebook || "",
+      twitter: formValues.twitter || "",
+      linkedin: formValues.linkedin || "",
+      instagram: formValues.instagram || "",
+      github: formValues.github || "",
+    };
+
     try {
-      await updateSocialLinks({
-        variables: {
-          updateSocialLinkInput: {
-            profileId: user?.profile?.id,
-            facebook: formValues.facebook || null,
-            twitter: formValues.twitter || null,
-            linkedin: formValues.linkedin || null,
-            instagram: formValues.instagram || null,
-            github: formValues.github || null,
+      if (isEditing) {
+        await updateSocialLinks({
+          variables: {
+            updateSocialLinkInput: {
+              ...socialLinksData,
+              profileId: Number(user?.profile?.id),
+            },
           },
-        },
-      });
+        });
+      } else {
+        await createSocialLinks({
+          variables: {
+            createSocialLinkInput: {
+              ...socialLinksData,
+              profileId: Number(user?.profile?.id),
+            },
+          },
+        });
+      }
     } catch (error) {
       console.error("Error updating social links:", error);
     }
@@ -123,7 +147,7 @@ export default function SocialLinksSection({
           ))}
 
           <FormActionButton
-            isPending={loading}
+            isPending={createResult.loading || updateResult.loading}
             cancelHandler={() => setIsEditing(false)}
           />
         </CustomForm>

@@ -27,6 +27,13 @@ export const GET_MY_PROFILE = gql`
             phone
             relation
           }
+          socialLinks {
+            facebook
+            twitter
+            linkedin
+            instagram
+            github
+          }
         }
         role {
           id
@@ -167,8 +174,8 @@ export const UPDATE_SOCIAL_LINKS = gql`
 `;
 
 export const CHANGE_MY_PASSWORD = gql`
-  mutation ChangeMyPassword($changePasswordInput: ChangePasswordInput!) {
-    changeMyPassword(changePasswordInput: $changePasswordInput) {
+  mutation ChangeMyPassword($changeMyPasswordInput: ChangeMyPasswordInput!) {
+    changeMyPassword(changeMyPasswordInput: $changeMyPasswordInput) {
       success
       message
     }

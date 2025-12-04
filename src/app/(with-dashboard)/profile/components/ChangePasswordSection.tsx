@@ -23,7 +23,7 @@ export default function ChangePasswordSection() {
     try {
       await changePassword({
         variables: {
-          changePasswordInput: {
+          changeMyPasswordInput: {
             currentPassword: formValues.currentPassword,
             newPassword: formValues.newPassword,
           },

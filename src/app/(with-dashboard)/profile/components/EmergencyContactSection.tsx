@@ -8,9 +8,11 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import FormActionButton from "@/components/form/FormActionButton";
 import { emergencyContactSchema } from "@/schemas/profile.schema";
 import { FiEdit2 } from "react-icons/fi";
+import { IUser } from "@/types";
+import { RelationSelect } from "@/components/input-fields";
 
 interface EmergencyContactSectionProps {
-  user: any;
+  user: IUser;
   refetch: () => void;
 }
 
@@ -30,18 +32,20 @@ export default function EmergencyContactSection({
     }
   );
 
-  const handleSubmit = async (formValues: any) => {
+  // MUTATION TO UPDATE PROFILE
+  const handleSubmit = async (data: any) => {
     try {
       await updateEmergencyContact({
         variables: {
           updateEmergencyContactInput: {
-            profileId: user?.profile?.id,
-            ...formValues,
+            ...data,
+            id: Number(user?.profile?.id),
           },
         },
+        fetchPolicy: "no-cache",
       });
     } catch (error) {
-      console.error("Error updating emergency contact:", error);
+      console.log(error);
     }
   };
 
@@ -87,11 +91,7 @@ export default function EmergencyContactSection({
               label="Phone Number"
               placeholder="Enter phone number"
             />
-            <CustomInputField
-              name="relation"
-              label="Relationship"
-              placeholder="e.g., Spouse, Parent, Sibling"
-            />
+            <RelationSelect name="relation" label="Relation" required />
           </div>
 
           <FormActionButton

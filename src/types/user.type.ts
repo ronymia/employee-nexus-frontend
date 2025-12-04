@@ -1,5 +1,6 @@
 import { Status } from "./common.type";
 import { IEmergencyContact } from "./employee.type";
+import { ISocialLinks } from "./social-links.type";
 
 export interface IProfile {
   id: number;
@@ -17,6 +18,7 @@ export interface IProfile {
   createdAt: Date;
   updatedAt: Date;
   emergencyContact?: IEmergencyContact;
+  socialLinks: ISocialLinks;
 }
 export interface IUser {
   id: number;

@@ -10,9 +10,12 @@ import FormActionButton from "@/components/form/FormActionButton";
 import { userProfileSchema } from "@/schemas/user.schema";
 import { FiEdit2 } from "react-icons/fi";
 import dayjs from "dayjs";
+import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import { IUser } from "@/types";
 
 interface ProfileInfoSectionProps {
-  user: any;
+  user: IUser;
   refetch: () => void;
   showAddress?: boolean;
 }
@@ -33,16 +36,26 @@ export default function ProfileInfoSection({
 
   const handleSubmit = async (formValues: any) => {
     try {
-      await updateProfile({
+      // Remove email from submission as it's not part of profile update
+      const { email, ...profileData } = formValues;
+
+      const result = await updateProfile({
         variables: {
           updateProfileInput: {
-            id: user?.profile?.id,
-            ...formValues,
+            ...profileData,
+            id: Number(user?.profile?.id),
+            profilePicture: user?.profile?.profilePicture || "",
           },
         },
+        fetchPolicy: "no-cache",
       });
+
+      if (result.data) {
+        console.log(result);
+        // onClose();
+      }
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error submitting employee:", error);
     }
   };
 
@@ -97,34 +110,17 @@ export default function ProfileInfoSection({
                 placeholder="Enter phone number"
                 required
               />
-              <CustomInputField
+              <CustomDatePicker
                 name="dateOfBirth"
+                dataAuto="dateOfBirth"
                 label="Date of Birth"
                 placeholder="DD-MM-YYYY"
                 required
               />
-              <CustomSelect
-                name="gender"
-                label="Gender"
-                options={[
-                  { value: "", label: "Select Gender" },
-                  { value: "MALE", label: "Male" },
-                  { value: "FEMALE", label: "Female" },
-                ]}
-                dataAuto="gender-select"
-                isLoading={false}
-                required
-              />
-              <CustomSelect
+              <GenderRadio name="gender" dataAuto="gender-select" required />
+              <MaritalStatusRadio
                 name="maritalStatus"
-                label="Marital Status"
-                options={[
-                  { value: "", label: "Select Status" },
-                  { value: "SINGLE", label: "Single" },
-                  { value: "MARRIED", label: "Married" },
-                ]}
                 dataAuto="marital-status-select"
-                isLoading={false}
                 required
               />
             </div>
