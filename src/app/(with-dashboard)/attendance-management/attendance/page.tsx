@@ -14,9 +14,16 @@ import {
   PiPlusCircle,
   PiTrash,
   PiPencilSimple,
+  PiCheck,
+  PiX,
 } from "react-icons/pi";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
-import { GET_ATTENDANCES, DELETE_ATTENDANCE } from "@/graphql/attendance.api";
+import {
+  GET_ATTENDANCES,
+  DELETE_ATTENDANCE,
+  APPROVE_ATTENDANCE,
+  REJECT_ATTENDANCE,
+} from "@/graphql/attendance.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
@@ -69,6 +76,18 @@ export default function AttendancePage() {
     },
   });
 
+  // Approve attendance mutation
+  const [approveAttendance] = useMutation(APPROVE_ATTENDANCE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+  });
+
+  // Reject attendance mutation
+  const [rejectAttendance] = useMutation(REJECT_ATTENDANCE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+  });
+
   const employees = employeesData?.employees?.data || [];
   const attendances = attendancesData?.attendances?.data || [];
   const loading = employeesLoading || attendancesLoading;
@@ -102,6 +121,26 @@ export default function AttendancePage() {
       data: attendance,
       title: "Update Attendance Record",
     });
+  };
+
+  const handleApprove = async (attendance: IAttendance) => {
+    try {
+      await approveAttendance({
+        variables: { attendanceId: Number(attendance.id) },
+      });
+    } catch (error) {
+      console.error("Error approving attendance:", error);
+    }
+  };
+
+  const handleReject = async (attendance: IAttendance) => {
+    try {
+      await rejectAttendance({
+        variables: { attendanceId: Number(attendance.id) },
+      });
+    } catch (error) {
+      console.error("Error rejecting attendance:", error);
+    }
   };
 
   // Old dummy data for reference
@@ -152,48 +191,81 @@ export default function AttendancePage() {
     (a) => a.status.toLowerCase() === "late"
   ).length;
 
+  // const getStatusBadge = (status: string) => {
+  //   switch (status.toLowerCase()) {
+  //     case "present":
+  //       return (
+  //         <span className="badge badge-success gap-1">
+  //           <PiCheckCircle size={14} />
+  //           Present
+  //         </span>
+  //       );
+  //     case "absent":
+  //       return (
+  //         <span className="badge badge-error gap-1">
+  //           <PiXCircle size={14} />
+  //           Absent
+  //         </span>
+  //       );
+  //     case "late":
+  //       return (
+  //         <span className="badge badge-warning gap-1">
+  //           <PiWarning size={14} />
+  //           Late
+  //         </span>
+  //       );
+  //     case "half_day":
+  //       return (
+  //         <span className="badge badge-info gap-1">
+  //           <PiMinus size={14} />
+  //           Half Day
+  //         </span>
+  //       );
+  //     case "on_leave":
+  //       return (
+  //         <span className="badge badge-ghost gap-1">
+  //           <PiAirplaneTilt size={14} />
+  //           On Leave
+  //         </span>
+  //       );
+  //     default:
+  //       return <span className="badge badge-ghost">{status}</span>;
+  //   }
+  // };
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
-      case "present":
+      case "approved":
         return (
           <span className="badge badge-success gap-1">
             <PiCheckCircle size={14} />
-            Present
+            Approved
           </span>
         );
-      case "absent":
+      case "rejected":
         return (
           <span className="badge badge-error gap-1">
             <PiXCircle size={14} />
-            Absent
+            Rejected
           </span>
         );
-      case "late":
+      case "pending":
         return (
           <span className="badge badge-warning gap-1">
             <PiWarning size={14} />
-            Late
+            Pending
           </span>
         );
-      case "half_day":
-        return (
-          <span className="badge badge-info gap-1">
-            <PiMinus size={14} />
-            Half Day
-          </span>
-        );
-      case "on_leave":
+      case "cancelled":
         return (
           <span className="badge badge-ghost gap-1">
-            <PiAirplaneTilt size={14} />
-            On Leave
+            <PiXCircle size={14} />
+            Cancelled
           </span>
         );
       default:
         return <span className="badge badge-ghost">{status}</span>;
     }
   };
-
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -313,6 +385,32 @@ export default function AttendancePage() {
         isLoading={loading}
         actions={[
           {
+            name: "Approve",
+            type: "button" as const,
+            Icon: PiCheck,
+            handler: (row: any) => handleApprove(row),
+            permissions: [Permissions.AttendanceUpdate],
+            disabledOn: [
+              {
+                accessorKey: "status",
+                value: "approved",
+              },
+            ],
+          },
+          {
+            name: "Reject",
+            type: "button" as const,
+            Icon: PiX,
+            handler: (row: any) => handleReject(row),
+            permissions: [Permissions.AttendanceUpdate],
+            disabledOn: [
+              {
+                accessorKey: "status",
+                value: "rejected",
+              },
+            ],
+          },
+          {
             name: "Edit",
             type: "button" as const,
             Icon: PiPencilSimple,
@@ -350,7 +448,7 @@ export default function AttendancePage() {
           customBreakHours: row.breakHours
             ? `${row.breakHours.toFixed(2)}h`
             : "0h",
-          customStatus: row.status,
+          customStatus: getStatusBadge(row.status),
           customLocation: row.punchRecords?.[0]?.workSite?.name,
           customProject: row.punchRecords?.[0]?.project?.name,
         }))}

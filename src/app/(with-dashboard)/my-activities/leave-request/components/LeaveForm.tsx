@@ -10,7 +10,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { ILeave, LeaveDuration } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
-import { CREATE_LEAVE, UPDATE_LEAVE } from "@/graphql/leave.api";
+import { CREATE_LEAVE, LEAVE_REQUEST, UPDATE_LEAVE } from "@/graphql/leave.api";
 import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -36,7 +36,7 @@ export default function LeaveForm({
   const user = useAppStore((state) => state.user);
   const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const [createLeave] = useMutation(CREATE_LEAVE);
+  const [createLeave] = useMutation(LEAVE_REQUEST);
   const [updateLeave] = useMutation(UPDATE_LEAVE);
 
   // Upload attachments function

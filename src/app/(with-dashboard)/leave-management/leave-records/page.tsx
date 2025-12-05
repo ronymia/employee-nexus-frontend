@@ -14,9 +14,16 @@ import {
   PiPlusCircle,
   PiPencil,
   PiTrash,
+  PiCheck,
+  PiX,
 } from "react-icons/pi";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
-import { GET_LEAVES, DELETE_LEAVE } from "@/graphql/leave.api";
+import {
+  GET_LEAVES,
+  DELETE_LEAVE,
+  APPROVE_LEAVE,
+  REJECT_LEAVE,
+} from "@/graphql/leave.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
@@ -108,6 +115,18 @@ export default function LeaveRecordsPage() {
     refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
   });
 
+  // Approve leave mutation
+  const [approveLeave] = useMutation(APPROVE_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+  });
+
+  // Reject leave mutation
+  const [rejectLeave] = useMutation(REJECT_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+  });
+
   const handleDelete = async () => {
     if (deleteModal.id) {
       try {
@@ -119,6 +138,14 @@ export default function LeaveRecordsPage() {
         console.error("Error deleting leave:", error);
       }
     }
+  };
+
+  const handleApprove = async (leave: ILeave) => {
+    await approveLeave({ variables: { leaveId: Number(leave.id) } });
+  };
+
+  const handleReject = async (leave: ILeave) => {
+    await rejectLeave({ variables: { leaveId: Number(leave.id) } });
   };
 
   const handleEdit = (leave: ILeave) => {
@@ -252,6 +279,28 @@ export default function LeaveRecordsPage() {
         <CustomTable
           isLoading={loading}
           actions={[
+            {
+              name: "Approve",
+              type: "button" as const,
+              handler: handleApprove,
+              Icon: PiCheck,
+              permissions: [Permissions.LeaveUpdate],
+              disabledOn: [
+                { accessorKey: "status", value: "approved" },
+                // { accessorKey: "status", value: "rejected" },
+              ],
+            },
+            {
+              name: "Reject",
+              type: "button" as const,
+              handler: handleReject,
+              Icon: PiX,
+              permissions: [Permissions.LeaveUpdate],
+              disabledOn: [
+                // { accessorKey: "status", value: "approved" },
+                { accessorKey: "status", value: "rejected" },
+              ],
+            },
             {
               name: "Edit",
               type: "button" as const,

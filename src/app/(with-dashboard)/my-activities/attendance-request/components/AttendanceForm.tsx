@@ -11,6 +11,7 @@ import {
   CREATE_ATTENDANCE,
   UPDATE_ATTENDANCE,
   GET_ATTENDANCES,
+  ATTENDANCE_REQUEST,
 } from "@/graphql/attendance.api";
 import moment from "moment";
 import { useState } from "react";
@@ -33,7 +34,7 @@ export default function AttendanceForm({
   const user = useAppStore((state) => state.user);
 
   // Create mutation
-  const [createAttendance] = useMutation(CREATE_ATTENDANCE, {
+  const [createAttendance] = useMutation(ATTENDANCE_REQUEST, {
     awaitRefetchQueries: true,
     refetchQueries: [
       {

@@ -18,10 +18,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { menuNames } from "@/constants/menu";
 import useAppStore from "@/hooks/useAppStore";
 import usePermissionGuard from "@/guards/usePermissionGuard";
-import {
-  PermissionAction,
-  PermissionResource,
-} from "@/constants/permissions.constant";
+import { Permissions } from "@/constants/permissions.constant";
 
 const navVariants = {
   open: {
@@ -41,9 +38,17 @@ export default function Sidebar({
   setIsSidebarOpen,
   setIsOpen,
 }: ISidebarProps) {
-  const { permissionGuard, hasPermission } = usePermissionGuard();
+  const { hasPermission } = usePermissionGuard();
   const { permissions, user } = useAppStore((state) => state);
-  console.log({ user });
+
+  // console.log({ permissions });
+  // Extract role name without the number suffix (e.g., "employee#1" -> "employee")
+  const getRoleName = (roleName?: string) => {
+    if (!roleName) return "";
+    return roleName.split("#")[0].toLowerCase();
+  };
+
+  const userRole = getRoleName(user?.role?.name);
   const menuItems: IMenuItems[] = [
     // DEFAULT USER SIDEBAR
     {
@@ -78,20 +83,30 @@ export default function Sidebar({
       Icon: PiClock,
       label: menuNames.my_activities,
       path: "/my-activities",
-      show: true,
+      show:
+        (hasPermission(Permissions.AttendanceCreate) &&
+          userRole === "employee") ||
+        (hasPermission(Permissions.LeaveCreate) && userRole === "employee") ||
+        userRole === "employee",
       subMenus: [
         {
           Icon: PiClock,
           label: "Attendance Request",
           path: "/my-activities/attendance-request",
-          show: true,
+          show:
+            (hasPermission(Permissions.AttendanceCreate) &&
+              userRole === "employee") ||
+            userRole === "employee",
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Leave Request",
           path: "/my-activities/leave-request",
-          show: true,
+          show:
+            (hasPermission(Permissions.LeaveCreate) &&
+              userRole === "employee") ||
+            userRole === "employee",
           subMenus: [],
         },
       ],
@@ -100,44 +115,36 @@ export default function Sidebar({
       Icon: MdOutlineBusinessCenter,
       label: menuNames.business,
       path: "/businesses",
-      show: permissionGuard(
-        PermissionResource.BUSINESS,
-        [PermissionAction.READ, PermissionAction.CREATE],
-        true
-      ),
+      show:
+        hasPermission(Permissions.BusinessRead) &&
+        hasPermission(Permissions.BusinessCreate),
       subMenus: [],
     },
     {
       Icon: MdOutlineSubscriptions,
       label: menuNames.subscription_plans,
       path: "/subscription-plans",
-      show: permissionGuard(
-        PermissionResource.SUBSCRIPTION_PLAN,
-        [PermissionAction.READ, PermissionAction.CREATE],
-        true
-      ),
+      show:
+        hasPermission(Permissions.SubscriptionPlanRead) &&
+        hasPermission(Permissions.SubscriptionPlanCreate),
       subMenus: [],
     },
     {
       Icon: VscFileSubmodule,
       label: menuNames.features,
       path: "/features",
-      show: permissionGuard(
-        PermissionResource.FEATURE,
-        [PermissionAction.READ, PermissionAction.CREATE],
-        true
-      ),
+      show:
+        hasPermission(Permissions.FeatureRead) &&
+        hasPermission(Permissions.FeatureCreate),
       subMenus: [],
     },
     {
       Icon: MdOutlineBusinessCenter,
       label: menuNames.projects,
       path: "/projects",
-      show: permissionGuard(
-        PermissionResource.PROJECT,
-        [PermissionAction.READ, PermissionAction.CREATE],
-        true
-      ),
+      show:
+        hasPermission(Permissions.ProjectRead) ||
+        hasPermission(Permissions.ProjectCreate),
       subMenus: [],
     },
     // USER MANAGEMENT MENU
@@ -145,19 +152,15 @@ export default function Sidebar({
       Icon: FiUsers,
       label: "User Management",
       path: "/user-management",
-      show: permissionGuard(
-        PermissionResource.USER,
-        [PermissionAction.READ],
-        true
-      ),
+      show:
+        hasPermission(Permissions.UserRead) &&
+        hasPermission(Permissions.UserCreate),
       subMenus: [
         {
           Icon: FiUsers,
           label: "Employees",
           path: "/user-management/employees",
-          show: permissionGuard(PermissionResource.USER, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.UserRead),
           subMenus: [],
         },
       ],
@@ -210,60 +213,55 @@ export default function Sidebar({
       Icon: VscFileSubmodule,
       label: "Administration",
       path: "/administration",
-      show: true,
+      show:
+        (hasPermission(Permissions.DesignationRead) ||
+          hasPermission(Permissions.WorkSiteRead) ||
+          hasPermission(Permissions.EmploymentStatusRead) ||
+          hasPermission(Permissions.LeaveTypeRead) ||
+          hasPermission(Permissions.DepartmentRead) ||
+          hasPermission(Permissions.WorkScheduleRead)) &&
+        hasPermission(Permissions.WorkScheduleCreate),
       subMenus: [
         {
           Icon: VscFileSubmodule,
           label: "Designation",
           path: "/administration/designations",
-          show: permissionGuard(PermissionResource.DESIGNATION, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.DesignationRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Work Sites",
           path: "/administration/work-sites",
-          show: permissionGuard(PermissionResource.WORK_SITE, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.WorkSiteRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Employment Status",
           path: "/administration/employment-status",
-          show: permissionGuard(PermissionResource.EMPLOYMENT_STATUS, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.EmploymentStatusRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Leave Types",
           path: "/administration/leave-types",
-          show: permissionGuard(PermissionResource.LEAVE_TYPE, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.LeaveTypeRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Departments",
           path: "/administration/departments",
-          show: permissionGuard(PermissionResource.DEPARTMENT, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.DepartmentRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Work Schedules",
           path: "/administration/work-schedules",
-          show: permissionGuard(PermissionResource.WORK_SCHEDULE, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.WorkScheduleRead),
           subMenus: [],
         },
       ],
@@ -273,24 +271,23 @@ export default function Sidebar({
       Icon: VscFileSubmodule,
       label: "Asset Management",
       path: "/asset-management",
-      show: true,
+      show:
+        (hasPermission(Permissions.AssetTypeRead) ||
+          hasPermission(Permissions.AssetRead)) &&
+        userRole !== "employee",
       subMenus: [
         {
           Icon: VscFileSubmodule,
           label: "Asset Types",
           path: "/asset-management/asset-types",
-          show: permissionGuard(PermissionResource.ASSET_TYPE, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.AssetTypeRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Assets",
           path: "/asset-management/assets",
-          show: permissionGuard(PermissionResource.ASSET, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.AssetRead),
           subMenus: [],
         },
       ],
@@ -300,13 +297,18 @@ export default function Sidebar({
       Icon: PiClock,
       label: menuNames.attendance_management,
       path: "/attendance-management",
-      show: true,
+      show:
+        (hasPermission(Permissions.AttendanceRead) ||
+          hasPermission(Permissions.AttendanceCreate)) &&
+        userRole !== "employee",
       subMenus: [
         {
           Icon: PiClock,
           label: "Attendance",
           path: "/attendance-management/attendance",
-          show: true,
+          show:
+            hasPermission(Permissions.AttendanceRead) &&
+            userRole !== "employee",
           subMenus: [],
         },
       ],
@@ -316,20 +318,24 @@ export default function Sidebar({
       Icon: VscFileSubmodule,
       label: menuNames.leave_management,
       path: "/leave-management",
-      show: true,
+      show:
+        (hasPermission(Permissions.LeaveRead) ||
+          hasPermission(Permissions.HolidayRead)) &&
+        userRole !== "employee",
       subMenus: [
         {
           Icon: VscFileSubmodule,
           label: "Leave Records",
           path: "/leave-management/leave-records",
-          show: true,
+          show: hasPermission(Permissions.LeaveRead) && userRole !== "employee",
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Holidays",
           path: "/leave-management/holidays",
-          show: true,
+          show:
+            hasPermission(Permissions.HolidayRead) && userRole !== "employee",
           subMenus: [],
         },
       ],
@@ -339,27 +345,31 @@ export default function Sidebar({
       Icon: MdOutlineBusinessCenter,
       label: menuNames.payroll_management,
       path: "/payroll-management",
-      show: true,
+      show:
+        (hasPermission(Permissions.PayrollComponentRead) ||
+          hasPermission(Permissions.PayrollCycleRead) ||
+          hasPermission(Permissions.PayrollItemRead)) &&
+        userRole !== "employee",
       subMenus: [
         {
           Icon: VscFileSubmodule,
           label: "Payroll Components",
           path: "/payroll-management/payroll-components",
-          show: true,
+          show: hasPermission(Permissions.PayrollComponentRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Payroll Cycles",
           path: "/payroll-management/payroll-cycles",
-          show: true,
+          show: hasPermission(Permissions.PayrollCycleRead),
           subMenus: [],
         },
         {
           Icon: PiReceipt,
           label: "All Payslips",
           path: "/payroll-management/payslips",
-          show: true,
+          show: hasPermission(Permissions.PayrollItemRead),
           subMenus: [],
         },
       ],
@@ -370,41 +380,30 @@ export default function Sidebar({
       label: "Settings",
       path: "/settings",
       show:
-        permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
-          PermissionAction.READ,
-        ]) ||
-        permissionGuard(PermissionResource.LEAVE_SETTINGS, [
-          PermissionAction.READ,
-        ]) ||
-        permissionGuard(PermissionResource.BUSINESS_SETTINGS, [
-          PermissionAction.READ,
-        ]),
+        (hasPermission(Permissions.AttendanceSettingsRead) ||
+          hasPermission(Permissions.LeaveSettingsRead) ||
+          hasPermission(Permissions.BusinessSettingsRead)) &&
+        userRole !== "employee",
       subMenus: [
         {
           Icon: VscFileSubmodule,
           label: "Attendance Settings",
           path: "/settings/attendance-settings",
-          show: permissionGuard(PermissionResource.ATTENDANCE_SETTINGS, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.AttendanceSettingsRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Leave Settings",
           path: "/settings/leave-settings",
-          show: permissionGuard(PermissionResource.LEAVE_SETTINGS, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.LeaveSettingsRead),
           subMenus: [],
         },
         {
           Icon: VscFileSubmodule,
           label: "Business Settings",
           path: "/settings/business-settings",
-          show: permissionGuard(PermissionResource.BUSINESS_SETTINGS, [
-            PermissionAction.READ,
-          ]),
+          show: hasPermission(Permissions.BusinessSettingsRead),
           subMenus: [],
         },
       ],

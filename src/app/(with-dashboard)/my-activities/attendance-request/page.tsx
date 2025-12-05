@@ -19,10 +19,10 @@ import { GET_ATTENDANCES, DELETE_ATTENDANCE } from "@/graphql/attendance.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
-import AttendanceForm from "./components/AttendanceForm";
 import usePopupOption from "@/hooks/usePopupOption";
 import useAuthGuard from "@/hooks/useAuthGuard";
 import useAppStore from "@/hooks/useAppStore";
+import AttendanceForm from "./components/AttendanceForm";
 
 export default function AttendanceRequestPage() {
   useAuthGuard();
@@ -262,24 +262,26 @@ export default function AttendanceRequestPage() {
       {/* Attendance Table */}
       <CustomTable
         isLoading={loading}
-        actions={[
-          {
-            name: "Edit",
-            type: "button" as const,
-            Icon: PiPencilSimple,
-            handler: (row: any) => handleEdit(row),
-            permissions: [],
-            disabledOn: [],
-          },
-          {
-            name: "Delete",
-            type: "button" as const,
-            Icon: PiTrash,
-            handler: (row: any) => handleDelete(row),
-            permissions: [],
-            disabledOn: [],
-          },
-        ]}
+        actions={
+          [
+            //   {
+            //     name: "Edit",
+            //     type: "button" as const,
+            //     Icon: PiPencilSimple,
+            //     handler: (row: any) => handleEdit(row),
+            //     permissions: [],
+            //     disabledOn: [],
+            //   },
+            //   {
+            //     name: "Delete",
+            //     type: "button" as const,
+            //     Icon: PiTrash,
+            //     handler: (row: any) => handleDelete(row),
+            //     permissions: [],
+            //     disabledOn: [],
+            //   },
+          ]
+        }
         columns={columns}
         setColumns={setColumns}
         dataSource={attendances.map((row) => ({
