@@ -42,8 +42,8 @@ export default function Sidebar({
   setIsOpen,
 }: ISidebarProps) {
   const { permissionGuard, hasPermission } = usePermissionGuard();
-  const { permissions } = useAppStore((state) => state);
-  console.log({ permissions });
+  const { permissions, user } = useAppStore((state) => state);
+  console.log({ user });
   const menuItems: IMenuItems[] = [
     // DEFAULT USER SIDEBAR
     {
@@ -73,6 +73,28 @@ export default function Sidebar({
       path: "/payslips",
       show: true,
       subMenus: [],
+    },
+    {
+      Icon: PiClock,
+      label: menuNames.my_activities,
+      path: "/my-activities",
+      show: true,
+      subMenus: [
+        {
+          Icon: PiClock,
+          label: "Attendance Request",
+          path: "/my-activities/attendance-request",
+          show: true,
+          subMenus: [],
+        },
+        {
+          Icon: VscFileSubmodule,
+          label: "Leave Request",
+          path: "/my-activities/leave-request",
+          show: true,
+          subMenus: [],
+        },
+      ],
     },
     {
       Icon: MdOutlineBusinessCenter,
