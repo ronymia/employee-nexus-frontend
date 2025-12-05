@@ -52,23 +52,27 @@ export default function BusinessSettingsOwnerProfile({
     <div className={`max-w-3xl mx-auto p-6 space-y-6`}>
       {/* Header */}
       <div
-        className={`flex items-center justify-between bg-base-300 p-6 rounded-lg shadow`}
+        className={`flex flex-col md:flex-row items-start md:items-center justify-between bg-base-300 p-4 md:p-6 rounded-lg shadow gap-4`}
       >
-        <div className={`flex items-center space-x-4`}>
+        <div className={`flex items-center space-x-3 md:space-x-4`}>
           {/* Avatar */}
           <div
-            className={`w-16 h-16 rounded-full bg-base-100 flex items-center justify-center text-xl font-semibold text-green-950`}
+            className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-base-100 flex items-center justify-center text-lg md:text-xl font-semibold text-green-950 shrink-0`}
           >
             {ownerData?.profile?.fullName?.charAt(0)}
           </div>
           <div>
-            <h2 className={`text-2xl font-bold mb-1 text-green-950`}>
+            <h2 className={`text-xl md:text-2xl font-bold mb-1 text-green-950`}>
               {ownerData?.profile?.fullName}
             </h2>
-            <span className={`text-sm text-green-900 font-medium`}>
+            <span
+              className={`text-xs md:text-sm text-green-900 font-medium block`}
+            >
               {ownerData?.email}
             </span>
-            <small className={`text-sm text-green-900 block font-medium`}>
+            <small
+              className={`text-xs md:text-sm text-green-900 block font-medium`}
+            >
               {ownerData?.status}
             </small>
           </div>
@@ -86,7 +90,7 @@ export default function BusinessSettingsOwnerProfile({
                 title: "Edit Owner Profile",
               })
             }
-            className={`bg-linear-to-tl to-primary shadow-md from-primary hover:bg-green-700 text-base-300 font-semibold px-4 py-2 rounded-md`}
+            className={`bg-linear-to-tl to-primary shadow-md from-primary hover:bg-green-700 text-base-300 font-semibold px-4 py-2 rounded-md w-full md:w-auto text-sm md:text-base`}
           >
             Edit Profile
           </button>

@@ -158,7 +158,13 @@ export default function EmployeesPage() {
           data?.employees?.data?.map((row) => ({
             ...row,
             customFullName: row?.profile?.fullName || "N/A",
-            customRoleName: row?.role?.name || "N/A",
+            customRoleName: row?.role?.name ? (
+              <span className="badge badge-primary badge-sm">
+                {row.role.name.split("#")[0]}
+              </span>
+            ) : (
+              "N/A"
+            ),
             customPhone: row?.profile?.phone || "N/A",
           })) || []
         }

@@ -76,7 +76,7 @@ export default function Sidebar({
       Icon: PiReceipt,
       label: menuNames.payslips,
       path: "/payslips",
-      show: true,
+      show: userRole !== "owner",
       subMenus: [],
     },
     {

@@ -21,7 +21,7 @@ export default function ProfileAvatar() {
                 {user?.profile?.fullName}
               </h4>
               <small className={`text-xs text-green-900`}>
-                {formatText(user?.role?.name)}
+                {formatText(user?.role?.name?.split("#")[0] || "N/A")}
               </small>
             </div>
 
