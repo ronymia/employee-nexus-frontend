@@ -72,9 +72,9 @@ export default function BusinessSettingsConfig() {
     <div className={`max-w-3xl mx-auto p-6 space-y-6`}>
       {/* Header */}
       <div
-        className={`flex items-center justify-between bg-base-300 p-6 rounded-lg shadow`}
+        className={`flex flex-col md:flex-row items-start md:items-center justify-between bg-base-300 p-4 md:p-6 rounded-lg shadow gap-4`}
       >
-        <h2 className={`text-2xl font-bold text-green-950`}>
+        <h2 className={`text-xl md:text-2xl font-bold text-green-950`}>
           Business Configuration
         </h2>
         <button
@@ -89,7 +89,7 @@ export default function BusinessSettingsConfig() {
               title: "Edit Business Configuration",
             })
           }
-          className={`bg-linear-to-tl to-primary shadow-md from-primary hover:bg-green-700 text-base-300 font-semibold px-4 py-2 rounded-md`}
+          className={`bg-linear-to-tl to-primary shadow-md from-primary hover:bg-green-700 text-base-300 font-semibold px-4 py-2 rounded-md w-full md:w-auto text-sm md:text-base`}
         >
           Edit Configuration
         </button>

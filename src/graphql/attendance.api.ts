@@ -111,6 +111,34 @@ export const GET_ATTENDANCE_BY_ID = gql`
 `;
 
 // CREATE ATTENDANCE
+export const ATTENDANCE_REQUEST = gql`
+  mutation CreateAttendance($createAttendanceInput: RequestAttendanceInput!) {
+    attendanceRequest(createAttendanceInput: $createAttendanceInput) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        date
+        totalHours
+        breakHours
+        status
+        createdAt
+        updatedAt
+        punchRecords {
+          id
+          punchIn
+          punchOut
+          workHours
+          breakHours
+          notes
+        }
+      }
+    }
+  }
+`;
+// CREATE ATTENDANCE
 export const CREATE_ATTENDANCE = gql`
   mutation CreateAttendance($createAttendanceInput: CreateAttendanceInput!) {
     createAttendance(createAttendanceInput: $createAttendanceInput) {
@@ -169,6 +197,38 @@ export const DELETE_ATTENDANCE = gql`
       success
       data {
         id
+      }
+    }
+  }
+`;
+
+// APPROVE ATTENDANCE
+export const APPROVE_ATTENDANCE = gql`
+  mutation ApproveAttendance($attendanceId: Int!) {
+    approveAttendance(attendanceId: $attendanceId) {
+      message
+      statusCode
+      success
+      data {
+        id
+        status
+        updatedAt
+      }
+    }
+  }
+`;
+
+// REJECT ATTENDANCE
+export const REJECT_ATTENDANCE = gql`
+  mutation RejectAttendance($attendanceId: Int!) {
+    rejectAttendance(attendanceId: $attendanceId) {
+      message
+      statusCode
+      success
+      data {
+        id
+        status
+        updatedAt
       }
     }
   }

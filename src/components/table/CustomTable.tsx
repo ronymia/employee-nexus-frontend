@@ -119,14 +119,15 @@ export default function CustomTable({
           <CustomColumnsSet columns={columns} setColumns={setColumns} />
         )}
 
-        <div className={`flex items-center gap-3 flex-col-reverse md:flex-row`}>
+        <div
+          className={`flex items-center gap-3 flex-col-reverse md:flex-row md:justify-end md:items-end w-full`}
+        >
           {searchConfig?.searchable && (
             <CustomSearchField
               searchable={searchConfig?.searchable}
               debounceDelay={searchConfig?.debounceDelay}
               defaultValue={searchConfig?.defaultField}
               changeHandler={(searchCondition) => {
-                /** Handle search */
                 setSearchTerm(searchCondition.value);
                 setSearchField(searchCondition.field);
               }}

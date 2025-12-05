@@ -97,6 +97,31 @@ export const GET_LEAVE_BY_ID = gql`
 `;
 
 // CREATE LEAVE
+export const LEAVE_REQUEST = gql`
+  mutation CreateLeave($createLeaveInput: RequestLeaveInput!) {
+    leaveRequest(createLeaveInput: $createLeaveInput) {
+      message
+      statusCode
+      success
+      data {
+        id
+        userId
+        leaveTypeId
+        leaveYear
+        leaveDuration
+        startDate
+        endDate
+        totalHours
+        status
+        attachments
+        notes
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+// CREATE LEAVE
 export const CREATE_LEAVE = gql`
   mutation CreateLeave($createLeaveInput: CreateLeaveInput!) {
     createLeave(createLeaveInput: $createLeaveInput) {
@@ -162,19 +187,33 @@ export const DELETE_LEAVE = gql`
   }
 `;
 
-// APPROVE/REJECT LEAVE
-export const REVIEW_LEAVE = gql`
-  mutation ReviewLeave($id: Int!, $status: String!, $rejectionReason: String) {
-    reviewLeave(id: $id, status: $status, rejectionReason: $rejectionReason) {
+// APPROVE LEAVE
+export const APPROVE_LEAVE = gql`
+  mutation ApproveLeave($leaveId: Int!) {
+    approveLeave(leaveId: $leaveId) {
       message
       statusCode
       success
       data {
         id
         status
-        reviewedAt
-        reviewedBy
-        rejectionReason
+        updatedAt
+      }
+    }
+  }
+`;
+
+// REJECT LEAVE
+export const REJECT_LEAVE = gql`
+  mutation RejectLeave($leaveId: Int!) {
+    rejectLeave(leaveId: $leaveId) {
+      message
+      statusCode
+      success
+      data {
+        id
+        status
+        updatedAt
       }
     }
   }

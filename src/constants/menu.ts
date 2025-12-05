@@ -2,6 +2,8 @@ export const menuNames = {
   dashboard: "Dashboard",
   notifications: "Notifications",
   profile: "My Profile",
+  payslips: "My Payslips",
+  my_activities: "My Activities",
   business: "Businesses",
   subscription_plans: "Subscription Plans",
   features: "Features",

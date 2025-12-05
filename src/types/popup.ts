@@ -44,7 +44,8 @@ type IForm_NAME =
   | "attendance"
   | "leave"
   | "holiday"
-  | "bulk_schedule";
+  | "bulk_schedule"
+  | "payslip";
 
 export interface IPopupOption {
   open: boolean;

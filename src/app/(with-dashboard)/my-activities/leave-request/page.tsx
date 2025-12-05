@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
 import CustomLoading from "@/components/loader/CustomLoading";
 import FormModal from "@/components/form/FormModal";
-import { TableColumnType, IEmployee, ILeave, LeaveDuration } from "@/types";
+import { TableColumnType, ILeave, LeaveDuration } from "@/types";
 import {
   PiClock,
   PiCheckCircle,
@@ -14,58 +14,46 @@ import {
   PiPlusCircle,
   PiPencil,
   PiTrash,
-  PiCheck,
-  PiX,
 } from "react-icons/pi";
-import { GET_EMPLOYEES } from "@/graphql/employee.api";
-import {
-  GET_LEAVES,
-  DELETE_LEAVE,
-  APPROVE_LEAVE,
-  REJECT_LEAVE,
-} from "@/graphql/leave.api";
+import { GET_LEAVES, DELETE_LEAVE } from "@/graphql/leave.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import LeaveForm from "./components/LeaveForm";
-import { Permissions } from "@/constants/permissions.constant";
-import usePermissionGuard from "@/guards/usePermissionGuard";
+import useAuthGuard from "@/hooks/useAuthGuard";
+import useAppStore from "@/hooks/useAppStore";
 
-export default function LeaveRecordsPage() {
-  const { hasPermission } = usePermissionGuard();
+export default function LeaveRequestPage() {
+  useAuthGuard();
+  const user = useAppStore((state) => state.user);
+
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
-      header: "Employee",
-      accessorKey: "customEmployeeName",
-      show: true,
-    },
-    {
-      key: "2",
       header: "Leave Type",
       accessorKey: "customLeaveType",
       show: true,
     },
     {
-      key: "3",
+      key: "2",
       header: "Duration",
       accessorKey: "customDuration",
       show: true,
     },
     {
-      key: "4",
+      key: "3",
       header: "Leave Period",
       accessorKey: "customLeavePeriod",
       show: true,
     },
     {
-      key: "5",
+      key: "4",
       header: "Total Hours",
       accessorKey: "customTotalHours",
       show: true,
     },
     {
-      key: "6",
+      key: "5",
       header: "Status",
       accessorKey: "customStatus",
       show: true,
@@ -79,20 +67,7 @@ export default function LeaveRecordsPage() {
     id: number | null;
   }>({ open: false, id: null });
 
-  // Fetch employees for the form
-  const { data: employeesData } = useQuery<{
-    employees: {
-      data: IEmployee[];
-    };
-  }>(GET_EMPLOYEES, {
-    variables: {
-      query: {},
-    },
-  });
-
-  const employees = employeesData?.employees?.data || [];
-
-  // Fetch leave records
+  // Fetch leave records for logged-in user
   const {
     data: leavesData,
     loading,
@@ -103,8 +78,11 @@ export default function LeaveRecordsPage() {
     };
   }>(GET_LEAVES, {
     variables: {
-      query: {},
+      query: {
+        userId: Number(user?.id),
+      },
     },
+    skip: !user?.id,
   });
 
   const leaves = leavesData?.leaves?.data || [];
@@ -112,19 +90,9 @@ export default function LeaveRecordsPage() {
   // Delete mutation
   const [deleteLeave, { loading: deleting }] = useMutation(DELETE_LEAVE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
-  });
-
-  // Approve leave mutation
-  const [approveLeave] = useMutation(APPROVE_LEAVE, {
-    awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
-  });
-
-  // Reject leave mutation
-  const [rejectLeave] = useMutation(REJECT_LEAVE, {
-    awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: { userId: Number(user?.id) } } },
+    ],
   });
 
   const handleDelete = async () => {
@@ -138,14 +106,6 @@ export default function LeaveRecordsPage() {
         console.error("Error deleting leave:", error);
       }
     }
-  };
-
-  const handleApprove = async (leave: ILeave) => {
-    await approveLeave({ variables: { leaveId: Number(leave.id) } });
-  };
-
-  const handleReject = async (leave: ILeave) => {
-    await rejectLeave({ variables: { leaveId: Number(leave.id) } });
   };
 
   const handleEdit = (leave: ILeave) => {
@@ -213,10 +173,10 @@ export default function LeaveRecordsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-base-content">
-            Leave Records
+            My Leave Requests
           </h1>
           <p className="text-sm text-base-content/60 mt-1">
-            Manage employee leave requests and records
+            Submit and manage your leave requests
           </p>
         </div>
       </div>
@@ -280,33 +240,11 @@ export default function LeaveRecordsPage() {
           isLoading={loading}
           actions={[
             {
-              name: "Approve",
-              type: "button" as const,
-              handler: handleApprove,
-              Icon: PiCheck,
-              permissions: [Permissions.LeaveUpdate],
-              disabledOn: [
-                { accessorKey: "status", value: "approved" },
-                // { accessorKey: "status", value: "rejected" },
-              ],
-            },
-            {
-              name: "Reject",
-              type: "button" as const,
-              handler: handleReject,
-              Icon: PiX,
-              permissions: [Permissions.LeaveUpdate],
-              disabledOn: [
-                // { accessorKey: "status", value: "approved" },
-                { accessorKey: "status", value: "rejected" },
-              ],
-            },
-            {
               name: "Edit",
               type: "button" as const,
               handler: handleEdit,
               Icon: PiPencil,
-              permissions: [Permissions.LeaveUpdate],
+              permissions: [],
               disabledOn: [],
             },
             {
@@ -315,7 +253,7 @@ export default function LeaveRecordsPage() {
               handler: (leave: ILeave) =>
                 setDeleteModal({ open: true, id: leave.id }),
               Icon: PiTrash,
-              permissions: [Permissions.LeaveDelete],
+              permissions: [],
               disabledOn: [],
             },
           ]}
@@ -323,7 +261,6 @@ export default function LeaveRecordsPage() {
           setColumns={setColumns}
           dataSource={leaves.map((row) => ({
             ...row,
-            customEmployeeName: row.user?.profile?.fullName || "N/A",
             customLeaveType: row.leaveType?.name || "N/A",
             customDuration: getDurationLabel(row.leaveDuration),
             customLeavePeriod: row.endDate
@@ -337,32 +274,29 @@ export default function LeaveRecordsPage() {
           searchConfig={{
             searchable: false,
             debounceDelay: 500,
-            defaultField: "customEmployeeName",
+            defaultField: "customLeaveType",
             searchableFields: [
-              { label: "Employee Name", value: "customEmployeeName" },
               { label: "Leave Type", value: "customLeaveType" },
               { label: "Status", value: "status" },
             ],
           }}
         >
-          {hasPermission(Permissions.LeaveCreate) ? (
-            <button
-              className="btn btn-primary gap-2"
-              onClick={() =>
-                setPopupOption({
-                  open: true,
-                  closeOnDocumentClick: true,
-                  actionType: "create",
-                  form: "leave",
-                  data: null,
-                  title: "Create Leave Request",
-                })
-              }
-            >
-              <PiPlusCircle size={18} />
-              Add Leave
-            </button>
-          ) : null}
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "create",
+                form: "leave",
+                data: null,
+                title: "Submit Leave Request",
+              })
+            }
+          >
+            <PiPlusCircle size={18} />
+            Add Leave
+          </button>
         </CustomTable>
       )}
 
@@ -370,7 +304,6 @@ export default function LeaveRecordsPage() {
       <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
         {popupOption.form === "leave" && (
           <LeaveForm
-            employees={employees}
             leave={popupOption.data}
             actionType={popupOption.actionType as "create" | "update"}
             onClose={() =>

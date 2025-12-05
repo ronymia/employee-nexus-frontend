@@ -57,12 +57,12 @@ export default function PayrollComponentsPage() {
       accessorKey: "customCalculationType",
       show: true,
     },
-    // {
-    //   key: "5",
-    //   header: "Default Value",
-    //   accessorKey: "customDefaultValue",
-    //   show: true,
-    // },
+    {
+      key: "5",
+      header: "Default Value",
+      accessorKey: "customDefaultValue",
+      show: true,
+    },
     {
       key: "6",
       header: "Status",
@@ -314,7 +314,7 @@ export default function PayrollComponentsPage() {
             ),
           }))}
           searchConfig={{
-            searchable: true,
+            searchable: false,
             debounceDelay: 500,
             defaultField: "name",
             searchableFields: [

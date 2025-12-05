@@ -1,0 +1,502 @@
+"use client";
+
+import { IPayrollItem } from "@/types";
+import moment from "moment";
+import { useState } from "react";
+import { PiDownloadSimple, PiXCircle, PiEye } from "react-icons/pi";
+import dynamic from "next/dynamic";
+
+// Dynamically import PDFDownloadLink and PDFViewer to avoid SSR issues
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
+
+const PDFViewer = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
+  { ssr: false }
+);
+
+// Import the PDF document component
+import { PayslipPDF } from "./PayslipPDF";
+
+interface PayslipProps {
+  item: IPayrollItem;
+  onClose?: () => void;
+  showActions?: boolean;
+}
+
+export default function Payslip({
+  item,
+  onClose,
+  showActions = true,
+}: PayslipProps) {
+  const [showPDFPreview, setShowPDFPreview] = useState(false);
+
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
+
+    const printWindow = window.open("", "", "width=800,height=600");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Payslip - ${item.user?.profile?.fullName}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              color: #333;
+            }
+            .payslip-container {
+              max-width: 800px;
+              margin: 0 auto;
+              border: 2px solid #000;
+              page-break-inside: avoid;
+            }
+            @page {
+              size: A4;
+              margin: 10mm;
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px;
+              text-align: center;
+            }
+            .company-name {
+              font-size: 28px;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            .document-title {
+              font-size: 20px;
+              letter-spacing: 2px;
+              margin-top: 10px;
+            }
+            .info-section {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              padding: 30px;
+              background: #f8f9fa;
+              border-bottom: 2px solid #dee2e6;
+            }
+            .info-block h3 {
+              font-size: 12px;
+              color: #6c757d;
+              text-transform: uppercase;
+              margin-bottom: 15px;
+              letter-spacing: 1px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              padding: 8px 0;
+              border-bottom: 1px solid #e9ecef;
+            }
+            .info-label {
+              font-weight: 600;
+              color: #495057;
+            }
+            .info-value {
+              color: #212529;
+            }
+            .earnings-deductions {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 0;
+              page-break-inside: avoid;
+            }
+            .column {
+              padding: 30px;
+            }
+            .column:first-child {
+              border-right: 2px solid #dee2e6;
+            }
+            .column-title {
+              font-size: 16px;
+              font-weight: bold;
+              color: #495057;
+              margin-bottom: 20px;
+              padding-bottom: 10px;
+              border-bottom: 2px solid #667eea;
+            }
+            .line-item {
+              display: flex;
+              justify-content: space-between;
+              padding: 10px 0;
+              border-bottom: 1px solid #e9ecef;
+            }
+            .line-item-label {
+              color: #495057;
+            }
+            .line-item-amount {
+              font-weight: 600;
+              color: #212529;
+            }
+            .totals-section {
+              background: #f8f9fa;
+              padding: 30px;
+              border-top: 2px solid #dee2e6;
+            }
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              padding: 12px 0;
+              font-size: 16px;
+            }
+            .total-row.grand-total {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 20px;
+              margin-top: 20px;
+              font-size: 20px;
+              font-weight: bold;
+            }
+            .footer {
+              padding: 30px;
+              background: #fff;
+              border-top: 2px solid #dee2e6;
+              text-align: center;
+              color: #6c757d;
+              font-size: 12px;
+            }
+            .signature-section {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 40px;
+              margin-top: 40px;
+              padding: 0 30px 30px;
+              page-break-inside: avoid;
+            }
+            .signature-box {
+              text-align: center;
+              padding-top: 40px;
+              border-top: 2px solid #000;
+            }
+            .signature-label {
+              font-size: 14px;
+              color: #495057;
+              margin-top: 10px;
+            }
+            .status-badge {
+              display: inline-block;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: bold;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .status-paid {
+              background: #d4edda;
+              color: #155724;
+            }
+            .status-approved {
+              background: #d1ecf1;
+              color: #0c5460;
+            }
+            .status-pending {
+              background: #fff3cd;
+              color: #856404;
+            }
+            @media print {
+              body {
+                padding: 0;
+              }
+              .no-print {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  const handleDownload = () => {
+    handlePrint();
+  };
+
+  // Calculate earnings breakdown
+  const earningsBreakdown =
+    item.components
+      ?.filter((c) => c.component?.componentType === "EARNING")
+      .map((c) => ({
+        label: c.component?.name || "Unknown",
+        amount: c.amount,
+      })) || [];
+
+  // Calculate deductions breakdown
+  const deductionsBreakdown =
+    item.components
+      ?.filter((c) => c.component?.componentType === "DEDUCTION")
+      .map((c) => ({
+        label: c.component?.name || "Unknown",
+        amount: c.amount,
+      })) || [];
+
+  const totalEarnings = earningsBreakdown.reduce(
+    (sum, e) => sum + e.amount,
+    item.basicSalary
+  );
+  const totalDeductions = deductionsBreakdown.reduce(
+    (sum, d) => sum + d.amount,
+    0
+  );
+
+  const getStatusBadge = () => {
+    switch (item.status) {
+      case "PAID":
+        return <span className="status-badge status-paid">Paid</span>;
+      case "APPROVED":
+        return <span className="status-badge status-approved">Approved</span>;
+      case "PENDING":
+        return <span className="status-badge status-pending">Pending</span>;
+      default:
+        return (
+          <span className="status-badge status-pending">{item.status}</span>
+        );
+    }
+  };
+
+  return (
+    <div className="w-full">
+      {/* Action Buttons (Not printed) */}
+      {showActions && (
+        <div className="no-print flex items-center justify-between mb-4 p-4 bg-base-200 rounded-lg">
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrint}
+              className="btn btn-sm btn-primary gap-2"
+            >
+              <PiPrinter size={18} />
+              Print
+            </button>
+            <button
+              onClick={handleDownload}
+              className="btn btn-sm btn-secondary gap-2"
+            >
+              <PiDownloadSimple size={18} />
+              Download PDF
+            </button>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="btn btn-sm btn-ghost gap-2">
+              <PiXCircle size={18} />
+              Close
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Payslip Content */}
+      <div ref={printRef} className="payslip-container bg-white">
+        {/* Header */}
+        <div className="header">
+          <div className="company-name">Your Company Name</div>
+          <div className="text-sm opacity-90">
+            123 Business Street, City, Country
+          </div>
+          <div className="document-title">PAYSLIP</div>
+        </div>
+
+        {/* Employee & Payment Info */}
+        <div className="info-section">
+          <div className="info-block">
+            <h3>Employee Information</h3>
+            <div className="info-row">
+              <span className="info-label">Name:</span>
+              <span className="info-value">
+                {item.user?.profile?.fullName || "N/A"}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Employee ID:</span>
+              <span className="info-value">
+                {(item.user as any)?.employee?.employeeId || "N/A"}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Department:</span>
+              <span className="info-value">
+                {(item.user as any)?.employee?.department?.name || "N/A"}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Designation:</span>
+              <span className="info-value">
+                {(item.user as any)?.employee?.designation?.name || "N/A"}
+              </span>
+            </div>
+          </div>
+
+          <div className="info-block">
+            <h3>Payment Information</h3>
+            <div className="info-row">
+              <span className="info-label">Pay Period:</span>
+              <span className="info-value">
+                {moment(item.payrollCycle?.periodStart).format("MMM DD")} -{" "}
+                {moment(item.payrollCycle?.periodEnd).format("MMM DD, YYYY")}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Payment Date:</span>
+              <span className="info-value">
+                {moment(
+                  (item as any).paymentDate || item.payrollCycle?.paymentDate
+                ).format("MMM DD, YYYY")}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Payment Method:</span>
+              <span className="info-value">
+                {item.paymentMethod?.replace("_", " ").toUpperCase() ||
+                  "Bank Transfer"}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Status:</span>
+              <span className="info-value">{getStatusBadge()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Earnings and Deductions */}
+        <div className="earnings-deductions">
+          {/* Earnings Column */}
+          <div className="column">
+            <div className="column-title">Earnings</div>
+            <div className="line-item">
+              <span className="line-item-label">Basic Salary</span>
+              <span className="line-item-amount">
+                ${item.basicSalary.toFixed(2)}
+              </span>
+            </div>
+            {earningsBreakdown.map((earning, index) => (
+              <div key={index} className="line-item">
+                <span className="line-item-label">{earning.label}</span>
+                <span className="line-item-amount">
+                  ${earning.amount.toFixed(2)}
+                </span>
+              </div>
+            ))}
+            <div
+              className="line-item"
+              style={{ marginTop: "20px", fontWeight: "bold" }}
+            >
+              <span className="line-item-label">Total Earnings</span>
+              <span className="line-item-amount">
+                ${totalEarnings.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* Deductions Column */}
+          <div className="column">
+            <div className="column-title">Deductions</div>
+            {deductionsBreakdown.length > 0 ? (
+              <>
+                {deductionsBreakdown.map((deduction, index) => (
+                  <div key={index} className="line-item">
+                    <span className="line-item-label">{deduction.label}</span>
+                    <span className="line-item-amount">
+                      ${deduction.amount.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+                <div
+                  className="line-item"
+                  style={{ marginTop: "20px", fontWeight: "bold" }}
+                >
+                  <span className="line-item-label">Total Deductions</span>
+                  <span className="line-item-amount">
+                    ${totalDeductions.toFixed(2)}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="line-item">
+                <span className="line-item-label">No Deductions</span>
+                <span className="line-item-amount">$0.00</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Totals Section */}
+        <div className="totals-section">
+          <div className="total-row">
+            <span>Gross Pay:</span>
+            <span>${item.grossPay.toFixed(2)}</span>
+          </div>
+          <div className="total-row">
+            <span>Total Deductions:</span>
+            <span>${item.totalDeductions.toFixed(2)}</span>
+          </div>
+          <div className="total-row grand-total">
+            <span>Net Pay:</span>
+            <span>${item.netPay.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Payment Details */}
+        {item.transactionRef && (
+          <div style={{ padding: "30px", background: "#f8f9fa" }}>
+            <div className="info-row">
+              <span className="info-label">Transaction Reference:</span>
+              <span className="info-value">{item.transactionRef}</span>
+            </div>
+            {item.paidAt && (
+              <div className="info-row">
+                <span className="info-label">Paid On:</span>
+                <span className="info-value">
+                  {moment(item.paidAt).format("MMM DD, YYYY HH:mm")}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Signature Section */}
+        <div className="signature-section">
+          <div className="signature-box">
+            <div className="signature-label">Employee Signature</div>
+          </div>
+          <div className="signature-box">
+            <div className="signature-label">Authorized Signature</div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="footer">
+          <p>
+            This is a computer-generated payslip and does not require a
+            signature.
+          </p>
+          <p style={{ marginTop: "10px" }}>
+            For any queries, please contact HR Department at hr@company.com
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

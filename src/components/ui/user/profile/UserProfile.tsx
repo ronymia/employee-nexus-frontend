@@ -11,6 +11,7 @@ import {
   PaySlipContent,
   ProjectsContent,
   SocialLinksContent,
+  LeaveContent,
 } from "./profile-tabs";
 import ProfileContent from "./profile-tabs/profile/ProfileContent";
 import EducationContent from "./profile-tabs/education/EducationContent";
@@ -1118,17 +1119,9 @@ export default function UserProfile({ userId }: UserProfileProps) {
         {activeTab === "education" && <EducationContent userId={userId} />}
         {activeTab === "experience" && <ExperienceContent userId={userId} />}
         {activeTab === "schedule" && <ScheduleContent userId={userId} />}
-        {activeTab === "attendance" && (
-          <AttendanceContent userId={userId} attendances={dummyAttendances} />
-        )}
-        {activeTab === "leave" && (
-          <div className="bg-base-100 rounded-lg p-6 shadow-sm">
-            <p className="text-base-content/60 text-center py-8">
-              Leave management coming soon
-            </p>
-          </div>
-        )}
-        {activeTab === "payslip" && <PaySlipContent />}
+        {activeTab === "attendance" && <AttendanceContent userId={userId} />}
+        {activeTab === "leave" && <LeaveContent userId={userId} />}
+        {activeTab === "payslip" && <PaySlipContent userId={userId} />}
         {activeTab === "projects" && <ProjectsContent userId={userId} />}
         {activeTab === "documents" && <DocumentsContent userId={userId} />}
         {activeTab === "notes" && <NotesContent userId={userId} />}

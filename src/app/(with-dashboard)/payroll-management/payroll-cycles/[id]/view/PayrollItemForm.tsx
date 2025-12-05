@@ -442,13 +442,13 @@ function PayrollComponentsSection({
       <div className="space-y-3">
         {componentList.map((comp, index) => (
           <div key={index} className="border rounded p-3 bg-base-200">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
               <CustomSelect
                 dataAuto={`component-${index}`}
                 name={`components.${index}.componentId`}
                 label="Component"
                 placeholder="Select component"
-                required={false}
+                required={true}
                 options={componentOptions}
                 isLoading={false}
                 defaultValues={comp.componentId}
@@ -461,7 +461,7 @@ function PayrollComponentsSection({
                 name={`components.${index}.amount`}
                 label="Amount"
                 placeholder="0.00"
-                required={false}
+                required={true}
                 type="number"
                 // step="0.01"
                 // value={comp.amount}
@@ -474,7 +474,7 @@ function PayrollComponentsSection({
                 name={`components.${index}.calculationBase`}
                 label="Base Amount"
                 placeholder="0.00"
-                required={false}
+                required={true}
                 type="number"
                 // step="0.01"
                 // value={comp.calculationBase}
@@ -487,7 +487,7 @@ function PayrollComponentsSection({
                 name={`components.${index}.notes`}
                 label="Notes"
                 placeholder="Optional notes"
-                required={false}
+                required={true}
                 // value={comp.notes}
                 // onChange={(e) =>
                 //   updateComponent(index, "notes", e.target.value)
@@ -495,7 +495,7 @@ function PayrollComponentsSection({
               />
               <button
                 type="button"
-                className="btn btn-sm btn-error"
+                className="btn btn-sm btn-error self-center"
                 onClick={() => removeComponent(index)}
               >
                 Remove
@@ -561,13 +561,13 @@ function PayslipAdjustmentsSection() {
       <div className="space-y-3">
         {adjustmentList.map((adj, index) => (
           <div key={index} className="border rounded p-3 bg-base-200">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
               <CustomSelect
                 dataAuto={`adj-type-${index}`}
                 name={`adjustments.${index}.type`}
                 label="Type"
                 placeholder="Select type"
-                required={false}
+                required={true}
                 options={adjustmentTypes}
                 isLoading={false}
                 // value={adj.type}
@@ -578,7 +578,7 @@ function PayslipAdjustmentsSection() {
                 name={`adjustments.${index}.description`}
                 label="Description"
                 placeholder="Description"
-                required={false}
+                required={true}
                 // value={adj.description}
                 // onChange={(e) =>
                 //   updateAdjustment(index, "description", e.target.value)
@@ -589,7 +589,7 @@ function PayslipAdjustmentsSection() {
                 name={`adjustments.${index}.amount`}
                 label="Amount"
                 placeholder="0.00"
-                required={false}
+                required={true}
                 type="number"
                 // step="0.01"
                 // value={adj.amount}
@@ -597,7 +597,7 @@ function PayslipAdjustmentsSection() {
                 //   updateAdjustment(index, "amount", e.target.value)
                 // }
               />
-              <div className="form-control">
+              {/* <div className="form-control">
                 <label className="label">
                   <span className="label-text">Recurring</span>
                 </label>
@@ -609,13 +609,13 @@ function PayslipAdjustmentsSection() {
                     updateAdjustment(index, "isRecurring", e.target.checked)
                   }
                 />
-              </div>
+              </div> */}
               <CustomInputField
                 dataAuto={`adj-notes-${index}`}
                 name={`adjustments.${index}.notes`}
                 label="Notes"
                 placeholder="Optional notes"
-                required={false}
+                required={true}
                 // value={adj.notes}
                 // onChange={(e) =>
                 //   updateAdjustment(index, "notes", e.target.value)
@@ -623,7 +623,7 @@ function PayslipAdjustmentsSection() {
               />
               <button
                 type="button"
-                className="btn btn-sm btn-error"
+                className="btn btn-sm btn-error self-center"
                 onClick={() => removeAdjustment(index)}
               >
                 Remove

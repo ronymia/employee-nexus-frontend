@@ -1,23 +1,5 @@
 "use client";
 
-// export default function PaySlipContent() {
-//   return (
-//     <div className="bg-base-100 rounded-lg p-6 shadow-sm">
-//       <div className="flex flex-col items-center justify-center py-12">
-//         <PiReceipt className="text-6xl text-base-content/30 mb-4" />
-//         <h3 className="text-lg font-semibold mb-2 text-base-content">
-//           Pay Slip Information
-//         </h3>
-//         <p className="text-base-content/60 text-center">
-//           No pay slip records found!
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
-
-"use client";
-
 import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { GET_ALL_PAYSLIPS } from "@/graphql";
@@ -622,9 +604,12 @@ const dummyPayslips: any[] = [
   },
 ];
 
-export default function PaySlipContent({ userId }: { userId: number }) {
+export default function PayslipsPage() {
   const { popupOption, setPopupOption } = usePopupOption();
   const [selectedYear, setSelectedYear] = useState(moment().year());
+  const user = useAppStore((state) => state.user);
+
+  console.log({ user });
 
   const { data, loading } = useQuery<{
     payrollItems: {
@@ -633,7 +618,7 @@ export default function PaySlipContent({ userId }: { userId: number }) {
   }>(GET_ALL_PAYSLIPS, {
     variables: {
       query: {
-        userId: Number(userId),
+        userId: Number(user?.id),
       },
     },
     // skip: true, // Skip the query to use dummy data
@@ -678,9 +663,9 @@ export default function PaySlipContent({ userId }: { userId: number }) {
       <div className="hidden lg:block bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Payslips</h1>
+            <h1 className="text-2xl font-bold text-gray-900">My Payslips</h1>
             <p className="text-sm text-gray-500 mt-1">
-              View and download salary slips
+              View and download your salary slips
             </p>
           </div>
           {/* <select

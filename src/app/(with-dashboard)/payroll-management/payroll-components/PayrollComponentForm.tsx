@@ -180,16 +180,16 @@ function PayrollComponentFormFields({
             options={calculationTypeOptions}
             isLoading={false}
           />
-          {/* <CustomInputField
+          <CustomInputField
             dataAuto="defaultValue"
             name="defaultValue"
             label="Default Value"
             placeholder="Enter amount or percentage"
             required={false}
             type="number"
-            step="0.01"
+            // step="0.01"
           />
-          <CustomInputField
+          {/* <CustomInputField
             dataAuto="displayOrder"
             name="displayOrder"
             label="Display Order"
@@ -205,22 +205,17 @@ function PayrollComponentFormFields({
         <h4 className="text-base font-semibold mb-3 text-primary">
           Properties
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* <ToggleField
-            name="isActive"
-            label="Active Status"
-            description="Enable this component"
-          /> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ToggleField
             name="isTaxable"
             label="Taxable"
             description="Subject to income tax"
           />
-          {/* <ToggleField
+          <ToggleField
             name="isStatutory"
             label="Statutory"
             description="Required by law"
-          /> */}
+          />
         </div>
       </div>
     </div>

@@ -115,10 +115,10 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       submitHandler={handleOnSubmit}
       resolver={employeeSchema}
       defaultValues={data || {}}
-      className="flex flex-col gap-y-4 p-6"
+      className="flex flex-col gap-y-4 md:p-6 p-1"
     >
       {/* PERSONAL INFORMATION */}
-      <div className="bg-white border rounded-lg p-5 shadow-sm">
+      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
         <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
           Personal Information
         </h3>
@@ -142,7 +142,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       </div>
 
       {/* ADDRESS INFORMATION */}
-      <div className="bg-white border rounded-lg p-5 shadow-sm">
+      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
         <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
           Address
         </h3>
@@ -161,7 +161,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       </div>
 
       {/* EMERGENCY CONTACT */}
-      <div className="bg-white border rounded-lg p-5 shadow-sm">
+      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
         <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
           Emergency Contact
         </h3>
@@ -185,7 +185,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       </div>
 
       {/* EMPLOYMENT DETAILS */}
-      <div className="bg-white border rounded-lg p-5 shadow-sm">
+      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
         <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
           Employment Details
         </h3>
@@ -208,7 +208,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       </div>
 
       {/* COMPENSATION & WORK SCHEDULE */}
-      <div className="bg-white border rounded-lg p-5 shadow-sm">
+      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
         <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
           Compensation & Schedule
         </h3>
