@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@apollo/client/react";
 import moment from "moment";
 import {
   PiCalendarBlank,
@@ -16,6 +17,8 @@ import {
   PiDesktop,
   PiGlobe,
 } from "react-icons/pi";
+import { GET_ATTENDANCES } from "@/graphql/attendance.api";
+import CustomLoading from "@/components/loader/CustomLoading";
 
 interface IAttendancePunch {
   id: number;
@@ -55,15 +58,33 @@ interface IAttendance {
 
 interface AttendanceContentProps {
   userId: number;
-  attendances?: IAttendance[];
 }
 
-export default function AttendanceContent({
-  userId,
-  attendances = [],
-}: AttendanceContentProps) {
+export default function AttendanceContent({ userId }: AttendanceContentProps) {
   const [currentMonth, setCurrentMonth] = useState(moment());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  // Fetch attendances for the user
+  const {
+    data: attendancesData,
+    loading,
+    refetch,
+  } = useQuery<{
+    attendances: {
+      data: IAttendance[];
+    };
+  }>(GET_ATTENDANCES, {
+    variables: {
+      query: {
+        userId: userId,
+        startDate: currentMonth.clone().startOf("month").format("YYYY-MM-DD"),
+        endDate: currentMonth.clone().endOf("month").format("YYYY-MM-DD"),
+      },
+    },
+    skip: !userId,
+  });
+
+  const attendances = attendancesData?.attendances?.data || [];
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
@@ -112,7 +133,7 @@ export default function AttendanceContent({
       const week = [];
       for (let i = 0; i < 7; i++) {
         const dateStr = day.format("YYYY-MM-DD");
-        const attendance = attendances.find((a) =>
+        const attendance = attendances.find((a: IAttendance) =>
           moment(a.date).isSame(day, "day")
         );
         const isCurrentMonth = day.month() === currentMonth.month();
@@ -121,7 +142,7 @@ export default function AttendanceContent({
         week.push(
           <div
             key={dateStr}
-            className={`border rounded-lg p-2 min-h-[80px] cursor-pointer transition-all ${
+            className={`border rounded-lg p-2 min-h-20 cursor-pointer transition-all ${
               !isCurrentMonth ? "opacity-30" : ""
             } ${isToday ? "ring-2 ring-primary" : ""} ${
               attendance ? getStatusColor(attendance.status) : "bg-base-100"
@@ -162,18 +183,43 @@ export default function AttendanceContent({
   };
 
   const selectedAttendance = selectedDate
-    ? attendances.find((a) => moment(a.date).isSame(selectedDate, "day"))
+    ? attendances.find((a: IAttendance) =>
+        moment(a.date).isSame(selectedDate, "day")
+      )
     : null;
 
   // Calculate monthly stats
   const monthlyStats = {
-    present: attendances.filter((a) => a.status === "present").length,
-    absent: attendances.filter((a) => a.status === "absent").length,
-    late: attendances.filter((a) => a.status === "late").length,
-    halfDay: attendances.filter((a) => a.status === "half_day").length,
-    onLeave: attendances.filter((a) => a.status === "on_leave").length,
-    totalHours: attendances.reduce((sum, a) => sum + (a.totalHours || 0), 0),
+    present: attendances.filter((a: IAttendance) => a.status === "present")
+      .length,
+    absent: attendances.filter((a: IAttendance) => a.status === "absent")
+      .length,
+    late: attendances.filter((a: IAttendance) => a.status === "late").length,
+    halfDay: attendances.filter((a: IAttendance) => a.status === "half_day")
+      .length,
+    onLeave: attendances.filter((a: IAttendance) => a.status === "on_leave")
+      .length,
+    totalHours: attendances.reduce(
+      (sum: number, a: IAttendance) => sum + (a.totalHours || 0),
+      0
+    ),
   };
+
+  // Refetch when month changes
+  const handleMonthChange = (newMonth: moment.Moment) => {
+    setCurrentMonth(newMonth);
+    refetch({
+      query: {
+        userId: userId,
+        startDate: newMonth.clone().startOf("month").format("YYYY-MM-DD"),
+        endDate: newMonth.clone().endOf("month").format("YYYY-MM-DD"),
+      },
+    });
+  };
+
+  if (loading) {
+    return <CustomLoading />;
+  }
 
   return (
     <div className="space-y-6">
@@ -191,21 +237,21 @@ export default function AttendanceContent({
           <button
             className="btn btn-sm btn-circle btn-ghost"
             onClick={() =>
-              setCurrentMonth(currentMonth.clone().subtract(1, "month"))
+              handleMonthChange(currentMonth.clone().subtract(1, "month"))
             }
           >
             <PiCaretLeft size={20} />
           </button>
           <button
             className="btn btn-sm btn-ghost"
-            onClick={() => setCurrentMonth(moment())}
+            onClick={() => handleMonthChange(moment())}
           >
             Today
           </button>
           <button
             className="btn btn-sm btn-circle btn-ghost"
             onClick={() =>
-              setCurrentMonth(currentMonth.clone().add(1, "month"))
+              handleMonthChange(currentMonth.clone().add(1, "month"))
             }
           >
             <PiCaretRight size={20} />
@@ -355,108 +401,110 @@ export default function AttendanceContent({
                   Punch Records
                 </h5>
                 <div className="space-y-3">
-                  {selectedAttendance.punchRecords.map((punch, index) => (
-                    <div
-                      key={punch.id}
-                      className="bg-base-200/50 rounded-lg p-4 border border-base-300"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="badge badge-sm badge-primary">
-                          Session {index + 1}
-                        </span>
-                        <span className="text-xs text-base-content/60">
-                          {punch.workHours?.toFixed(2) || "0"}h worked
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <PiClock size={16} className="text-success" />
-                            <span className="text-sm font-semibold">
-                              Punch In
-                            </span>
-                          </div>
-                          <p className="text-sm text-base-content/80 ml-6">
-                            {moment(punch.punchIn).format("hh:mm:ss A")}
-                          </p>
-                          {punch.punchInDevice && (
-                            <p className="text-xs text-base-content/60 ml-6 flex items-center gap-1">
-                              <PiDesktop size={12} />
-                              {punch.punchInDevice}
-                            </p>
-                          )}
-                          {punch.punchInIp && (
-                            <p className="text-xs text-base-content/60 ml-6 flex items-center gap-1">
-                              <PiGlobe size={12} />
-                              {punch.punchInIp}
-                            </p>
-                          )}
+                  {selectedAttendance.punchRecords.map(
+                    (punch: IAttendancePunch, index: number) => (
+                      <div
+                        key={punch.id}
+                        className="bg-base-200/50 rounded-lg p-4 border border-base-300"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="badge badge-sm badge-primary">
+                            Session {index + 1}
+                          </span>
+                          <span className="text-xs text-base-content/60">
+                            {punch.workHours?.toFixed(2) || "0"}h worked
+                          </span>
                         </div>
 
-                        {punch.punchOut && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <div className="flex items-center gap-2 mb-2">
-                              <PiClock size={16} className="text-error" />
+                              <PiClock size={16} className="text-success" />
                               <span className="text-sm font-semibold">
-                                Punch Out
+                                Punch In
                               </span>
                             </div>
                             <p className="text-sm text-base-content/80 ml-6">
-                              {moment(punch.punchOut).format("hh:mm:ss A")}
+                              {moment(punch.punchIn).format("hh:mm:ss A")}
                             </p>
-                            {punch.punchOutDevice && (
+                            {punch.punchInDevice && (
                               <p className="text-xs text-base-content/60 ml-6 flex items-center gap-1">
                                 <PiDesktop size={12} />
-                                {punch.punchOutDevice}
+                                {punch.punchInDevice}
                               </p>
                             )}
-                            {punch.punchOutIp && (
+                            {punch.punchInIp && (
                               <p className="text-xs text-base-content/60 ml-6 flex items-center gap-1">
                                 <PiGlobe size={12} />
-                                {punch.punchOutIp}
+                                {punch.punchInIp}
                               </p>
                             )}
                           </div>
-                        )}
-                      </div>
 
-                      {(punch.breakStart || punch.punchInLat) && (
-                        <div className="mt-3 pt-3 border-t border-base-300 flex flex-wrap gap-4">
-                          {punch.breakStart && punch.breakEnd && (
-                            <div className="text-xs text-base-content/60">
-                              Break:{" "}
-                              {moment(punch.breakStart).format("hh:mm A")} -{" "}
-                              {moment(punch.breakEnd).format("hh:mm A")} (
-                              {punch.breakHours?.toFixed(2) || "0"}h)
+                          {punch.punchOut && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <PiClock size={16} className="text-error" />
+                                <span className="text-sm font-semibold">
+                                  Punch Out
+                                </span>
+                              </div>
+                              <p className="text-sm text-base-content/80 ml-6">
+                                {moment(punch.punchOut).format("hh:mm:ss A")}
+                              </p>
+                              {punch.punchOutDevice && (
+                                <p className="text-xs text-base-content/60 ml-6 flex items-center gap-1">
+                                  <PiDesktop size={12} />
+                                  {punch.punchOutDevice}
+                                </p>
+                              )}
+                              {punch.punchOutIp && (
+                                <p className="text-xs text-base-content/60 ml-6 flex items-center gap-1">
+                                  <PiGlobe size={12} />
+                                  {punch.punchOutIp}
+                                </p>
+                              )}
                             </div>
                           )}
-                          {punch.punchInLat && punch.punchInLng && (
-                            <button
-                              className="btn btn-xs btn-ghost gap-1"
-                              onClick={() => {
-                                window.open(
-                                  `https://www.google.com/maps?q=${punch.punchInLat},${punch.punchInLng}`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              <PiMapPin size={14} />
-                              View Location
-                            </button>
-                          )}
                         </div>
-                      )}
 
-                      {punch.notes && (
-                        <div className="mt-3 pt-3 border-t border-base-300">
-                          <p className="text-xs text-base-content/60 italic">
-                            Note: {punch.notes}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        {(punch.breakStart || punch.punchInLat) && (
+                          <div className="mt-3 pt-3 border-t border-base-300 flex flex-wrap gap-4">
+                            {punch.breakStart && punch.breakEnd && (
+                              <div className="text-xs text-base-content/60">
+                                Break:{" "}
+                                {moment(punch.breakStart).format("hh:mm A")} -{" "}
+                                {moment(punch.breakEnd).format("hh:mm A")} (
+                                {punch.breakHours?.toFixed(2) || "0"}h)
+                              </div>
+                            )}
+                            {punch.punchInLat && punch.punchInLng && (
+                              <button
+                                className="btn btn-xs btn-ghost gap-1"
+                                onClick={() => {
+                                  window.open(
+                                    `https://www.google.com/maps?q=${punch.punchInLat},${punch.punchInLng}`,
+                                    "_blank"
+                                  );
+                                }}
+                              >
+                                <PiMapPin size={14} />
+                                View Location
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {punch.notes && (
+                          <div className="mt-3 pt-3 border-t border-base-300">
+                            <p className="text-xs text-base-content/60 italic">
+                              Note: {punch.notes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             )}
