@@ -18,6 +18,68 @@ export const GET_PAYROLL_ITEMS = gql`
             fullName
             # avatar
           }
+          role {
+            id
+            name
+          }
+          employee {
+            id
+            userId
+            employeeId
+            nidNumber
+            joiningDate
+            salaryPerMonth
+            workingDaysPerWeek
+            workingHoursPerWeek
+            designationId
+            designation {
+              id
+              name
+            }
+            employmentStatusId
+            employmentStatus {
+              id
+              name
+            }
+            departmentId
+            department {
+              id
+              name
+            }
+            workSiteId
+            workSite {
+              id
+              name
+            }
+            workScheduleId
+            workSchedule {
+              id
+              name
+            }
+            rotaType
+            createdAt
+            updatedAt
+          }
+          business {
+            address
+            city
+            createdAt
+            email
+            id
+            lat
+            lng
+            name
+            numberOfEmployeesAllowed
+            phone
+            country
+            postcode
+            registrationDate
+            status
+            subscriptionPlanId
+            updatedAt
+            userId
+            website
+          }
         }
         basicSalary
         grossPay
@@ -142,20 +204,20 @@ export const GET_PAYROLL_ITEM_BY_ID = gql`
 export const CREATE_PAYROLL_ITEM = gql`
   mutation CreatePayrollItem($createPayrollItemInput: CreatePayrollItemInput!) {
     createPayrollItem(createPayrollItemInput: $createPayrollItemInput) {
-      message
-      statusCode
       success
-      data {
-        id
-        # payrollCycleId
-        # userId
-        # basicSalary
-        # grossPay
-        # totalDeductions
-        # netPay
-        status
-        # createdAt
-      }
+      statusCode
+      message
+      # data {
+      # id
+      # payrollCycleId
+      # userId
+      # basicSalary
+      # grossPay
+      # totalDeductions
+      # netPay
+      # status
+      # createdAt
+      # }
     }
   }
 `;

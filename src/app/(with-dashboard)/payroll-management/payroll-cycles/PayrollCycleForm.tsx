@@ -102,9 +102,9 @@ export default function PayrollCycleForm({
 
 function PayrollCycleFormFields() {
   const frequencyOptions = [
-    { label: "Weekly", value: PayrollFrequency.WEEKLY },
-    { label: "Bi-Weekly", value: PayrollFrequency.BI_WEEKLY },
-    { label: "Semi-Monthly", value: PayrollFrequency.SEMI_MONTHLY },
+    // { label: "Weekly", value: PayrollFrequency.WEEKLY },
+    // { label: "Bi-Weekly", value: PayrollFrequency.BI_WEEKLY },
+    // { label: "Semi-Monthly", value: PayrollFrequency.SEMI_MONTHLY },
     { label: "Monthly", value: PayrollFrequency.MONTHLY },
   ];
 
@@ -154,6 +154,7 @@ function PayrollCycleFormFields() {
             label="Period End Date"
             placeholder="Select End Date"
             required={true}
+            right
           />
           <CustomDatePicker
             dataAuto="paymentDate"
@@ -161,6 +162,7 @@ function PayrollCycleFormFields() {
             label="Payment Date"
             placeholder="Select Payment Date"
             required={true}
+            right
           />
         </div>
       </div>

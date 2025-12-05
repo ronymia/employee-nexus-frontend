@@ -41,6 +41,7 @@ import usePopupOption from "@/hooks/usePopupOption";
 import PayrollItemForm from "./PayrollItemForm";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
+import PayslipWrapper from "@/components/payroll/PayslipWrapper";
 
 export default function PayrollCycleDetailPage() {
   const { hasPermission } = usePermissionGuard();
@@ -160,7 +161,7 @@ export default function PayrollCycleDetailPage() {
   const handleApproveCycle = async () => {
     try {
       await approveCycle({
-        variables: { id: Number(cycleId) },
+        variables: { approvePayrollCycleInput: { id: Number(cycleId) } },
       });
       refetchCycle();
     } catch (error) {
@@ -171,7 +172,7 @@ export default function PayrollCycleDetailPage() {
   const handleProcessCycle = async () => {
     try {
       await processCycle({
-        variables: { id: Number(cycleId) },
+        variables: { processPayrollCycleInput: { id: Number(cycleId) } },
       });
       refetchCycle();
       refetchItems();
@@ -406,17 +407,23 @@ export default function PayrollCycleDetailPage() {
         <CustomTable
           isLoading={itemsLoading}
           actions={[
-            // {
-            //   name: "View",
-            //   type: "button" as const,
-            //   handler: (item: IPayrollItem) => {
-            //     // TODO: Navigate to item detail
-            //     console.log("View item:", item);
-            //   },
-            //   Icon: PiEye,
-            //   permissions: [Permissions.PayrollItemRead],
-            //   disabledOn: [],
-            // },
+            {
+              name: "View Payslip",
+              type: "button" as const,
+              handler: (item: IPayrollItem) => {
+                setPopupOption({
+                  open: true,
+                  closeOnDocumentClick: false,
+                  actionType: "view",
+                  form: "payslip" as any,
+                  data: item,
+                  title: "Employee Payslip",
+                });
+              },
+              Icon: PiEye,
+              permissions: [Permissions.PayrollItemRead],
+              disabledOn: [],
+            },
             // {
             //   name: "Edit",
             //   type: "button" as const,
@@ -472,7 +479,7 @@ export default function PayrollCycleDetailPage() {
             customStatus: getStatusBadge(row.status),
           }))}
           searchConfig={{
-            searchable: true,
+            searchable: false,
             debounceDelay: 500,
             defaultField: "customEmployeeName",
             searchableFields: [
@@ -503,7 +510,11 @@ export default function PayrollCycleDetailPage() {
       )}
 
       {/* Item Form Modal */}
-      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+      <CustomPopup
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+        customWidth={popupOption.form === ("payslip" as any) ? "50%" : "95%"}
+      >
         {popupOption.form === ("payrollItem" as any) && (
           <PayrollItemForm
             item={popupOption.data}
@@ -515,6 +526,17 @@ export default function PayrollCycleDetailPage() {
               })
             }
             refetch={refetchItems}
+          />
+        )}
+        {popupOption.form === ("payslip" as any) && (
+          <PayslipWrapper
+            item={popupOption.data}
+            onClose={() =>
+              setPopupOption({
+                ...popupOption,
+                open: false,
+              })
+            }
           />
         )}
       </CustomPopup>

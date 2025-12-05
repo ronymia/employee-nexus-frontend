@@ -6,7 +6,7 @@ import {
   MdOutlineSubscriptions,
   MdSettings,
 } from "react-icons/md";
-import { PiClock } from "react-icons/pi";
+import { PiClock, PiReceipt } from "react-icons/pi";
 import { IoNotificationsOutline } from "react-icons/io5";
 import SidebarGenerator from "./SidebarGenerator";
 import { VscFileSubmodule } from "react-icons/vsc";
@@ -64,6 +64,13 @@ export default function Sidebar({
       Icon: FiUsers,
       label: menuNames.profile,
       path: "/profile",
+      show: true,
+      subMenus: [],
+    },
+    {
+      Icon: PiReceipt,
+      label: menuNames.payslips,
+      path: "/payslips",
       show: true,
       subMenus: [],
     },
@@ -323,6 +330,13 @@ export default function Sidebar({
           Icon: VscFileSubmodule,
           label: "Payroll Cycles",
           path: "/payroll-management/payroll-cycles",
+          show: true,
+          subMenus: [],
+        },
+        {
+          Icon: PiReceipt,
+          label: "All Payslips",
+          path: "/payroll-management/payslips",
           show: true,
           subMenus: [],
         },

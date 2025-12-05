@@ -57,23 +57,31 @@ export const GET_PAYROLL_CYCLE_BY_ID = gql`
         processedAt
         notes
         businessId
-        # payrollItems {
-        #   id
-        #   userId
-        #   user {
-        #     id
-        #     email
-        #     profile {
-        #       fullName
-        #       avatar
-        #     }
-        #   }
-        #   basicSalary
-        #   grossPay
-        #   totalDeductions
-        #   netPay
-        #   status
-        # }
+        payrollItems {
+          id
+          userId
+          user {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+          basicSalary
+          grossPay
+          totalDeductions
+          netPay
+          status
+          components {
+            # componentItems
+            amount
+            calculationBase
+            notes
+          }
+          adjustments {
+            type
+          }
+        }
         createdAt
         updatedAt
       }
@@ -143,8 +151,10 @@ export const DELETE_PAYROLL_CYCLE = gql`
 
 // APPROVE PAYROLL CYCLE
 export const APPROVE_PAYROLL_CYCLE = gql`
-  mutation ApprovePayrollCycle($id: Int!) {
-    approvePayrollCycle(id: $id) {
+  mutation ApprovePayrollCycle(
+    $approvePayrollCycleInput: ApprovePayrollCycleInput!
+  ) {
+    approvePayrollCycle(approvePayrollCycleInput: $approvePayrollCycleInput) {
       message
       statusCode
       success
@@ -160,8 +170,10 @@ export const APPROVE_PAYROLL_CYCLE = gql`
 
 // PROCESS PAYROLL CYCLE
 export const PROCESS_PAYROLL_CYCLE = gql`
-  mutation ProcessPayrollCycle($id: Int!) {
-    processPayrollCycle(id: $id) {
+  mutation ProcessPayrollCycle(
+    $processPayrollCycleInput: ProcessPayrollCycleInput!
+  ) {
+    processPayrollCycle(processPayrollCycleInput: $processPayrollCycleInput) {
       message
       statusCode
       success
@@ -178,3 +190,4 @@ export const PROCESS_PAYROLL_CYCLE = gql`
     }
   }
 `;
+// FINALIZE PAYROLL CYCLE

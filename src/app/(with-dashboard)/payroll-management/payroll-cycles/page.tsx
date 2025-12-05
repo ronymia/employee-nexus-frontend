@@ -329,7 +329,7 @@ export default function PayrollCyclesPage() {
             customStatus: getStatusBadge(row.status),
           }))}
           searchConfig={{
-            searchable: true,
+            searchable: false,
             debounceDelay: 500,
             defaultField: "name",
             searchableFields: [
