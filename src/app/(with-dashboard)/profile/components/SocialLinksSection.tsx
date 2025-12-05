@@ -154,7 +154,7 @@ export default function SocialLinksSection({
       ) : (
         <div className="space-y-4">
           {socialPlatforms.map((platform) => {
-            const url = socialLinks[platform.name];
+            const url = socialLinks[platform.name as keyof typeof socialLinks] as string | undefined;
             return (
               <div
                 key={platform.name}
