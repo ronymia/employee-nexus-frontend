@@ -9,6 +9,7 @@ import CustomTable from "@/components/table/CustomTable";
 import { GET_BUSINESSES } from "@/graphql/business.api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Permissions } from "@/constants/permissions.constant";
 
 export default function AllBusinesses() {
   const { user } = useAppStore((state) => state);
@@ -82,21 +83,21 @@ export default function AllBusinesses() {
       type: "link",
       handler: () => {},
       href: (row) => `/businesses/${row?.id}/view`,
-      permissions: [],
+      permissions: [Permissions.BusinessRead],
       disabledOn: [{ accessorKey: "status", value: "inactive" }],
     },
     {
       name: "edit",
       type: "button",
       handler: handleEdit,
-      permissions: [],
+      permissions: [Permissions.BusinessUpdate],
       disabledOn: [{ accessorKey: "status", value: "inactive" }],
     },
     {
       name: "delete",
       type: "button",
       handler: (row) => console.log("Delete:", row),
-      permissions: [],
+      permissions: [Permissions.BusinessDelete],
       disabledOn: [],
     },
   ];

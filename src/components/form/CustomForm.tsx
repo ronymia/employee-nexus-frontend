@@ -47,7 +47,7 @@ export default function CustomForm({
       methods.reset(undefined, { keepValues: true });
 
       //
-      // console.log(err);
+      console.log(err);
     }
   };
 

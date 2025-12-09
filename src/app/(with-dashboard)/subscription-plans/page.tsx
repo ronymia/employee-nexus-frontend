@@ -15,6 +15,7 @@ import { PiPlusCircle } from "react-icons/pi";
 import { useMutation, useQuery } from "@apollo/client/react";
 import usePopupOption from "@/hooks/usePopupOption";
 import FormModal from "@/components/form/FormModal";
+import { Permissions } from "@/constants/permissions.constant";
 
 export default function AllSubscriptionPlan() {
   const { popupOption, setPopupOption, createNewSubscriptionPlan } =
@@ -113,14 +114,14 @@ export default function AllSubscriptionPlan() {
     {
       name: "edit",
       type: "button",
-      permissions: [],
+      permissions: [Permissions.SubscriptionPlanUpdate],
       handler: handleEdit,
       disabledOn: [{ accessorKey: "status", value: "inactive" }],
     },
     {
       name: "delete",
       type: "button",
-      permissions: [],
+      permissions: [Permissions.SubscriptionPlanDelete],
       handler: (row) => {
         setPopupOption({
           open: true,
