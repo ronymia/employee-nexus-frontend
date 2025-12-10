@@ -6,9 +6,8 @@ import { IBusiness } from "@/types";
 import { useQuery } from "@apollo/client/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
-import OwnerProfile from "./tabs/OwnerProfile";
-import BusinessSchedule from "./tabs/BusinessSchedule";
-import BusinessSubscription from "./tabs/BusinessSubscription";
+import BusinessSettingsOwnerProfile from "@/app/(with-dashboard)/settings/business-settings/tabs/BusinessSettingsOwnerProfile";
+import BusinessSettingsSchedule from "@/app/(with-dashboard)/settings/business-settings/tabs/BusinessSettingsSchedule";
 import { IUser } from "@/types/user.type";
 import CustomLoading from "@/components/loader/CustomLoading";
 import BusinessCard from "@/app/(with-dashboard)/businesses/[id]/view/components/BusinessCard";
@@ -48,7 +47,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         tabs={[
           { title: "Owner", id: "owner" },
           { title: "Schedule", id: "schedule" },
-          { title: "Subscription", id: "subscription" },
         ]}
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -58,18 +56,19 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       {/* Render content based on active tab */}
       <div className="mt-4 max-w-5xl w-full">
         {activeTab === "owner" && (
-          <OwnerProfile
+          <BusinessSettingsOwnerProfile
             key={`owner_information`}
             ownerData={singleBusinessData?.owner as IUser}
+            businessId={Number(id)}
           />
         )}
         {activeTab === "schedule" && (
-          <BusinessSchedule
+          <BusinessSettingsSchedule
             key={`business_schedule`}
             businessSchedules={singleBusinessData?.businessSchedules || []}
+            businessId={Number(id)}
           />
         )}
-        {activeTab === "subscription" && <BusinessSubscription />}
       </div>
     </div>
   );

@@ -23,9 +23,7 @@ import ChangePasswordSection from "./components/ChangePasswordSection";
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<string>("info");
 
-  const { data, loading, refetch } = useQuery(GET_MY_PROFILE, {
-    fetchPolicy: "cache-and-network",
-  });
+  const { data, loading, refetch } = useQuery(GET_MY_PROFILE, {});
 
   const user = (data as any)?.getMyProfile?.data;
 

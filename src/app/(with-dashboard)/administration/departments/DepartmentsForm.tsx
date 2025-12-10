@@ -112,7 +112,7 @@ export default function DepartmentsForm({
       <CustomInputField name="name" label="Name" required />
 
       {/* PARENT DEPARTMENT - DROPDOWN */}
-      <CustomSelect
+      {/* <CustomSelect
         position="top"
         name="parentId"
         label="Parent Department"
@@ -121,10 +121,10 @@ export default function DepartmentsForm({
         options={departmentsOptions}
         placeholder="Select parent department (optional)"
         required={false}
-      />
+      /> */}
 
       {/* MANAGER - DROPDOWN */}
-      <CustomSelect
+      {/* <CustomSelect
         position="top"
         name="managerId"
         label="Manager"
@@ -133,7 +133,7 @@ export default function DepartmentsForm({
         options={usersOptions}
         placeholder="Select manager (optional)"
         required={false}
-      />
+      /> */}
 
       {/* DESCRIPTION */}
       <CustomTextareaField name="description" label="Description" required />
