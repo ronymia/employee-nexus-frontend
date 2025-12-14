@@ -424,16 +424,16 @@ export default function PayrollCycleDetailPage() {
               permissions: [Permissions.PayrollItemRead],
               disabledOn: [],
             },
-            // {
-            //   name: "Edit",
-            //   type: "button" as const,
-            //   handler: handleEdit,
-            //   Icon: PiPencil,
-            //   permissions: [Permissions.PayrollItemUpdate],
-            //   disabledOn: [
-            //     { accessorKey: "status", value: PayrollItemStatus.PAID },
-            //   ],
-            // },
+            {
+              name: "Edit",
+              type: "button" as const,
+              handler: handleEdit,
+              Icon: PiPencil,
+              permissions: [Permissions.PayrollItemUpdate],
+              disabledOn: [
+                { accessorKey: "status", value: PayrollItemStatus.PAID },
+              ],
+            },
             {
               name: "Approve",
               type: "button" as const,
@@ -455,17 +455,17 @@ export default function PayrollCycleDetailPage() {
                 { accessorKey: "status", value: PayrollItemStatus.PAID },
               ],
             },
-            // {
-            //   name: "Delete",
-            //   type: "button" as const,
-            //   handler: (item: IPayrollItem) =>
-            //     setDeleteModal({ open: true, id: item.id, type: "item" }),
-            //   Icon: PiTrash,
-            //   permissions: [Permissions.PayrollItemUpdate],
-            //   disabledOn: [
-            //     { accessorKey: "status", value: PayrollItemStatus.PAID },
-            //   ],
-            // },
+            {
+              name: "Delete",
+              type: "button" as const,
+              handler: (item: IPayrollItem) =>
+                setDeleteModal({ open: true, id: item.id, type: "item" }),
+              Icon: PiTrash,
+              permissions: [Permissions.PayrollItemUpdate],
+              disabledOn: [
+                { accessorKey: "status", value: PayrollItemStatus.PAID },
+              ],
+            },
           ]}
           columns={columns}
           setColumns={setColumns}

@@ -224,14 +224,8 @@ export const CREATE_PAYROLL_ITEM = gql`
 
 // UPDATE PAYROLL ITEM
 export const UPDATE_PAYROLL_ITEM = gql`
-  mutation UpdatePayrollItem(
-    $id: Int!
-    $updatePayrollItemInput: UpdatePayrollItemInput!
-  ) {
-    updatePayrollItem(
-      id: $id
-      updatePayrollItemInput: $updatePayrollItemInput
-    ) {
+  mutation UpdatePayrollItem($updatePayrollItemInput: UpdatePayrollItemInput!) {
+    updatePayrollItem(updatePayrollItemInput: $updatePayrollItemInput) {
       message
       statusCode
       success
@@ -268,10 +262,10 @@ export const APPROVE_PAYROLL_ITEM = gql`
       message
       statusCode
       success
-      data {
-        id
-        status
-      }
+      # data {
+      #   id
+      #   status
+      # }
     }
   }
 `;

@@ -17,8 +17,10 @@ import { PiPlusCircle } from "react-icons/pi";
 
 export default function DepartmentsPage() {
   const { permissionGuard } = usePermissionGuard();
-  // CREATE NEW DEPARTMENT
+  //
   const { popupOption, setPopupOption, createNewDepartment } = usePopupOption();
+
+  // CREATE NEW DEPARTMENT
   const { data, loading } = useQuery<{
     departments: {
       message: string;

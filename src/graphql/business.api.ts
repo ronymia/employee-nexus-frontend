@@ -8,6 +8,7 @@ export const GET_BUSINESSES = gql`
       statusCode
       success
       data {
+        ownerId
         address
         city
         country
@@ -24,7 +25,6 @@ export const GET_BUSINESSES = gql`
         status
         subscriptionPlanId
         updatedAt
-        userId
         website
       }
     }
@@ -55,19 +55,18 @@ export const GET_BUSINESS_BY_ID = gql`
         status
         subscriptionPlanId
         updatedAt
-        userId
+        ownerId
         website
         owner {
-          createdAt
-          deletedBy
-          email
           id
+          email
           roleId
           status
+          createdAt
           updatedAt
+          deletedBy
           profile {
             userId
-            id
             fullName
             address
             phone
@@ -183,7 +182,6 @@ export const BUSINESS_SETTING_BY_BUSINESS_ID = gql`
         businessTimeZone
         currency
         deleteReadNotifications
-        id
         identifierPrefix
         isSelfRegistered
         theme
@@ -208,7 +206,6 @@ export const UPDATE_BUSINESS_SETTING = gql`
         businessTimeZone
         currency
         deleteReadNotifications
-        id
         identifierPrefix
         isSelfRegistered
         theme
@@ -256,6 +253,19 @@ export const UPDATE_BUSINESS = gql`
         postcode
         website
         status
+      }
+    }
+  }
+`;
+
+export const DELETE_BUSINESS = gql`
+  mutation DeleteBusiness($id: Int!) {
+    deleteBusiness(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
       }
     }
   }

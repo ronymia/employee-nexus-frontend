@@ -16,6 +16,9 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import usePopupOption from "@/hooks/usePopupOption";
 import FormModal from "@/components/form/FormModal";
 import { Permissions } from "@/constants/permissions.constant";
+import StatusBadge from "@/components/ui/StatusBadge";
+import Swal from "sweetalert2";
+import { getCurrencySymbol } from "@/utils/currency.utils";
 
 export default function AllSubscriptionPlan() {
   const { popupOption, setPopupOption, createNewSubscriptionPlan } =
@@ -83,14 +86,14 @@ export default function AllSubscriptionPlan() {
     {
       key: "2",
       header: "Price",
-      accessorKey: "price",
+      accessorKey: "customPrice",
       show: true,
       sortDirection: "ascending",
     },
     {
       key: "3",
       header: "Setup Fee",
-      accessorKey: "setupFee",
+      accessorKey: "customSetupFee",
       show: true,
       sortDirection: "ascending",
     },
@@ -104,7 +107,7 @@ export default function AllSubscriptionPlan() {
     {
       key: "5",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
@@ -136,7 +139,35 @@ export default function AllSubscriptionPlan() {
     },
   ];
 
+  const currency = "";
+
   // Modal for adding a new subscription plan
+  const handleStatusToggle = (row: ISubscriptionPlan) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you want to change the status of "${row.name}" to ${
+        row.status === "ACTIVE" ? "Inactive" : "Active"
+      }?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, change it!",
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        // TODO: Implement API call to update status
+        console.log("Toggle status for:", row.id, row.status);
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return true;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Updated!", "The status has been updated.", "success");
+      }
+    });
+  };
+
   return (
     <>
       {/* Popup for adding/editing a subscription plan */}
@@ -147,6 +178,9 @@ export default function AllSubscriptionPlan() {
         <header className={`mb-5 flex items-center justify-between`}>
           <div className="">
             <h1 className={`text-2xl font-medium`}>All Subscription Plans</h1>
+            <p className="text-sm text-base-content/60 mt-1">
+              Manage all your subscription plans here
+            </p>
           </div>
         </header>
         {/* TABLE */}
@@ -165,7 +199,16 @@ export default function AllSubscriptionPlan() {
               { label: "Description", value: "description" },
             ],
           }}
-          dataSource={data?.subscriptionPlans?.data || []}
+          dataSource={
+            data?.subscriptionPlans?.data?.map((row) => ({
+              ...row,
+              customStatus: (
+                <StatusBadge status={row.status} onClick={() => {}} />
+              ),
+              customPrice: `${getCurrencySymbol(currency)} ${row.price}`,
+              customSetupFee: `${getCurrencySymbol(currency)} ${row.setupFee}`,
+            })) || []
+          }
           // dataSource={[
           //   {
           //     createdAt: "2025-08-15T10:12:45.123Z",

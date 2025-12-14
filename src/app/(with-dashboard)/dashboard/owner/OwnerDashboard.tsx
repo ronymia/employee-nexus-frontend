@@ -305,6 +305,11 @@ export default function OwnerDashboard() {
     recentActivities,
   } = dashboardData;
 
+  console.log({ dashboardData });
+
+  if (loading) {
+    return <CustomLoading />;
+  }
   return (
     <div className="w-full space-y-6 p-4 md:p-6">
       {/* Header */}
