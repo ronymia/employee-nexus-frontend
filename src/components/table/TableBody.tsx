@@ -73,7 +73,7 @@ export default function TableBody({
               {actions?.length > 0 && (
                 <td className={`text-right`}>
                   <div
-                    className={`flex items-center justify-start gap-x-1.5 border-t border-b border-r border-primary-content rounded-r-box h-16`}
+                    className={`flex items-center justify-start gap-x-1.5 border-t border-b border-r border-primary-content rounded-r-box h-16 pr-3`}
                   >
                     <TableActionButton
                       key={row?.id}

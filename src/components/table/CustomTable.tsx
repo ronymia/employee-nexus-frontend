@@ -207,7 +207,7 @@ export default function CustomTable({
                     <span className="text-gray-500 font-medium min-w-[100px] pt-0.5">
                       {col?.header}
                     </span>
-                    <span className="text-gray-900 font-medium text-right break-words flex-1">
+                    <span className="text-gray-900 font-medium text-right wrap-break-word flex-1">
                       {row[col.accessorKey]}
                     </span>
                   </div>

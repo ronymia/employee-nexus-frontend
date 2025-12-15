@@ -7,13 +7,12 @@ export const GET_DESIGNATIONS = gql`
       statusCode
       success
       data {
-        businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        businessId
+        createdAt
         updatedAt
       }
     }
@@ -28,13 +27,12 @@ export const CREATE_DESIGNATION = gql`
       statusCode
       success
       data {
-        businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        businessId
+        createdAt
         updatedAt
       }
     }
@@ -53,13 +51,12 @@ export const UPDATE_DESIGNATION = gql`
       statusCode
       success
       data {
-        businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        businessId
+        createdAt
         updatedAt
       }
     }
@@ -72,13 +69,12 @@ export const DELETE_DESIGNATION = gql`
       statusCode
       success
       data {
-        businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        businessId
+        createdAt
         updatedAt
       }
     }

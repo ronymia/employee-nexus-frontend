@@ -1,3 +1,4 @@
+import { showToast } from "@/components/ui/CustomToast";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
@@ -32,21 +33,27 @@ export default function DesignationForm({
   const handleOnSubmit = async (formValues: IDesignationFormData) => {
     if (data?.id) {
       formValues["id"] = Number(data.id);
-      await updateDesignation({
+      const res = await updateDesignation({
         variables: formValues,
       });
+      if (res?.data) {
+        showToast.success("Updated!", "Designation updated successfully");
+        handleClosePopup?.();
+      }
     } else {
-      await createDesignation({
+      const res = await createDesignation({
         variables: formValues,
       });
+      if (res?.data) {
+        showToast.success("Created!", "Designation created successfully");
+        handleClosePopup?.();
+      }
     }
-    handleClosePopup?.();
   };
 
   return (
     <CustomForm
       submitHandler={handleOnSubmit}
-      defaultValues={data || {}}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}

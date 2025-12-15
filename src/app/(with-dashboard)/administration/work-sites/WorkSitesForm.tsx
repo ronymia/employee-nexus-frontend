@@ -105,7 +105,7 @@ export default function WorkSiteForm({
       <CustomTextareaField name="address" label="Address" />
 
       {/* LOCATION ENABLED */}
-      {/* <CustomRadioButton
+      <CustomRadioButton
         required={false}
         dataAuto="isLocationEnabled"
         name="isLocationEnabled"
@@ -121,10 +121,10 @@ export default function WorkSiteForm({
             value: "false",
           },
         ]}
-      /> */}
+      />
 
       {/* GEO LOCATION ENABLED */}
-      {/* <CustomRadioButton
+      <CustomRadioButton
         required={false}
         dataAuto="isGeoLocationEnabled"
         name="isGeoLocationEnabled"
@@ -140,17 +140,17 @@ export default function WorkSiteForm({
             value: "false",
           },
         ]}
-      /> */}
+      />
 
       {/* MAX RADIUS */}
-      {/* <CustomInputField
+      <CustomInputField
         name="maxRadius"
         label="Max Radius (meters)"
         type="number"
-      /> */}
+      />
 
       {/* IP ENABLED */}
-      {/* <CustomRadioButton
+      <CustomRadioButton
         required={false}
         dataAuto="isIpEnabled"
         name="isIpEnabled"
@@ -166,10 +166,10 @@ export default function WorkSiteForm({
             value: "false",
           },
         ]}
-      /> */}
+      />
 
       {/* IP ADDRESS */}
-      {/* <CustomInputField name="ipAddress" label="IP Address" /> */}
+      <CustomInputField name="ipAddress" label="IP Address" />
 
       {/* ACTION BUTTON */}
       <FormActionButton

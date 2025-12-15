@@ -1,7 +1,9 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
+import StatusBadge from "@/components/ui/StatusBadge";
 import {
   PermissionAction,
   PermissionResource,
@@ -16,13 +18,17 @@ import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IDesignation } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
+import PageHeader from "@/components/ui/PageHeader";
 import { PiPlusCircle } from "react-icons/pi";
 
 export default function DesignationsPage() {
+  // PERMISSIONS
   const { permissionGuard } = usePermissionGuard();
   // CREATE NEW DESIGNATION
   const { popupOption, setPopupOption, createNewDesignation } =
     usePopupOption();
+
+  // GET ALL DESIGNATIONS
   const { data, loading } = useQuery<{
     designations: {
       data: IDesignation[];
@@ -30,14 +36,10 @@ export default function DesignationsPage() {
   }>(GET_DESIGNATIONS, {});
 
   // DELETE DESIGNATION
-  const [deleteSubscriptionPlan, deleteResult] = useMutation(
-    DELETE_DESIGNATION,
-    {
-      awaitRefetchQueries: true,
-      refetchQueries: [{ query: GET_DESIGNATIONS }],
-    }
-  );
-  // console.log({ data });
+  const [deleteDesignation, deleteResult] = useMutation(DELETE_DESIGNATION, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_DESIGNATIONS }],
+  });
 
   // HANDLERS
   const handleEdit = (row: IDesignation) => {
@@ -48,7 +50,7 @@ export default function DesignationsPage() {
       name: row?.name,
     };
 
-    // open the popup for editing the form
+    // OPEN FORM
     setPopupOption({
       open: true,
       closeOnDocumentClick: true,
@@ -61,11 +63,18 @@ export default function DesignationsPage() {
 
   // DELETE HANDLER
   const handleDelete = async (row: IDesignation) => {
-    await deleteSubscriptionPlan({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const res = await deleteDesignation({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Designation deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete designation");
+    }
   };
 
   // COLUMNS
@@ -87,7 +96,7 @@ export default function DesignationsPage() {
     {
       key: "3",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
@@ -128,11 +137,10 @@ export default function DesignationsPage() {
 
       {/* Modal for adding a new subscription plan */}
       <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Designations</h1>
-          </div>
-        </header>
+        <PageHeader
+          title="All Designations"
+          subtitle="Manage your employee designations"
+        />
         {/* TABLE */}
         <CustomTable
           isLoading={loading || deleteResult.loading}
@@ -149,7 +157,14 @@ export default function DesignationsPage() {
               { label: "Description", value: "description" },
             ],
           }}
-          dataSource={data?.designations?.data || []}
+          dataSource={
+            data?.designations?.data?.map((row) => ({
+              ...row,
+              customStatus: (
+                <StatusBadge status={row.status} onClick={() => {}} />
+              ),
+            })) || []
+          }
         >
           {permissionGuard(
             PermissionResource.DESIGNATION,
