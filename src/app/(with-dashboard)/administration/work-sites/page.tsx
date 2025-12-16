@@ -12,43 +12,42 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IWorkSite } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
+import PageHeader from "@/components/ui/PageHeader";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
+import StatusBadge from "@/components/ui/StatusBadge";
 
 export default function WorkSitesPage() {
+  // PERMISSION GUARD
   const { permissionGuard } = usePermissionGuard();
+  // MODAL OPTION
   const { popupOption, setPopupOption, createNewWorkSite } = usePopupOption();
+  // GET ALL WORK SITES
   const { data, loading } = useQuery<{
     workSites: {
       data: IWorkSite[];
     };
   }>(GET_WORK_SITES, {});
 
+  // DELETE WORK SITE MUTATION
   const [deleteWorkSite, deleteResult] = useMutation(DELETE_WORK_SITES, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_WORK_SITES }],
   });
-  // console.log({ data });
 
+  // UPDATE HANDLER
   const handleEdit = (row: IWorkSite) => {
     //
     const data = {
-      id: row?.id,
+      id: row?.id ? Number(row.id) : undefined,
       name: row?.name,
       description: row?.description,
-      address: row?.address,
-      isLocationEnabled:
-        row?.isLocationEnabled !== undefined
-          ? String(row.isLocationEnabled)
-          : undefined,
-      isGeoLocationEnabled:
-        row?.isGeoLocationEnabled !== undefined
-          ? String(row.isGeoLocationEnabled)
-          : undefined,
-      maxRadius: row?.maxRadius,
-      isIpEnabled:
-        row?.isIpEnabled !== undefined ? String(row.isIpEnabled) : undefined,
-      ipAddress: row?.ipAddress,
+      locationTrackingType: row?.locationTrackingType,
+      address: row?.address || undefined,
+      lat: row?.lat || undefined,
+      lng: row?.lng || undefined,
+      maxRadius: row?.maxRadius || undefined,
+      ipAddress: row?.ipAddress || undefined,
     };
 
     // open the popup for editing the form
@@ -61,6 +60,8 @@ export default function WorkSitesPage() {
       title: "Update Work Site",
     });
   };
+
+  // DELETE HANDLER
   const handleDelete = async (row: IWorkSite) => {
     await deleteWorkSite({
       variables: {
@@ -69,6 +70,7 @@ export default function WorkSitesPage() {
     });
   };
 
+  // TABLE COLUMNS DEF
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -86,41 +88,28 @@ export default function WorkSitesPage() {
     },
     {
       key: "3",
-      header: "Address",
-      accessorKey: "address",
+      header: "Location Track Type",
+      accessorKey: "customLocationTrackingType",
       show: true,
       sortDirection: "ascending",
     },
-    // {
-    //   key: "4",
-    //   header: "Location Enabled",
-    //   accessorKey: "customIsLocationEnabled",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
-    // {
-    //   key: "5",
-    //   header: "Geo Location Enabled",
-    //   accessorKey: "customIsGeoLocationEnabled",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
-    // {
-    //   key: "6",
-    //   header: "IP Enabled",
-    //   accessorKey: "customIsIpEnabled",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
     {
-      key: "7",
+      key: "4",
+      header: "Geo/IP Address",
+      accessorKey: "customGeoIpAddress",
+      show: true,
+      sortDirection: "ascending",
+    },
+    {
+      key: "5",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
   ]);
 
+  // TABLE ACTIONS
   const actions: TableActionType[] = [
     {
       name: "edit",
@@ -155,11 +144,7 @@ export default function WorkSitesPage() {
 
       {/* Modal for adding a new work site */}
       <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Work Sites</h1>
-          </div>
-        </header>
+        <PageHeader title="All Work Sites" subtitle="Manage your work sites" />
         {/* TABLE */}
         <CustomTable
           isLoading={loading || deleteResult.loading}
@@ -179,11 +164,38 @@ export default function WorkSitesPage() {
           dataSource={
             data?.workSites?.data?.map((row) => ({
               ...row,
-              customIsLocationEnabled: row?.isLocationEnabled ? "Yes" : "No",
-              customIsGeoLocationEnabled: row?.isGeoLocationEnabled
-                ? "Yes"
-                : "No",
-              customIsIpEnabled: row?.isIpEnabled ? "Yes" : "No",
+              customStatus: (
+                <StatusBadge status={row.status as string} onClick={() => {}} />
+              ),
+              customLocationTrackingType: (
+                <span className="capitalize">
+                  {row?.locationTrackingType
+                    ?.replaceAll("_", " ")
+                    .toLowerCase()}
+                </span>
+              ),
+              customGeoIpAddress:
+                row?.locationTrackingType === "GEO_FENCING" ? (
+                  <div className="flex items-center gap-2">
+                    <span className="badge badge-info badge-sm">📍 Geo</span>
+                    <span className="text-xs text-base-content/70">
+                      {row?.maxRadius || "N/A"}m radius
+                    </span>
+                  </div>
+                ) : row?.locationTrackingType === "IP_WHITELIST" ? (
+                  <div className="flex items-center gap-2">
+                    <span className="badge badge-warning badge-sm">🌐 IP</span>
+                    <span className="text-xs font-mono text-base-content/70">
+                      {row?.ipAddress || "N/A"}
+                    </span>
+                  </div>
+                ) : row?.locationTrackingType === "MANUAL" ? (
+                  <span className="badge badge-primary badge-sm">
+                    📝 Manual
+                  </span>
+                ) : (
+                  <span className="badge badge-ghost badge-sm">🚫 None</span>
+                ),
             })) || []
           }
         >

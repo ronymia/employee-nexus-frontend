@@ -1,14 +1,16 @@
+import { LocationTrackingType } from "@/schemas";
+
 export interface IWorkSite {
   id: number;
   name: string;
   description: string;
-  status: string;
+  status?: string;
   address?: string;
-  isLocationEnabled?: boolean;
-  isGeoLocationEnabled?: boolean;
+  lat?: number;
+  lng?: number;
   maxRadius?: number;
-  isIpEnabled?: boolean;
   ipAddress?: string;
+  locationTrackingType?: LocationTrackingType;
   businessId?: number;
   createdAt: string;
   updatedAt: string;
