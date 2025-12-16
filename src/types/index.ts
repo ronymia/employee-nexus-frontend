@@ -34,3 +34,4 @@ export * from "./attendance.type";
 export * from "./leave.type";
 export * from "./payroll.type";
 export * from "./notification.type";
+export * from "./dashboard.type";

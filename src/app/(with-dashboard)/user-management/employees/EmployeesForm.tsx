@@ -30,12 +30,12 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
 
   const [createEmployee, createResult] = useMutation(CREATE_EMPLOYEE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_EMPLOYEES }],
+    refetchQueries: [{ query: GET_EMPLOYEES, variables: { query: {} } }],
   });
 
   const [updateEmployee, updateResult] = useMutation(UPDATE_EMPLOYEE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_EMPLOYEES }],
+    refetchQueries: [{ query: GET_EMPLOYEES, variables: { query: {} } }],
   });
 
   const handleOnSubmit = async (formValues: IEmployeeFormData) => {

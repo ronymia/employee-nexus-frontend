@@ -137,8 +137,8 @@ export const UPDATE_PAYROLL_CYCLE = gql`
 
 // DELETE PAYROLL CYCLE
 export const DELETE_PAYROLL_CYCLE = gql`
-  mutation DeletePayrollCycle($id: Int!) {
-    deletePayrollCycle(id: $id) {
+  mutation CancelPayrollCycle($id: Int!) {
+    cancelPayrollCycle(id: $id) {
       message
       statusCode
       success

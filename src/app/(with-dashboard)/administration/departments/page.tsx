@@ -17,8 +17,10 @@ import { PiPlusCircle } from "react-icons/pi";
 
 export default function DepartmentsPage() {
   const { permissionGuard } = usePermissionGuard();
-  // CREATE NEW DEPARTMENT
+  //
   const { popupOption, setPopupOption, createNewDepartment } = usePopupOption();
+
+  // CREATE NEW DEPARTMENT
   const { data, loading } = useQuery<{
     departments: {
       message: string;
@@ -80,20 +82,20 @@ export default function DepartmentsPage() {
       show: true,
       sortDirection: "ascending",
     },
-    {
-      key: "3",
-      header: "Parent Department",
-      accessorKey: "CustomParentName",
-      show: true,
-      sortDirection: "ascending",
-    },
-    {
-      key: "4",
-      header: "Manager",
-      accessorKey: "CustomManagerName",
-      show: true,
-      sortDirection: "ascending",
-    },
+    // {
+    //   key: "3",
+    //   header: "Parent Department",
+    //   accessorKey: "CustomParentName",
+    //   show: true,
+    //   sortDirection: "ascending",
+    // },
+    // {
+    //   key: "4",
+    //   header: "Manager",
+    //   accessorKey: "CustomManagerName",
+    //   show: true,
+    //   sortDirection: "ascending",
+    // },
     {
       key: "5",
       header: "Status",

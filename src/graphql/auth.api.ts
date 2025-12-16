@@ -16,7 +16,6 @@ export const LOGIN_MUTATION = gql`
         }
         permissions
         profile {
-          id
           userId
           address
           city

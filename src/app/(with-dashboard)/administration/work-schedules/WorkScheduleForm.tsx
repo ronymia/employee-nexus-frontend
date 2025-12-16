@@ -188,7 +188,7 @@ function ScheduleTypeSelector({ isUpdate }: { isUpdate: boolean }) {
           options={[
             { title: "Regular", value: "REGULAR" },
             { title: "Shift", value: "SHIFT" },
-            { title: "Flexible", value: "FLEXIBLE" },
+            // { title: "Flexible", value: "FLEXIBLE" },
           ]}
         />
       </div>

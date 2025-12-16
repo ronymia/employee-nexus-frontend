@@ -12,11 +12,11 @@ export const GET_WORK_SITES = gql`
         description
         status
         address
-        isLocationEnabled
-        isGeoLocationEnabled
+        lat
+        lng
         maxRadius
-        isIpEnabled
         ipAddress
+        locationTrackingType
         businessId
         createdAt
         updatedAt
@@ -26,28 +26,8 @@ export const GET_WORK_SITES = gql`
 `;
 
 export const CREATE_WORK_SITES = gql`
-  mutation CreateWorkSite(
-    $name: String!
-    $description: String!
-    $address: String
-    $isLocationEnabled: Boolean
-    $isGeoLocationEnabled: Boolean
-    $maxRadius: Int
-    $isIpEnabled: Boolean
-    $ipAddress: String
-  ) {
-    createWorkSite(
-      createWorkSiteInput: {
-        name: $name
-        description: $description
-        address: $address
-        isLocationEnabled: $isLocationEnabled
-        isGeoLocationEnabled: $isGeoLocationEnabled
-        maxRadius: $maxRadius
-        isIpEnabled: $isIpEnabled
-        ipAddress: $ipAddress
-      }
-    ) {
+  mutation CreateWorkSite($createWorkSiteInput: CreateWorkSiteInput!) {
+    createWorkSite(createWorkSiteInput: $createWorkSiteInput) {
       message
       statusCode
       success
@@ -57,11 +37,11 @@ export const CREATE_WORK_SITES = gql`
         description
         status
         address
-        isLocationEnabled
-        isGeoLocationEnabled
+        lat
+        lng
         maxRadius
-        isIpEnabled
         ipAddress
+        locationTrackingType
         businessId
         createdAt
         updatedAt
@@ -71,30 +51,8 @@ export const CREATE_WORK_SITES = gql`
 `;
 
 export const UPDATE_WORK_SITES = gql`
-  mutation UpdateWorkSite(
-    $id: Int!
-    $name: String!
-    $description: String!
-    $address: String
-    $isLocationEnabled: Boolean
-    $isGeoLocationEnabled: Boolean
-    $maxRadius: Int
-    $isIpEnabled: Boolean
-    $ipAddress: String
-  ) {
-    updateWorkSite(
-      updateWorkSiteInput: {
-        id: $id
-        name: $name
-        description: $description
-        address: $address
-        isLocationEnabled: $isLocationEnabled
-        isGeoLocationEnabled: $isGeoLocationEnabled
-        maxRadius: $maxRadius
-        isIpEnabled: $isIpEnabled
-        ipAddress: $ipAddress
-      }
-    ) {
+  mutation UpdateWorkSite($updateWorkSiteInput: UpdateWorkSiteInput!) {
+    updateWorkSite(updateWorkSiteInput: $updateWorkSiteInput) {
       message
       statusCode
       success
@@ -104,11 +62,11 @@ export const UPDATE_WORK_SITES = gql`
         description
         status
         address
-        isLocationEnabled
-        isGeoLocationEnabled
+        lat
+        lng
         maxRadius
-        isIpEnabled
         ipAddress
+        locationTrackingType
         businessId
         createdAt
         updatedAt
@@ -129,11 +87,11 @@ export const DELETE_WORK_SITES = gql`
         description
         status
         address
-        isLocationEnabled
-        isGeoLocationEnabled
+        lat
+        lng
         maxRadius
-        isIpEnabled
         ipAddress
+        locationTrackingType
         businessId
         createdAt
         updatedAt

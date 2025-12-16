@@ -104,7 +104,7 @@ function PayrollComponentFormFields({
   const componentTypeOptions = [
     { label: "Earning", value: ComponentType.EARNING },
     { label: "Deduction", value: ComponentType.DEDUCTION },
-    { label: "Employer Cost", value: ComponentType.EMPLOYER_COST },
+    // { label: "Employer Cost", value: ComponentType.EMPLOYER_COST },
   ];
 
   const calculationTypeOptions = [
@@ -113,11 +113,11 @@ function PayrollComponentFormFields({
       label: "Percentage of Basic Salary",
       value: CalculationType.PERCENTAGE_OF_BASIC,
     },
-    {
-      label: "Percentage of Gross Pay",
-      value: CalculationType.PERCENTAGE_OF_GROSS,
-    },
-    { label: "Hourly Rate", value: CalculationType.HOURLY_RATE },
+    // {
+    //   label: "Percentage of Gross Pay",
+    //   value: CalculationType.PERCENTAGE_OF_GROSS,
+    // },
+    // { label: "Hourly Rate", value: CalculationType.HOURLY_RATE },
   ];
 
   return (

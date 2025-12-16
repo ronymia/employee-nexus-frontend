@@ -5,7 +5,7 @@ import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
-import { IPayrollItem, IPayrollComponent, ComponentType } from "@/types";
+import { IPayrollItem, IPayrollComponent, ComponentType, IUser } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import {
   CREATE_PAYROLL_ITEM,
@@ -13,7 +13,7 @@ import {
 } from "@/graphql/payroll-item.api";
 import { GET_PAYROLL_COMPONENTS } from "@/graphql/payroll-component.api";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 interface PayrollItemFormProps {
@@ -112,19 +112,12 @@ export default function PayrollItemForm({
           },
         });
       } else {
+        const { payrollCycleId, userId, ...rest } = input;
         await updateItem({
           variables: {
-            id: Number(item?.id),
             updatePayrollItemInput: {
-              basicSalary: input.basicSalary,
-              workingDays: input.workingDays,
-              presentDays: input.presentDays,
-              absentDays: input.absentDays,
-              leaveDays: input.leaveDays,
-              overtimeHours: input.overtimeHours,
-              paymentMethod: input.paymentMethod,
-              bankAccount: input.bankAccount,
-              notes: input.notes,
+              ...rest,
+              id: Number(item?.id),
             },
           },
         });
@@ -141,7 +134,7 @@ export default function PayrollItemForm({
 
   const defaultValues = {
     payrollCycleId: item?.payrollCycleId || "",
-    userId: item?.userId || "",
+    userId: String(item?.userId) || "",
     basicSalary: item?.basicSalary || "",
     workingDays: item?.workingDays || 30,
     presentDays: item?.presentDays || "",
@@ -153,7 +146,7 @@ export default function PayrollItemForm({
     notes: item?.notes || "",
     components:
       item?.components?.map((c) => ({
-        componentId: c.componentId,
+        componentId: String(c.componentId),
         component: c.component,
         amount: c.amount,
         calculationBase: c.calculationBase,
@@ -168,6 +161,8 @@ export default function PayrollItemForm({
         notes: a.notes,
       })) || [],
   };
+
+  console.log({ defaultValues });
 
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
@@ -186,7 +181,7 @@ function PayrollItemFormFields({
   components,
   actionType,
 }: {
-  employees: any[];
+  employees: IUser[];
   components: IPayrollComponent[];
   actionType: "create" | "update";
 }) {
@@ -230,6 +225,25 @@ function PayrollItemFormFields({
     }
   }, [workingDays, presentDays, leaveDays, setValue]);
 
+  // Auto-calculate overtime hours
+  // useEffect(() => {
+  //   const calculatedOvertime = basicSalary * 0.5;
+  //   if (calculatedOvertime >= 0) {
+  //     setValue("overtimeHours", calculatedOvertime);
+  //   }
+  // }, [basicSalary, setValue]);
+
+  // ADD BASIC SALARY
+  useEffect(() => {
+    const selectedEmployee = employees.find(
+      (e) => e.id.toString() === watch("userId")
+    );
+
+    if (selectedEmployee && selectedEmployee.employee) {
+      setValue("basicSalary", selectedEmployee.employee.salaryPerMonth || 0);
+    }
+  }, [watch("userId")]);
+
   return (
     <div className="space-y-4">
       {/* Employee Information */}
@@ -256,6 +270,7 @@ function PayrollItemFormFields({
             required={true}
             type="number"
             // step="0.01"
+            readOnly={true}
           />
         </div>
       </div>
@@ -345,7 +360,7 @@ function PayrollItemFormFields({
       <PayrollComponentsSection components={components} />
 
       {/* Adjustments Section */}
-      <PayslipAdjustmentsSection />
+      {/* <PayslipAdjustmentsSection /> */}
 
       {/* Notes */}
       <div className="border border-primary/20 rounded-lg p-4">
@@ -371,8 +386,8 @@ function PayrollComponentsSection({
 }: {
   components: IPayrollComponent[];
 }) {
-  const { control, watch, setValue } = useFormContext();
-  const [componentList, setComponentList] = useState<any[]>([]);
+  const { control, setValue } = useFormContext();
+  const prevComponentIdsRef = useRef<string[]>([]);
 
   const basicSalary = useWatch({
     control,
@@ -380,43 +395,107 @@ function PayrollComponentsSection({
     defaultValue: 0,
   });
 
+  // Watch the components array from react-hook-form
+  const componentsFormValue = useWatch({
+    control,
+    name: "components",
+    defaultValue: [],
+  });
+
+  // Initialize prevComponentIdsRef with existing componentIds on mount
+  // useEffect(() => {
+  //   if (prevComponentIdsRef.current.length === 0 && componentsFormValue && componentsFormValue.length > 0) {
+  //     prevComponentIdsRef.current = componentsFormValue.map((comp: any) => comp.componentId || "");
+  //   }
+  // }, []);
+
+  // Auto-calculate amounts when component is selected (detect componentId changes)
+  useEffect(() => {
+    if (!componentsFormValue || componentsFormValue.length === 0) {
+      prevComponentIdsRef.current = [];
+      return;
+    }
+
+    const currentComponentIds = componentsFormValue.map(
+      (comp: any) => comp.componentId || ""
+    );
+    const prevComponentIds = prevComponentIdsRef.current;
+
+    const updatedComponents = componentsFormValue.map(
+      (comp: any, index: number) => {
+        if (!comp.componentId) return comp;
+
+        const component = components.find(
+          (c) => c.id === Number(comp.componentId)
+        );
+        if (!component) return comp;
+
+        // Check if this component was just selected (componentId changed)
+        const isNewlySelected =
+          currentComponentIds[index] !== prevComponentIds[index];
+
+        // Only auto-calculate if component was just selected
+        if (isNewlySelected) {
+          let calculatedAmount = 0;
+
+          // Auto-calculate based on component type
+          if (component.calculationType === "PERCENTAGE_OF_BASIC") {
+            calculatedAmount = (basicSalary * component.defaultValue!) / 100;
+          } else if (component.calculationType === "FIXED_AMOUNT") {
+            calculatedAmount = component.defaultValue || 0;
+          }
+
+          return {
+            ...comp,
+            amount: calculatedAmount,
+            calculationBase: basicSalary,
+            component: component,
+          };
+        }
+
+        // Component already selected, don't recalculate (allow manual editing)
+        // But update component reference if not set
+        if (!comp.component) {
+          return {
+            ...comp,
+            component: component,
+          };
+        }
+
+        return comp;
+      }
+    );
+
+    // Check if there are actual changes before updating
+    const hasChanges = componentsFormValue.some((comp: any, index: number) => {
+      return JSON.stringify(comp) !== JSON.stringify(updatedComponents[index]);
+    });
+
+    if (hasChanges) {
+      setValue("components", updatedComponents, { shouldValidate: false });
+    }
+
+    // Update the ref with current componentIds
+    prevComponentIdsRef.current = currentComponentIds;
+  }, [componentsFormValue, basicSalary, components, setValue]);
+
   const addComponent = () => {
-    setComponentList([
-      ...componentList,
-      {
-        componentId: "",
-        amount: 0,
-        calculationBase: basicSalary,
-        notes: "",
-      },
-    ]);
+    const currentComponents = componentsFormValue || [];
+    const newComponent = {
+      componentId: "",
+      amount: 0,
+      calculationBase: basicSalary,
+      notes: "",
+    };
+    setValue("components", [...currentComponents, newComponent]);
   };
 
   const removeComponent = (index: number) => {
-    const newList = componentList.filter((_, i) => i !== index);
-    setComponentList(newList);
-    setValue("components", newList);
-  };
-
-  const updateComponent = (index: number, field: string, value: any) => {
-    const newList = [...componentList];
-    newList[index] = { ...newList[index], [field]: value };
-
-    // Auto-calculate amount based on component type
-    if (field === "componentId") {
-      const component = components.find((c) => c.id === Number(value));
-      if (component) {
-        if (component.calculationType === "PERCENTAGE_OF_BASIC") {
-          newList[index].amount = (basicSalary * component.defaultValue!) / 100;
-        } else if (component.calculationType === "FIXED_AMOUNT") {
-          newList[index].amount = component.defaultValue || 0;
-        }
-        newList[index].component = component;
-      }
-    }
-
-    setComponentList(newList);
-    setValue("components", newList);
+    const currentComponents = componentsFormValue || [];
+    const newComponents = currentComponents.filter(
+      (_: any, i: number) => i !== index
+    );
+    setValue("components", newComponents);
   };
 
   const componentOptions = components.map((c) => ({
@@ -440,69 +519,58 @@ function PayrollComponentsSection({
       </div>
 
       <div className="space-y-3">
-        {componentList.map((comp, index) => (
-          <div key={index} className="border rounded p-3 bg-base-200">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
-              <CustomSelect
-                dataAuto={`component-${index}`}
-                name={`components.${index}.componentId`}
-                label="Component"
-                placeholder="Select component"
-                required={true}
-                options={componentOptions}
-                isLoading={false}
-                defaultValues={comp.componentId}
-                changeHandler={(value) =>
-                  updateComponent(index, "componentId", value)
-                }
-              />
-              <CustomInputField
-                dataAuto={`amount-${index}`}
-                name={`components.${index}.amount`}
-                label="Amount"
-                placeholder="0.00"
-                required={true}
-                type="number"
-                // step="0.01"
-                // value={comp.amount}
-                // onChange={(e) =>
-                //   updateComponent(index, "amount", e.target.value)
-                // }
-              />
-              <CustomInputField
-                dataAuto={`base-${index}`}
-                name={`components.${index}.calculationBase`}
-                label="Base Amount"
-                placeholder="0.00"
-                required={true}
-                type="number"
-                // step="0.01"
-                // value={comp.calculationBase}
-                // onChange={(e) =>
-                //   updateComponent(index, "calculationBase", e.target.value)
-                // }
-              />
-              <CustomInputField
-                dataAuto={`notes-${index}`}
-                name={`components.${index}.notes`}
-                label="Notes"
-                placeholder="Optional notes"
-                required={true}
-                // value={comp.notes}
-                // onChange={(e) =>
-                //   updateComponent(index, "notes", e.target.value)
-                // }
-              />
-              <button
-                type="button"
-                className="btn btn-sm btn-error self-center"
-                onClick={() => removeComponent(index)}
-              >
-                Remove
-              </button>
+        {componentsFormValue && componentsFormValue.length > 0 ? (
+          componentsFormValue.map((comp: any, index: number) => (
+            <div key={index} className="border rounded p-3 bg-base-200">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+                <CustomSelect
+                  dataAuto={`component-${index}`}
+                  name={`components.${index}.componentId`}
+                  label="Component"
+                  placeholder="Select component"
+                  required={true}
+                  options={componentOptions}
+                  isLoading={false}
+                />
+                <CustomInputField
+                  dataAuto={`amount-${index}`}
+                  name={`components.${index}.amount`}
+                  label="Amount"
+                  placeholder="0.00"
+                  required={true}
+                  type="number"
+                />
+                <CustomInputField
+                  dataAuto={`base-${index}`}
+                  name={`components.${index}.calculationBase`}
+                  label="Base Amount"
+                  placeholder="0.00"
+                  required={false}
+                  type="number"
+                  readOnly={true}
+                />
+                <CustomInputField
+                  dataAuto={`notes-${index}`}
+                  name={`components.${index}.notes`}
+                  label="Notes"
+                  placeholder="Optional notes"
+                  required={false}
+                />
+                <button
+                  type="button"
+                  className="btn btn-sm btn-error self-center"
+                  onClick={() => removeComponent(index)}
+                >
+                  Remove
+                </button>
+              </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center text-base-content/70 py-4">
+            No components added yet. Click "Add Component" to get started.
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

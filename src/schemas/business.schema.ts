@@ -74,6 +74,35 @@ export const userRegisterWithBusinessSchema = z.object({
   }),
 });
 
+export const updateBusinessSchema = z.object({
+  business: z.object({
+    name: z
+      .string({ error: "Business name is required" })
+      .nonempty({ error: "Business name is required" }),
+    email: z
+      .string({ error: "Email is required" })
+      .nonempty({ error: "Email can not be empty" })
+      .regex(emailRegex, { error: "Invalid email" }),
+    phone: z
+      .string({ error: "Phone is required" })
+      .nonempty({ error: "Phone is required" }),
+    address: z
+      .string({ error: "Address is required" })
+      .nonempty({ error: "Address is required" }),
+    city: z
+      .string({ error: "City is required" })
+      .nonempty({ error: "City is required" }),
+    country: z
+      .string({ error: "Country is required" })
+      .nonempty({ error: "Country is required" }),
+    postcode: z
+      .string({ error: "Postcode is required" })
+      .nonempty({ error: "Postcode is required" }),
+  }),
+});
+
+export type IUpdateBusiness = z.infer<typeof updateBusinessSchema>;
+
 export type IUserRegisterWithBusiness = z.infer<
   typeof userRegisterWithBusinessSchema
 >;

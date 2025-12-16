@@ -46,7 +46,6 @@ export default function NotificationsPage() {
         priority: filter.priority === "ALL" ? undefined : filter.priority,
       },
     },
-    fetchPolicy: "cache-and-network",
   });
 
   const [markAsRead] = useMutation(MARK_NOTIFICATION_AS_READ, {

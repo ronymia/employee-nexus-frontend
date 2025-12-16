@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 import { AppStoreProvider } from "@/providers/AppStoreProvider";
 import ApolloClientProvider from "@/providers/ApolloClientProvider";
 
@@ -32,7 +33,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppStoreProvider>
-          <ApolloClientProvider>{children}</ApolloClientProvider>
+          <ApolloClientProvider>
+            <Toaster position="top-right" />
+            {children}
+          </ApolloClientProvider>
         </AppStoreProvider>
       </body>
     </html>

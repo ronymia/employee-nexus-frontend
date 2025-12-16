@@ -55,14 +55,14 @@ export default function Sidebar({
       Icon: MdOutlineDashboard,
       label: menuNames.dashboard,
       path: "/dashboard",
-      show: true,
+      show: userRole !== "super_admin",
       subMenus: [],
     },
     {
       Icon: IoNotificationsOutline,
       label: menuNames.notifications,
       path: "/notifications",
-      show: true,
+      show: userRole !== "super_admin",
       subMenus: [],
     },
     {
@@ -76,7 +76,7 @@ export default function Sidebar({
       Icon: PiReceipt,
       label: menuNames.payslips,
       path: "/payslips",
-      show: userRole !== "owner",
+      show: userRole !== "owner" && userRole !== "super_admin",
       subMenus: [],
     },
     {
@@ -154,7 +154,8 @@ export default function Sidebar({
       path: "/user-management",
       show:
         hasPermission(Permissions.UserRead) &&
-        hasPermission(Permissions.UserCreate),
+        hasPermission(Permissions.UserCreate) &&
+        userRole !== "super_admin",
       subMenus: [
         {
           Icon: FiUsers,
