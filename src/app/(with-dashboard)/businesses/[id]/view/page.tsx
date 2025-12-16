@@ -59,14 +59,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <BusinessSettingsOwnerProfile
             key={`owner_information`}
             ownerData={singleBusinessData?.owner as IUser}
-            businessId={Number(id)}
           />
         )}
         {activeTab === "schedule" && (
           <BusinessSettingsSchedule
             key={`business_schedule`}
             businessSchedules={singleBusinessData?.businessSchedules || []}
-            businessId={Number(id)}
           />
         )}
       </div>

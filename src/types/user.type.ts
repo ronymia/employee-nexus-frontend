@@ -1,6 +1,6 @@
 import { IBusiness } from "./business.type";
 import { Status } from "./common.type";
-import { IEmergencyContact } from "./employee.type";
+import { IEmergencyContact, IEmployee } from "./employee.type";
 import { ISocialLinks } from "./social-links.type";
 
 export interface IProfile {
@@ -33,6 +33,7 @@ export interface IUser {
   deletedBy: Date;
   profile: IProfile;
   business: IBusiness;
+  employee: IEmployee;
 }
 
 export interface IUserFormData {

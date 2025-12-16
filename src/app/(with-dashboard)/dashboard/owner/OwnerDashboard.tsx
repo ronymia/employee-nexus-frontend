@@ -8,6 +8,8 @@ import {
   IRecentProject,
   IRecentActivity,
   IUpcomingLeave,
+  PayrollCycleStatus,
+  PayrollFrequency,
 } from "@/types";
 import CustomLoading from "@/components/loader/CustomLoading";
 import {
@@ -166,7 +168,7 @@ const MOCK_DASHBOARD_DATA: IOwnerDashboardResponse = {
     payrollSummary: {
       currentCycle: {
         name: "December 2025 Payroll",
-        status: "PROCESSING",
+        status: PayrollCycleStatus.PROCESSING,
         periodStart: "2025-12-01",
         periodEnd: "2025-12-31",
         paymentDate: "2025-12-31",
@@ -174,6 +176,11 @@ const MOCK_DASHBOARD_DATA: IOwnerDashboardResponse = {
         totalGrossPay: 485000,
         totalDeductions: 48500,
         totalNetPay: 436500,
+        businessId: 1,
+        id: 101,
+        frequency: PayrollFrequency.MONTHLY,
+        createdAt: "2025-12-01T10:00:00Z",
+        updatedAt: "2025-12-15T12:00:00Z",
       },
       yearToDate: {
         totalPaid: 5420000,

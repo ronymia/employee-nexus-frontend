@@ -1,3 +1,5 @@
+import { IPayrollCycle } from "./payroll.type";
+
 export interface IBusinessOverview {
   totalEmployees: number;
   activeEmployees: number;
@@ -63,18 +65,6 @@ export interface ILeaveStats {
     byType: ILeaveTypeCount[];
   };
   upcomingLeaves: IUpcomingLeave[];
-}
-
-export interface IPayrollCycle {
-  name: string;
-  status: string;
-  periodStart: string;
-  periodEnd: string;
-  paymentDate: string;
-  totalEmployees: number;
-  totalGrossPay: number;
-  totalDeductions: number;
-  totalNetPay: number;
 }
 
 export interface IPayrollYearToDate {
