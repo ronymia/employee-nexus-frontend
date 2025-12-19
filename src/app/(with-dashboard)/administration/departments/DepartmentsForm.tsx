@@ -1,3 +1,4 @@
+import { showToast } from "@/components/ui/CustomToast";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
@@ -51,21 +52,35 @@ export default function DepartmentsForm({
 
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: IDepartmentFormData) => {
-    if (data?.id) {
-      formValues["id"] = Number(data.id);
-      await updateDepartment({
-        variables: {
-          updateDepartmentInput: formValues,
-        },
-      });
-    } else {
-      await createDepartment({
-        variables: {
-          createDepartmentInput: formValues,
-        },
-      });
+    try {
+      if (data?.id) {
+        formValues["id"] = Number(data.id);
+        const res = await updateDepartment({
+          variables: {
+            updateDepartmentInput: formValues,
+          },
+        });
+        if (res?.data) {
+          showToast.success("Updated!", "Department updated successfully");
+        }
+      } else {
+        const res = await createDepartment({
+          variables: {
+            createDepartmentInput: formValues,
+          },
+        });
+        if (res?.data) {
+          showToast.success("Created!", "Department created successfully");
+        }
+      }
+      handleClosePopup?.();
+    } catch (error: any) {
+      showToast.error(
+        "Error",
+        error.message ||
+          `Failed to ${data?.id ? "update" : "create"} department`
+      );
     }
-    handleClosePopup?.();
   };
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
 import PageHeader from "@/components/ui/PageHeader";
@@ -46,9 +47,7 @@ export default function DepartmentsPage() {
       id: row?.id,
       name: row?.name,
       description: row?.description,
-      status: row?.status,
       parentId: row?.parentId,
-      businessId: row?.businessId,
       managerId: row?.managerId,
     };
 
@@ -65,11 +64,18 @@ export default function DepartmentsPage() {
 
   // DELETE DEPARTMENT
   const handleDelete = async (row: IDepartment) => {
-    await deleteDepartment({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const res = await deleteDepartment({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Department deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete department");
+    }
   };
 
   // TABLE COLUMNS DEFINITION
