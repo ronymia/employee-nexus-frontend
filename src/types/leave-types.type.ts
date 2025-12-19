@@ -21,6 +21,6 @@ export interface ILeaveTypeEmploymentStatus {
 
 export enum LeaveRolloverType {
   NONE = "NONE",
-  CARRY_OVER = "CARRY_OVER",
-  CARRY_FORWARD = "CARRY_FORWARD",
+  PARTIAL_ROLLOVER = "PARTIAL_ROLLOVER",
+  FULL_ROLLOVER = "FULL_ROLLOVER",
 }

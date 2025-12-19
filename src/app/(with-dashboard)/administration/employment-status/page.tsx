@@ -1,7 +1,10 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
+import StatusBadge from "@/components/ui/StatusBadge";
+import PageHeader from "@/components/ui/PageHeader";
 import {
   PermissionAction,
   PermissionResource,
@@ -17,6 +20,7 @@ import { TableActionType, TableColumnType, IEmploymentStatus } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
+import Swal from "sweetalert2";
 
 export default function EmploymentStatusesPage() {
   const { permissionGuard } = usePermissionGuard();
@@ -59,11 +63,21 @@ export default function EmploymentStatusesPage() {
     });
   };
   const handleDelete = async (row: IEmploymentStatus) => {
-    await deleteEmploymentStatus({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const res = await deleteEmploymentStatus({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Employment status deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error(
+        "Error",
+        error.message || "Failed to delete employment status"
+      );
+    }
   };
 
   const [columns, setColumns] = useState<TableColumnType[]>([
@@ -84,7 +98,7 @@ export default function EmploymentStatusesPage() {
     {
       key: "3",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
@@ -103,13 +117,20 @@ export default function EmploymentStatusesPage() {
       type: "button",
       permissions: [Permissions.EmploymentStatusDelete],
       handler: (row) => {
-        setPopupOption({
-          open: true,
-          closeOnDocumentClick: true,
-          actionType: "delete",
-          form: "employment_status",
-          deleteHandler: () => handleDelete(row),
-          title: "Delete Employment Status",
+        Swal.fire({
+          title: "Are you sure?",
+          text: `Do you want to delete "${row.name}"? This action cannot be undone!`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+          cancelButtonText: "Cancel",
+          showLoaderOnConfirm: true,
+          preConfirm: async () => {
+            await handleDelete(row);
+            return true;
+          },
         });
       },
       disabledOn: [],
@@ -124,11 +145,10 @@ export default function EmploymentStatusesPage() {
 
       {/* Modal for adding a new employment status */}
       <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Employment Statuses</h1>
-          </div>
-        </header>
+        <PageHeader
+          title="All Employment Statuses"
+          subtitle="Manage your employee employment statuses"
+        />
         {/* TABLE */}
         <CustomTable
           isLoading={loading || deleteResult.loading}
@@ -144,7 +164,14 @@ export default function EmploymentStatusesPage() {
               { label: "Description", value: "description" },
             ],
           }}
-          dataSource={data?.employmentStatuses?.data || []}
+          dataSource={
+            data?.employmentStatuses?.data?.map((row) => ({
+              ...row,
+              customStatus: (
+                <StatusBadge status={row.status} onClick={() => {}} />
+              ),
+            })) || []
+          }
         >
           {permissionGuard(PermissionResource.EMPLOYMENT_STATUS, [
             PermissionAction.CREATE,

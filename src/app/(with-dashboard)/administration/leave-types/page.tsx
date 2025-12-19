@@ -1,5 +1,6 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
 import {
@@ -14,6 +15,7 @@ import { TableActionType, TableColumnType, ILeaveType } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
+import Swal from "sweetalert2";
 
 export default function LeaveTypesPage() {
   const { permissionGuard } = usePermissionGuard();
@@ -59,11 +61,18 @@ export default function LeaveTypesPage() {
     });
   };
   const handleDelete = async (row: ILeaveType) => {
-    await deleteLeaveType({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const res = await deleteLeaveType({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Leave type deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete leave type");
+    }
   };
 
   const [columns, setColumns] = useState<TableColumnType[]>([
@@ -77,7 +86,7 @@ export default function LeaveTypesPage() {
     {
       key: "2",
       header: "Leave Type",
-      accessorKey: "leaveType",
+      accessorKey: "customLeaveType",
       show: true,
       sortDirection: "ascending",
     },
@@ -88,20 +97,27 @@ export default function LeaveTypesPage() {
       show: true,
       sortDirection: "ascending",
     },
-    // {
-    //   key: "4",
-    //   header: "Rollover Type",
-    //   accessorKey: "leaveRolloverType",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
-    // {
-    //   key: "5",
-    //   header: "Carry Over Limit",
-    //   accessorKey: "carryOverLimit",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
+    {
+      key: "4",
+      header: "Rollover Type",
+      accessorKey: "customLeaveRolloverType",
+      show: true,
+      sortDirection: "ascending",
+    },
+    {
+      key: "5",
+      header: "Carry Over Limit",
+      accessorKey: "carryOverLimit",
+      show: true,
+      sortDirection: "ascending",
+    },
+    {
+      key: "6",
+      header: "Employment Statuses",
+      accessorKey: "customEmploymentStatuses",
+      show: true,
+      sortDirection: "ascending",
+    },
   ]);
 
   const actions: TableActionType[] = [
@@ -162,7 +178,73 @@ export default function LeaveTypesPage() {
               { label: "Leave Type", value: "leaveType" },
             ],
           }}
-          dataSource={data?.leaveTypes?.data || []}
+          dataSource={
+            data?.leaveTypes?.data?.map((row) => ({
+              ...row,
+              customLeaveType: (
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                    row.leaveType === "PAID"
+                      ? "bg-green-100 text-green-800 border border-green-200"
+                      : "bg-orange-100 text-orange-800 border border-orange-200"
+                  }`}
+                >
+                  {row.leaveType === "PAID" ? "Paid" : "Unpaid"}
+                </span>
+              ),
+              customLeaveRolloverType: (() => {
+                let badgeColor = "";
+                let displayText = "";
+
+                switch (row.leaveRolloverType) {
+                  case "NONE":
+                    badgeColor =
+                      "bg-gray-100 text-gray-800 border border-gray-200";
+                    displayText = "No Rollover";
+                    break;
+                  case "PARTIAL_ROLLOVER":
+                    badgeColor =
+                      "bg-blue-100 text-blue-800 border border-blue-200";
+                    displayText = "Partial Rollover";
+                    break;
+                  case "FULL_ROLLOVER":
+                    badgeColor =
+                      "bg-purple-100 text-purple-800 border border-purple-200";
+                    displayText = "Full Rollover";
+                    break;
+                  default:
+                    badgeColor =
+                      "bg-gray-100 text-gray-800 border border-gray-200";
+                    displayText = row.leaveRolloverType || "N/A";
+                }
+
+                return (
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${badgeColor}`}
+                  >
+                    {displayText}
+                  </span>
+                );
+              })(),
+              customEmploymentStatuses: (
+                <div className="flex flex-wrap gap-1.5">
+                  {row.employmentStatuses &&
+                  row.employmentStatuses.length > 0 ? (
+                    row.employmentStatuses.map((status: any, index: number) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200"
+                      >
+                        {status.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-gray-400">N/A</span>
+                  )}
+                </div>
+              ),
+            })) || []
+          }
         >
           {permissionGuard(PermissionResource.LEAVE_TYPE, [
             PermissionAction.CREATE,

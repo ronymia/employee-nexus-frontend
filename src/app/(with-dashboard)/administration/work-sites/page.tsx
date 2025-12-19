@@ -1,5 +1,6 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
 import {
@@ -16,6 +17,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import StatusBadge from "@/components/ui/StatusBadge";
+import Swal from "sweetalert2";
 
 export default function WorkSitesPage() {
   // PERMISSION GUARD
@@ -63,11 +65,18 @@ export default function WorkSitesPage() {
 
   // DELETE HANDLER
   const handleDelete = async (row: IWorkSite) => {
-    await deleteWorkSite({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const res = await deleteWorkSite({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Work site deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete work site");
+    }
   };
 
   // TABLE COLUMNS DEF
@@ -123,13 +132,20 @@ export default function WorkSitesPage() {
       type: "button",
       permissions: [Permissions.WorkSiteDelete],
       handler: (row) => {
-        setPopupOption({
-          open: true,
-          closeOnDocumentClick: true,
-          actionType: "delete",
-          form: "work_site",
-          deleteHandler: () => handleDelete(row),
-          title: "Delete Work Site",
+        Swal.fire({
+          title: "Are you sure?",
+          text: `Do you want to delete "${row.name}"? This action cannot be undone!`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+          cancelButtonText: "Cancel",
+          showLoaderOnConfirm: true,
+          preConfirm: async () => {
+            await handleDelete(row);
+            return true;
+          },
         });
       },
       disabledOn: [],
@@ -144,7 +160,10 @@ export default function WorkSitesPage() {
 
       {/* Modal for adding a new work site */}
       <section className={``}>
-        <PageHeader title="All Work Sites" subtitle="Manage your work sites" />
+        <PageHeader
+          title="All Work Sites"
+          subtitle="Track and manage your work sites"
+        />
         {/* TABLE */}
         <CustomTable
           isLoading={loading || deleteResult.loading}

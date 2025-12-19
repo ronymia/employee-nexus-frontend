@@ -1,5 +1,6 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
@@ -102,23 +103,36 @@ export default function WorkSiteForm({
 
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: IWorkSiteFormData) => {
-    console.log({ formValues });
-    const preparedData = prepareFormData(formValues);
+    try {
+      console.log({ formValues });
+      const preparedData = prepareFormData(formValues);
 
-    if (data?.id) {
-      preparedData.id = Number(data.id);
-      await updateWorkSite({
-        variables: {
-          updateWorkSiteInput: preparedData,
-        },
-      });
-    } else {
-      await createWorkSite({
-        variables: { createWorkSiteInput: preparedData },
-      });
+      if (data?.id) {
+        preparedData.id = Number(data.id);
+        const res = await updateWorkSite({
+          variables: {
+            updateWorkSiteInput: preparedData,
+          },
+        });
+        if (res?.data) {
+          showToast.success("Updated!", "Work site updated successfully");
+          handleClosePopup();
+        }
+      } else {
+        const res = await createWorkSite({
+          variables: { createWorkSiteInput: preparedData },
+        });
+        if (res?.data) {
+          showToast.success("Created!", "Work site created successfully");
+          handleClosePopup();
+        }
+      }
+    } catch (error: any) {
+      showToast.error(
+        "Error",
+        error.message || `Failed to ${data?.id ? "update" : "create"} work site`
+      );
     }
-
-    handleClosePopup();
   };
 
   const defaultValues = {
@@ -196,9 +210,13 @@ function WorkSiteFormFields({
       const response = await fetch("https://api.ipify.org?format=json");
       const data = await response.json();
       setValue("ipAddress", data.ip, { shouldValidate: true });
+      showToast.success("Success", `IP address detected: ${data.ip}`);
     } catch (error) {
       console.error("Failed to fetch IP:", error);
-      alert("Failed to detect IP address. Please enter manually.");
+      showToast.error(
+        "Error",
+        "Failed to detect IP address. Please enter manually."
+      );
     }
   };
 

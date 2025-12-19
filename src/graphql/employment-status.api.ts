@@ -8,12 +8,11 @@ export const GET_EMPLOYMENT_STATUSES = gql`
       success
       data {
         businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        createdAt
         updatedAt
       }
     }
@@ -29,12 +28,11 @@ export const CREATE_EMPLOYMENT_STATUS = gql`
       success
       data {
         businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        createdAt
         updatedAt
       }
     }
@@ -58,12 +56,11 @@ export const UPDATE_EMPLOYMENT_STATUS = gql`
       success
       data {
         businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        createdAt
         updatedAt
       }
     }
@@ -77,12 +74,11 @@ export const DELETE_EMPLOYMENT_STATUS = gql`
       success
       data {
         businessId
-        createdAt
-        createdBy
-        description
         id
         name
         status
+        description
+        createdAt
         updatedAt
       }
     }
