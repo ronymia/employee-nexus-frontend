@@ -239,7 +239,9 @@ export default function LeaveTypesPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-gray-400">N/A</span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      All Employee Statuses
+                    </span>
                   )}
                 </div>
               ),

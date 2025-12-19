@@ -20,7 +20,6 @@ export const GET_USERS = gql`
         createdAt
         updatedAt
         profile {
-          id
           fullName
           address
           city
