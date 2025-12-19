@@ -15,31 +15,30 @@ const scheduleSchema = z.object({
     .min(1, "At least one time slot is required"),
 });
 
-export const workScheduleSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  scheduleType: z.enum(["REGULAR", "SHIFT", "FLEXIBLE"]).default("REGULAR"),
-  breakType: z.enum(["PAID", "UNPAID"]),
-  breakHours: z.coerce.number().min(0, "Break hours must be 0 or more"),
-  schedules: z
-    .array(scheduleSchema)
-    .min(1, "At least one schedule is required"),
-});
-
-export const updateWorkScheduleSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  description: z.string().min(1, "Description is required").optional(),
-  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
-  scheduleType: z.enum(["REGULAR", "SHIFT", "FLEXIBLE"]).optional(),
-  breakType: z.enum(["PAID", "UNPAID"]).optional(),
-  breakHours: z.coerce
-    .number()
-    .min(0, "Break hours must be 0 or more")
-    .optional(),
-  schedules: z.array(scheduleSchema).optional(),
-});
+export const workScheduleSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
+    scheduleType: z
+      .enum(["REGULAR", "SCHEDULED", "FLEXIBLE"])
+      .default("REGULAR"),
+    breakType: z.enum(["PAID", "UNPAID"]),
+    breakHours: z.coerce.number().min(0, "Break hours must be 0 or more"),
+    schedules: z.array(scheduleSchema).optional().default([]),
+  })
+  .superRefine((data, ctx) => {
+    // Only validate schedules on submission (when other required fields are filled)
+    if (
+      data.name &&
+      data.description &&
+      (!data.schedules || data.schedules.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one schedule is required",
+        path: ["schedules"],
+      });
+    }
+  });
 
 export type IWorkScheduleFormData = z.infer<typeof workScheduleSchema>;
-export type IUpdateWorkScheduleFormData = z.infer<
-  typeof updateWorkScheduleSchema
->;

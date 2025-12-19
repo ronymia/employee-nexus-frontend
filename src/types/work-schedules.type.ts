@@ -5,7 +5,7 @@ export interface IWorkSchedule {
   name: string;
   description: string;
   status: "ACTIVE" | "INACTIVE";
-  scheduleType: "REGULAR" | "SHIFT" | "FLEXIBLE";
+  scheduleType: "REGULAR" | "SCHEDULED" | "FLEXIBLE";
   breakType: "PAID" | "UNPAID";
   breakHours: number;
   businessId?: number;

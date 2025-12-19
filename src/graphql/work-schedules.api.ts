@@ -110,13 +110,9 @@ export const CREATE_WORK_SCHEDULE = gql`
 // UPDATE WORK SCHEDULE
 export const UPDATE_WORK_SCHEDULE = gql`
   mutation UpdateWorkSchedule(
-    $id: Int!
     $updateWorkScheduleInput: UpdateWorkScheduleInput!
   ) {
-    updateWorkSchedule(
-      id: $id
-      updateWorkScheduleInput: $updateWorkScheduleInput
-    ) {
+    updateWorkSchedule(updateWorkScheduleInput: $updateWorkScheduleInput) {
       message
       statusCode
       success
