@@ -39,7 +39,7 @@ export default function RegularSchedule() {
   }, [startTime, endTime, weekendDays, setValue]);
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-base-200">
+    <div className="space-y-4 p-4 border rounded-lg bg-base-200 border-primary-content">
       <h3 className="text-lg font-medium">Regular Schedule</h3>
       <p className="text-sm text-gray-600">
         Set the same start and end time for all days of the week

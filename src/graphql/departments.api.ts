@@ -24,7 +24,6 @@ export const GET_DEPARTMENTS = gql`
             fullName
           }
         }
-        createdBy
         createdAt
         updatedAt
       }
@@ -33,20 +32,8 @@ export const GET_DEPARTMENTS = gql`
 `;
 
 export const CREATE_DEPARTMENT = gql`
-  mutation CreateDepartment(
-    $name: String!
-    $description: String!
-    $parentId: Int
-    $managerId: Int
-  ) {
-    createDepartment(
-      createDepartmentInput: {
-        name: $name
-        description: $description
-        parentId: $parentId
-        managerId: $managerId
-      }
-    ) {
+  mutation CreateDepartment($createDepartmentInput: CreateDepartmentInput!) {
+    createDepartment(createDepartmentInput: $createDepartmentInput) {
       message
       statusCode
       success
@@ -68,7 +55,6 @@ export const CREATE_DEPARTMENT = gql`
             fullName
           }
         }
-        createdBy
         createdAt
         updatedAt
       }
@@ -77,22 +63,8 @@ export const CREATE_DEPARTMENT = gql`
 `;
 
 export const UPDATE_DEPARTMENT = gql`
-  mutation UpdateDepartment(
-    $id: Int!
-    $name: String!
-    $description: String!
-    $parentId: Int
-    $managerId: Int
-  ) {
-    updateDepartment(
-      updateDepartmentInput: {
-        id: $id
-        name: $name
-        description: $description
-        parentId: $parentId
-        managerId: $managerId
-      }
-    ) {
+  mutation UpdateDepartment($updateDepartmentInput: UpdateDepartmentInput!) {
+    updateDepartment(updateDepartmentInput: $updateDepartmentInput) {
       message
       statusCode
       success
@@ -114,7 +86,6 @@ export const UPDATE_DEPARTMENT = gql`
             fullName
           }
         }
-        createdBy
         createdAt
         updatedAt
       }
@@ -136,18 +107,34 @@ export const DELETE_DEPARTMENT = gql`
 `;
 
 // Users query for manager selection
-export const GET_USERS = gql`
-  query Users {
-    users {
+export const GET_MANAGERS = gql`
+  query Users($query: QueryUserInput) {
+    users(query: $query) {
       message
       statusCode
       success
       data {
         id
-        name
         email
+        roleId
+        status
+        createdAt
+        updatedAt
         profile {
           fullName
+          address
+          city
+          country
+          dateOfBirth
+          gender
+          maritalStatus
+          phone
+          postcode
+          profilePicture
+        }
+        role {
+          id
+          name
         }
       }
     }

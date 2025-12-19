@@ -1,5 +1,6 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
@@ -40,15 +41,22 @@ export default function EmploymentStatusForm({
   const handleOnSubmit = async (formValues: IEmploymentStatusFormData) => {
     if (data?.id) {
       formValues["id"] = Number(data.id);
-      await updateEmploymentStatus({
+      const res = await updateEmploymentStatus({
         variables: formValues,
       });
+      if (res?.data) {
+        showToast.success("Updated!", "Employment status updated successfully");
+        handleClosePopup?.();
+      }
     } else {
-      await createEmploymentStatus({
+      const res = await createEmploymentStatus({
         variables: formValues,
       });
+      if (res?.data) {
+        showToast.success("Created!", "Employment status created successfully");
+        handleClosePopup?.();
+      }
     }
-    handleClosePopup?.();
   };
 
   return (

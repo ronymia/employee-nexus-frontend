@@ -1,7 +1,10 @@
 "use client";
 
+import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusBadge from "@/components/ui/StatusBadge";
 import {
   PermissionAction,
   PermissionResource,
@@ -12,12 +15,14 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IDepartment } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 
 export default function DepartmentsPage() {
+  // GET PERMISSIONS
   const { permissionGuard } = usePermissionGuard();
-  //
+
+  // GET POPUP OPTIONS
   const { popupOption, setPopupOption, createNewDepartment } = usePopupOption();
 
   // CREATE NEW DEPARTMENT
@@ -42,9 +47,7 @@ export default function DepartmentsPage() {
       id: row?.id,
       name: row?.name,
       description: row?.description,
-      status: row?.status,
       parentId: row?.parentId,
-      businessId: row?.businessId,
       managerId: row?.managerId,
     };
 
@@ -59,14 +62,23 @@ export default function DepartmentsPage() {
     });
   };
 
+  // DELETE DEPARTMENT
   const handleDelete = async (row: IDepartment) => {
-    await deleteDepartment({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const res = await deleteDepartment({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Department deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete department");
+    }
   };
 
+  // TABLE COLUMNS DEFINITION
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -82,29 +94,30 @@ export default function DepartmentsPage() {
       show: true,
       sortDirection: "ascending",
     },
-    // {
-    //   key: "3",
-    //   header: "Parent Department",
-    //   accessorKey: "CustomParentName",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
-    // {
-    //   key: "4",
-    //   header: "Manager",
-    //   accessorKey: "CustomManagerName",
-    //   show: true,
-    //   sortDirection: "ascending",
-    // },
+    {
+      key: "3",
+      header: "Parent Department",
+      accessorKey: "customParentDepartment",
+      show: true,
+      sortDirection: "ascending",
+    },
+    {
+      key: "4",
+      header: "Manager",
+      accessorKey: "customManager",
+      show: true,
+      sortDirection: "ascending",
+    },
     {
       key: "5",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
   ]);
 
+  // TABLE ACTIONS
   const actions: TableActionType[] = [
     {
       name: "edit",
@@ -131,56 +144,68 @@ export default function DepartmentsPage() {
     },
   ];
 
-  // Modal for adding a new department
+  // RENDER
   return (
-    <>
+    <Fragment key={`department-page`}>
       {/* Popup for adding/editing a department */}
       <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
 
       {/* Modal for adding a new department */}
-      <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Departments</h1>
-          </div>
-        </header>
-        {/* TABLE */}
-        <CustomTable
-          isLoading={loading || deleteResult.loading}
-          actions={actions}
-          columns={columns}
-          setColumns={setColumns}
-          searchConfig={{
-            searchable: loading ? true : false,
-            debounceDelay: 500,
-            defaultField: "name",
-            searchableFields: [
-              { label: "Name", value: "name" },
-              { label: "Description", value: "description" },
-            ],
-          }}
-          dataSource={
-            data?.departments?.data?.map((row) => ({
-              ...row,
-              CustomParentName: row.parent?.name || "N/A",
-              CustomManagerName: row.manager?.profile?.fullName || "N/A",
-            })) || []
-          }
-        >
-          {permissionGuard(PermissionResource.DEPARTMENT, [
-            PermissionAction.CREATE,
-          ]) && (
-            <button
-              type="button"
-              className={`btn btn-primary text-base-300`}
-              onClick={createNewDepartment}
-            >
-              <PiPlusCircle className={`text-xl`} />
-              Add New
-            </button>
-          )}
-        </CustomTable>
-      </section>
-    </>
+      <PageHeader
+        title="All Departments"
+        subtitle="Organize your company structure and manage departments"
+      />
+      {/* TABLE */}
+      <CustomTable
+        isLoading={loading || deleteResult.loading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumns}
+        searchConfig={{
+          searchable: loading ? true : false,
+          debounceDelay: 500,
+          defaultField: "name",
+          searchableFields: [
+            { label: "Name", value: "name" },
+            { label: "Description", value: "description" },
+          ],
+        }}
+        dataSource={
+          data?.departments?.data?.map((row) => ({
+            ...row,
+            customParentDepartment: row.parent?.name ? (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                {row.parent.name}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400">No Parent</span>
+            ),
+            customManager: row.manager?.profile?.fullName ? (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                👤 {row.manager.profile.fullName}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400">No Manager</span>
+            ),
+            customStatus: (
+              <StatusBadge status={row.status as string} onClick={() => {}} />
+            ),
+          })) || []
+        }
+      >
+        {permissionGuard(PermissionResource.DEPARTMENT, [
+          PermissionAction.CREATE,
+        ]) && (
+          <button
+            type="button"
+            className={`btn btn-primary text-base-300`}
+            onClick={createNewDepartment}
+          >
+            <PiPlusCircle className={`text-xl`} />
+            Add New
+          </button>
+        )}
+      </CustomTable>
+    </Fragment>
   );
 }

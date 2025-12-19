@@ -1,3 +1,4 @@
+import React from "react";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
@@ -12,6 +13,7 @@ import { GET_EMPLOYMENT_STATUSES } from "@/graphql/employment-status.api";
 import { ILeaveTypeFormData } from "@/schemas";
 import { ILeaveType, ILeaveTypeEmploymentStatus } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
+import { useFormContext, useWatch } from "react-hook-form";
 
 export default function LeaveTypesForm({
   handleClosePopup,
@@ -124,7 +126,7 @@ export default function LeaveTypesForm({
       />
 
       {/* LEAVE ROLLOVER TYPE */}
-      {/* <CustomRadioButton
+      <CustomRadioButton
         dataAuto="leaveRolloverType"
         required
         name="leaveRolloverType"
@@ -132,26 +134,22 @@ export default function LeaveTypesForm({
         radioGroupClassName="grid-cols-3"
         options={[
           {
-            title: "None",
+            title: "No Rollover",
             value: "NONE",
           },
           {
-            title: "Carry Over",
-            value: "CARRY_OVER",
+            title: "Partial Rollover",
+            value: "PARTIAL_ROLLOVER",
           },
           {
-            title: "Carry Forward",
-            value: "CARRY_FORWARD",
+            title: "Full Rollover",
+            value: "FULL_ROLLOVER",
           },
         ]}
-      /> */}
+      />
 
-      {/* CARRY OVER LIMIT */}
-      {/* <CustomInputField
-        name="carryOverLimit"
-        label="Carry Over Limit"
-        type="number"
-      /> */}
+      {/* CARRY OVER LIMIT - Only shown for Partial Rollover */}
+      <CarryOverLimit />
 
       {/* EMPLOYMENT STATUSES - MULTI SELECT DROPDOWN */}
       <CustomSelect
@@ -171,5 +169,32 @@ export default function LeaveTypesForm({
         isPending={createResult.loading || updateResult.loading}
       />
     </CustomForm>
+  );
+}
+
+// Component to conditionally render Carry Over Limit field
+function CarryOverLimit() {
+  const { setValue } = useFormContext();
+  const leaveRolloverType = useWatch({ name: "leaveRolloverType" });
+
+  // Set carryOverLimit to null when not in PARTIAL_ROLLOVER mode
+  React.useEffect(() => {
+    if (leaveRolloverType !== "PARTIAL_ROLLOVER") {
+      setValue("carryOverLimit", null);
+    }
+  }, [leaveRolloverType, setValue]);
+
+  // Only show the field when Partial Rollover is selected
+  if (leaveRolloverType !== "PARTIAL_ROLLOVER") {
+    return null;
+  }
+
+  return (
+    <CustomInputField
+      name="carryOverLimit"
+      label="Carry Over Limit"
+      type="number"
+      required
+    />
   );
 }

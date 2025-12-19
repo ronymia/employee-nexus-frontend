@@ -1,4 +1,3 @@
-import React from "react";
 import { PiRadioButtonFill, PiXCircle } from "react-icons/pi";
 
 interface IStatusBadgeProps {
@@ -11,15 +10,15 @@ const StatusBadge = ({ status, onClick }: IStatusBadgeProps) => {
     switch (status.toLowerCase()) {
       case "active":
         return {
-          icon: <PiRadioButtonFill className="text-success text-lg" />,
+          icon: <PiRadioButtonFill className="text-green-500 text-lg" />,
           label: "Active",
-          className: "border-base-100 text-success",
+          className: "border-green-500",
         };
       case "inactive":
         return {
           icon: <PiXCircle className="text-error text-lg" />,
           label: "Inactive",
-          className: "border-error text-error",
+          className: "border-error",
         };
       default:
         return {
@@ -36,7 +35,7 @@ const StatusBadge = ({ status, onClick }: IStatusBadgeProps) => {
     <div
       role="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 text-sm font-medium transition-colors hover:bg-base-200 cursor-pointer ${config.className}`}
+      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium transition-colors hover:bg-base-200 cursor-pointer ${config.className}`}
     >
       {config.icon}
       <span>{config.label}</span>

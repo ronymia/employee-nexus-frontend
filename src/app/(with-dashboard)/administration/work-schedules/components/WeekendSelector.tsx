@@ -15,7 +15,7 @@ const DAYS = [
 ];
 
 export default function WeekendSelector() {
-  const { watch, setValue } = useFormContext();
+  const { setValue } = useFormContext();
   const [selectedWeekends, setSelectedWeekends] = useState<number[]>([0, 6]); // Default: Sunday and Saturday
 
   // Initialize weekend days on mount
@@ -39,7 +39,7 @@ export default function WeekendSelector() {
   };
 
   return (
-    <div className="space-y-3 p-4 border rounded-lg bg-base-200">
+    <div className="space-y-3 p-4 border rounded-lg bg-base-200 border-primary-content">
       <h3 className="text-lg font-medium">Select Weekend Days</h3>
       <p className="text-sm text-gray-600">
         Choose which days are considered weekends

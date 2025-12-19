@@ -76,7 +76,7 @@ export default function FlexibleSchedule() {
   };
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-base-200">
+    <div className="space-y-4 p-4 border rounded-lg bg-base-200 border-primary-content">
       <h3 className="text-lg font-medium">Flexible Schedule</h3>
       <p className="text-sm text-gray-600">
         Set multiple time slots for each day of the week

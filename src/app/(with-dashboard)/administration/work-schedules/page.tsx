@@ -2,28 +2,70 @@
 
 import { PiPlusCircle } from "react-icons/pi";
 import type { IWorkSchedule, TableActionType, TableColumnType } from "@/types";
-import { useQuery } from "@apollo/client/react";
-import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { Fragment, useMemo, useState } from "react";
 import CustomTable from "@/components/table/CustomTable";
-import { GET_WORK_SCHEDULES } from "@/graphql/work-schedules.api";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusBadge from "@/components/ui/StatusBadge";
+import {
+  DELETE_WORK_SCHEDULE,
+  GET_WORK_SCHEDULES,
+} from "@/graphql/work-schedules.api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Permissions } from "@/constants/permissions.constant";
+import { showToast } from "@/components/ui/CustomToast";
+import usePermissionGuard from "@/guards/usePermissionGuard";
+import usePopupOption from "@/hooks/usePopupOption";
 
 export default function WorkSchedules() {
+  // ROUTER
   const router = useRouter();
+
+  // GET PERMISSIONS
+  const { permissionGuard } = usePermissionGuard();
+
+  // GET POPUP OPTIONS
+  const { popupOption, setPopupOption } = usePopupOption();
+
+  // GET WORK SCHEDULES
   const { data, loading } = useQuery<{
     workSchedules: {
       data: IWorkSchedule[];
     };
   }>(GET_WORK_SCHEDULES);
 
+  // DELETE WORK SCHEDULE
+  const [deleteWorkSchedule, deleteResult] = useMutation(DELETE_WORK_SCHEDULE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_WORK_SCHEDULES }],
+  });
+
+  // HANDLE EDIT
   const handleEdit = (row: IWorkSchedule) => {
     router.push(`/administration/work-schedules/${row?.id}/update`);
   };
 
-  const handleDelete = (row: IWorkSchedule) => {};
+  // HANDLE DELETE
+  const handleDelete = async (row: IWorkSchedule) => {
+    try {
+      const res = await deleteWorkSchedule({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Work schedule deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error(
+        "Error",
+        error.message || "Failed to delete work schedule"
+      );
+    }
+  };
 
+  // TABLE COLUMNS DEFINITION
   const [columnHelper, setColumnHelper] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -48,7 +90,7 @@ export default function WorkSchedules() {
     {
       key: "3",
       header: "Schedule Type",
-      accessorKey: "scheduleType",
+      accessorKey: "customScheduleType",
       show: true,
       sortDirection: "ascending",
       sortable: false,
@@ -58,7 +100,7 @@ export default function WorkSchedules() {
     {
       key: "4",
       header: "Break Type",
-      accessorKey: "breakType",
+      accessorKey: "customBreakType",
       show: true,
       sortDirection: "ascending",
       sortable: false,
@@ -78,7 +120,7 @@ export default function WorkSchedules() {
     {
       key: "6",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
       sortable: false,
@@ -87,17 +129,19 @@ export default function WorkSchedules() {
     },
   ]);
 
+  // TABLE COLUMNS
   const columns = useMemo(() => columnHelper, [columnHelper]);
 
+  // TABLE ACTIONS
   const actions: TableActionType[] = [
-    {
-      name: "view",
-      type: "link",
-      handler: () => {},
-      href: (row) => `/administration/work-schedules/${row?.id}/view`,
-      permissions: [Permissions.WorkScheduleRead],
-      disabledOn: [{ accessorKey: "status", value: "INACTIVE" }],
-    },
+    // {
+    //   name: "view",
+    //   type: "link",
+    //   handler: () => {},
+    //   href: (row) => `/administration/work-schedules/${row?.id}/view`,
+    //   permissions: [Permissions.WorkScheduleRead],
+    //   disabledOn: [{ accessorKey: "status", value: "INACTIVE" }],
+    // },
     {
       name: "edit",
       type: "button",
@@ -108,22 +152,30 @@ export default function WorkSchedules() {
     {
       name: "delete",
       type: "button",
-      handler: (row) => console.log("Delete:", row),
       permissions: [Permissions.WorkScheduleDelete],
+      handler: (row) => {
+        setPopupOption({
+          open: true,
+          closeOnDocumentClick: true,
+          actionType: "delete",
+          form: "",
+          deleteHandler: () => handleDelete(row),
+          title: "Delete Work Schedule",
+        });
+      },
       disabledOn: [],
     },
   ];
 
   return (
-    <section className={``}>
-      <header className={`mb-5 flex items-center justify-between`}>
-        <div className="">
-          <h1 className={`text-2xl font-medium`}>Work Schedules</h1>
-        </div>
-      </header>
+    <Fragment key="work-schedules">
+      <PageHeader
+        title="Work Schedules"
+        subtitle="Define and manage work schedules for your organization"
+      />
       {/* TABLE */}
       <CustomTable
-        isLoading={loading}
+        isLoading={loading || deleteResult.loading}
         actions={actions}
         columns={columns}
         setColumns={setColumnHelper}
@@ -136,7 +188,70 @@ export default function WorkSchedules() {
             { label: "Description", value: "description" },
           ],
         }}
-        dataSource={data?.workSchedules?.data || []}
+        dataSource={
+          data?.workSchedules?.data?.map((row) => ({
+            ...row,
+            customScheduleType: (() => {
+              const type = row.scheduleType?.replace(/_/g, " ") || "N/A";
+              let badgeColor = "";
+
+              switch (row.scheduleType) {
+                case "REGULAR":
+                  badgeColor =
+                    "bg-blue-100 text-blue-800 border border-blue-200";
+                  break;
+                case "SCHEDULED":
+                  badgeColor =
+                    "bg-purple-100 text-purple-800 border border-purple-200";
+                  break;
+                case "FLEXIBLE":
+                  badgeColor =
+                    "bg-teal-100 text-teal-800 border border-teal-200";
+                  break;
+                default:
+                  badgeColor =
+                    "bg-gray-100 text-gray-800 border border-gray-200";
+              }
+
+              return (
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${badgeColor}`}
+                >
+                  {type.toLowerCase()}
+                </span>
+              );
+            })(),
+            customBreakType: (() => {
+              const type = row.breakType?.replace(/_/g, " ") || "N/A";
+              let badgeColor = "";
+
+              switch (row.breakType) {
+                case "PAID":
+                  badgeColor =
+                    "bg-green-100 text-green-800 border border-green-200";
+                  break;
+                case "UNPAID":
+                  badgeColor =
+                    "bg-orange-100 text-orange-800 border border-orange-200";
+                  break;
+                default:
+                  badgeColor =
+                    "bg-gray-100 text-gray-800 border border-gray-200";
+              }
+
+              return (
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${badgeColor}`}
+                >
+                  {type.toLowerCase()}
+                </span>
+              );
+            })(),
+            customStatus: (
+              <StatusBadge status={row.status as string} onClick={() => {}} />
+            ),
+          })) || []
+        }
       >
         <Link
           href={`/administration/work-schedules/create`}
@@ -146,6 +261,6 @@ export default function WorkSchedules() {
           Add Work Schedule
         </Link>
       </CustomTable>
-    </section>
+    </Fragment>
   );
 }
