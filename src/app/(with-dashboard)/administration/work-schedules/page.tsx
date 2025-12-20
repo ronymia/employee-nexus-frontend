@@ -17,13 +17,14 @@ import { Permissions } from "@/constants/permissions.constant";
 import { showToast } from "@/components/ui/CustomToast";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
+import FormModal from "@/components/form/FormModal";
 
 export default function WorkSchedules() {
   // ROUTER
   const router = useRouter();
 
   // GET PERMISSIONS
-  const { permissionGuard } = usePermissionGuard();
+  const { hasPermission } = usePermissionGuard();
 
   // GET POPUP OPTIONS
   const { popupOption, setPopupOption } = usePopupOption();
@@ -169,6 +170,10 @@ export default function WorkSchedules() {
 
   return (
     <Fragment key="work-schedules">
+      {/* FORM MODAL */}
+      <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+
+      {/* PAGE HEADER */}
       <PageHeader
         title="Work Schedules"
         subtitle="Define and manage work schedules for your organization"
@@ -253,13 +258,15 @@ export default function WorkSchedules() {
           })) || []
         }
       >
-        <Link
-          href={`/administration/work-schedules/create`}
-          className={`btn btn-primary text-base-300`}
-        >
-          <PiPlusCircle className={`text-xl`} />
-          Add Work Schedule
-        </Link>
+        {hasPermission(Permissions.WorkScheduleCreate) ? (
+          <Link
+            href={`/administration/work-schedules/create`}
+            className={`btn btn-primary text-base-300`}
+          >
+            <PiPlusCircle className={`text-xl`} />
+            Add Work Schedule
+          </Link>
+        ) : null}
       </CustomTable>
     </Fragment>
   );

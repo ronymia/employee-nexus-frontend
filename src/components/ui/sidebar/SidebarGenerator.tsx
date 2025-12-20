@@ -24,19 +24,12 @@ export default function SidebarGenerator({
   subMenus,
   setIsSidebarOpen,
 }: ISidebarGeneratorProps) {
-  // GET WINDOW WIDTH
-  // REDUX STATE DISPATCH
-  // GET CURRENT PATH
   const pathname = usePathname();
-  // SUBMENU OPEN STATE
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   // HANDLE LINK CLICK TOGGLE SIDEBAR
   const handleLinkClick = () => {
     setIsSidebarOpen(false);
-    // if (windowInnerWidth < 768) {
-    //   setDetailsOpen(false);
-    // }
   };
 
   // GET ACTIVE SUBMENU
@@ -48,10 +41,7 @@ export default function SidebarGenerator({
   // IF SUB MENU IS ACTIVE, OPEN PARENT MENU
   useEffect(() => {
     if (isSubmenuActive) setDetailsOpen(true);
-    return () => {};
   }, [isSubmenuActive]);
-
-  // HANDLE MENU VISIBILITY
 
   // RENDER
   return (
@@ -60,55 +50,55 @@ export default function SidebarGenerator({
         <details
           open={detailsOpen}
           onToggle={(e) => setDetailsOpen(e.currentTarget.open)}
-          className={""}
         >
           <summary
-            className={`flex items-center gap-2.5 px-3 py-2.5 transition-colors cursor-pointer group
-                            ${
-                              isSubmenuActive
-                                ? "bg-primary text-sm md:text-base font-medium text-base-300"
-                                : "hover:bg-secondary-content"
-                            }
-                            `}
+            className={`flex items-center gap-2.5 px-3 py-2.5 transition-all duration-200 cursor-pointer group ${
+              isSubmenuActive
+                ? "bg-primary text-base-300 font-medium"
+                : "hover:bg-base-200"
+            }`}
           >
+            {/* ICON */}
             <div
-              className={` flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
                 isSubmenuActive
-                  ? "bg-green-200 text-green-950"
-                  : "group-hover:bg-base-100 group-hover:text-primary"
+                  ? "bg-primary-content text-primary"
+                  : "bg-base-200 group-hover:bg-base-300"
               }`}
             >
-              {<Icon className="w-4 h-4" />}
+              <Icon className="w-4 h-4" />
             </div>
 
+            {/* LABEL */}
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
-              className="whitespace-nowrap grow text-heading"
+              className="whitespace-nowrap grow text-sm md:text-base"
             >
               {label}
             </motion.span>
 
+            {/* ARROW ICON */}
             <IoIosArrowUp
-              className={`transform transition-transform duration-200 ${
+              className={`w-4 h-4 transform transition-transform duration-200 ${
                 detailsOpen ? "rotate-0" : "rotate-180"
               }`}
             />
           </summary>
 
-          {/* SUB MENU ITEMS  */}
-          <AnimatePresence initial={false} key={`submenu-${label}`}>
+          {/* SUB MENU ITEMS */}
+          <AnimatePresence initial={false}>
             {detailsOpen && (
               <motion.div
                 key="submenu-content"
-                className={`flex flex-col pl-5 pt-0.5`}
+                className="flex flex-col pl-5 pt-1 pb-1 bg-base-100/50"
                 layout
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.1, ease: "easeInOut" }}
+                transition={{ duration: 0.15, ease: "easeInOut" }}
               >
                 {subMenus
                   ?.filter((child) => child.show)
@@ -117,14 +107,11 @@ export default function SidebarGenerator({
                       key={child.path}
                       href={child?.path}
                       onClick={handleLinkClick}
-                      className={`flex items-center justify-start gap-2.5 p-1.5 cursor-pointer text-sm border-l-2 drop-shadow-md
-                                                        ${
-                                                          pathname ===
-                                                          child?.path
-                                                            ? "text-green-950 font-medium bg-primary-content border-l-green-950"
-                                                            : "hover:bg-primary-content  border-l-base-300"
-                                                        }
-                                                      `}
+                      className={`flex items-center px-3 py-2 text-sm transition-all duration-200 border-b-2 border-b-primary-content ${
+                        pathname === child?.path
+                          ? "bg-primary-content text-primary font-medium border-l-2 border-l-primary"
+                          : "hover:bg-base-300 border-l-base-300"
+                      }`}
                     >
                       {child?.label}
                     </Link>
@@ -137,31 +124,25 @@ export default function SidebarGenerator({
         <Link
           href={path}
           onClick={handleLinkClick}
-          className={`
-            flex items-center gap-3 px-3 py-2.5 transition-all duration-200 group text-green-950
-            ${
-              path === pathname
-                ? "bg-primary text-sm md:text-base font-medium text-base-300"
-                : "hover:bg-gray-100"
-            }
-          `}
+          className={`flex items-center gap-2.5 px-3 py-2.5 transition-all duration-200 group ${
+            path === pathname
+              ? "bg-primary text-base-300 font-medium"
+              : "hover:bg-base-200"
+          }`}
         >
           {/* ICON */}
           <div
-            className={`
-              flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200
-              ${
-                pathname === path
-                  ? "bg-green-200 text-green-950"
-                  : "bg-base-200 text-muted group-hover:bg-gray-300 group-hover:text-green-950"
-              }
-            `}
+            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+              pathname === path
+                ? "bg-primary-content text-primary"
+                : "bg-base-200 group-hover:bg-base-300"
+            }`}
           >
             <Icon className="w-4 h-4" />
           </div>
 
           {/* LABEL */}
-          {label}
+          <span className="text-sm md:text-base">{label}</span>
         </Link>
       )}
     </Fragment>

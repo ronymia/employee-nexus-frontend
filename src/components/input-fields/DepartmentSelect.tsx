@@ -9,6 +9,7 @@ interface DepartmentSelectProps {
   required?: boolean;
   placeholder?: string;
   dataAuto?: string;
+  position?: "top" | "bottom";
 }
 
 export default function DepartmentSelect({
@@ -17,6 +18,7 @@ export default function DepartmentSelect({
   required = false,
   placeholder = "Select Department",
   dataAuto = "department",
+  position = "bottom",
 }: DepartmentSelectProps) {
   const { data, loading } = useQuery<{ departments: { data: IDepartment[] } }>(
     GET_DEPARTMENTS,
@@ -38,6 +40,7 @@ export default function DepartmentSelect({
       dataAuto={dataAuto}
       required={required}
       isLoading={loading}
+      position={position}
     />
   );
 }

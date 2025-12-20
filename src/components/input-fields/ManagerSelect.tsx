@@ -1,4 +1,4 @@
-import CustomSelect from "./CustomSelect";
+import CustomSelect from "../form/input/CustomSelect";
 import { GET_MANAGERS } from "@/graphql/departments.api";
 import { useQuery } from "@apollo/client/react";
 import { IUser } from "@/types";
@@ -28,7 +28,7 @@ export default function ManagerSelect({
   wrapperClassName = "",
   fieldClassName = "",
   labelClassName = "",
-  position = "top",
+  position = "bottom",
 }: IManagerSelectProps) {
   // GET USERS FOR MANAGER DROPDOWN
   const { data, loading } = useQuery<{

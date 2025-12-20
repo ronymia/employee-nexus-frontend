@@ -10,8 +10,7 @@ import CustomAddressAutocomplete from "@/components/form/input/CustomAddressAuto
 import CustomGoogleMap from "@/components/map/CustomGoogleMap";
 import { useFormContext } from "react-hook-form";
 import { useMutation } from "@apollo/client/react";
-import { APIProvider } from "@vis.gl/react-google-maps";
-import { useState, useCallback } from "react";
+import { useState, useCallback, Fragment } from "react";
 import {
   CREATE_WORK_SITES,
   GET_WORK_SITES,
@@ -27,19 +26,19 @@ import { IWorkSite } from "@/types";
 // ========================
 // INTERFACES
 // ========================
-interface WorkSiteFormProps {
+interface IWorkSiteFormProps {
   handleClosePopup: () => void;
   data: IWorkSite;
 }
 
-interface WorkSiteFormFieldsProps {
+interface IWorkSiteFormFieldsProps {
   createResult: any;
   updateResult: any;
   handleClosePopup: () => void;
   initialLocation: { lat: number; lng: number } | null;
 }
 
-interface LocationData {
+interface ILocationData {
   address: string;
   lat: number;
   lng: number;
@@ -88,7 +87,7 @@ const prepareFormData = (formValues: IWorkSiteFormData): any => {
 export default function WorkSiteForm({
   handleClosePopup,
   data,
-}: WorkSiteFormProps) {
+}: IWorkSiteFormProps) {
   // MUTATION TO CREATE A NEW
   const [createWorkSite, createResult] = useMutation(CREATE_WORK_SITES, {
     awaitRefetchQueries: true,
@@ -132,33 +131,42 @@ export default function WorkSiteForm({
         "Error",
         error.message || `Failed to ${data?.id ? "update" : "create"} work site`
       );
+
+      throw error;
     }
   };
 
+  // defaultValues
   const defaultValues = {
-    ...data,
+    id: data?.id ? Number(data.id) : undefined,
+    name: data?.name,
+    description: data?.description,
     locationTrackingType:
       data?.locationTrackingType || LocationTrackingType.NONE,
+    address: data?.address || undefined,
+    lat: data?.lat || undefined,
+    lng: data?.lng || undefined,
+    maxRadius: data?.maxRadius || undefined,
+    ipAddress: data?.ipAddress || undefined,
   };
 
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
-      <CustomForm
-        submitHandler={handleOnSubmit}
-        resolver={workSiteSchema}
-        defaultValues={defaultValues}
-        className="flex flex-col gap-y-4"
-      >
-        <WorkSiteFormFields
-          createResult={createResult}
-          updateResult={updateResult}
-          handleClosePopup={handleClosePopup}
-          initialLocation={
-            data?.lat && data?.lng ? { lat: data.lat, lng: data.lng } : null
-          }
-        />
-      </CustomForm>
-    </APIProvider>
+    <CustomForm
+      key={`work_site-form-${data?.id}`}
+      submitHandler={handleOnSubmit}
+      resolver={workSiteSchema}
+      defaultValues={defaultValues}
+      className="flex flex-col gap-y-4"
+    >
+      <WorkSiteFormFields
+        createResult={createResult}
+        updateResult={updateResult}
+        handleClosePopup={handleClosePopup}
+        initialLocation={
+          data?.lat && data?.lng ? { lat: data.lat, lng: data.lng } : null
+        }
+      />
+    </CustomForm>
   );
 }
 
@@ -170,7 +178,7 @@ function WorkSiteFormFields({
   updateResult,
   handleClosePopup,
   initialLocation,
-}: WorkSiteFormFieldsProps) {
+}: IWorkSiteFormFieldsProps) {
   const { watch, setValue } = useFormContext();
   const [mapLocation, setMapLocation] = useState<{
     lat: number;
@@ -199,7 +207,7 @@ function WorkSiteFormFields({
   );
 
   const handleAddressSelect = useCallback(
-    (data: LocationData) => {
+    (data: ILocationData) => {
       handleLocationUpdate(data.lat, data.lng);
     },
     [handleLocationUpdate]
@@ -223,7 +231,7 @@ function WorkSiteFormFields({
   const isPending = createResult.loading || updateResult.loading;
 
   return (
-    <>
+    <Fragment key={`work_site-basic-info-form`}>
       {/* BASIC INFORMATION */}
       <section className="space-y-3">
         <CustomInputField
@@ -284,7 +292,7 @@ function WorkSiteFormFields({
         cancelHandler={handleClosePopup}
         isPending={isPending}
       />
-    </>
+    </Fragment>
   );
 }
 
@@ -299,7 +307,7 @@ function GeoLocationSection({
 }: {
   mapLocation: { lat: number; lng: number } | null;
   maxRadius: number;
-  onAddressSelect: (data: LocationData) => void;
+  onAddressSelect: (data: ILocationData) => void;
   onLocationChange: (lat: number, lng: number) => void;
 }) {
   return (

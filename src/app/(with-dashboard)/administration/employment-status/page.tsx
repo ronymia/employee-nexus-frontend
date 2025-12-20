@@ -18,15 +18,19 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IEmploymentStatus } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import Swal from "sweetalert2";
 
 export default function EmploymentStatusesPage() {
+  // PERMISSIONS
   const { permissionGuard } = usePermissionGuard();
+
   // CREATE NEW EMPLOYMENT STATUS
   const { popupOption, setPopupOption, createNewEmploymentStatus } =
     usePopupOption();
+
+  // GET EMPLOYMENT STATUSES
   const { data, loading } = useQuery<{
     employmentStatuses: {
       data: IEmploymentStatus[];
@@ -41,7 +45,6 @@ export default function EmploymentStatusesPage() {
       refetchQueries: [{ query: GET_EMPLOYMENT_STATUSES }],
     }
   );
-  // console.log({ data });
 
   // HANDLERS
   const handleEdit = (row: IEmploymentStatus) => {
@@ -62,6 +65,8 @@ export default function EmploymentStatusesPage() {
       title: "Update Employment Status",
     });
   };
+
+  // DELETE EMPLOYMENT STATUS
   const handleDelete = async (row: IEmploymentStatus) => {
     try {
       const res = await deleteEmploymentStatus({
@@ -80,6 +85,7 @@ export default function EmploymentStatusesPage() {
     }
   };
 
+  // TABLE COLUMNS DEF
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -104,6 +110,7 @@ export default function EmploymentStatusesPage() {
     },
   ]);
 
+  // TABLE ACTIONS
   const actions: TableActionType[] = [
     {
       name: "edit",
@@ -117,20 +124,13 @@ export default function EmploymentStatusesPage() {
       type: "button",
       permissions: [Permissions.EmploymentStatusDelete],
       handler: (row) => {
-        Swal.fire({
-          title: "Are you sure?",
-          text: `Do you want to delete "${row.name}"? This action cannot be undone!`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, delete it!",
-          cancelButtonText: "Cancel",
-          showLoaderOnConfirm: true,
-          preConfirm: async () => {
-            await handleDelete(row);
-            return true;
-          },
+        setPopupOption({
+          open: true,
+          closeOnDocumentClick: true,
+          actionType: "delete",
+          form: "employment_status",
+          deleteHandler: () => handleDelete(row),
+          title: "Delete Employment Status",
         });
       },
       disabledOn: [],
@@ -139,54 +139,52 @@ export default function EmploymentStatusesPage() {
 
   // Modal for adding a new employment status
   return (
-    <>
+    <Fragment key={`employment_status-page`}>
       {/* Popup for adding/editing a employment status */}
       <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
 
       {/* Modal for adding a new employment status */}
-      <section className={``}>
-        <PageHeader
-          title="All Employment Statuses"
-          subtitle="Manage your employee employment statuses"
-        />
-        {/* TABLE */}
-        <CustomTable
-          isLoading={loading || deleteResult.loading}
-          actions={actions}
-          columns={columns}
-          setColumns={setColumns}
-          searchConfig={{
-            searchable: loading ? true : false,
-            debounceDelay: 500,
-            defaultField: "name",
-            searchableFields: [
-              { label: "Name", value: "name" },
-              { label: "Description", value: "description" },
-            ],
-          }}
-          dataSource={
-            data?.employmentStatuses?.data?.map((row) => ({
-              ...row,
-              customStatus: (
-                <StatusBadge status={row.status} onClick={() => {}} />
-              ),
-            })) || []
-          }
-        >
-          {permissionGuard(PermissionResource.EMPLOYMENT_STATUS, [
-            PermissionAction.CREATE,
-          ]) && (
-            <button
-              type="button"
-              className={`btn btn-primary text-base-300`}
-              onClick={createNewEmploymentStatus}
-            >
-              <PiPlusCircle className={`text-xl`} />
-              Add New
-            </button>
-          )}
-        </CustomTable>
-      </section>
-    </>
+      <PageHeader
+        title="All Employment Statuses"
+        subtitle="Manage your employee employment statuses"
+      />
+      {/* TABLE */}
+      <CustomTable
+        isLoading={loading || deleteResult.loading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumns}
+        searchConfig={{
+          searchable: loading ? true : false,
+          debounceDelay: 500,
+          defaultField: "name",
+          searchableFields: [
+            { label: "Name", value: "name" },
+            { label: "Description", value: "description" },
+          ],
+        }}
+        dataSource={
+          data?.employmentStatuses?.data?.map((row) => ({
+            ...row,
+            customStatus: (
+              <StatusBadge status={row.status} onClick={() => {}} />
+            ),
+          })) || []
+        }
+      >
+        {permissionGuard(PermissionResource.EMPLOYMENT_STATUS, [
+          PermissionAction.CREATE,
+        ]) && (
+          <button
+            type="button"
+            className={`btn btn-primary text-base-300`}
+            onClick={createNewEmploymentStatus}
+          >
+            <PiPlusCircle className={`text-xl`} />
+            Add New
+          </button>
+        )}
+      </CustomTable>
+    </Fragment>
   );
 }

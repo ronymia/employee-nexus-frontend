@@ -18,7 +18,6 @@ export const GET_LEAVE_TYPES = gql`
           name
         }
         businessId
-        createdBy
         createdAt
         updatedAt
       }
@@ -60,7 +59,6 @@ export const CREATE_LEAVE_TYPE = gql`
           name
         }
         businessId
-        createdBy
         createdAt
         updatedAt
       }
@@ -104,7 +102,6 @@ export const UPDATE_LEAVE_TYPE = gql`
           name
         }
         businessId
-        createdBy
         createdAt
         updatedAt
       }

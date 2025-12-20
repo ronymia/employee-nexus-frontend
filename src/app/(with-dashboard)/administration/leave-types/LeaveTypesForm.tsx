@@ -10,7 +10,7 @@ import {
   UPDATE_LEAVE_TYPE,
 } from "@/graphql/leave-types.api";
 import { GET_EMPLOYMENT_STATUSES } from "@/graphql/employment-status.api";
-import { ILeaveTypeFormData } from "@/schemas";
+import { ILeaveTypeFormData, leaveTypeSchema } from "@/schemas";
 import { ILeaveType, ILeaveTypeEmploymentStatus } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -78,21 +78,21 @@ export default function LeaveTypesForm({
     handleClosePopup?.();
   };
 
-  console.log({ data });
+  const defaultValues = {
+    name: data?.name || "",
+    leaveType: data?.leaveType || "",
+    leaveHours: data?.leaveHours || 0,
+    leaveRolloverType: data?.leaveRolloverType || "",
+    employmentStatuses:
+      data?.employmentStatuses?.map((status) => Number(status.id)) || [],
+  };
 
   return (
     <CustomForm
+      key={`leave_type-form-${data?.id}`}
       submitHandler={handleOnSubmit}
-      defaultValues={
-        data || {
-          name: "",
-          leaveType: "",
-          leaveHours: 0,
-          leaveRolloverType: "",
-          leaveRolloverValue: 0,
-          employmentStatuses: [],
-        }
-      }
+      resolver={leaveTypeSchema}
+      defaultValues={defaultValues}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}

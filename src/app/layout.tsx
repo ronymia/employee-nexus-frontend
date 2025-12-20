@@ -6,6 +6,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AppStoreProvider } from "@/providers/AppStoreProvider";
 import ApolloClientProvider from "@/providers/ApolloClientProvider";
+import GoogleMapAPIProvider from "@/providers/GoogleMapAPIProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,8 +35,10 @@ export default function RootLayout({
       >
         <AppStoreProvider>
           <ApolloClientProvider>
-            <Toaster position="top-right" />
-            {children}
+            <GoogleMapAPIProvider>
+              <Toaster position="top-right" />
+              {children}
+            </GoogleMapAPIProvider>
           </ApolloClientProvider>
         </AppStoreProvider>
       </body>

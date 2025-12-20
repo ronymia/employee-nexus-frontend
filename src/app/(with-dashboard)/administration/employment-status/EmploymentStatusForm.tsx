@@ -10,7 +10,7 @@ import {
   GET_EMPLOYMENT_STATUSES,
   UPDATE_EMPLOYMENT_STATUS,
 } from "@/graphql/employment-status.api";
-import { IEmploymentStatusFormData } from "@/schemas";
+import { employmentStatusSchema, IEmploymentStatusFormData } from "@/schemas";
 import { IEmploymentStatus } from "@/types";
 import { useMutation } from "@apollo/client/react";
 
@@ -29,6 +29,8 @@ export default function EmploymentStatusForm({
       refetchQueries: [{ query: GET_EMPLOYMENT_STATUSES }],
     }
   );
+
+  // MUTATION TO UPDATE AN EXISTING
   const [updateEmploymentStatus, updateResult] = useMutation(
     UPDATE_EMPLOYMENT_STATUS,
     {
@@ -59,10 +61,16 @@ export default function EmploymentStatusForm({
     }
   };
 
+  const defaultValues = {
+    name: data?.name || "",
+    description: data?.description || "",
+  };
+
   return (
     <CustomForm
       submitHandler={handleOnSubmit}
-      defaultValues={data || {}}
+      resolver={employmentStatusSchema}
+      defaultValues={defaultValues}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}

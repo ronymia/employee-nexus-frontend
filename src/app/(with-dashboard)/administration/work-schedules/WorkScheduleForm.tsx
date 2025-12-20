@@ -24,6 +24,7 @@ import ShiftSchedule from "./components/ShiftSchedule";
 import FlexibleSchedule from "./components/FlexibleSchedule";
 import WeekendSelector from "./components/WeekendSelector";
 import { IWorkSchedule } from "@/types";
+import { Fragment } from "react";
 
 export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
   // ROUTER
@@ -89,6 +90,8 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
         error.message ||
           `Failed to ${isUpdate ? "update" : "create"} work schedule`
       );
+
+      throw error;
     }
   };
   // console.log({ workScheduleData });
@@ -144,6 +147,7 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
       resolver={workScheduleSchema}
       className={`flex flex-col gap-3 p-3`}
       defaultValues={defaultValues}
+      key={`work-schedule-form-${id}`}
     >
       {/* NAME */}
       <CustomInputField name="name" label="Name" required={!isUpdate} />
@@ -202,7 +206,7 @@ function ScheduleTypeSelector({ isUpdate }: { isUpdate: boolean }) {
   const scheduleType = watch("scheduleType");
 
   return (
-    <>
+    <Fragment key={`schedule-type-selector-${scheduleType}`}>
       {/* SCHEDULE TYPE RADIO BUTTONS */}
       <div className="space-y-2">
         <CustomRadioButton
@@ -223,6 +227,6 @@ function ScheduleTypeSelector({ isUpdate }: { isUpdate: boolean }) {
       {scheduleType === "REGULAR" && <RegularSchedule />}
       {scheduleType === "SCHEDULED" && <ShiftSchedule />}
       {scheduleType === "FLEXIBLE" && <FlexibleSchedule />}
-    </>
+    </Fragment>
   );
 }
