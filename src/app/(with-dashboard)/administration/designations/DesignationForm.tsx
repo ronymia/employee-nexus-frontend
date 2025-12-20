@@ -8,22 +8,24 @@ import {
   GET_DESIGNATIONS,
   UPDATE_DESIGNATION,
 } from "@/graphql/designation.api";
-import { IDesignationFormData } from "@/schemas";
-import { IJobType } from "@/types/job-type.type";
+import { designationSchema, IDesignationFormData } from "@/schemas";
 import { useMutation } from "@apollo/client/react";
+import { IDesignation } from "@/types";
 
 export default function DesignationForm({
   handleClosePopup,
   data,
 }: {
   handleClosePopup: () => void;
-  data: IJobType;
+  data: IDesignation;
 }) {
   // MUTATION TO CREATE A NEW
   const [createDesignation, createResult] = useMutation(CREATE_DESIGNATION, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_DESIGNATIONS }],
   });
+
+  // MUTATION TO UPDATE A DESIGNATION
   const [updateDesignation, updateResult] = useMutation(UPDATE_DESIGNATION, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_DESIGNATIONS }],
@@ -51,9 +53,16 @@ export default function DesignationForm({
     }
   };
 
+  const defaultValues = {
+    name: data?.name || "",
+    description: data?.description || "",
+  };
+
   return (
     <CustomForm
       submitHandler={handleOnSubmit}
+      resolver={designationSchema}
+      defaultValues={defaultValues}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}

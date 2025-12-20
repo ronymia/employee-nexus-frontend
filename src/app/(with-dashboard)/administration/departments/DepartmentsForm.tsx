@@ -2,18 +2,17 @@ import { showToast } from "@/components/ui/CustomToast";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
-import CustomSelect from "@/components/form/input/CustomSelect";
-import ManagerSelect from "@/components/form/input/ManagerSelect";
+import ManagerSelect from "@/components/input-fields/ManagerSelect";
 import {
   CREATE_DEPARTMENT,
   GET_DEPARTMENTS,
   UPDATE_DEPARTMENT,
 } from "@/graphql/departments.api";
-import { GET_BUSINESSES } from "@/graphql/business.api";
-import { IDepartmentFormData } from "@/schemas";
+import { departmentSchema, IDepartmentFormData } from "@/schemas";
 import { IDepartment } from "@/types";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
+import { DepartmentSelect } from "@/components/input-fields";
 
 export default function DepartmentsForm({
   handleClosePopup,
@@ -22,13 +21,6 @@ export default function DepartmentsForm({
   handleClosePopup: () => void;
   data: IDepartment;
 }) {
-  // GET DEPARTMENTS FOR PARENT DROPDOWN
-  const { data: departmentsData, loading: departmentsLoading } = useQuery<{
-    departments: {
-      data: IDepartment[];
-    };
-  }>(GET_DEPARTMENTS, {});
-
   // MUTATION TO CREATE A NEW DEPARTMENT
   const [createDepartment, createResult] = useMutation(CREATE_DEPARTMENT, {
     awaitRefetchQueries: true,
@@ -40,15 +32,6 @@ export default function DepartmentsForm({
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_DEPARTMENTS }],
   });
-
-  // DEPARTMENTS OPTIONS FOR PARENT DROPDOWN (exclude current department and its children)
-  const departmentsOptions =
-    departmentsData?.departments?.data
-      ?.filter((dept) => dept.id !== data?.id) // Exclude current department
-      ?.map((dept) => ({
-        label: dept.name,
-        value: Number(dept.id),
-      })) || [];
 
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: IDepartmentFormData) => {
@@ -62,6 +45,7 @@ export default function DepartmentsForm({
         });
         if (res?.data) {
           showToast.success("Updated!", "Department updated successfully");
+          handleClosePopup?.();
         }
       } else {
         const res = await createDepartment({
@@ -72,43 +56,42 @@ export default function DepartmentsForm({
         if (res?.data) {
           showToast.success("Created!", "Department created successfully");
         }
+        handleClosePopup?.();
       }
-      handleClosePopup?.();
     } catch (error: any) {
       showToast.error(
         "Error",
         error.message ||
           `Failed to ${data?.id ? "update" : "create"} department`
       );
+      throw error;
     }
+  };
+
+  // DEFAULT VALUES FOR FORM
+  const defaultValues = {
+    name: data?.name || "",
+    description: data?.description || "",
+    parentId: data?.parentId || undefined,
+    managerId: data?.managerId || undefined,
   };
 
   return (
     <CustomForm
       submitHandler={handleOnSubmit}
-      defaultValues={
-        data || {
-          name: "",
-          description: "",
-          parentId: undefined,
-          managerId: undefined,
-        }
-      }
+      resolver={departmentSchema}
+      defaultValues={defaultValues}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}
       <CustomInputField name="name" label="Name" required />
 
       {/* PARENT DEPARTMENT - DROPDOWN */}
-      <CustomSelect
-        position="top"
-        name="parentId"
-        label="Parent Department"
-        dataAuto="parentId"
-        isLoading={departmentsLoading}
-        options={departmentsOptions}
-        placeholder="Select parent department (optional)"
+      <DepartmentSelect
+        name={"parentId"}
+        label={"Parent Department"}
         required={false}
+        placeholder="Select parent department (optional)"
       />
 
       {/* MANAGER - DROPDOWN */}

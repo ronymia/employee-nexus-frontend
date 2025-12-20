@@ -3,25 +3,20 @@
 import { showToast } from "@/components/ui/CustomToast";
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
-import {
-  PermissionAction,
-  PermissionResource,
-  Permissions,
-} from "@/constants/permissions.constant";
+import { Permissions } from "@/constants/permissions.constant";
 import { DELETE_WORK_SITES, GET_WORK_SITES } from "@/graphql/work-sites.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IWorkSite } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import PageHeader from "@/components/ui/PageHeader";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import StatusBadge from "@/components/ui/StatusBadge";
-import Swal from "sweetalert2";
 
 export default function WorkSitesPage() {
   // PERMISSION GUARD
-  const { permissionGuard } = usePermissionGuard();
+  const { hasPermission } = usePermissionGuard();
   // MODAL OPTION
   const { popupOption, setPopupOption, createNewWorkSite } = usePopupOption();
   // GET ALL WORK SITES
@@ -39,26 +34,13 @@ export default function WorkSitesPage() {
 
   // UPDATE HANDLER
   const handleEdit = (row: IWorkSite) => {
-    //
-    const data = {
-      id: row?.id ? Number(row.id) : undefined,
-      name: row?.name,
-      description: row?.description,
-      locationTrackingType: row?.locationTrackingType,
-      address: row?.address || undefined,
-      lat: row?.lat || undefined,
-      lng: row?.lng || undefined,
-      maxRadius: row?.maxRadius || undefined,
-      ipAddress: row?.ipAddress || undefined,
-    };
-
     // open the popup for editing the form
     setPopupOption({
       open: true,
       closeOnDocumentClick: true,
       actionType: "update",
       form: "work_site",
-      data: data,
+      data: row,
       title: "Update Work Site",
     });
   };
@@ -132,20 +114,13 @@ export default function WorkSitesPage() {
       type: "button",
       permissions: [Permissions.WorkSiteDelete],
       handler: (row) => {
-        Swal.fire({
-          title: "Are you sure?",
-          text: `Do you want to delete "${row.name}"? This action cannot be undone!`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, delete it!",
-          cancelButtonText: "Cancel",
-          showLoaderOnConfirm: true,
-          preConfirm: async () => {
-            await handleDelete(row);
-            return true;
-          },
+        setPopupOption({
+          open: true,
+          closeOnDocumentClick: true,
+          actionType: "delete",
+          form: "work_site",
+          deleteHandler: () => handleDelete(row),
+          title: "Delete Work Site",
         });
       },
       disabledOn: [],
@@ -154,84 +129,76 @@ export default function WorkSitesPage() {
 
   // Modal for adding a new work site
   return (
-    <>
+    <Fragment key={`work_site-page`}>
       {/* Popup for adding/editing a work site */}
       <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
 
       {/* Modal for adding a new work site */}
-      <section className={``}>
-        <PageHeader
-          title="All Work Sites"
-          subtitle="Track and manage your work sites"
-        />
-        {/* TABLE */}
-        <CustomTable
-          isLoading={loading || deleteResult.loading}
-          actions={actions}
-          columns={columns}
-          setColumns={setColumns}
-          searchConfig={{
-            searchable: loading ? true : false,
-            debounceDelay: 500,
-            defaultField: "name",
-            searchableFields: [
-              { label: "Name", value: "name" },
-              { label: "Description", value: "description" },
-              { label: "Address", value: "address" },
-            ],
-          }}
-          dataSource={
-            data?.workSites?.data?.map((row) => ({
-              ...row,
-              customStatus: (
-                <StatusBadge status={row.status as string} onClick={() => {}} />
-              ),
-              customLocationTrackingType: (
-                <span className="capitalize">
-                  {row?.locationTrackingType
-                    ?.replaceAll("_", " ")
-                    .toLowerCase()}
-                </span>
-              ),
-              customGeoIpAddress:
-                row?.locationTrackingType === "GEO_FENCING" ? (
-                  <div className="flex items-center gap-2">
-                    <span className="badge badge-info badge-sm">📍 Geo</span>
-                    <span className="text-xs text-base-content/70">
-                      {row?.maxRadius || "N/A"}m radius
-                    </span>
-                  </div>
-                ) : row?.locationTrackingType === "IP_WHITELIST" ? (
-                  <div className="flex items-center gap-2">
-                    <span className="badge badge-warning badge-sm">🌐 IP</span>
-                    <span className="text-xs font-mono text-base-content/70">
-                      {row?.ipAddress || "N/A"}
-                    </span>
-                  </div>
-                ) : row?.locationTrackingType === "MANUAL" ? (
-                  <span className="badge badge-primary badge-sm">
-                    📝 Manual
+      <PageHeader
+        title="All Work Sites"
+        subtitle="Track and manage your work sites"
+      />
+      {/* TABLE */}
+      <CustomTable
+        isLoading={loading || deleteResult.loading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumns}
+        searchConfig={{
+          searchable: loading ? true : false,
+          debounceDelay: 500,
+          defaultField: "name",
+          searchableFields: [
+            { label: "Name", value: "name" },
+            { label: "Description", value: "description" },
+            { label: "Address", value: "address" },
+          ],
+        }}
+        dataSource={
+          data?.workSites?.data?.map((row) => ({
+            ...row,
+            customStatus: (
+              <StatusBadge status={row.status as string} onClick={() => {}} />
+            ),
+            customLocationTrackingType: (
+              <span className="capitalize">
+                {row?.locationTrackingType?.replaceAll("_", " ").toLowerCase()}
+              </span>
+            ),
+            customGeoIpAddress:
+              row?.locationTrackingType === "GEO_FENCING" ? (
+                <div className="flex items-center gap-2">
+                  <span className="badge badge-info badge-sm">📍 Geo</span>
+                  <span className="text-xs text-base-content/70">
+                    {row?.maxRadius || "N/A"}m radius
                   </span>
-                ) : (
-                  <span className="badge badge-ghost badge-sm">🚫 None</span>
-                ),
-            })) || []
-          }
-        >
-          {permissionGuard(PermissionResource.WORK_SITE, [
-            PermissionAction.CREATE,
-          ]) && (
-            <button
-              type="button"
-              className={`btn btn-primary text-base-300`}
-              onClick={createNewWorkSite}
-            >
-              <PiPlusCircle className={`text-xl`} />
-              Add New
-            </button>
-          )}
-        </CustomTable>
-      </section>
-    </>
+                </div>
+              ) : row?.locationTrackingType === "IP_WHITELIST" ? (
+                <div className="flex items-center gap-2">
+                  <span className="badge badge-warning badge-sm">🌐 IP</span>
+                  <span className="text-xs font-mono text-base-content/70">
+                    {row?.ipAddress || "N/A"}
+                  </span>
+                </div>
+              ) : row?.locationTrackingType === "MANUAL" ? (
+                <span className="badge badge-primary badge-sm">📝 Manual</span>
+              ) : (
+                <span className="badge badge-ghost badge-sm">🚫 None</span>
+              ),
+          })) || []
+        }
+      >
+        {hasPermission(Permissions.WorkSiteCreate) ? (
+          <button
+            type="button"
+            className={`btn btn-primary text-base-300`}
+            onClick={createNewWorkSite}
+          >
+            <PiPlusCircle className={`text-xl`} />
+            Add New
+          </button>
+        ) : null}
+      </CustomTable>
+    </Fragment>
   );
 }

@@ -1,5 +1,3 @@
-import { Status } from "./common.type";
-
 export interface ILeaveType {
   id?: number;
   name: string;
