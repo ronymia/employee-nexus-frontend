@@ -8,6 +8,7 @@ import { IEmployee } from "@/types";
 import EmployeesForm from "../../EmployeesForm";
 import { IEmployeeFormData } from "@/schemas";
 import dayjs from "dayjs";
+import EmployeeNotFound from "@/components/error/EmployeeNotFound";
 
 export default function UpdateEmployeePage({
   params,
@@ -71,12 +72,9 @@ export default function UpdateEmployeePage({
     rotaType: data?.employee?.rotaType || "",
   };
 
+  // EMPLOYEE NOT FOUND STATE
   if (!data) {
-    return (
-      <div className="p-6">
-        <p>Employee not found</p>
-      </div>
-    );
+    return <EmployeeNotFound />;
   }
 
   return (

@@ -15,7 +15,6 @@ export const GET_EMPLOYEES = gql`
         createdAt
         updatedAt
         profile {
-          id
           fullName
           phone
           dateOfBirth
@@ -37,7 +36,6 @@ export const GET_EMPLOYEES = gql`
           name
         }
         employee {
-          id
           userId
           employeeId
           nidNumber
@@ -101,7 +99,6 @@ export const GET_EMPLOYEE_BY_ID = gql`
         createdAt
         updatedAt
         profile {
-          id
           fullName
           phone
           dateOfBirth
@@ -123,7 +120,6 @@ export const GET_EMPLOYEE_BY_ID = gql`
           name
         }
         employee {
-          id
           userId
           employeeId
           nidNumber
@@ -181,7 +177,6 @@ export const CREATE_EMPLOYEE = gql`
         createdAt
         updatedAt
         profile {
-          id
           fullName
           dateOfBirth
           gender
@@ -203,7 +198,6 @@ export const CREATE_EMPLOYEE = gql`
           name
         }
         employee {
-          id
           userId
           employeeId
           nidNumber
@@ -260,7 +254,6 @@ export const UPDATE_EMPLOYEE = gql`
         createdAt
         updatedAt
         profile {
-          id
           userId
           fullName
           dateOfBirth
@@ -283,7 +276,6 @@ export const UPDATE_EMPLOYEE = gql`
           name
         }
         employee {
-          id
           userId
           employeeId
           nidNumber

@@ -20,14 +20,14 @@ import PageHeader from "@/components/ui/PageHeader";
 import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
 
-// ==================== EMPLOYEES PAGE COMPONENT ====================
-export default function EmployeesPage() {
+// ==================== ADMIN MANAGEMENT PAGE COMPONENT ====================
+export default function AdminsPage() {
   // ==================== HOOKS INITIALIZATION ====================
   const router = useRouter();
   const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
 
-  // ==================== GRAPHQL QUERY: FETCH EMPLOYEES ====================
+  // ==================== GRAPHQL QUERY: FETCH ADMIN USERS ====================
   const { data, loading } = useQuery<{
     users: {
       message: string;
@@ -38,24 +38,26 @@ export default function EmployeesPage() {
     };
   }>(GET_USERS, {
     variables: {
-      query: { role: "employee" },
+      query: {
+        role: "admin",
+      },
     },
   });
 
-  // ==================== GRAPHQL MUTATION: DELETE EMPLOYEE ====================
+  // ==================== GRAPHQL MUTATION: DELETE ADMIN ====================
   const [deleteEmployee, deleteResult] = useMutation(DELETE_EMPLOYEE, {
     awaitRefetchQueries: true,
     refetchQueries: [
-      { query: GET_USERS, variables: { query: { role: "employee" } } },
+      { query: GET_USERS, variables: { query: { role: "admin" } } },
     ],
   });
 
-  // ==================== HANDLER: EDIT EMPLOYEE ====================
+  // ==================== HANDLER: EDIT ADMIN ====================
   const handleEdit = (row: IEmployee) => {
     router.push(`/user-management/employees/${row.id}/update`);
   };
 
-  // ==================== HANDLER: DELETE EMPLOYEE ====================
+  // ==================== HANDLER: DELETE ADMIN ====================
   const handleDelete = async (row: IEmployee) => {
     try {
       const result = await deleteEmployee({
@@ -65,17 +67,17 @@ export default function EmployeesPage() {
       });
       console.log("Delete result:", result);
     } catch (error) {
-      console.error("Error deleting employee:", error);
+      console.error("Error deleting admin:", error);
     }
   };
 
-  // ==================== HANDLER: VIEW EMPLOYEE ====================
+  // ==================== HANDLER: VIEW ADMIN ====================
   const handleView = (row: IEmployee) => {
     router.push(`/user-management/employees/${row.id}/view`);
   };
 
-  // ==================== HANDLER: CREATE NEW EMPLOYEE ====================
-  const createNewEmployee = () => {
+  // ==================== HANDLER: CREATE NEW ADMIN ====================
+  const createNewAdmin = () => {
     router.push("/user-management/employees/create");
   };
 
@@ -143,7 +145,7 @@ export default function EmployeesPage() {
           actionType: "delete",
           form: "employee",
           deleteHandler: () => handleDelete(row),
-          title: "Delete Employee",
+          title: "Delete Admin",
         });
       },
       disabledOn: [],
@@ -158,11 +160,11 @@ export default function EmployeesPage() {
 
       {/* PAGE HEADER WITH TITLE AND SUBTITLE */}
       <PageHeader
-        title="Employee Management"
-        subtitle="Manage your organization's employees, view details, and update information"
+        title="Admin Management"
+        subtitle="Manage system administrators, view their details, and update information"
       />
 
-      {/* EMPLOYEES DATA TABLE */}
+      {/* ADMINS DATA TABLE */}
       <CustomTable
         isLoading={loading || deleteResult.loading}
         actions={actions}
@@ -180,7 +182,7 @@ export default function EmployeesPage() {
           ],
         }}
         dataSource={
-          // MAP EMPLOYEE DATA TO TABLE FORMAT
+          // MAP ADMIN DATA TO TABLE FORMAT
           data?.users?.data?.map((row) => ({
             ...row,
             // CUSTOM USER PROFILE COLUMN WITH AVATAR AND DESIGNATION
@@ -253,17 +255,17 @@ export default function EmployeesPage() {
           })) || []
         }
       >
-        {/* ADD NEW EMPLOYEE BUTTON (PERMISSION GUARDED) */}
+        {/* ADD NEW ADMIN BUTTON (PERMISSION GUARDED) */}
         {permissionGuard(PermissionResource.USER, [
           PermissionAction.CREATE,
         ]) && (
           <button
             type="button"
-            className="btn btn-primary text-base-300"
-            onClick={createNewEmployee}
+            className="btn btn-error text-base-300"
+            onClick={createNewAdmin}
           >
             <PiPlusCircle className="text-xl" />
-            Add New
+            Add New Admin
           </button>
         )}
       </CustomTable>

@@ -7,8 +7,8 @@ export const GENERATE_USER_EMPLOYEE_ID = gql`
 `;
 
 export const GET_USERS = gql`
-  query Users {
-    users {
+  query Users($query: QueryUserInput) {
+    users(query: $query) {
       message
       statusCode
       success
@@ -34,6 +34,21 @@ export const GET_USERS = gql`
         role {
           id
           name
+        }
+        employee {
+          employeeId
+          department {
+            id
+            name
+          }
+          designation {
+            id
+            name
+          }
+          employmentStatus {
+            id
+            name
+          }
         }
       }
     }
@@ -223,6 +238,33 @@ export const UPDATE_USER_PROFILE = gql`
         phone
         postcode
         profilePicture
+      }
+    }
+  }
+`;
+
+export const GET_USER_STATISTICS = gql`
+  query UserStatistics {
+    userStatistics {
+      success
+      statusCode
+      message
+      data {
+        totalUsers
+        totalEmployees
+        totalManagers
+        totalAdmins
+        activeUsers
+        inactiveUsers
+        blockedUsers
+        deletedUsers
+        suspendedUsers
+        verifiedUsers
+        unverifiedUsers
+        terminatedUsers
+        resignedUsers
+        retiredUsers
+        onLeaveUsers
       }
     }
   }

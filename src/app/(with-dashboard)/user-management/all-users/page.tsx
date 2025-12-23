@@ -7,7 +7,7 @@ import {
   Permissions,
 } from "@/constants/permissions.constant";
 import { DELETE_EMPLOYEE } from "@/graphql/employee.api";
-import { GET_USERS } from "@/graphql/user.api";
+import { GET_USERS, GET_USER_STATISTICS } from "@/graphql/user.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IEmployee, IMeta } from "@/types";
@@ -17,17 +17,18 @@ import { PiPlusCircle } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import FormModal from "@/components/form/FormModal";
 import PageHeader from "@/components/ui/PageHeader";
+import PersonnelInsights from "@/components/ui/PersonnelInsights";
 import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
 
-// ==================== EMPLOYEES PAGE COMPONENT ====================
-export default function EmployeesPage() {
+// ==================== ALL USERS PAGE COMPONENT ====================
+export default function AllUsersPage() {
   // ==================== HOOKS INITIALIZATION ====================
   const router = useRouter();
   const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
 
-  // ==================== GRAPHQL QUERY: FETCH EMPLOYEES ====================
+  // ==================== GRAPHQL QUERY: FETCH ALL USERS ====================
   const { data, loading } = useQuery<{
     users: {
       message: string;
@@ -38,24 +39,39 @@ export default function EmployeesPage() {
     };
   }>(GET_USERS, {
     variables: {
-      query: { role: "employee" },
+      query: {},
     },
   });
 
-  // ==================== GRAPHQL MUTATION: DELETE EMPLOYEE ====================
+  // ==================== GRAPHQL QUERY: FETCH USER STATISTICS ====================
+  const { data: statsData, loading: statsLoading } = useQuery<{
+    userStatistics: {
+      success: boolean;
+      statusCode: number;
+      message: string;
+      data: {
+        totalUsers: number;
+        totalEmployees: number;
+        totalManagers: number;
+        totalAdmins: number;
+        activeUsers: number;
+        inactiveUsers: number;
+      };
+    };
+  }>(GET_USER_STATISTICS);
+
+  // ==================== GRAPHQL MUTATION: DELETE USER ====================
   const [deleteEmployee, deleteResult] = useMutation(DELETE_EMPLOYEE, {
     awaitRefetchQueries: true,
-    refetchQueries: [
-      { query: GET_USERS, variables: { query: { role: "employee" } } },
-    ],
+    refetchQueries: [{ query: GET_USERS, variables: { query: {} } }],
   });
 
-  // ==================== HANDLER: EDIT EMPLOYEE ====================
+  // ==================== HANDLER: EDIT USER ====================
   const handleEdit = (row: IEmployee) => {
     router.push(`/user-management/employees/${row.id}/update`);
   };
 
-  // ==================== HANDLER: DELETE EMPLOYEE ====================
+  // ==================== HANDLER: DELETE USER ====================
   const handleDelete = async (row: IEmployee) => {
     try {
       const result = await deleteEmployee({
@@ -65,17 +81,17 @@ export default function EmployeesPage() {
       });
       console.log("Delete result:", result);
     } catch (error) {
-      console.error("Error deleting employee:", error);
+      console.error("Error deleting user:", error);
     }
   };
 
-  // ==================== HANDLER: VIEW EMPLOYEE ====================
+  // ==================== HANDLER: VIEW USER ====================
   const handleView = (row: IEmployee) => {
     router.push(`/user-management/employees/${row.id}/view`);
   };
 
-  // ==================== HANDLER: CREATE NEW EMPLOYEE ====================
-  const createNewEmployee = () => {
+  // ==================== HANDLER: CREATE NEW USER ====================
+  const createNewUser = () => {
     router.push("/user-management/employees/create");
   };
 
@@ -107,6 +123,12 @@ export default function EmployeesPage() {
     },
     {
       key: "5",
+      header: "Role",
+      accessorKey: "customRoleName",
+      show: true,
+    },
+    {
+      key: "6",
       header: "Status",
       accessorKey: "customStatus",
       show: true,
@@ -143,7 +165,7 @@ export default function EmployeesPage() {
           actionType: "delete",
           form: "employee",
           deleteHandler: () => handleDelete(row),
-          title: "Delete Employee",
+          title: "Delete User",
         });
       },
       disabledOn: [],
@@ -158,11 +180,17 @@ export default function EmployeesPage() {
 
       {/* PAGE HEADER WITH TITLE AND SUBTITLE */}
       <PageHeader
-        title="Employee Management"
-        subtitle="Manage your organization's employees, view details, and update information"
+        title="All Personnel"
+        subtitle="View and manage all users including employees, managers, and admins in one place"
       />
 
-      {/* EMPLOYEES DATA TABLE */}
+      {/* PERSONNEL INSIGHTS SECTION */}
+      <PersonnelInsights
+        data={statsData?.userStatistics?.data}
+        loading={statsLoading}
+      />
+
+      {/* ALL USERS DATA TABLE */}
       <CustomTable
         isLoading={loading || deleteResult.loading}
         actions={actions}
@@ -180,7 +208,7 @@ export default function EmployeesPage() {
           ],
         }}
         dataSource={
-          // MAP EMPLOYEE DATA TO TABLE FORMAT
+          // MAP USER DATA TO TABLE FORMAT
           data?.users?.data?.map((row) => ({
             ...row,
             // CUSTOM USER PROFILE COLUMN WITH AVATAR AND DESIGNATION
@@ -248,22 +276,38 @@ export default function EmployeesPage() {
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
             ),
+            // CUSTOM ROLE NAME COLUMN WITH DYNAMIC BADGE
+            customRoleName: row?.role?.name ? (
+              <span
+                className={`badge badge-sm ${
+                  row.role.name.toLowerCase().includes("admin")
+                    ? "badge-error"
+                    : row.role.name.toLowerCase().includes("manager")
+                    ? "badge-warning"
+                    : "badge-primary"
+                }`}
+              >
+                {row.role.name.split("#")[0]}
+              </span>
+            ) : (
+              "N/A"
+            ),
             // CUSTOM STATUS COLUMN WITH STATUS BADGE
             customStatus: <StatusBadge status={row?.status || "Unknown"} />,
           })) || []
         }
       >
-        {/* ADD NEW EMPLOYEE BUTTON (PERMISSION GUARDED) */}
+        {/* ADD NEW USER BUTTON (PERMISSION GUARDED) */}
         {permissionGuard(PermissionResource.USER, [
           PermissionAction.CREATE,
         ]) && (
           <button
             type="button"
             className="btn btn-primary text-base-300"
-            onClick={createNewEmployee}
+            onClick={createNewUser}
           >
             <PiPlusCircle className="text-xl" />
-            Add New
+            Add New User
           </button>
         )}
       </CustomTable>
