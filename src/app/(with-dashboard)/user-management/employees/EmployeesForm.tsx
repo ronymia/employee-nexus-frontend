@@ -24,87 +24,100 @@ import {
   RelationSelect,
 } from "@/components/input-fields";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
+  // ==================== INITIALIZE ROUTER ====================
   const router = useRouter();
 
+  // ==================== GRAPHQL MUTATION: CREATE EMPLOYEE ====================
   const [createEmployee, createResult] = useMutation(CREATE_EMPLOYEE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_EMPLOYEES, variables: { query: {} } }],
   });
 
+  // ==================== GRAPHQL MUTATION: UPDATE EMPLOYEE ====================
   const [updateEmployee, updateResult] = useMutation(UPDATE_EMPLOYEE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_EMPLOYEES, variables: { query: {} } }],
   });
 
+  // ==================== FORM SUBMISSION HANDLER ====================
   const handleOnSubmit = async (formValues: IEmployeeFormData) => {
-    // Convert string values to numbers for GraphQL mutation
+    // CONVERT USER ROLE ID TO NUMBER
     formValues["user"]["roleId"] = Number(formValues["user"]["roleId"]);
 
-    // Set default password for new employees
+    // SET DEFAULT PASSWORD FOR NEW EMPLOYEES
     if (!data?.id) {
       formValues["user"]["password"] = "12345678@We";
     }
 
-    // Convert all ID fields to numbers
-    if (formValues["departmentId"]) {
-      formValues["departmentId"] = Number(formValues["departmentId"]);
-    }
-    if (formValues["designationId"]) {
-      formValues["designationId"] = Number(formValues["designationId"]);
-    }
-    if (formValues["employmentStatusId"]) {
-      formValues["employmentStatusId"] = Number(
-        formValues["employmentStatusId"]
-      );
-    }
-    if (formValues["workSiteId"]) {
-      formValues["workSiteId"] = Number(formValues["workSiteId"]);
-    }
-    if (formValues["workScheduleId"]) {
-      formValues["workScheduleId"] = Number(formValues["workScheduleId"]);
-    }
+    // CONVERT SALARY TO NUMBER
     if (formValues["salaryPerMonth"]) {
       formValues["salaryPerMonth"] = Number(formValues["salaryPerMonth"]);
     }
+
+    // CONVERT WORKING DAYS PER WEEK TO NUMBER
     if (formValues["workingDaysPerWeek"]) {
       formValues["workingDaysPerWeek"] = Number(
         formValues["workingDaysPerWeek"]
       );
     }
+
+    // CONVERT WORKING HOURS PER WEEK TO NUMBER
     if (formValues["workingHoursPerWeek"]) {
       formValues["workingHoursPerWeek"] = Number(
         formValues["workingHoursPerWeek"]
       );
     }
-    // console.log({ formValues });
+
+    // TRY TO SUBMIT EMPLOYEE DATA
     try {
+      // UPDATE EXISTING EMPLOYEE
       if (data?.id) {
         await updateEmployee({
           variables: {
             updateEmployeeInput: {
               ...formValues,
-              joiningDate: dayjs(formValues["joiningDate"], "DD-MM-YYYY"),
+              // CONVERT JOINING DATE FROM DD-MM-YYYY TO DATETIME
+              joiningDate: dayjs(
+                formValues["joiningDate"],
+                "DD-MM-YYYY"
+              ).toDate(),
             },
           },
         }).then(() => {
+          // REDIRECT TO EMPLOYEE LIST AFTER SUCCESSFUL UPDATE
           router.push("/user-management/employees");
         });
       } else {
+        // CREATE NEW EMPLOYEE
+        console.log({
+          joiningDate: formValues["joiningDate"],
+        });
+
         await createEmployee({
           variables: {
             createEmployeeInput: {
               ...formValues,
-              joiningDate: dayjs(formValues["joiningDate"], "DD-MM-YYYY"),
+              // CONVERT JOINING DATE FROM DD-MM-YYYY TO DATETIME
+              joiningDate: dayjs(
+                formValues["joiningDate"],
+                "DD-MM-YYYY"
+              ).toDate(),
             },
           },
         }).then(() => {
+          // REDIRECT TO EMPLOYEE LIST AFTER SUCCESSFUL CREATION
           router.push("/user-management/employees");
         });
       }
     } catch (error) {
+      // LOG AND RE-THROW ERROR FOR FORM HANDLING
       console.error("Error submitting employee:", error);
+      throw error;
     }
   };
 
@@ -115,67 +128,93 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       submitHandler={handleOnSubmit}
       resolver={employeeSchema}
       defaultValues={data || {}}
-      className="flex flex-col gap-y-4 md:p-6 p-1"
+      className="flex flex-col gap-y-5 md:gap-y-6 md:p-6 p-3 max-w-7xl mx-auto"
     >
-      {/* PERSONAL INFORMATION */}
-      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-          Personal Information
+      {/* ==================== SECTION: PERSONAL INFORMATION ==================== */}
+      <div className="bg-linear-to-br from-white to-gray-50 border-2 border-primary/20 rounded-xl md:p-6 p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-lg md:text-xl font-bold mb-4 md:mb-5 text-primary border-b-2 border-primary/30 pb-3 flex items-center gap-2">
+          <span className="hidden sm:inline">👤</span>
+          <span>Personal Information</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {/* FULL NAME INPUT */}
           <CustomInputField
             name="profile.fullName"
             label="Full Name"
             required
           />
+
+          {/* EMAIL INPUT */}
           <CustomInputField name="user.email" label="Email" required />
+
+          {/* PHONE INPUT */}
           <CustomInputField name="profile.phone" label="Phone" required />
+
+          {/* DATE OF BIRTH PICKER */}
           <CustomDatePicker
             name="profile.dateOfBirth"
             label="Date of Birth"
             dataAuto="dateOfBirth"
             required={true}
           />
+
+          {/* GENDER RADIO SELECTION */}
           <GenderRadio name="profile.gender" required={true} />
+
+          {/* MARITAL STATUS RADIO SELECTION */}
           <MaritalStatusRadio name="profile.maritalStatus" required={true} />
         </div>
       </div>
 
-      {/* ADDRESS INFORMATION */}
-      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-          Address
+      {/* ==================== SECTION: ADDRESS INFORMATION ==================== */}
+      <div className="bg-linear-to-br from-white to-blue-50/30 border-2 border-blue-200/50 rounded-xl md:p-6 p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-lg md:text-xl font-bold mb-4 md:mb-5 text-blue-700 border-b-2 border-blue-300/50 pb-3 flex items-center gap-2">
+          <span className="hidden sm:inline">📍</span>
+          <span>Address Information</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="md:col-span-2 lg:col-span-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {/* STREET ADDRESS - FULL WIDTH */}
+          <div className="sm:col-span-2 lg:col-span-3">
             <CustomInputField
               name="profile.address"
               label="Street Address"
               required
             />
           </div>
+
+          {/* CITY INPUT */}
           <CustomInputField name="profile.city" label="City" required />
+
+          {/* COUNTRY INPUT */}
           <CustomInputField name="profile.country" label="Country" required />
+
+          {/* POSTCODE INPUT */}
           <CustomInputField name="profile.postcode" label="Postcode" required />
         </div>
       </div>
 
-      {/* EMERGENCY CONTACT */}
-      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-          Emergency Contact
+      {/* ==================== SECTION: EMERGENCY CONTACT ==================== */}
+      <div className="bg-linear-to-br from-white to-red-50/30 border-2 border-red-200/50 rounded-xl md:p-6 p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-lg md:text-xl font-bold mb-4 md:mb-5 text-red-700 border-b-2 border-red-300/50 pb-3 flex items-center gap-2">
+          <span className="hidden sm:inline">🚨</span>
+          <span>Emergency Contact</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {/* EMERGENCY CONTACT NAME */}
           <CustomInputField
             name="emergencyContact.name"
             label="Contact Name"
             required
           />
+
+          {/* EMERGENCY CONTACT PHONE */}
           <CustomInputField
             name="emergencyContact.phone"
             label="Contact Phone"
             required
           />
+
+          {/* EMERGENCY CONTACT RELATION */}
           <RelationSelect
             name="emergencyContact.relation"
             label="Relation"
@@ -184,47 +223,71 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
         </div>
       </div>
 
-      {/* EMPLOYMENT DETAILS */}
-      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-          Employment Details
+      {/* ==================== SECTION: EMPLOYMENT DETAILS ==================== */}
+      <div className="bg-linear-to-br from-white to-green-50/30 border-2 border-green-200/50 rounded-xl md:p-6 p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-lg md:text-xl font-bold mb-4 md:mb-5 text-green-700 border-b-2 border-green-300/50 pb-3 flex items-center gap-2">
+          <span className="hidden sm:inline">💼</span>
+          <span>Employment Details</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {/* USER ROLE SELECTION */}
           <RoleSelect name="user.roleId" label="Role" required />
+
+          {/* DEPARTMENT SELECTION */}
           <DepartmentSelect name="departmentId" required={true} />
+
+          {/* DESIGNATION SELECTION */}
           <DesignationSelect name="designationId" required={true} />
+
+          {/* EMPLOYMENT STATUS SELECTION */}
           <EmploymentStatusSelect name="employmentStatusId" required={true} />
+
+          {/* EMPLOYEE ID INPUT */}
           <CustomInputField name="employeeId" label="Employee ID" />
+
+          {/* JOINING DATE PICKER */}
           <CustomDatePicker
             name="joiningDate"
             label="Joining Date"
             dataAuto="joiningDate"
             required={true}
           />
+
+          {/* WORK SITE SELECTION */}
           <WorkSiteSelect name="workSiteId" required={true} />
+
+          {/* WORK SCHEDULE SELECTION */}
           <WorkScheduleSelect name="workScheduleId" required={true} />
+
+          {/* NATIONAL ID NUMBER INPUT */}
           <CustomInputField name="nidNumber" label="NID Number" required />
         </div>
       </div>
 
-      {/* COMPENSATION & WORK SCHEDULE */}
-      <div className="bg-white border rounded-lg md:p-5 p-3 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-          Compensation & Schedule
+      {/* ==================== SECTION: COMPENSATION & SCHEDULE ==================== */}
+      <div className="bg-linear-to-br from-white to-purple-50/30 border-2 border-purple-200/50 rounded-xl md:p-6 p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-lg md:text-xl font-bold mb-4 md:mb-5 text-purple-700 border-b-2 border-purple-300/50 pb-3 flex items-center gap-2">
+          <span className="hidden sm:inline">💰</span>
+          <span>Compensation & Schedule</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {/* MONTHLY SALARY INPUT */}
           <CustomInputField
             name="salaryPerMonth"
             label="Monthly Salary"
             type="number"
             required
           />
+
+          {/* WORKING DAYS PER WEEK INPUT */}
           <CustomInputField
             name="workingDaysPerWeek"
             label="Working Days per Week"
             type="number"
             required
           />
+
+          {/* WORKING HOURS PER WEEK INPUT */}
           <CustomInputField
             name="workingHoursPerWeek"
             label="Working Hours per Week"
@@ -234,11 +297,13 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
         </div>
       </div>
 
-      {/* ACTION BUTTONS */}
-      <FormActionButton
-        cancelHandler={() => router.push("/user-management/employees")}
-        isPending={createResult.loading || updateResult.loading}
-      />
+      {/* ==================== ACTION BUTTONS ==================== */}
+      <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t-2 border-gray-200 pt-4 -mx-3 px-3 md:mx-0 md:px-0 md:border-0 md:bg-transparent md:backdrop-blur-none">
+        <FormActionButton
+          cancelHandler={() => router.push("/user-management/employees")}
+          isPending={createResult.loading || updateResult.loading}
+        />
+      </div>
     </CustomForm>
   );
 }

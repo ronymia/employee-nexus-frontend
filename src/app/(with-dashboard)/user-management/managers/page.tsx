@@ -21,14 +21,14 @@ import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { showToast } from "@/components/ui/CustomToast";
 
-// ==================== EMPLOYEES PAGE COMPONENT ====================
-export default function EmployeesPage() {
+// ==================== MANAGER MANAGEMENT PAGE COMPONENT ====================
+export default function ManagersPage() {
   // ==================== HOOKS INITIALIZATION ====================
   const router = useRouter();
   const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
 
-  // ==================== GRAPHQL QUERY: FETCH EMPLOYEES ====================
+  // ==================== GRAPHQL QUERY: FETCH MANAGER USERS ====================
   const { data, loading } = useQuery<{
     users: {
       message: string;
@@ -39,24 +39,26 @@ export default function EmployeesPage() {
     };
   }>(GET_USERS, {
     variables: {
-      query: { role: "employee" },
+      query: {
+        role: "manager",
+      },
     },
   });
 
-  // ==================== GRAPHQL MUTATION: DELETE EMPLOYEE ====================
+  // ==================== GRAPHQL MUTATION: DELETE MANAGER ====================
   const [deleteEmployee, deleteResult] = useMutation(DELETE_EMPLOYEE, {
     awaitRefetchQueries: true,
     refetchQueries: [
-      { query: GET_USERS, variables: { query: { role: "employee" } } },
+      { query: GET_USERS, variables: { query: { role: "manager" } } },
     ],
   });
 
-  // ==================== HANDLER: EDIT EMPLOYEE ====================
+  // ==================== HANDLER: EDIT MANAGER ====================
   const handleEdit = (row: IEmployee) => {
     router.push(`/user-management/employees/${row.id}/update`);
   };
 
-  // ==================== HANDLER: DELETE EMPLOYEE ====================
+  // ==================== HANDLER: DELETE MANAGER ====================
   const handleDelete = async (row: IEmployee) => {
     try {
       const result = await deleteEmployee({
@@ -65,20 +67,20 @@ export default function EmployeesPage() {
         },
       });
       if (result?.data) {
-        showToast.success("Deleted!", "Employee deleted successfully");
+        showToast.success("Deleted!", "Manager deleted successfully");
       }
     } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to delete employee");
+      showToast.error("Error", error.message || "Failed to delete manager");
     }
   };
 
-  // ==================== HANDLER: VIEW EMPLOYEE ====================
+  // ==================== HANDLER: VIEW MANAGER ====================
   const handleView = (row: IEmployee) => {
     router.push(`/user-management/employees/${row.id}/view`);
   };
 
-  // ==================== HANDLER: CREATE NEW EMPLOYEE ====================
-  const createNewEmployee = () => {
+  // ==================== HANDLER: CREATE NEW MANAGER ====================
+  const createNewManager = () => {
     router.push("/user-management/employees/create");
   };
 
@@ -146,7 +148,7 @@ export default function EmployeesPage() {
           actionType: "delete",
           form: "employee",
           deleteHandler: () => handleDelete(row),
-          title: "Delete Employee",
+          title: "Delete Manager",
         });
       },
       disabledOn: [],
@@ -161,11 +163,11 @@ export default function EmployeesPage() {
 
       {/* PAGE HEADER WITH TITLE AND SUBTITLE */}
       <PageHeader
-        title="Employee Management"
-        subtitle="Manage your organization's employees, view details, and update information"
+        title="Manager Management"
+        subtitle="Manage organizational managers, view their details, and update information"
       />
 
-      {/* EMPLOYEES DATA TABLE */}
+      {/* MANAGERS DATA TABLE */}
       <CustomTable
         isLoading={loading || deleteResult.loading}
         actions={actions}
@@ -183,7 +185,7 @@ export default function EmployeesPage() {
           ],
         }}
         dataSource={
-          // MAP EMPLOYEE DATA TO TABLE FORMAT
+          // MAP MANAGER DATA TO TABLE FORMAT
           data?.users?.data?.map((row) => ({
             ...row,
             // CUSTOM USER PROFILE COLUMN WITH AVATAR AND DESIGNATION
@@ -256,17 +258,17 @@ export default function EmployeesPage() {
           })) || []
         }
       >
-        {/* ADD NEW EMPLOYEE BUTTON (PERMISSION GUARDED) */}
+        {/* ADD NEW MANAGER BUTTON (PERMISSION GUARDED) */}
         {permissionGuard(PermissionResource.USER, [
           PermissionAction.CREATE,
         ]) && (
           <button
             type="button"
-            className="btn btn-primary text-base-300"
-            onClick={createNewEmployee}
+            className="btn btn-warning text-base-300"
+            onClick={createNewManager}
           >
             <PiPlusCircle className="text-xl" />
-            Add New
+            Add New Manager
           </button>
         )}
       </CustomTable>

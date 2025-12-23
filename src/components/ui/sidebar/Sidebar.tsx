@@ -159,8 +159,29 @@ export default function Sidebar({
       subMenus: [
         {
           Icon: FiUsers,
+          label: "All Personnel",
+          path: "/user-management/all-users",
+          show: hasPermission(Permissions.UserRead),
+          subMenus: [],
+        },
+        {
+          Icon: FiUsers,
           label: "Employees",
           path: "/user-management/employees",
+          show: hasPermission(Permissions.UserRead),
+          subMenus: [],
+        },
+        {
+          Icon: FiUsers,
+          label: "Admins",
+          path: "/user-management/admins",
+          show: hasPermission(Permissions.UserRead),
+          subMenus: [],
+        },
+        {
+          Icon: FiUsers,
+          label: "Managers",
+          path: "/user-management/managers",
           show: hasPermission(Permissions.UserRead),
           subMenus: [],
         },

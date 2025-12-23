@@ -12,25 +12,33 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, IProject } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import { useRouter } from "next/navigation";
+import PageHeader from "@/components/ui/PageHeader";
+import { showToast } from "@/components/ui/CustomToast";
 
+// ==================== PROJECTS PAGE COMPONENT ====================
 export default function ProjectsPage() {
+  // ==================== HOOKS INITIALIZATION ====================
   const router = useRouter();
   const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
+
+  // ==================== GRAPHQL QUERY: FETCH PROJECTS ====================
   const { data, loading } = useQuery<{
     projects: {
       data: IProject[];
     };
   }>(GET_PROJECTS, {});
 
+  // ==================== GRAPHQL MUTATION: DELETE PROJECT ====================
   const [deleteProject, deleteResult] = useMutation(DELETE_PROJECT, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_PROJECTS }],
   });
 
+  // ==================== HANDLER: EDIT PROJECT ====================
   const handleEdit = (row: IProject) => {
     const data = {
       id: row?.id,
@@ -42,7 +50,7 @@ export default function ProjectsPage() {
       endDate: row?.endDate,
     };
 
-    // open the popup for editing the form
+    // OPEN FORM POPUP FOR EDITING
     setPopupOption({
       open: true,
       closeOnDocumentClick: true,
@@ -53,14 +61,23 @@ export default function ProjectsPage() {
     });
   };
 
+  // ==================== HANDLER: DELETE PROJECT ====================
   const handleDelete = async (row: IProject) => {
-    await deleteProject({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const result = await deleteProject({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (result?.data) {
+        showToast.success("Deleted!", "Project deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete project");
+    }
   };
 
+  // ==================== HANDLER: CREATE NEW PROJECT ====================
   const createNewProject = () => {
     setPopupOption({
       open: true,
@@ -71,6 +88,7 @@ export default function ProjectsPage() {
     });
   };
 
+  // ==================== TABLE COLUMNS CONFIGURATION ====================
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -89,7 +107,7 @@ export default function ProjectsPage() {
     {
       key: "3",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
@@ -109,11 +127,14 @@ export default function ProjectsPage() {
     },
   ]);
 
+  // ==================== HANDLER: VIEW PROJECT ====================
   const handleView = (row: IProject) => {
     router.push(`/projects/${row.id}/view`);
   };
 
+  // ==================== TABLE ACTIONS CONFIGURATION ====================
   const actions: TableActionType[] = [
+    // VIEW ACTION
     {
       name: "view",
       type: "button",
@@ -121,6 +142,7 @@ export default function ProjectsPage() {
       handler: handleView,
       disabledOn: [],
     },
+    // EDIT ACTION
     {
       name: "edit",
       type: "button",
@@ -128,6 +150,7 @@ export default function ProjectsPage() {
       handler: handleEdit,
       disabledOn: [],
     },
+    // DELETE ACTION
     {
       name: "delete",
       type: "button",
@@ -146,18 +169,19 @@ export default function ProjectsPage() {
     },
   ];
 
+  // ==================== COMPONENT RENDER ====================
   return (
-    <>
-      {/* Popup for adding/editing a project */}
+    <Fragment key={`projects-page`}>
+      {/* DELETE CONFIRMATION MODAL */}
       <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
 
-      {/* Main content */}
+      {/* PROJECTS PAGE CONTENT */}
       <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Projects</h1>
-          </div>
-        </header>
+        {/* PAGE HEADER WITH TITLE AND SUBTITLE */}
+        <PageHeader
+          title="Project Management"
+          subtitle="Oversee all organizational projects, track milestones, manage teams, and ensure timely delivery of project objectives"
+        />
         {/* TABLE */}
         <CustomTable
           isLoading={loading || deleteResult.loading}
@@ -174,7 +198,29 @@ export default function ProjectsPage() {
               { label: "Status", value: "status" },
             ],
           }}
-          dataSource={data?.projects?.data || []}
+          dataSource={
+            data?.projects?.data?.map((row) => ({
+              ...row,
+              // CUSTOM STATUS COLUMN WITH COLOR-CODED BADGES
+              customStatus: row?.status ? (
+                <span
+                  className={`badge badge-sm font-semibold ${
+                    row.status.toLowerCase() === "pending"
+                      ? "badge-warning"
+                      : row.status.toLowerCase() === "ongoing"
+                      ? "badge-info"
+                      : row.status.toLowerCase() === "complete"
+                      ? "badge-success"
+                      : "badge-secondary"
+                  }`}
+                >
+                  {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                </span>
+              ) : (
+                <span className="text-sm text-gray-400">N/A</span>
+              ),
+            })) || []
+          }
         >
           {permissionGuard(PermissionResource.PROJECT, [
             PermissionAction.CREATE,
@@ -190,6 +236,6 @@ export default function ProjectsPage() {
           )}
         </CustomTable>
       </section>
-    </>
+    </Fragment>
   );
 }

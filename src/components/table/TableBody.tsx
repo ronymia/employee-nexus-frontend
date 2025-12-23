@@ -1,6 +1,6 @@
 "use client";
 
-import CustomLoading from "../loader/CustomLoading";
+import TableSkeleton from "../loader/TableSkeleton";
 import useDeviceWidth from "@/hooks/useDeviceWidth";
 import TableActionButton from "./TableActionButton";
 import type { TableActionType, TableColumnType } from "@/types";
@@ -114,14 +114,7 @@ export default function TableBody({
           </tr>
         )
       ) : (
-        <tr className={`border-b w-full`}>
-          <td
-            colSpan={columns.length + 1}
-            className={`text-center align-middle h-96 w-full`}
-          >
-            <CustomLoading />
-          </td>
-        </tr>
+        <TableSkeleton columns={columns.length} rows={5} />
       )}
     </tbody>
   );
