@@ -19,6 +19,7 @@ import FormModal from "@/components/form/FormModal";
 import PageHeader from "@/components/ui/PageHeader";
 import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { showToast } from "@/components/ui/CustomToast";
 
 // ==================== MANAGER MANAGEMENT PAGE COMPONENT ====================
 export default function ManagersPage() {
@@ -65,9 +66,11 @@ export default function ManagersPage() {
           id: Number(row?.id),
         },
       });
-      console.log("Delete result:", result);
-    } catch (error) {
-      console.error("Error deleting manager:", error);
+      if (result?.data) {
+        showToast.success("Deleted!", "Manager deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete manager");
     }
   };
 

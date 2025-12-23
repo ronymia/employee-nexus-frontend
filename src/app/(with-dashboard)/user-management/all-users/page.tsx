@@ -20,6 +20,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import PersonnelInsights from "@/components/ui/PersonnelInsights";
 import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { showToast } from "@/components/ui/CustomToast";
 
 // ==================== ALL USERS PAGE COMPONENT ====================
 export default function AllUsersPage() {
@@ -79,9 +80,11 @@ export default function AllUsersPage() {
           id: Number(row?.id),
         },
       });
-      console.log("Delete result:", result);
-    } catch (error) {
-      console.error("Error deleting user:", error);
+      if (result?.data) {
+        showToast.success("Deleted!", "User deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete user");
     }
   };
 

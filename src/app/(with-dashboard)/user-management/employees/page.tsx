@@ -19,6 +19,7 @@ import FormModal from "@/components/form/FormModal";
 import PageHeader from "@/components/ui/PageHeader";
 import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { showToast } from "@/components/ui/CustomToast";
 
 // ==================== EMPLOYEES PAGE COMPONENT ====================
 export default function EmployeesPage() {
@@ -63,9 +64,11 @@ export default function EmployeesPage() {
           id: Number(row?.id),
         },
       });
-      console.log("Delete result:", result);
-    } catch (error) {
-      console.error("Error deleting employee:", error);
+      if (result?.data) {
+        showToast.success("Deleted!", "Employee deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete employee");
     }
   };
 
