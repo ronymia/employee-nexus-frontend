@@ -277,3 +277,39 @@ export const DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT = gql`
     }
   }
 `;
+
+// ==================== GET USER WORK SCHEDULE ====================
+
+export const GET_USER_WORK_SCHEDULE = gql`
+  query GetUserWorkSchedule($userId: Int!) {
+    getUserWorkSchedule(userId: $userId) {
+      success
+      message
+      data {
+        id
+        name
+        description
+        scheduleType
+        status
+        schedules {
+          day
+          isWeekend
+          timeSlots {
+            startTime
+            endTime
+          }
+        }
+        business {
+          id
+          name
+        }
+        creator {
+          id
+          profile {
+            fullName
+          }
+        }
+      }
+    }
+  }
+`;

@@ -473,7 +473,6 @@ export default function AttendancePage() {
         {popupOption.form === "attendance" &&
           popupOption.actionType !== "delete" && (
             <AttendanceForm
-              employees={employees}
               attendance={popupOption.data}
               actionType={popupOption.actionType as "create" | "update"}
               onClose={() => {

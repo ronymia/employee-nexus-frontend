@@ -1,79 +1,77 @@
 "use client";
 
+// ==================== EXTERNAL IMPORTS ====================
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { useFormContext } from "react-hook-form";
+import { motion, AnimatePresence } from "framer-motion";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+// ==================== COMPONENT IMPORTS ====================
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
-import CustomSelect from "@/components/form/input/CustomSelect";
-import CustomTextareaField from "@/components/form/input/CustomTextareaField";
-import CustomDatePicker from "@/components/form/input/CustomDatePicker";
-import CustomDateTimeInput from "@/components/form/input/CustomDateTimeInput";
-import { IEmployee } from "@/types";
-import { IAttendance } from "@/types/attendance.type";
-import { useMutation } from "@apollo/client/react";
+import { EmployeeSelect } from "@/components/input-fields";
+
+// ==================== SUB-COMPONENT IMPORTS ====================
+import {
+  BasicInfoFields,
+  PunchRecordFields,
+  LoadingScheduleState,
+  NoScheduleMessage,
+  SelectionPrompt,
+} from "./";
+
+// ==================== GRAPHQL IMPORTS ====================
 import {
   CREATE_ATTENDANCE,
   UPDATE_ATTENDANCE,
   GET_ATTENDANCES,
 } from "@/graphql/attendance.api";
-import { useState, useEffect } from "react";
-import dayjs from "dayjs";
-import {
-  WorkSiteSelect,
-  ProjectSelect,
-  EmployeeSelect,
-} from "@/components/input-fields";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import { PiPlus, PiTrash, PiClock } from "react-icons/pi";
-import { motion, AnimatePresence } from "framer-motion";
-import { useFormContext } from "react-hook-form";
-import EmployeeProjectSelect from "@/components/input-fields/EmployeeProjectSelect";
-import EmployeeWorkSiteSelect from "@/components/input-fields/EmployeeWorkSiteSelect";
+import { GET_USER_WORK_SCHEDULE } from "@/graphql/work-schedules.api";
 
+// ==================== TYPE IMPORTS ====================
+import { IAttendance } from "@/types/attendance.type";
+
+// ==================== ICONS ====================
+import { PiPlus } from "react-icons/pi";
+import { IWorkSchedule } from "@/types";
+
+// Extend dayjs with custom parse format
 dayjs.extend(customParseFormat);
 
-// ==================== INTERFACES ====================
-interface AttendanceFormProps {
-  employees: IEmployee[];
+// ==================== TYPESCRIPT INTERFACES ====================
+
+/**
+ * Props for AttendanceForm component
+ * @param attendance - Optional existing attendance record for update mode
+ * @param actionType - Form mode: create new or update existing
+ * @param onClose - Callback function to close the form
+ */
+
+interface IAttendanceFormProps {
   attendance?: IAttendance;
   actionType: "create" | "update";
   onClose: () => void;
 }
 
-// ==================== HELPER FUNCTIONS ====================
-
-// Format work hours to "Xh Ym" format
-function formatWorkHours(hours: number | undefined): string {
-  if (!hours || hours === 0) return "0h 0m";
-
-  const wholeHours = Math.floor(hours);
-  const minutes = Math.round((hours - wholeHours) * 60);
-
-  if (wholeHours === 0) {
-    return `${minutes}m`;
-  } else if (minutes === 0) {
-    return `${wholeHours}h`;
-  } else {
-    return `${wholeHours}h ${minutes}m`;
-  }
-}
-
-// Calculate work hours from punch in/out (for display only)
-function calculateWorkHours(punchIn: string, punchOut: string): number {
-  if (!punchIn || !punchOut) return 0;
-
-  const totalMinutes = dayjs(punchOut).diff(dayjs(punchIn), "minute");
-  return totalMinutes / 60;
-}
-
-// ==================== MAIN COMPONENT ====================
+// ==================== MAIN ATTENDANCE FORM COMPONENT ====================
+/**
+ * Main attendance form component for creating and updating attendance records
+ * Handles automatic IP detection, device info capture, and work schedule integration
+ * Auto-populates punch times based on employee's work schedule
+ */
 export default function AttendanceForm({
-  employees,
   attendance,
   actionType,
   onClose,
-}: AttendanceFormProps) {
+}: IAttendanceFormProps) {
+  // ==================== LOCAL STATE ====================
   const [isPending, setIsPending] = useState(false);
   const [ipAddress, setIpAddress] = useState("192.168.1.1");
   const [deviceInfo, setDeviceInfo] = useState("Unknown Device");
+
+  // ==================== GRAPHQL MUTATIONS ====================
 
   // ==================== DETECT IP ADDRESS ====================
   useEffect(() => {
@@ -250,8 +248,8 @@ export default function AttendanceForm({
         {/* Basic Information */}
         <BasicInfoFields actionType={actionType} />
 
-        {/* Punch Records */}
-        <PunchRecordsSection />
+        {/* Punch Records - Conditional Display */}
+        <PunchRecordsSection actionType={actionType} />
       </div>
 
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
@@ -259,43 +257,82 @@ export default function AttendanceForm({
   );
 }
 
-// ==================== SUB-COMPONENTS ====================
+// ==================== PUNCH RECORDS SECTION COMPONENT ====================
 
-// Basic Information Fields
-function BasicInfoFields({ actionType }: { actionType: "create" | "update" }) {
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <h4 className="text-base font-semibold mb-3 text-primary">
-        Basic Information
-      </h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <EmployeeSelect
-          dataAuto="userId"
-          name="userId"
-          label="Employee"
-          placeholder="Select Employee"
-          required={true}
-          disabled={actionType === "update"}
-        />
-        <CustomDatePicker
-          dataAuto="date"
-          name="date"
-          label="Date"
-          placeholder="Select Date"
-          required={true}
-          disabled={actionType === "update"}
-          formatDate="DD-MM-YYYY"
-        />
-      </div>
-    </div>
-  );
-}
-
-// Punch Records Section with manual array management
-function PunchRecordsSection() {
+/**
+ * Manages dynamic punch records with auto-population from work schedule
+ * Handles add/remove operations and conditional rendering based on schedule
+ */
+function PunchRecordsSection({
+  actionType,
+}: {
+  actionType: "create" | "update";
+}) {
   const { watch, setValue } = useFormContext();
   const punchRecords = watch("punchRecords") || [];
+  const userId = watch("userId");
+  const date = watch("date"); // Format: DD-MM-YYYY
 
+  // ==================== QUERY WORK SCHEDULE ====================
+  // Query user's work schedule - ONLY after BOTH userId AND date are selected
+  const { data: scheduleData, loading: scheduleLoading } = useQuery<{
+    getUserWorkSchedule: {
+      data: IWorkSchedule;
+    };
+  }>(GET_USER_WORK_SCHEDULE, {
+    variables: { userId: Number(userId) },
+    skip: !userId || !date || actionType === "update", // Skip if either missing OR update mode
+  });
+
+  const hasSchedule = scheduleData?.getUserWorkSchedule?.data;
+
+  // ==================== AUTO-POPULATE PUNCH TIMES ====================
+  // Auto-populate punch times when schedule is loaded
+  useEffect(() => {
+    if (hasSchedule && date && actionType === "create") {
+      // Convert selected date to weekday (0-6)
+      const selectedDate = dayjs(date, "DD-MM-YYYY");
+      const weekday = selectedDate.day(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+      // Find schedule for this weekday
+      const daySchedule = hasSchedule.schedules?.find(
+        (s: any) => s.day === weekday && !s.isWeekend
+      );
+
+      if (
+        daySchedule &&
+        daySchedule.timeSlots &&
+        daySchedule.timeSlots.length > 0
+      ) {
+        // Get first time slot
+        const firstSlot = daySchedule.timeSlots[0];
+
+        // Combine selected date with start/end times
+        const punchInDateTime = dayjs(
+          `${selectedDate.format("YYYY-MM-DD")} ${firstSlot.startTime}`,
+          "YYYY-MM-DD HH:mm"
+        ).format("YYYY-MM-DDTHH:mm");
+
+        const punchOutDateTime = dayjs(
+          `${selectedDate.format("YYYY-MM-DD")} ${firstSlot.endTime}`,
+          "YYYY-MM-DD HH:mm"
+        ).format("YYYY-MM-DDTHH:mm");
+
+        // Update first punch record with schedule times
+        const updatedRecords = [...punchRecords];
+        if (updatedRecords[0]) {
+          updatedRecords[0] = {
+            ...updatedRecords[0],
+            punchIn: punchInDateTime,
+            punchOut: punchOutDateTime,
+          };
+          setValue("punchRecords", updatedRecords);
+        }
+      }
+    }
+  }, [hasSchedule, date, actionType, setValue]);
+
+  // ==================== ADD PUNCH RECORD ====================
   const addPunchRecord = () => {
     setValue("punchRecords", [
       ...punchRecords,
@@ -310,6 +347,7 @@ function PunchRecordsSection() {
     ]);
   };
 
+  // ==================== REMOVE PUNCH RECORD ====================
   const removePunchRecord = (index: number) => {
     if (punchRecords.length > 1) {
       const newRecords = punchRecords.filter(
@@ -319,10 +357,27 @@ function PunchRecordsSection() {
     }
   };
 
-  // console.log({ punchRecords });
+  // ==================== CONDITIONAL RENDERING ====================
 
+  // Show prompt if employee/date not selected
+  if (!userId || !date) {
+    return <SelectionPrompt />;
+  }
+
+  // Show loading state while fetching schedule
+  if (scheduleLoading && actionType === "create") {
+    return <LoadingScheduleState />;
+  }
+
+  // Show message if no schedule (only for create mode)
+  if (actionType === "create" && !scheduleLoading && !hasSchedule) {
+    return <NoScheduleMessage />;
+  }
+
+  // ==================== RENDER PUNCH RECORDS ====================
   return (
     <div className="border border-primary/20 rounded-lg p-4">
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-base font-semibold text-primary">Punch Records</h4>
         <button
@@ -335,6 +390,7 @@ function PunchRecordsSection() {
         </button>
       </div>
 
+      {/* PUNCH RECORDS LIST */}
       <AnimatePresence mode="popLayout">
         {punchRecords.map((record: any, index: number) => (
           <motion.div
@@ -353,103 +409,6 @@ function PunchRecordsSection() {
           </motion.div>
         ))}
       </AnimatePresence>
-    </div>
-  );
-}
-
-// Individual Punch Record Fields
-function PunchRecordFields({
-  index,
-  onRemove,
-  canRemove,
-}: {
-  index: number;
-  onRemove: () => void;
-  canRemove: boolean;
-}) {
-  const { watch } = useFormContext();
-  const punchIn = watch(`punchRecords.${index}.punchIn`);
-  const punchOut = watch(`punchRecords.${index}.punchOut`);
-
-  // Calculate work hours in real-time
-  const workHours = calculateWorkHours(punchIn, punchOut);
-  return (
-    <div className="mb-4 p-4 bg-base-200 rounded-lg border border-base-300">
-      <div className="flex items-center justify-between mb-3">
-        <h5 className="text-sm font-semibold text-base-content">
-          Record #{index + 1}
-        </h5>
-        {canRemove && (
-          <button
-            type="button"
-            onClick={onRemove}
-            className="btn btn-sm btn-ghost btn-circle text-error"
-          >
-            <PiTrash size={16} />
-          </button>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        {/* Project & Work Site */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <EmployeeProjectSelect
-            name={`punchRecords.${index}.projectId`}
-            required={false}
-            query={{ userId: watch("userId") }}
-          />
-          <EmployeeWorkSiteSelect
-            name={`punchRecords.${index}.workSiteId`}
-            required={false}
-            query={{ userId: watch("userId") }}
-          />
-        </div>
-
-        {/* Punch Times */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomDateTimeInput
-            dataAuto={`punchRecords.${index}.punchIn`}
-            name={`punchRecords.${index}.punchIn`}
-            label="Punch In"
-            placeholder="Select punch in time"
-            required={true}
-          />
-          <CustomDateTimeInput
-            dataAuto={`punchRecords.${index}.punchOut`}
-            name={`punchRecords.${index}.punchOut`}
-            label="Punch Out"
-            placeholder="Select punch out time"
-            required={false}
-          />
-        </div>
-
-        {/* Notes */}
-        <CustomTextareaField
-          dataAuto={`punchRecords.${index}.notes`}
-          name={`punchRecords.${index}.notes`}
-          label="Notes"
-          placeholder="Add notes for this punch record..."
-          required={false}
-          rows={2}
-        />
-
-        {/* Work Hours Display */}
-        {workHours > 0 && (
-          <div className="bg-info/10 border border-info/20 rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <PiClock size={16} className="text-info" />
-              <div>
-                <p className="text-xs text-base-content/60">
-                  Calculated Work Hours
-                </p>
-                <p className="text-sm font-semibold text-info">
-                  {formatWorkHours(workHours)}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
