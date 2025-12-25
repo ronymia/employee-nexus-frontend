@@ -2,11 +2,7 @@
 
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
-import {
-  PermissionAction,
-  PermissionResource,
-  Permissions,
-} from "@/constants/permissions.constant";
+import { Permissions } from "@/constants/permissions.constant";
 import { DELETE_PROJECT, GET_PROJECTS } from "@/graphql/project.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
@@ -17,12 +13,17 @@ import { PiPlusCircle } from "react-icons/pi";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/ui/PageHeader";
 import { showToast } from "@/components/ui/CustomToast";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 
+dayjs.extend(localizedFormat);
+dayjs.extend(customParseFormat);
 // ==================== PROJECTS PAGE COMPONENT ====================
 export default function ProjectsPage() {
   // ==================== HOOKS INITIALIZATION ====================
   const router = useRouter();
-  const { permissionGuard } = usePermissionGuard();
+  const { hasPermission } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
 
   // ==================== GRAPHQL QUERY: FETCH PROJECTS ====================
@@ -44,7 +45,6 @@ export default function ProjectsPage() {
       id: row?.id,
       name: row?.name,
       description: row?.description,
-      cover: row?.cover,
       status: row?.status,
       startDate: row?.startDate,
       endDate: row?.endDate,
@@ -114,14 +114,14 @@ export default function ProjectsPage() {
     {
       key: "4",
       header: "Start Date",
-      accessorKey: "startDate",
+      accessorKey: "customStartDate",
       show: true,
       sortDirection: "ascending",
     },
     {
       key: "5",
       header: "End Date",
-      accessorKey: "endDate",
+      accessorKey: "customEndDate",
       show: true,
       sortDirection: "ascending",
     },
@@ -189,7 +189,7 @@ export default function ProjectsPage() {
           columns={columns}
           setColumns={setColumns}
           searchConfig={{
-            searchable: loading ? true : false,
+            searchable: loading ? false : true,
             debounceDelay: 500,
             defaultField: "name",
             searchableFields: [
@@ -201,6 +201,12 @@ export default function ProjectsPage() {
           dataSource={
             data?.projects?.data?.map((row) => ({
               ...row,
+              customStartDate: row?.startDate
+                ? dayjs(row.startDate).format("ll")
+                : "",
+              customEndDate: row?.endDate
+                ? dayjs(row.endDate).format("ll")
+                : "",
               // CUSTOM STATUS COLUMN WITH COLOR-CODED BADGES
               customStatus: row?.status ? (
                 <span
@@ -222,9 +228,7 @@ export default function ProjectsPage() {
             })) || []
           }
         >
-          {permissionGuard(PermissionResource.PROJECT, [
-            PermissionAction.CREATE,
-          ]) && (
+          {hasPermission(Permissions.ProjectCreate) ? (
             <button
               type="button"
               className={`btn btn-primary text-base-300`}
@@ -233,7 +237,7 @@ export default function ProjectsPage() {
               <PiPlusCircle className={`text-xl`} />
               Add New
             </button>
-          )}
+          ) : null}
         </CustomTable>
       </section>
     </Fragment>
