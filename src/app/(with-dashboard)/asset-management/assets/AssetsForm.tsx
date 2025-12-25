@@ -2,17 +2,18 @@ import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
-import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import CustomFileUploader from "@/components/form/input/CustomFileUploader";
+import AssetTypeSelect from "@/components/input-fields/AssetTypeSelect";
 import { CREATE_ASSET, GET_ASSETS, UPDATE_ASSET } from "@/graphql/asset.api";
-import { GET_ASSET_TYPES } from "@/graphql/asset-type.api";
-import { AssetFormData } from "@/schemas";
+import { assetSchema, IAssetFormData } from "@/schemas";
 import { Asset } from "@/types";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import useAppStore from "@/hooks/useAppStore";
+import { showToast } from "@/components/ui/CustomToast";
 
+// ==================== ASSETS FORM COMPONENT ====================
 export default function AssetsForm({
   handleClosePopup,
   data,
@@ -20,25 +21,24 @@ export default function AssetsForm({
   handleClosePopup: () => void;
   data: Asset;
 }) {
+  // ==================== STATE ====================
   const [isUploading, setIsUploading] = useState(false);
   const token = useAppStore((state) => state.token);
 
-  // QUERY TO GET ASSET TYPES FOR DROPDOWN
-  const { data: assetTypesData } = useQuery<{
-    assetTypes: { data: { id: number; name: string }[] };
-  }>(GET_ASSET_TYPES);
-
-  // MUTATION TO CREATE A NEW ASSET
+  // ==================== GRAPHQL MUTATIONS ====================
+  // CREATE ASSET MUTATION
   const [createAsset, createResult] = useMutation(CREATE_ASSET, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ASSETS }],
   });
+
+  // UPDATE ASSET MUTATION
   const [updateAsset, updateResult] = useMutation(UPDATE_ASSET, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ASSETS }],
   });
 
-  // UPLOAD IMAGE TO BACKEND
+  // ==================== IMAGE UPLOAD HANDLER ====================
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
       setIsUploading(true);
@@ -72,9 +72,9 @@ export default function AssetsForm({
     }
   };
 
-  // HANDLER FOR FORM SUBMISSION
-  const handleOnSubmit = async (formValues: AssetFormData) => {
-    // Upload image only if a new File is provided (not a string path)
+  // ==================== FORM SUBMISSION HANDLER ====================
+  const handleOnSubmit = async (formValues: IAssetFormData) => {
+    // UPLOAD IMAGE IF PROVIDED
     if (formValues.image && formValues.image instanceof File) {
       const imagePath = await uploadImage(formValues.image);
       formValues.image = imagePath || "";
@@ -88,30 +88,44 @@ export default function AssetsForm({
 
     formValues["assetTypeId"] = Number(formValues.assetTypeId);
 
+    // UPDATE EXISTING ASSET
     if (data?.id) {
       (formValues as any)["id"] = Number(data.id);
-      await updateAsset({
+      const res = await updateAsset({
         variables: formValues,
       });
-    } else {
-      await createAsset({
-        variables: formValues,
-      });
+      if (res?.data) {
+        showToast.success("Updated!", "Asset updated successfully");
+        handleClosePopup?.();
+      }
     }
-    handleClosePopup?.();
+    // CREATE NEW ASSET
+    else {
+      const res = await createAsset({
+        variables: formValues,
+      });
+      if (res?.data) {
+        showToast.success("Created!", "Asset created successfully");
+        handleClosePopup?.();
+      }
+    }
   };
 
-  // OPTIONS FOR ASSET TYPE DROPDOWN
-  const assetTypeOptions =
-    assetTypesData?.assetTypes?.data?.map((type) => ({
-      value: type.id,
-      label: type.name,
-    })) || [];
+  // ==================== DEFAULT FORM VALUES ====================
+  const defaultValues = {
+    name: data?.name || "",
+    code: data?.code || "",
+    date: data?.date || "",
+    assetTypeId: data?.assetTypeId || "",
+    image: data?.image || "",
+    note: data?.note || "",
+  };
 
   return (
     <CustomForm
       submitHandler={handleOnSubmit}
-      defaultValues={data || {}}
+      resolver={assetSchema}
+      defaultValues={defaultValues}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}
@@ -126,14 +140,11 @@ export default function AssetsForm({
         dataAuto="asset-date"
       />
       {/* ASSET TYPE */}
-      <CustomSelect
+      <AssetTypeSelect
         name="assetTypeId"
         label="Asset Type"
-        options={assetTypeOptions}
-        placeholder="Select Asset Type"
+        required={true}
         dataAuto="asset-type"
-        required={false}
-        isLoading={false}
       />
       {/* IMAGE */}
       <CustomFileUploader

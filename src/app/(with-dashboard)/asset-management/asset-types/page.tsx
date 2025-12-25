@@ -3,11 +3,7 @@
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
 import StatusBadge from "@/components/ui/StatusBadge";
-import {
-  PermissionAction,
-  PermissionResource,
-  Permissions,
-} from "@/constants/permissions.constant";
+import { Permissions } from "@/constants/permissions.constant";
 import { DELETE_ASSET_TYPE, GET_ASSET_TYPES } from "@/graphql/asset-type.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";

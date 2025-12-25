@@ -2,33 +2,37 @@
 
 import FormModal from "@/components/form/FormModal";
 import CustomTable from "@/components/table/CustomTable";
-import {
-  PermissionAction,
-  PermissionResource,
-  Permissions,
-} from "@/constants/permissions.constant";
+import { Permissions } from "@/constants/permissions.constant";
 import { DELETE_ASSET, GET_ASSETS } from "@/graphql/asset.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
 import { TableActionType, TableColumnType, Asset } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
+import PageHeader from "@/components/ui/PageHeader";
+import { showToast } from "@/components/ui/CustomToast";
 
+// ==================== ASSETS PAGE COMPONENT ====================
 export default function AssetsPage() {
-  const { permissionGuard } = usePermissionGuard();
+  // ==================== HOOKS INITIALIZATION ====================
+  const { hasPermission } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
+
+  // ==================== GRAPHQL QUERY: FETCH ASSETS ====================
   const { data, loading } = useQuery<{
     assets: {
       data: Asset[];
     };
   }>(GET_ASSETS, {});
 
+  // ==================== GRAPHQL MUTATION: DELETE ASSET ====================
   const [deleteAsset, deleteResult] = useMutation(DELETE_ASSET, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ASSETS }],
   });
 
+  // ==================== HANDLER: EDIT ASSET ====================
   const handleEdit = (row: Asset) => {
     const data = {
       id: row?.id,
@@ -40,7 +44,7 @@ export default function AssetsPage() {
       note: row?.note,
     };
 
-    // open the popup for editing the form
+    // OPEN FORM POPUP FOR EDITING
     setPopupOption({
       open: true,
       closeOnDocumentClick: true,
@@ -51,14 +55,23 @@ export default function AssetsPage() {
     });
   };
 
+  // ==================== HANDLER: DELETE ASSET ====================
   const handleDelete = async (row: Asset) => {
-    await deleteAsset({
-      variables: {
-        id: Number(row?.id),
-      },
-    });
+    try {
+      const result = await deleteAsset({
+        variables: {
+          id: Number(row?.id),
+        },
+      });
+      if (result?.data) {
+        showToast.success("Deleted!", "Asset deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete asset");
+    }
   };
 
+  // ==================== HANDLER: CREATE NEW ASSET ====================
   const createNewAsset = () => {
     setPopupOption({
       open: true,
@@ -69,6 +82,7 @@ export default function AssetsPage() {
     });
   };
 
+  // ==================== TABLE COLUMNS CONFIGURATION ====================
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -101,13 +115,15 @@ export default function AssetsPage() {
     {
       key: "5",
       header: "Status",
-      accessorKey: "status",
+      accessorKey: "customStatus",
       show: true,
       sortDirection: "ascending",
     },
   ]);
 
+  // ==================== TABLE ACTIONS CONFIGURATION ====================
   const actions: TableActionType[] = [
+    // EDIT ACTION
     {
       name: "edit",
       type: "button",
@@ -115,6 +131,7 @@ export default function AssetsPage() {
       handler: handleEdit,
       disabledOn: [{ accessorKey: "status", value: "INACTIVE" }],
     },
+    // DELETE ACTION
     {
       name: "delete",
       type: "button",
@@ -133,55 +150,70 @@ export default function AssetsPage() {
     },
   ];
 
+  // ==================== COMPONENT RENDER ====================
   return (
-    <>
-      {/* Popup for adding/editing an asset */}
+    <Fragment key={`assets-page`}>
+      {/* DELETE CONFIRMATION MODAL */}
       <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
 
-      {/* Main content */}
-      <section className={``}>
-        <header className={`mb-5 flex items-center justify-between`}>
-          <div className="">
-            <h1 className={`text-2xl font-medium`}>All Assets</h1>
-          </div>
-        </header>
-        {/* TABLE */}
-        <CustomTable
-          isLoading={loading || deleteResult.loading}
-          actions={actions}
-          columns={columns}
-          setColumns={setColumns}
-          searchConfig={{
-            searchable: loading ? true : false,
-            debounceDelay: 500,
-            defaultField: "name",
-            searchableFields: [
-              { label: "Name", value: "name" },
-              { label: "Code", value: "code" },
-              { label: "Asset Type", value: "assetType.name" },
-            ],
-          }}
-          dataSource={
-            data?.assets?.data?.map((row) => ({
-              ...row,
-              customAssetTypeName: row.assetType?.name || "-",
-            })) || []
-          }
-        >
-          {permissionGuard(PermissionResource.ASSET, [
-            PermissionAction.CREATE,
-          ]) && (
-            <button
-              type="button"
-              className={`btn btn-primary text-base-300`}
-              onClick={createNewAsset}
-            >
-              <PiPlusCircle className={`text-xl`} />
-              Add New
-            </button>
-          )}
-        </CustomTable>
-      </section>
-    </>
+      {/* ASSETS PAGE CONTENT */}
+      {/* PAGE HEADER WITH TITLE AND SUBTITLE */}
+      <PageHeader
+        title="Asset Management"
+        subtitle="Track and manage all organizational assets including equipment, devices, and inventory items"
+      />
+      {/* TABLE */}
+      <CustomTable
+        isLoading={loading || deleteResult.loading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumns}
+        searchConfig={{
+          searchable: loading ? false : true,
+          debounceDelay: 500,
+          defaultField: "name",
+          searchableFields: [
+            { label: "Name", value: "name" },
+            { label: "Code", value: "code" },
+            { label: "Asset Type", value: "assetType.name" },
+          ],
+        }}
+        dataSource={
+          data?.assets?.data?.map((row) => ({
+            ...row,
+            customAssetTypeName: row.assetType?.name || "-",
+            // CUSTOM STATUS COLUMN WITH COLOR-CODED BADGES
+            customStatus: row?.status ? (
+              <span
+                className={`badge badge-sm font-semibold ${
+                  row.status.toLowerCase() === "assign"
+                    ? "badge-success"
+                    : row.status.toLowerCase() === "unassigned"
+                    ? "badge-warning"
+                    : row.status.toLowerCase() === "damage"
+                    ? "badge-error"
+                    : "badge-secondary"
+                }`}
+              >
+                {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+              </span>
+            ) : (
+              <span className="text-sm text-gray-400">N/A</span>
+            ),
+          })) || []
+        }
+      >
+        {hasPermission(Permissions.AssetCreate) && (
+          <button
+            type="button"
+            className={`btn btn-primary text-base-300`}
+            onClick={createNewAsset}
+          >
+            <PiPlusCircle className={`text-xl`} />
+            Add New
+          </button>
+        )}
+      </CustomTable>
+    </Fragment>
   );
 }

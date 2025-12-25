@@ -5,8 +5,8 @@ export const assetSchema = z.object({
   code: z.string().min(1, "Code is required"),
   date: z.string().min(1, "Date is required"),
   note: z.string().optional(),
-  assetTypeId: z.number().optional(),
+  assetTypeId: z.number({ error: "Asset Type is required" }),
   image: z.instanceof(File).optional().or(z.string().optional()),
 });
 
-export type AssetFormData = z.infer<typeof assetSchema>;
+export type IAssetFormData = z.infer<typeof assetSchema>;
