@@ -1,7 +1,7 @@
-import { GET_PROJECTS } from "@/graphql/project.api";
+import { GET_PROJECTS, GET_USER_PROJECTS } from "@/graphql/project.api";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
-import { IProject } from "@/types/project.type";
+import { IProject, IUserProjectMember } from "@/types/project.type";
 
 interface IProjectSelectProps {
   name: string;
@@ -9,24 +9,33 @@ interface IProjectSelectProps {
   required?: boolean;
   placeholder?: string;
   dataAuto?: string;
+  query: {
+    userId: number;
+  };
 }
 
-export default function ProjectSelect({
+export default function EmployeeProjectSelect({
   name,
   label = "Project",
   required = false,
   placeholder = "Select Project",
   dataAuto = "project",
+  query,
 }: IProjectSelectProps) {
-  const { data, loading } = useQuery<{ projects: { data: IProject[] } }>(
-    GET_PROJECTS,
-    {}
-  );
+  // Query to get user projects
+  const { data, loading } = useQuery<{
+    userProjects: {
+      data: IUserProjectMember[];
+    };
+  }>(GET_USER_PROJECTS, {
+    variables: { userId: query?.userId },
+    skip: !query?.userId,
+  });
 
   const options =
-    data?.projects?.data?.map((project: IProject) => ({
-      label: project.name,
-      value: Number(project.id),
+    data?.userProjects?.data?.map((project: IUserProjectMember) => ({
+      label: project.project.name,
+      value: Number(project.project.id),
     })) || [];
 
   return (

@@ -58,10 +58,11 @@ export const GET_EMPLOYEES = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {
@@ -142,10 +143,11 @@ export const GET_EMPLOYEE_BY_ID = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {
@@ -220,10 +222,11 @@ export const CREATE_EMPLOYEE = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {
@@ -298,10 +301,11 @@ export const UPDATE_EMPLOYEE = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {

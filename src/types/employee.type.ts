@@ -25,35 +25,18 @@ export interface IEmployee {
   email: string;
   businessId: number;
   roleId: number;
+  role?: IRole;
   status: string;
-  permissions?: string[];
   deletedBy?: number;
+  profile?: IProfile;
+  employee?: IEmployeeDetails;
+  permissions?: string[];
   createdAt: string;
   updatedAt: string;
-  profile?: IProfile;
-  role?: IRole;
-  employee?: IEmployeeDetails;
-  employeeId?: string;
-  departmentId: number;
-  designationId: number;
-  employmentStatusId?: number;
-  workSiteId?: number;
-  workScheduleId?: number;
-  joiningDate?: string;
-  salaryPerMonth?: number;
-  nidNumber?: string;
-  rotaType?: string;
-  workingDaysPerWeek?: number;
-  workingHoursPerWeek?: number;
-  department?: IDepartment;
-  designation?: IDesignation;
-  employmentStatus?: IEmploymentStatus;
-  workSite?: IWorkSite;
-  workSchedule?: IWorkSchedule;
 }
 
 export interface IEmployeeDetails {
-  id: number;
+  userId: number;
   employeeId?: string;
   departmentId: number;
   designationId: number;
@@ -69,7 +52,9 @@ export interface IEmployeeDetails {
   department?: IDepartment;
   designation?: IDesignation;
   employmentStatus?: IEmploymentStatus;
-  workSite?: IWorkSite;
+  workSites?: {
+    workSite: IWorkSite;
+  }[];
   workSchedule?: IWorkSchedule;
 }
 

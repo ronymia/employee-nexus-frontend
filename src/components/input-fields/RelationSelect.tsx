@@ -1,6 +1,6 @@
 import CustomSelect from "@/components/form/input/CustomSelect";
 
-interface RelationSelectProps {
+interface IRelationSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -14,7 +14,7 @@ export default function RelationSelect({
   required = false,
   placeholder = "Select Relation",
   dataAuto = "relation",
-}: RelationSelectProps) {
+}: IRelationSelectProps) {
   const options = [
     { label: "Father", value: "Father" },
     { label: "Mother", value: "Mother" },

@@ -10,7 +10,7 @@ export interface IProfile {
   address: string;
   city: string;
   country: string;
-  dateOfBirth: string; // format "DD-MM-YYYY"
+  dateOfBirth: Date; // format "DD-MM-YYYY"
   gender: "MALE" | "FEMALE";
   maritalStatus: "SINGLE" | "MARRIED";
   phone: string;

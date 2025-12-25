@@ -5,7 +5,7 @@ const MARITAL_STATUS_OPTIONS = [
   { title: "Married", value: "MARRIED" },
 ];
 
-interface MaritalStatusRadioProps {
+interface IMaritalStatusRadioProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -19,7 +19,7 @@ export default function MaritalStatusRadio({
   required = false,
   dataAuto = "maritalStatus",
   radioGroupClassName = "grid-cols-2",
-}: MaritalStatusRadioProps) {
+}: IMaritalStatusRadioProps) {
   return (
     <CustomRadioButton
       dataAuto={dataAuto}

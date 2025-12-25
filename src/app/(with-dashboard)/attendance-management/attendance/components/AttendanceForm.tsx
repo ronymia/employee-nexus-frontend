@@ -25,6 +25,8 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { PiPlus, PiTrash, PiClock } from "react-icons/pi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFormContext } from "react-hook-form";
+import EmployeeProjectSelect from "@/components/input-fields/EmployeeProjectSelect";
+import EmployeeWorkSiteSelect from "@/components/input-fields/EmployeeWorkSiteSelect";
 
 dayjs.extend(customParseFormat);
 
@@ -391,13 +393,15 @@ function PunchRecordFields({
       <div className="space-y-4">
         {/* Project & Work Site */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ProjectSelect
+          <EmployeeProjectSelect
             name={`punchRecords.${index}.projectId`}
             required={false}
+            query={{ userId: watch("userId") }}
           />
-          <WorkSiteSelect
+          <EmployeeWorkSiteSelect
             name={`punchRecords.${index}.workSiteId`}
             required={false}
+            query={{ userId: watch("userId") }}
           />
         </div>
 

@@ -99,3 +99,57 @@ export const DELETE_WORK_SITES = gql`
     }
   }
 `;
+
+// ==================== EMPLOYEE WORK SITE ASSIGNMENT ====================
+
+export const ASSIGN_WORK_SITE = gql`
+  mutation AssignWorkSite($input: AssignWorkSiteInput!) {
+    assignWorkSite(input: $input) {
+      success
+      message
+      data {
+        id
+        userId
+        workSiteId
+        workSite {
+          name
+          address
+        }
+        createdAt
+      }
+    }
+  }
+`;
+
+export const UNASSIGN_WORK_SITE = gql`
+  mutation UnassignWorkSite($input: UnassignWorkSiteInput!) {
+    unassignWorkSite(input: $input) {
+      success
+      message
+      data {
+        id
+        userId
+        workSiteId
+      }
+    }
+  }
+`;
+
+export const GET_EMPLOYEE_WORK_SITES = gql`
+  query EmployeeWorkSites($userId: Int!) {
+    employeeWorkSites(userId: $userId) {
+      success
+      message
+      data {
+        id
+        workSiteId
+        workSite {
+          name
+          address
+          status
+        }
+        createdAt
+      }
+    }
+  }
+`;

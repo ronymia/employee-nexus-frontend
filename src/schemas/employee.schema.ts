@@ -34,7 +34,7 @@ export const employeeSchema = z.object({
   departmentId: z.number().min(1, "Department is required"),
   designationId: z.number().min(1, "Designation is required"),
   employmentStatusId: z.number().min(1, "Employment Status is required"),
-  workSiteId: z.number().min(1, "Work Site is required"),
+  workSiteIds: z.array(z.number().min(1, "Work Site is required")),
   workScheduleId: z.number().min(1, "Work Schedule is required"),
   joiningDate: z.string(),
   salaryPerMonth: z

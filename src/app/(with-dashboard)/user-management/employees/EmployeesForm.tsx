@@ -44,6 +44,8 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
     refetchQueries: [{ query: GET_EMPLOYEES, variables: { query: {} } }],
   });
 
+  console.log({ data });
+
   // ==================== FORM SUBMISSION HANDLER ====================
   const handleOnSubmit = async (formValues: IEmployeeFormData) => {
     // CONVERT USER ROLE ID TO NUMBER
@@ -71,6 +73,13 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
       formValues["workingHoursPerWeek"] = Number(
         formValues["workingHoursPerWeek"]
       );
+    }
+
+    if (formValues["profile"]["dateOfBirth"]) {
+      formValues["profile"]["dateOfBirth"] = dayjs(
+        formValues["profile"]["dateOfBirth"],
+        "DD-MM-YYYY"
+      ).toDate();
     }
 
     // TRY TO SUBMIT EMPLOYEE DATA
@@ -254,7 +263,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
           />
 
           {/* WORK SITE SELECTION */}
-          <WorkSiteSelect name="workSiteId" required={true} />
+          <WorkSiteSelect name="workSiteIds" required={true} />
 
           {/* WORK SCHEDULE SELECTION */}
           <WorkScheduleSelect name="workScheduleId" required={true} />

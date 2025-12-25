@@ -3,7 +3,7 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
 import { IDesignation } from "@/types/designation.type";
 
-interface DesignationSelectProps {
+interface IDesignationSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -17,7 +17,7 @@ export default function DesignationSelect({
   required = false,
   placeholder = "Select Designation",
   dataAuto = "designation",
-}: DesignationSelectProps) {
+}: IDesignationSelectProps) {
   const { data, loading } = useQuery<{
     designations: { data: IDesignation[] };
   }>(GET_DESIGNATIONS, {});

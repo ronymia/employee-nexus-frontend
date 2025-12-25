@@ -15,3 +15,10 @@ export interface IWorkSite {
   createdAt: string;
   updatedAt: string;
 }
+export interface IEmployeeWorkSite {
+  id: number;
+  workSiteId: number;
+  workSite: IWorkSite;
+  createdAt: string;
+  updatedAt: string;
+}
