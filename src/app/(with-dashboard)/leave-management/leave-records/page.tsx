@@ -27,7 +27,7 @@ import {
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
-import LeaveForm from "./components/LeaveForm";
+import LeaveForm from "./LeaveForm";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 
@@ -367,7 +367,11 @@ export default function LeaveRecordsPage() {
       )}
 
       {/* Leave Form Modal */}
-      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+      <CustomPopup
+        customWidth="70%"
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+      >
         {popupOption.form === "leave" && (
           <LeaveForm
             employees={employees}

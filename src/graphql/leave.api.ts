@@ -218,3 +218,22 @@ export const REJECT_LEAVE = gql`
     }
   }
 `;
+
+// LEAVE BALANCE
+export const LEAVE_BALANCE = gql`
+  query LeaveBalance($leaveTypeId: Int!, $userId: Int!, $year: Int!) {
+    leaveBalance(leaveTypeId: $leaveTypeId, userId: $userId, year: $year) {
+      success
+      statusCode
+      message
+      data {
+        leaveTypeId
+        leaveTypeName
+        year
+        allocatedHours
+        usedHours
+        remainingHours
+      }
+    }
+  }
+`;
