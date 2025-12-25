@@ -16,7 +16,10 @@ import {
   PiPencilSimple,
   PiCheck,
   PiX,
+  PiClock,
+  PiEye,
 } from "react-icons/pi";
+import { LiaUserClockSolid } from "react-icons/lia";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
 import {
   GET_ATTENDANCES,
@@ -24,10 +27,11 @@ import {
   APPROVE_ATTENDANCE,
   REJECT_ATTENDANCE,
 } from "@/graphql/attendance.api";
-import moment from "moment";
+import dayjs from "dayjs";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
 import AttendanceForm from "./components/AttendanceForm";
+import AttendanceRecord from "./components/AttendanceRecord";
 import usePopupOption from "@/hooks/usePopupOption";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
@@ -35,11 +39,16 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 export default function AttendancePage() {
   const { hasPermission } = usePermissionGuard();
   const [selectedDate, setSelectedDate] = useState(
-    moment().format("YYYY-MM-DD")
+    dayjs().format("YYYY-MM-DD")
   );
 
   // Popup state management
   const { popupOption, setPopupOption } = usePopupOption();
+
+  // Attendance record modal state
+  const [selectedAttendance, setSelectedAttendance] =
+    useState<IAttendance | null>(null);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
   // Fetch employees for the table
   const { data: employeesData, loading: employeesLoading } = useQuery<{
@@ -143,12 +152,18 @@ export default function AttendancePage() {
     }
   };
 
+  // HANDLE VIEW ATTENDANCE RECORD
+  const handleViewRecord = (attendance: IAttendance) => {
+    setSelectedAttendance(attendance);
+    setIsRecordModalOpen(true);
+  };
+
   // Old dummy data for reference
   const dummyAttendances: IAttendance[] = [
     {
       id: 1,
       userId: 1,
-      date: moment().format("YYYY-MM-DD"),
+      date: dayjs().format("YYYY-MM-DD"),
       totalHours: 8.5,
       breakHours: 1,
       status: "present",
@@ -156,10 +171,10 @@ export default function AttendancePage() {
         {
           id: 1,
           attendanceId: 1,
-          punchIn: moment().set({ hour: 9, minute: 0 }).toISOString(),
-          punchOut: moment().set({ hour: 18, minute: 30 }).toISOString(),
-          breakStart: moment().set({ hour: 13, minute: 0 }).toISOString(),
-          breakEnd: moment().set({ hour: 14, minute: 0 }).toISOString(),
+          punchIn: dayjs().set("hour", 9).set("minute", 0).toISOString(),
+          punchOut: dayjs().set("hour", 18).set("minute", 30).toISOString(),
+          breakStart: dayjs().set("hour", 13).set("minute", 0).toISOString(),
+          breakEnd: dayjs().set("hour", 14).set("minute", 0).toISOString(),
           workHours: 8.5,
           breakHours: 1,
           punchInIp: "192.168.1.100",
@@ -170,6 +185,8 @@ export default function AttendancePage() {
           punchOutLng: 90.4125,
           punchInDevice: "Windows 10 - Chrome",
           punchOutDevice: "Windows 10 - Chrome",
+          workSite: "Windows 10 - Chrome",
+          project: "Windows 10 - Chrome",
           notes: "Regular working day",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -280,48 +297,63 @@ export default function AttendancePage() {
       show: true,
     },
     {
+      key: "2",
+      header: "Punch Record",
+      accessorKey: "customAttendanceRecord",
+      show: true,
+    },
+    {
       key: "3",
-      header: "Punch In",
-      accessorKey: "customPunchIn",
-      show: true,
-    },
-    {
-      key: "4",
-      header: "Punch Out",
-      accessorKey: "customPunchOut",
-      show: true,
-    },
-    {
-      key: "5",
-      header: "Total Hours",
-      accessorKey: "customTotalHours",
-      show: true,
-    },
-    {
-      key: "6",
-      header: "Break",
-      accessorKey: "customBreakHours",
-      show: true,
-    },
-    {
-      key: "7",
       header: "Status",
       accessorKey: "customStatus",
       show: true,
     },
-    {
-      key: "8",
-      header: "Location",
-      accessorKey: "customLocation",
-      show: true,
-    },
-    {
-      key: "9",
-      header: "Project",
-      accessorKey: "customProject",
-      show: true,
-    },
   ]);
+
+  const actions = [
+    {
+      name: "Approve",
+      type: "button" as const,
+      Icon: PiCheck,
+      handler: (row: any) => handleApprove(row),
+      permissions: [Permissions.AttendanceUpdate],
+      disabledOn: [
+        {
+          accessorKey: "status",
+          value: "approved",
+        },
+      ],
+    },
+    {
+      name: "Reject",
+      type: "button" as const,
+      Icon: PiX,
+      handler: (row: any) => handleReject(row),
+      permissions: [Permissions.AttendanceUpdate],
+      disabledOn: [
+        {
+          accessorKey: "status",
+          value: "rejected",
+        },
+      ],
+    },
+    {
+      name: "Edit",
+      type: "button" as const,
+      Icon: PiPencilSimple,
+      handler: (row: any) => handleEdit(row),
+      permissions: [Permissions.AttendanceUpdate],
+      disabledOn: [],
+    },
+    {
+      name: "Delete",
+      type: "button" as const,
+      Icon: PiTrash,
+      handler: (row: any) => handleDelete(row),
+      permissions: [Permissions.AttendanceDelete],
+      disabledOn: [],
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -343,7 +375,7 @@ export default function AttendancePage() {
       {/* Date Picker & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Stats Cards */}
-        {/* <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-success/10 border border-success/20 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -375,7 +407,7 @@ export default function AttendancePage() {
               <PiWarning size={32} className="text-warning" />
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
 
       {loading && <CustomLoading />}
@@ -383,74 +415,24 @@ export default function AttendancePage() {
       {/* Attendance Table */}
       <CustomTable
         isLoading={loading}
-        actions={[
-          {
-            name: "Approve",
-            type: "button" as const,
-            Icon: PiCheck,
-            handler: (row: any) => handleApprove(row),
-            permissions: [Permissions.AttendanceUpdate],
-            disabledOn: [
-              {
-                accessorKey: "status",
-                value: "approved",
-              },
-            ],
-          },
-          {
-            name: "Reject",
-            type: "button" as const,
-            Icon: PiX,
-            handler: (row: any) => handleReject(row),
-            permissions: [Permissions.AttendanceUpdate],
-            disabledOn: [
-              {
-                accessorKey: "status",
-                value: "rejected",
-              },
-            ],
-          },
-          {
-            name: "Edit",
-            type: "button" as const,
-            Icon: PiPencilSimple,
-            handler: (row: any) => handleEdit(row),
-            permissions: [Permissions.AttendanceUpdate],
-            disabledOn: [],
-          },
-          {
-            name: "Delete",
-            type: "button" as const,
-            Icon: PiTrash,
-            handler: (row: any) => handleDelete(row),
-            permissions: [Permissions.AttendanceDelete],
-            disabledOn: [],
-          },
-        ]}
+        actions={actions}
         columns={columns}
         setColumns={setColumns}
         dataSource={attendances.map((row) => ({
           ...row,
+          customAttendanceRecord: (
+            <button
+              onClick={() => handleViewRecord(row)}
+              className="btn btn-sm btn-ghost gap-2 text-primary hover:bg-primary/10"
+              title="View Attendance Details"
+            >
+              <LiaUserClockSolid size={24} />
+              <span className="hidden sm:inline">Punch Record</span>
+            </button>
+          ),
           customEmployeeName: row.user?.profile?.fullName || "N/A",
-          customDate: moment(row.date).format("MMM DD, YYYY"),
-          customPunchIn: row.punchRecords?.[0]?.punchIn
-            ? moment(row.punchRecords[0].punchIn).format("hh:mm A")
-            : "--:--",
-          customPunchOut: row.punchRecords?.[row.punchRecords.length - 1]
-            ?.punchOut
-            ? moment(
-                row.punchRecords[row.punchRecords.length - 1].punchOut
-              ).format("hh:mm A")
-            : "--:--",
-          customTotalHours: row.totalHours
-            ? `${row.totalHours.toFixed(2)}h`
-            : "0h",
-          customBreakHours: row.breakHours
-            ? `${row.breakHours.toFixed(2)}h`
-            : "0h",
+          customDate: dayjs(row.date).format("MMM DD, YYYY"),
           customStatus: getStatusBadge(row.status),
-          customLocation: row.punchRecords?.[0]?.workSite?.name,
-          customProject: row.punchRecords?.[0]?.project?.name,
         }))}
         searchConfig={{
           searchable: false,
@@ -483,7 +465,11 @@ export default function AttendancePage() {
       </CustomTable>
 
       {/* Attendance Form Modal */}
-      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+      <CustomPopup
+        customWidth="90%"
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+      >
         {popupOption.form === "attendance" &&
           popupOption.actionType !== "delete" && (
             <AttendanceForm
@@ -500,6 +486,16 @@ export default function AttendancePage() {
             />
           )}
       </CustomPopup>
+
+      {/* Attendance Record Modal */}
+      <AttendanceRecord
+        attendance={selectedAttendance}
+        isOpen={isRecordModalOpen}
+        onClose={() => {
+          setIsRecordModalOpen(false);
+          setSelectedAttendance(null);
+        }}
+      />
 
       {/* Delete Confirmation Modal */}
       {/* <FormModal popupOption={popupOption} setPopupOption={setPopupOption} /> */}

@@ -58,7 +58,15 @@ export default function CustomPopup({
       contentStyle={{
         display: "flex",
         flexDirection: "column",
-        width: customWidth || (isMobile ? "85%" : "40%"),
+        width: customWidth
+          ? windowInnerWidth < 768
+            ? "100%" // md: Full width on mobile
+            : windowInnerWidth < 1024
+            ? "80%" // lg: 80% on tablet
+            : "70%" // xl and above: 70% on desktop
+          : isMobile
+          ? "85%"
+          : "40%",
         height: customHeight || "100vh",
         maxHeight: "100vh",
         borderRadius: "0",
@@ -68,14 +76,23 @@ export default function CustomPopup({
         transform: popupOption.open ? "translateX(0)" : "translateX(100%)",
         opacity: popupOption.open ? 1 : 0,
         position: "relative",
-        ...(isMobile && {
-          maxWidth: "400px",
-        }),
-        ...(!isMobile && {
-          maxWidth: "600px",
-          borderTopLeftRadius: "16px",
-          borderBottomLeftRadius: "16px",
-        }),
+        // Only apply maxWidth constraints when customWidth is NOT provided
+        ...(isMobile &&
+          !customWidth && {
+            maxWidth: "400px",
+          }),
+        ...(!isMobile &&
+          !customWidth && {
+            maxWidth: "600px",
+            borderTopLeftRadius: "16px",
+            borderBottomLeftRadius: "16px",
+          }),
+        // Apply border radius for non-mobile when customWidth is provided
+        ...(!isMobile &&
+          customWidth && {
+            borderTopLeftRadius: "16px",
+            borderBottomLeftRadius: "16px",
+          }),
       }}
     >
       {/* CLOSE BUTTON - OUTSIDE MODAL */}

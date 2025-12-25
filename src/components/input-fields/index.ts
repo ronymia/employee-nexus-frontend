@@ -8,3 +8,4 @@ export { default as GenderRadio } from "./GenderRadio";
 export { default as MaritalStatusRadio } from "./MaritalStatusRadio";
 export { default as RoleSelect } from "./RoleSelect";
 export { default as RelationSelect } from "./RelationSelect";
+export { default as EmployeeSelect } from "./EmployeeSelect";
