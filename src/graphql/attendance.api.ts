@@ -233,3 +233,29 @@ export const REJECT_ATTENDANCE = gql`
     }
   }
 `;
+
+// ==================== ATTENDANCE SUMMARY ====================
+export const ATTENDANCE_SUMMARY = gql`
+  query AttendanceSummary(
+    $startDate: DateTime
+    $endDate: DateTime
+    $userId: Int
+  ) {
+    attendanceSummary(
+      startDate: $startDate
+      endDate: $endDate
+      userId: $userId
+    ) {
+      success
+      statusCode
+      message
+      data {
+        pending
+        approved
+        absent
+        late
+        halfDay
+      }
+    }
+  }
+`;

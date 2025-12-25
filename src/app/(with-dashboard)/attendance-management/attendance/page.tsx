@@ -1,26 +1,24 @@
 "use client";
 
+// ==================== EXTERNAL IMPORTS ====================
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
-import { TableColumnType, IEmployee } from "@/types";
+import { TableColumnType } from "@/types";
 import { IAttendance } from "@/types/attendance.type";
 import {
   PiCheckCircle,
   PiXCircle,
   PiWarning,
   PiMinus,
-  PiAirplaneTilt,
   PiPlusCircle,
   PiTrash,
   PiPencilSimple,
   PiCheck,
   PiX,
   PiClock,
-  PiEye,
 } from "react-icons/pi";
 import { LiaUserClockSolid } from "react-icons/lia";
-import { GET_EMPLOYEES } from "@/graphql/employee.api";
 import {
   GET_ATTENDANCES,
   DELETE_ATTENDANCE,
@@ -29,39 +27,311 @@ import {
 } from "@/graphql/attendance.api";
 import dayjs from "dayjs";
 import CustomPopup from "@/components/modal/CustomPopup";
-import CustomLoading from "@/components/loader/CustomLoading";
 import AttendanceForm from "./components/AttendanceForm";
 import AttendanceRecord from "./components/AttendanceRecord";
 import usePopupOption from "@/hooks/usePopupOption";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
+import { ATTENDANCE_SUMMARY } from "@/graphql/attendance.api";
+import { PiClockAfternoon } from "react-icons/pi";
+import { IconType } from "react-icons";
+import { motion } from "framer-motion";
+import PageHeader from "@/components/ui/PageHeader";
+import FormModal from "@/components/form/FormModal";
+import { showToast } from "@/components/ui/CustomToast";
+
+// ==================== SUB-COMPONENTS ====================
+
+// STATS CARD COMPONENT
+interface IStatsCardProps {
+  icon: IconType;
+  label: string;
+  count: number;
+  color: "primary" | "success" | "warning" | "error" | "info";
+  index: number;
+}
+
+function StatsCard({
+  icon: Icon,
+  label,
+  count,
+  color,
+  index,
+}: IStatsCardProps) {
+  const colorClasses = {
+    primary: {
+      bg: "bg-linear-to-br from-primary/10 via-primary/5 to-transparent",
+      border: "border-primary/30 hover:border-primary/50",
+      iconBg: "bg-primary/20",
+      icon: "text-primary",
+      text: "text-primary",
+      glow: "shadow-primary/20",
+    },
+    success: {
+      bg: "bg-linear-to-br from-success/10 via-success/5 to-transparent",
+      border: "border-success/30 hover:border-success/50",
+      iconBg: "bg-success/20",
+      icon: "text-success",
+      text: "text-success",
+      glow: "shadow-success/20",
+    },
+    warning: {
+      bg: "bg-linear-to-br from-warning/10 via-warning/5 to-transparent",
+      border: "border-warning/30 hover:border-warning/50",
+      iconBg: "bg-warning/20",
+      icon: "text-warning",
+      text: "text-warning",
+      glow: "shadow-warning/20",
+    },
+    error: {
+      bg: "bg-linear-to-br from-error/10 via-error/5 to-transparent",
+      border: "border-error/30 hover:border-error/50",
+      iconBg: "bg-error/20",
+      icon: "text-error",
+      text: "text-error",
+      glow: "shadow-error/20",
+    },
+    info: {
+      bg: "bg-linear-to-br from-info/10 via-info/5 to-transparent",
+      border: "border-info/30 hover:border-info/50",
+      iconBg: "bg-info/20",
+      icon: "text-info",
+      text: "text-info",
+      glow: "shadow-info/20",
+    },
+  };
+
+  const colors = colorClasses[color];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        duration: 0.5,
+        delay: index * 0.08,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      whileHover={{
+        y: -6,
+        scale: 1.03,
+        transition: { duration: 0.2 },
+      }}
+      className={`
+        relative overflow-hidden
+        border ${colors.border} ${colors.bg}
+        rounded-xl p-5
+        backdrop-blur-sm
+        transition-all duration-300
+        hover:shadow-lg ${colors.glow}
+        group cursor-pointer
+      `}
+    >
+      {/* BACKGROUND SHIMMER */}
+      <motion.div
+        className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent"
+        initial={{ x: "-100%" }}
+        animate={{ x: "100%" }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "linear",
+          delay: index * 0.2,
+        }}
+      />
+
+      {/* CONTENT */}
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-4">
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{
+              delay: index * 0.08 + 0.2,
+              duration: 0.6,
+              type: "spring",
+              stiffness: 200,
+            }}
+            className={`${colors.iconBg} ${colors.icon} p-3 rounded-lg group-hover:scale-110 transition-transform duration-300`}
+          >
+            <Icon size={24} className="drop-shadow-sm" />
+          </motion.div>
+
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{
+              delay: index * 0.08 + 0.3,
+              duration: 0.5,
+              type: "spring",
+            }}
+            className={`text-4xl font-bold ${colors.text} drop-shadow-sm`}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.08 + 0.4 }}
+            >
+              {count}
+            </motion.span>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: index * 0.08 + 0.5 }}
+          className="flex items-center gap-2"
+        >
+          <p className="text-sm font-semibold text-base-content/80 uppercase tracking-wide">
+            {label}
+          </p>
+          <motion.div
+            className={`h-1 flex-1 ${colors.iconBg} rounded-full`}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: index * 0.08 + 0.6, duration: 0.4 }}
+            style={{ transformOrigin: "left" }}
+          />
+        </motion.div>
+      </div>
+
+      {/* BOTTOM ACCENT */}
+      <motion.div
+        className={`absolute bottom-0 left-0 right-0 h-1 ${colors.iconBg}`}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ delay: index * 0.08 + 0.7, duration: 0.5 }}
+        style={{ transformOrigin: "left" }}
+      />
+    </motion.div>
+  );
+}
+
+// ATTENDANCE STATS COMPONENT
+interface IAttendanceStatsProps {
+  startDate?: string;
+  endDate?: string;
+  userId?: number;
+}
+
+function AttendanceStats({
+  startDate = undefined,
+  endDate = undefined,
+  userId = undefined,
+}: IAttendanceStatsProps) {
+  const { data, loading, error } = useQuery<{
+    attendanceSummary: {
+      data: {
+        pending: number;
+        approved: number;
+        absent: number;
+        late: number;
+        halfDay: number;
+      };
+    };
+  }>(ATTENDANCE_SUMMARY, {
+    variables: { startDate, endDate, userId },
+  });
+
+  const summary = data?.attendanceSummary?.data;
+  console.log({ summary });
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="border border-base-300 rounded-lg p-4 bg-base-200/50 animate-pulse"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-base-300 rounded-lg"></div>
+              <div className="w-12 h-8 bg-base-300 rounded"></div>
+            </div>
+            <div className="w-20 h-4 bg-base-300 rounded"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="alert alert-error mb-6"
+      >
+        <PiXCircle size={24} />
+        <span>Failed to load attendance summary</span>
+      </motion.div>
+    );
+  }
+
+  const stats = [
+    {
+      icon: PiClock,
+      label: "Pending",
+      count: summary?.pending || 0,
+      color: "warning" as const,
+    },
+    {
+      icon: PiCheckCircle,
+      label: "Approved",
+      count: summary?.approved || 0,
+      color: "success" as const,
+    },
+    {
+      icon: PiXCircle,
+      label: "Absent",
+      count: summary?.absent || 0,
+      color: "error" as const,
+    },
+    {
+      icon: PiWarning,
+      label: "Late",
+      count: summary?.late || 0,
+      color: "info" as const,
+    },
+    {
+      icon: PiClockAfternoon,
+      label: "Half Day",
+      count: summary?.halfDay || 0,
+      color: "primary" as const,
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      {stats.map((stat, index) => (
+        <StatsCard key={stat.label} {...stat} index={index} />
+      ))}
+    </div>
+  );
+}
+
+// ==================== MAIN COMPONENT ====================
 
 export default function AttendancePage() {
+  // ==================== PERMISSIONS ====================
   const { hasPermission } = usePermissionGuard();
+
+  // ==================== LOCAL STATE ====================
   const [selectedDate, setSelectedDate] = useState(
     dayjs().format("YYYY-MM-DD")
   );
 
-  // Popup state management
+  // POPUP STATE MANAGEMENT
   const { popupOption, setPopupOption } = usePopupOption();
 
-  // Attendance record modal state
+  // ATTENDANCE RECORD MODAL STATE
   const [selectedAttendance, setSelectedAttendance] =
     useState<IAttendance | null>(null);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
-  // Fetch employees for the table
-  const { data: employeesData, loading: employeesLoading } = useQuery<{
-    employees: {
-      data: IEmployee[];
-    };
-  }>(GET_EMPLOYEES, {
-    variables: {
-      query: {},
-    },
-  });
-
-  // Fetch attendances
+  // ==================== GRAPHQL QUERIES ====================
+  // FETCH ATTENDANCES
   const {
     data: attendancesData,
     loading: attendancesLoading,
@@ -76,7 +346,8 @@ export default function AttendancePage() {
     },
   });
 
-  // Delete attendance mutation
+  // ==================== GRAPHQL MUTATIONS ====================
+  // DELETE ATTENDANCE
   const [deleteAttendance] = useMutation(DELETE_ATTENDANCE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
@@ -85,42 +356,38 @@ export default function AttendancePage() {
     },
   });
 
-  // Approve attendance mutation
+  // APPROVE ATTENDANCE
   const [approveAttendance] = useMutation(APPROVE_ATTENDANCE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
   });
 
-  // Reject attendance mutation
+  // REJECT ATTENDANCE
   const [rejectAttendance] = useMutation(REJECT_ATTENDANCE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
   });
 
-  const employees = employeesData?.employees?.data || [];
+  // ==================== DATA PREPARATION ====================
   const attendances = attendancesData?.attendances?.data || [];
-  const loading = employeesLoading || attendancesLoading;
+  const loading = attendancesLoading;
 
-  const handleDelete = (attendance: IAttendance) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: false,
-      actionType: "delete",
-      form: "attendance",
-      data: { id: attendance.id },
-      title: "Delete Attendance Record",
-      deleteHandler: async () => {
-        try {
-          await deleteAttendance({
-            variables: { id: attendance.id },
-          });
-        } catch (error) {
-          console.error("Error deleting attendance:", error);
-        }
-      },
-    });
+  // ==================== HANDLERS ====================
+  // DELETE HANDLER
+  const handleDelete = async (attendance: IAttendance) => {
+    try {
+      const res = await deleteAttendance({
+        variables: { id: Number(attendance.id) },
+      });
+      if (res?.data) {
+        showToast.success("Deleted!", "Attendance deleted successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to delete attendance");
+    }
   };
 
+  // UPDATE HANDLER
   const handleEdit = (attendance: IAttendance) => {
     setPopupOption({
       open: true,
@@ -132,123 +399,42 @@ export default function AttendancePage() {
     });
   };
 
+  // APPROVE HANDLER
   const handleApprove = async (attendance: IAttendance) => {
     try {
-      await approveAttendance({
+      const res = await approveAttendance({
         variables: { attendanceId: Number(attendance.id) },
       });
-    } catch (error) {
-      console.error("Error approving attendance:", error);
+      if (res?.data) {
+        showToast.success("Approved!", "Attendance approved successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to approve attendance");
     }
   };
 
+  // REJECT HANDLER
   const handleReject = async (attendance: IAttendance) => {
     try {
-      await rejectAttendance({
+      const res = await rejectAttendance({
         variables: { attendanceId: Number(attendance.id) },
       });
-    } catch (error) {
-      console.error("Error rejecting attendance:", error);
+      if (res?.data) {
+        showToast.success("Rejected!", "Attendance rejected successfully");
+      }
+    } catch (error: any) {
+      showToast.error("Error", error.message || "Failed to reject attendance");
     }
   };
 
-  // HANDLE VIEW ATTENDANCE RECORD
+  // VIEW RECORD HANDLER
   const handleViewRecord = (attendance: IAttendance) => {
     setSelectedAttendance(attendance);
     setIsRecordModalOpen(true);
   };
 
-  // Old dummy data for reference
-  const dummyAttendances: IAttendance[] = [
-    {
-      id: 1,
-      userId: 1,
-      date: dayjs().format("YYYY-MM-DD"),
-      totalHours: 8.5,
-      breakHours: 1,
-      status: "present",
-      punchRecords: [
-        {
-          id: 1,
-          attendanceId: 1,
-          punchIn: dayjs().set("hour", 9).set("minute", 0).toISOString(),
-          punchOut: dayjs().set("hour", 18).set("minute", 30).toISOString(),
-          breakStart: dayjs().set("hour", 13).set("minute", 0).toISOString(),
-          breakEnd: dayjs().set("hour", 14).set("minute", 0).toISOString(),
-          workHours: 8.5,
-          breakHours: 1,
-          punchInIp: "192.168.1.100",
-          punchOutIp: "192.168.1.100",
-          punchInLat: 23.8103,
-          punchInLng: 90.4125,
-          punchOutLat: 23.8103,
-          punchOutLng: 90.4125,
-          punchInDevice: "Windows 10 - Chrome",
-          punchOutDevice: "Windows 10 - Chrome",
-          workSite: "Windows 10 - Chrome",
-          project: "Windows 10 - Chrome",
-          notes: "Regular working day",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
-
-  // Calculate stats
-  const presentCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "present"
-  ).length;
-  const absentCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "absent"
-  ).length;
-  const lateCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "late"
-  ).length;
-
-  // const getStatusBadge = (status: string) => {
-  //   switch (status.toLowerCase()) {
-  //     case "present":
-  //       return (
-  //         <span className="badge badge-success gap-1">
-  //           <PiCheckCircle size={14} />
-  //           Present
-  //         </span>
-  //       );
-  //     case "absent":
-  //       return (
-  //         <span className="badge badge-error gap-1">
-  //           <PiXCircle size={14} />
-  //           Absent
-  //         </span>
-  //       );
-  //     case "late":
-  //       return (
-  //         <span className="badge badge-warning gap-1">
-  //           <PiWarning size={14} />
-  //           Late
-  //         </span>
-  //       );
-  //     case "half_day":
-  //       return (
-  //         <span className="badge badge-info gap-1">
-  //           <PiMinus size={14} />
-  //           Half Day
-  //         </span>
-  //       );
-  //     case "on_leave":
-  //       return (
-  //         <span className="badge badge-ghost gap-1">
-  //           <PiAirplaneTilt size={14} />
-  //           On Leave
-  //         </span>
-  //       );
-  //     default:
-  //       return <span className="badge badge-ghost">{status}</span>;
-  //   }
-  // };
+  // ==================== HELPER FUNCTIONS ====================
+  // STATUS BADGE
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "approved":
@@ -272,17 +458,41 @@ export default function AttendancePage() {
             Pending
           </span>
         );
-      case "cancelled":
+      case "present":
         return (
-          <span className="badge badge-ghost gap-1">
+          <span className="badge badge-success gap-1">
+            <PiCheckCircle size={14} />
+            Present
+          </span>
+        );
+      case "absent":
+        return (
+          <span className="badge badge-error gap-1">
             <PiXCircle size={14} />
-            Cancelled
+            Absent
+          </span>
+        );
+      case "late":
+        return (
+          <span className="badge badge-warning gap-1">
+            <PiWarning size={14} />
+            Late
+          </span>
+        );
+      case "half_day":
+        return (
+          <span className="badge badge-info gap-1">
+            <PiMinus size={14} />
+            Half Day
           </span>
         );
       default:
         return <span className="badge badge-ghost">{status}</span>;
     }
   };
+
+  // ==================== TABLE CONFIGURATION ====================
+  // COLUMNS
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -349,7 +559,16 @@ export default function AttendancePage() {
       name: "Delete",
       type: "button" as const,
       Icon: PiTrash,
-      handler: (row: any) => handleDelete(row),
+      handler: (row: IAttendance) => {
+        setPopupOption({
+          open: true,
+          closeOnDocumentClick: true,
+          actionType: "delete",
+          form: "attendance",
+          deleteHandler: () => handleDelete(row),
+          title: "Delete Attendance",
+        });
+      },
       permissions: [Permissions.AttendanceDelete],
       disabledOn: [],
     },
@@ -358,59 +577,13 @@ export default function AttendancePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content">
-            Attendance Management
-          </h1>
-          <p className="text-sm text-base-content/60 mt-1">
-            Track and manage employee attendance records
-          </p>
-        </div>
+      <PageHeader
+        title={`Attendance Management`}
+        subtitle={`Track and manage employee attendance records`}
+      />
 
-        {/*  */}
-        <div className=""></div>
-      </div>
-
-      {/* Date Picker & Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Stats Cards */}
-        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-base-content/60">Present</p>
-                <p className="text-2xl font-bold text-success">
-                  {presentCount}
-                </p>
-              </div>
-              <PiCheckCircle size={32} className="text-success" />
-            </div>
-          </div>
-
-          <div className="bg-error/10 border border-error/20 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-base-content/60">Absent</p>
-                <p className="text-2xl font-bold text-error">{absentCount}</p>
-              </div>
-              <PiXCircle size={32} className="text-error" />
-            </div>
-          </div>
-
-          <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-base-content/60">Late</p>
-                <p className="text-2xl font-bold text-warning">{lateCount}</p>
-              </div>
-              <PiWarning size={32} className="text-warning" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {loading && <CustomLoading />}
+      {/* ATTENDANCE SUMMARY STATS */}
+      <AttendanceStats />
 
       {/* Attendance Table */}
       <CustomTable
@@ -465,13 +638,13 @@ export default function AttendancePage() {
       </CustomTable>
 
       {/* Attendance Form Modal */}
-      <CustomPopup
-        customWidth="90%"
-        popupOption={popupOption}
-        setPopupOption={setPopupOption}
-      >
-        {popupOption.form === "attendance" &&
-          popupOption.actionType !== "delete" && (
+      {popupOption.actionType !== "delete" && (
+        <CustomPopup
+          customWidth="90%"
+          popupOption={popupOption}
+          setPopupOption={setPopupOption}
+        >
+          {popupOption.form === "attendance" && (
             <AttendanceForm
               attendance={popupOption.data}
               actionType={popupOption.actionType as "create" | "update"}
@@ -484,7 +657,12 @@ export default function AttendancePage() {
               }}
             />
           )}
-      </CustomPopup>
+        </CustomPopup>
+      )}
+
+      {popupOption.actionType === "delete" && (
+        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
+      )}
 
       {/* Attendance Record Modal */}
       <AttendanceRecord
@@ -495,9 +673,6 @@ export default function AttendancePage() {
           setSelectedAttendance(null);
         }}
       />
-
-      {/* Delete Confirmation Modal */}
-      {/* <FormModal popupOption={popupOption} setPopupOption={setPopupOption} /> */}
     </div>
   );
 }
