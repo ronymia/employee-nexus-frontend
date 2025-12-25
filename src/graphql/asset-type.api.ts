@@ -12,7 +12,6 @@ export const GET_ASSET_TYPES = gql`
         description
         status
         businessId
-        createdBy
         createdAt
         updatedAt
       }
@@ -34,7 +33,6 @@ export const CREATE_ASSET_TYPE = gql`
         description
         status
         businessId
-        createdBy
         createdAt
         updatedAt
       }
@@ -56,7 +54,6 @@ export const UPDATE_ASSET_TYPE = gql`
         description
         status
         businessId
-        createdBy
         createdAt
         updatedAt
       }
@@ -76,7 +73,6 @@ export const DELETE_ASSET_TYPE = gql`
         description
         status
         businessId
-        createdBy
         createdAt
         updatedAt
       }
