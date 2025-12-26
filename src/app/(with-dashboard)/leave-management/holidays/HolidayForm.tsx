@@ -8,12 +8,11 @@ import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import CustomSelect from "@/components/form/input/CustomSelect";
-import { useFormContext } from "react-hook-form";
 import { useMutation } from "@apollo/client/react";
 import { CREATE_HOLIDAY, UPDATE_HOLIDAY } from "@/graphql/holiday.api";
 import { IHoliday, HolidayType } from "@/types/holiday.type";
-import { useState } from "react";
 import dayjs from "dayjs";
+import { showToast } from "@/components/ui/CustomToast";
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface IHolidayFormProps {
@@ -131,15 +130,12 @@ export default function HolidayForm({
   actionType,
   onClose,
 }: IHolidayFormProps) {
-  // ==================== LOCAL STATE ====================
-  const [isPending, setIsPending] = useState(false);
-
   // ==================== GRAPHQL MUTATIONS ====================
   // CREATE HOLIDAY
-  const [createHoliday] = useMutation(CREATE_HOLIDAY);
+  const [createHoliday, createResult] = useMutation(CREATE_HOLIDAY);
 
   // UPDATE HOLIDAY
-  const [updateHoliday] = useMutation(UPDATE_HOLIDAY);
+  const [updateHoliday, updateResult] = useMutation(UPDATE_HOLIDAY);
 
   // ==================== HOLIDAY TYPE OPTIONS ====================
   const holidayTypeOptions = [
@@ -152,8 +148,6 @@ export default function HolidayForm({
   // ==================== FORM SUBMISSION ====================
   const handleSubmit = async (data: any) => {
     try {
-      setIsPending(true);
-
       // FORMAT DATES TO ISO 8601
       const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
       const endDate = dayjs(data.endDate, "DD-MM-YYYY").toISOString();
@@ -176,19 +170,24 @@ export default function HolidayForm({
             createHolidayInput: input,
           },
         });
+        showToast.success("Created!", "Holiday has been created successfully");
       } else {
         await updateHoliday({
           variables: {
             updateHolidayInput: { ...input, id: Number(holiday?.id) },
           },
         });
+        showToast.success("Updated!", "Holiday has been updated successfully");
       }
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting holiday:", error);
-    } finally {
-      setIsPending(false);
+      showToast.error(
+        "Error",
+        error.message || `Failed to ${actionType} holiday`
+      );
+      throw error;
     }
   };
 
@@ -222,7 +221,10 @@ export default function HolidayForm({
       </div>
 
       {/* FORM ACTIONS */}
-      <FormActionButton isPending={isPending} cancelHandler={onClose} />
+      <FormActionButton
+        isPending={createResult.loading || updateResult.loading}
+        cancelHandler={onClose}
+      />
     </CustomForm>
   );
 }

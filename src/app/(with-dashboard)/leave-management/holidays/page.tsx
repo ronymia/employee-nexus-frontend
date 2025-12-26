@@ -18,16 +18,15 @@ import {
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import CustomPopup from "@/components/modal/CustomPopup";
-import FormModal from "@/components/form/FormModal";
 import HolidayForm from "./HolidayForm";
 import usePopupOption from "@/hooks/usePopupOption";
+import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
 import { GET_HOLIDAYS, DELETE_HOLIDAY } from "@/graphql/holiday.api";
 import { IHoliday, HolidayType } from "@/types/holiday.type";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import PageHeader from "@/components/ui/PageHeader";
-import { showToast } from "@/components/ui/CustomToast";
 
 dayjs.extend(isSameOrAfter);
 
@@ -139,6 +138,9 @@ export default function HolidaysPage() {
   // ==================== PERMISSIONS ====================
   const { hasPermission } = usePermissionGuard();
 
+  // ==================== HOOKS ====================
+  const deleteConfirmation = useDeleteConfirmation();
+
   // ==================== LOCAL STATE ====================
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
@@ -191,13 +193,6 @@ export default function HolidaysPage() {
   const [deleteHoliday] = useMutation(DELETE_HOLIDAY, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_HOLIDAYS }],
-    onCompleted: () => {
-      setPopupOption({ ...popupOption, open: false });
-      showToast.success("Deleted!", "Holiday deleted successfully");
-    },
-    onError: (error) => {
-      showToast.error("Error", error.message || "Failed to delete holiday");
-    },
   });
 
   // ==================== CALCULATE STATS ====================
@@ -211,22 +206,23 @@ export default function HolidaysPage() {
 
   // ==================== HANDLERS ====================
   // DELETE HANDLER
-  const handleDelete = (holiday: IHoliday) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: false,
-      actionType: "delete",
-      form: "holiday",
-      data: { id: holiday.id },
-      title: "Delete Holiday",
-      deleteHandler: async () => {
-        try {
-          await deleteHoliday({
-            variables: { id: Number(holiday.id) },
-          });
-        } catch (error: any) {
-          showToast.error("Error", error.message || "Failed to delete holiday");
-        }
+  const handleDelete = async (holiday: IHoliday) => {
+    await deleteConfirmation.confirm({
+      title: "Are you sure?",
+      itemName: holiday.name,
+      itemDescription: `Holiday Period: ${
+        holiday.startDate === holiday.endDate
+          ? dayjs(holiday.startDate).format("MMM DD, YYYY")
+          : `${dayjs(holiday.startDate).format("MMM DD, YYYY")} - ${dayjs(
+              holiday.endDate
+            ).format("MMM DD, YYYY")}`
+      }`,
+      confirmButtonText: "Yes, delete it!",
+      successMessage: "Holiday deleted successfully",
+      onDelete: async () => {
+        await deleteHoliday({
+          variables: { id: Number(holiday.id) },
+        });
       },
     });
   };
@@ -356,25 +352,21 @@ export default function HolidaysPage() {
       </CustomTable>
 
       {/* HOLIDAY FORM MODAL */}
-      {popupOption.actionType !== "delete" ? (
-        <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
-          {popupOption.form === "holiday" && (
-            <HolidayForm
-              holiday={popupOption.data}
-              actionType={popupOption.actionType as "create" | "update"}
-              onClose={() => {
-                setPopupOption({
-                  ...popupOption,
-                  open: false,
-                });
-                refetch();
-              }}
-            />
-          )}
-        </CustomPopup>
-      ) : (
-        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
-      )}
+      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+        {popupOption.form === "holiday" && (
+          <HolidayForm
+            holiday={popupOption.data}
+            actionType={popupOption.actionType as "create" | "update"}
+            onClose={() => {
+              setPopupOption({
+                ...popupOption,
+                open: false,
+              });
+              refetch();
+            }}
+          />
+        )}
+      </CustomPopup>
     </div>
   );
 }

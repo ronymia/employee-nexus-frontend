@@ -7,10 +7,11 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import CustomFileUploader from "@/components/form/input/CustomFileUploader";
+import EmployeeSelect from "@/components/input-fields/EmployeeSelect";
+import LeaveTypeSelect from "@/components/input-fields/LeaveTypeSelect";
 import { useFormContext, useWatch } from "react-hook-form";
-import { IEmployee, ILeave, LeaveDuration } from "@/types";
+import { ILeave, LeaveDuration } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
 import { CREATE_LEAVE, UPDATE_LEAVE, LEAVE_BALANCE } from "@/graphql/leave.api";
 import { useState } from "react";
 import dayjs from "dayjs";
@@ -18,12 +19,12 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { PiCheck, PiClock } from "react-icons/pi";
+import { showToast } from "@/components/ui/CustomToast";
 
 dayjs.extend(customParseFormat);
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface ILeaveFormProps {
-  employees: IEmployee[];
   leave?: ILeave;
   actionType: "create" | "update";
   onClose: () => void;
@@ -43,16 +44,12 @@ interface ILeaveBalanceData {
 
 // BASIC INFO SECTION
 interface IBasicInfoSectionProps {
-  employeeOptions: { label: string; value: number }[];
-  leaveTypeOptions: { label: string; value: number }[];
   yearOptions: { label: string; value: number }[];
   durationOptions: { label: string; value: LeaveDuration }[];
   actionType: "create" | "update";
 }
 
 function BasicInfoSection({
-  employeeOptions,
-  leaveTypeOptions,
   yearOptions,
   durationOptions,
   actionType,
@@ -63,24 +60,20 @@ function BasicInfoSection({
         Basic Information
       </h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CustomSelect
+        <EmployeeSelect
           dataAuto="userId"
           name="userId"
           label="Employee"
           placeholder="Select Employee"
           required={true}
-          options={employeeOptions}
           disabled={actionType === "update"}
-          isLoading={false}
         />
-        <CustomSelect
+        <LeaveTypeSelect
           dataAuto="leaveTypeId"
           name="leaveTypeId"
           label="Leave Type"
           placeholder="Select Leave Type"
           required={true}
-          options={leaveTypeOptions}
-          isLoading={false}
         />
         <CustomSelect
           dataAuto="leaveYear"
@@ -446,7 +439,6 @@ function NotesSection() {
 
 // ==================== MAIN COMPONENT ====================
 export default function LeaveForm({
-  employees,
   leave,
   actionType,
   onClose,
@@ -566,18 +558,30 @@ export default function LeaveForm({
             createLeaveInput: input,
           },
         });
+        showToast.success(
+          "Created!",
+          "Leave request has been created successfully"
+        );
       } else {
         await updateLeave({
           variables: {
             updateLeaveInput: { ...input, id: Number(leave?.id) },
           },
         });
+        showToast.success(
+          "Updated!",
+          "Leave request has been updated successfully"
+        );
       }
 
       refetch?.();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting leave:", error);
+      showToast.error(
+        "Error",
+        error.message || `Failed to ${actionType} leave request`
+      );
     } finally {
       setIsPending(false);
     }
@@ -600,20 +604,14 @@ export default function LeaveForm({
   // ==================== RENDER ====================
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
-      <LeaveFormFields employees={employees} actionType={actionType} />
+      <LeaveFormFields actionType={actionType} />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
 
 // ==================== FORM FIELDS COMPONENT ====================
-function LeaveFormFields({
-  employees,
-  actionType,
-}: {
-  employees: IEmployee[];
-  actionType: "create" | "update";
-}) {
+function LeaveFormFields({ actionType }: { actionType: "create" | "update" }) {
   // ==================== FORM CONTEXT ====================
   const { control, watch } = useFormContext();
 
@@ -627,11 +625,6 @@ function LeaveFormFields({
     name: "leaveDuration",
     defaultValue: LeaveDuration.SINGLE_DAY,
   });
-
-  // ==================== FETCH LEAVE TYPES ====================
-  const { data: leaveTypesData } = useQuery<{
-    leaveTypes: { data: any[] };
-  }>(GET_LEAVE_TYPES);
 
   // ==================== LEAVE BALANCE QUERY ====================
   const shouldFetchBalance =
@@ -654,19 +647,6 @@ function LeaveFormFields({
   const showRestOfForm =
     actionType === "update" || (shouldFetchBalance && !balanceLoading);
 
-  // ==================== PREPARE OPTIONS ====================
-  const employeeOptions = employees.map((emp) => ({
-    label: emp.profile?.fullName || emp.email,
-    value: emp.id,
-  }));
-
-  const leaveTypeOptions = (leaveTypesData?.leaveTypes?.data || []).map(
-    (type) => ({
-      label: type.name,
-      value: type.id,
-    })
-  );
-
   const durationOptions = [
     { label: "Single Day", value: LeaveDuration.SINGLE_DAY },
     { label: "Multi Day", value: LeaveDuration.MULTI_DAY },
@@ -684,8 +664,6 @@ function LeaveFormFields({
     <div className="space-y-4">
       {/* BASIC INFO */}
       <BasicInfoSection
-        employeeOptions={employeeOptions}
-        leaveTypeOptions={leaveTypeOptions}
         yearOptions={yearOptions}
         durationOptions={durationOptions}
         actionType={actionType}

@@ -44,9 +44,11 @@ export default function TableActionButton({
               ? BiShow
               : undefined;
           const dataAutoAttr = `${dataAuto}_${action?.name}-${row?.id}`;
+          const isActionLoading = action?.isLoading?.(row) || false;
           const iconClass = `text-3xl p-1 bg-gray-50 rounded border border-primary/20 drop-shadow cursor-pointer ${
             action?.name === "delete" ? "text-red-500" : "text-primary"
-          }`;
+          } ${isActionLoading ? "opacity-50 cursor-not-allowed" : ""}
+          `;
 
           // Render a Link
           if (action?.type === "link" && action?.href) {
@@ -76,11 +78,14 @@ export default function TableActionButton({
               data-auto={dataAutoAttr}
               key={action?.name}
               type="button"
-              onClick={() => action?.handler?.(row)}
+              onClick={() => !isActionLoading && action?.handler?.(row)}
+              disabled={isActionLoading}
               aria-label={action.name}
               // className={`bg-gray-100 transition border-gray-500`}
             >
-              {action?.Icon ? (
+              {isActionLoading ? (
+                <span className="loading loading-spinner loading-sm text-primary"></span>
+              ) : action?.Icon ? (
                 <action.Icon className={iconClass} />
               ) : Icon ? (
                 <Icon className={iconClass} />
