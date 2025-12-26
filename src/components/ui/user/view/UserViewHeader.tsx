@@ -58,35 +58,35 @@ ProfileHeaderProps) {
     gender: "Male",
   };
 
-  // const defaultWorkSchedule = {
-  //   today: { scheduled: 7.98, worked: 6.5, overtime: 0, leave: 0 },
-  //   week: { scheduled: 47.88, worked: 40, overtime: 2, leave: 0 },
-  //   month: { scheduled: 207.48, worked: 180, overtime: 5, leave: 8 },
-  // };
+  const defaultWorkSchedule = {
+    today: { scheduled: 7.98, worked: 6.5, overtime: 0, leave: 0 },
+    week: { scheduled: 47.88, worked: 40, overtime: 2, leave: 0 },
+    month: { scheduled: 207.48, worked: 180, overtime: 5, leave: 8 },
+  };
 
   const emp = employee || defaultEmployee;
-  // const schedule = workSchedule || defaultWorkSchedule;
+  const schedule = defaultWorkSchedule;
 
-  // const chartData = [
-  //   {
-  //     period: "Today",
-  //     worked: schedule.today.worked,
-  //     overtime: schedule.today.overtime,
-  //     leave: schedule.today.leave,
-  //   },
-  //   {
-  //     period: "Week",
-  //     worked: schedule.week.worked,
-  //     overtime: schedule.week.overtime,
-  //     leave: schedule.week.leave,
-  //   },
-  //   {
-  //     period: "Month",
-  //     worked: schedule.month.worked,
-  //     overtime: schedule.month.overtime,
-  //     leave: schedule.month.leave,
-  //   },
-  // ];
+  const chartData = [
+    {
+      period: "Today",
+      worked: schedule.today.worked,
+      overtime: schedule.today.overtime,
+      leave: schedule.today.leave,
+    },
+    {
+      period: "Week",
+      worked: schedule.week.worked,
+      overtime: schedule.week.overtime,
+      leave: schedule.week.leave,
+    },
+    {
+      period: "Month",
+      worked: schedule.month.worked,
+      overtime: schedule.month.overtime,
+      leave: schedule.month.leave,
+    },
+  ];
 
   return (
     <div className="p-3 bg-white">

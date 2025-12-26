@@ -4,30 +4,30 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
 import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
-import ProfileHeader from "./ProfileHeader";
-import ProfileTabs from "./ProfileTab";
+import UserViewHeader from "./UserViewHeader";
+import UserViewTabs from "./UserViewTab";
 import CustomLoading from "@/components/loader/CustomLoading";
 import {
   PaySlipContent,
   ProjectsContent,
   SocialLinksContent,
   LeaveContent,
-} from "./profile-tabs";
-import ProfileContent from "./profile-tabs/profile/ProfileContent";
-import EducationContent from "./profile-tabs/education/EducationContent";
-import ExperienceContent from "./profile-tabs/experience/ExperienceContent";
-import ScheduleContent from "./profile-tabs/schedule/ScheduleContent";
-import AssetsContent from "./profile-tabs/assets/AssetsContent";
-import DocumentsContent from "./profile-tabs/documents/DocumentsContent";
-import NotesContent from "./profile-tabs/notes/NotesContent";
-import AttendanceContent from "./profile-tabs/attendance/AttendanceContent";
+} from "./view-tabs";
+import ProfileContent from "./view-tabs/profile/ProfileContent";
+import EducationContent from "./view-tabs/education/EducationContent";
+import ExperienceContent from "./view-tabs/experience/ExperienceContent";
+import ScheduleContent from "./view-tabs/schedule/ScheduleContent";
+import AssetsContent from "./view-tabs/assets/AssetsContent";
+import DocumentsContent from "./view-tabs/documents/DocumentsContent";
+import NotesContent from "./view-tabs/notes/NotesContent";
+import AttendanceContent from "./view-tabs/attendance/AttendanceContent";
 import { IEmployee } from "@/types";
 
-interface UserProfileProps {
+interface UserViewProps {
   userId: number;
 }
 
-export default function UserProfile({ userId }: UserProfileProps) {
+export default function UserView({ userId }: UserViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(
@@ -1086,7 +1086,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
       </div>
 
       {/* Profile Info */}
-      <ProfileHeader
+      <UserViewHeader
+        key={`user-view-header`}
         employee={
           employee
             ? {
@@ -1111,20 +1112,44 @@ export default function UserProfile({ userId }: UserProfileProps) {
       />
 
       {/* Tabs */}
-      <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <UserViewTabs
+        key={`user-view-tabs`}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       {/* Content */}
       <div className="p-6">
-        {activeTab === "profile" && <ProfileContent employee={employee} />}
-        {activeTab === "education" && <EducationContent userId={userId} />}
-        {activeTab === "experience" && <ExperienceContent userId={userId} />}
-        {activeTab === "schedule" && <ScheduleContent userId={userId} />}
-        {activeTab === "attendance" && <AttendanceContent userId={userId} />}
-        {activeTab === "leave" && <LeaveContent userId={userId} />}
-        {activeTab === "payslip" && <PaySlipContent userId={userId} />}
-        {activeTab === "projects" && <ProjectsContent userId={userId} />}
-        {activeTab === "documents" && <DocumentsContent userId={userId} />}
-        {activeTab === "notes" && <NotesContent userId={userId} />}
+        {activeTab === "profile" && (
+          <ProfileContent key={`profile-tab`} employee={employee} />
+        )}
+        {activeTab === "education" && (
+          <EducationContent key={`education-tab`} userId={userId} />
+        )}
+        {activeTab === "experience" && (
+          <ExperienceContent key={`experience-tab`} userId={userId} />
+        )}
+        {activeTab === "schedule" && (
+          <ScheduleContent key={`schedule-tab`} userId={userId} />
+        )}
+        {activeTab === "attendance" && (
+          <AttendanceContent key={`attendance-tab`} userId={userId} />
+        )}
+        {activeTab === "leave" && (
+          <LeaveContent key={`leave-tab`} userId={userId} />
+        )}
+        {activeTab === "payslip" && (
+          <PaySlipContent key={`payslip-tab`} userId={userId} />
+        )}
+        {activeTab === "projects" && (
+          <ProjectsContent key={`projects-tab`} userId={userId} />
+        )}
+        {activeTab === "documents" && (
+          <DocumentsContent key={`documents-tab`} userId={userId} />
+        )}
+        {activeTab === "notes" && (
+          <NotesContent key={`notes-tab`} userId={userId} />
+        )}
         {activeTab === "letters" && (
           <div className="bg-base-100 rounded-lg p-6 shadow-sm">
             <p className="text-base-content/60 text-center py-8">
@@ -1132,8 +1157,12 @@ export default function UserProfile({ userId }: UserProfileProps) {
             </p>
           </div>
         )}
-        {activeTab === "assets" && <AssetsContent userId={userId} />}
-        {activeTab === "social" && <SocialLinksContent userId={userId} />}
+        {activeTab === "assets" && (
+          <AssetsContent key={`assets-tabs`} userId={userId} />
+        )}
+        {activeTab === "social" && (
+          <SocialLinksContent key={`social-tabs`} userId={userId} />
+        )}
       </div>
     </div>
   );

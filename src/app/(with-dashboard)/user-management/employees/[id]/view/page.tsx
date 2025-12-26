@@ -1,6 +1,6 @@
 import { use } from "react";
-import UserProfile from "@/components/ui/user/profile/UserProfile";
 import { Metadata } from "next";
+import UserView from "@/components/ui/user/view/UserView";
 
 export const metadata: Metadata = {
   title: "Employee View | Employee Nexus",
@@ -13,5 +13,5 @@ export default function EmployeeProfilePage({
 }) {
   const { id } = use(params);
 
-  return <UserProfile userId={Number(id)} />;
+  return <UserView userId={Number(id)} />;
 }
