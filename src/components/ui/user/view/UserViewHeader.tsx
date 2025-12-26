@@ -2,6 +2,7 @@
 
 import dayjs from "dayjs";
 import ImageUploader from "../../uploader/ImageUploader";
+import WorkScheduleCompactChart from "@/components/charts/WorkScheduleCompactChart";
 
 interface ProfileHeaderProps {
   employee?: {
@@ -191,84 +192,103 @@ ProfileHeaderProps) {
         </div>
 
         {/* Work Schedule Stats - COMMENTED FOR LATER */}
-        {/* <div className="flex-1 lg:min-w-[400px] border shadow-md rounded-xl p-4 md:p-6 bg-white mt-6">
-          <h3 className="text-base md:text-lg font-semibold mb-4 text-base-content">
-            Work Schedule Overview
-          </h3>
-
-          <div className="flex flex-wrap gap-3 mb-4 text-xs md:text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-success rounded"></div>
-              <span className="text-base-content/70">Worked</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-warning rounded"></div>
-              <span className="text-base-content/70">Overtime</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-info rounded"></div>
-              <span className="text-base-content/70">Leave</span>
-            </div>
-          </div>
-
-          <div className="space-y-4 mb-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm md:text-base font-medium text-success">
-                  Today&apos;s
-                </p>
-                <p className="text-xs text-base-content/60">
-                  Scheduled: {schedule.today.scheduled}h
-                </p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-xs text-base-content/60">
-                  Worked:{" "}
-                  <span className="font-medium">{schedule.today.worked}h</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm md:text-base font-medium text-success">
-                  This Week&apos;s
-                </p>
-                <p className="text-xs text-base-content/60">
-                  Scheduled: {schedule.week.scheduled}h
-                </p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-xs text-base-content/60">
-                  Worked:{" "}
-                  <span className="font-medium">{schedule.week.worked}h</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm md:text-base font-medium text-success">
-                  This Month&apos;s
-                </p>
-                <p className="text-xs text-base-content/60">
-                  Scheduled: {schedule.month.scheduled}h
-                </p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-xs text-base-content/60">
-                  Worked:{" "}
-                  <span className="font-medium">{schedule.month.worked}h</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="h-48 md:h-56">
-            <WorkScheduleChart data={chartData} />
-          </div>
-        </div> */}
+        {/* <WorkScheduleOverView schedule={schedule} chartData={chartData} /> */}
       </div>
     </div>
   );
 }
+
+// function WorkScheduleOverView({ schedule, chartData }) {
+//   return (
+//     <div className="flex-1 border shadow-md rounded-xl p-4 md:p-6 bg-white mt-6">
+//       <h3 className="text-base md:text-lg font-semibold mb-4 text-base-content">
+//         Work Schedule Overview
+//       </h3>
+
+//       <div className="py-2">
+//         <WorkScheduleCompactChart data={chartData} />
+//       </div>
+//     </div>
+//   );
+// }
+// function WorkScheduleOverView() {
+//   return (
+//     <div className="flex-1 border shadow-md rounded-xl p-4 md:p-6 bg-white mt-6">
+//       <h3 className="text-base md:text-lg font-semibold mb-4 text-base-content">
+//         Work Schedule Overview
+//       </h3>
+
+//       <div className="flex flex-wrap gap-3 mb-4 text-xs md:text-sm">
+//         <div className="flex items-center gap-2">
+//           <div className="w-3 h-3 bg-success rounded"></div>
+//           <span className="text-base-content/70">Worked</span>
+//         </div>
+//         <div className="flex items-center gap-2">
+//           <div className="w-3 h-3 bg-warning rounded"></div>
+//           <span className="text-base-content/70">Overtime</span>
+//         </div>
+//         <div className="flex items-center gap-2">
+//           <div className="w-3 h-3 bg-info rounded"></div>
+//           <span className="text-base-content/70">Leave</span>
+//         </div>
+//       </div>
+
+//       <div className="space-y-4 mb-4">
+//         <div className="flex justify-between items-center">
+//           <div>
+//             <p className="text-sm md:text-base font-medium text-success">
+//               Today&apos;s
+//             </p>
+//             <p className="text-xs text-base-content/60">
+//               Scheduled: {schedule.today.scheduled}h
+//             </p>
+//           </div>
+//           <div className="text-right space-y-1">
+//             <p className="text-xs text-base-content/60">
+//               Worked:{" "}
+//               <span className="font-medium">{schedule.today.worked}h</span>
+//             </p>
+//           </div>
+//         </div>
+
+//         <div className="flex justify-between items-center">
+//           <div>
+//             <p className="text-sm md:text-base font-medium text-success">
+//               This Week&apos;s
+//             </p>
+//             <p className="text-xs text-base-content/60">
+//               Scheduled: {schedule.week.scheduled}h
+//             </p>
+//           </div>
+//           <div className="text-right space-y-1">
+//             <p className="text-xs text-base-content/60">
+//               Worked:{" "}
+//               <span className="font-medium">{schedule.week.worked}h</span>
+//             </p>
+//           </div>
+//         </div>
+
+//         <div className="flex justify-between items-center">
+//           <div>
+//             <p className="text-sm md:text-base font-medium text-success">
+//               This Month&apos;s
+//             </p>
+//             <p className="text-xs text-base-content/60">
+//               Scheduled: {schedule.month.scheduled}h
+//             </p>
+//           </div>
+//           <div className="text-right space-y-1">
+//             <p className="text-xs text-base-content/60">
+//               Worked:{" "}
+//               <span className="font-medium">{schedule.month.worked}h</span>
+//             </p>
+//           </div>
+//         </div>
+//       </div>
+
+//       <div className="h-48 md:h-56">
+//         <WorkScheduleChart data={chartData} />
+//       </div>
+//     </div>
+//   );
+// }
