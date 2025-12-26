@@ -9,6 +9,7 @@ interface IWorkSiteSelectProps {
   required?: boolean;
   placeholder?: string;
   dataAuto?: string;
+  multipleSelect: boolean;
 }
 
 export default function WorkSiteSelect({
@@ -17,6 +18,7 @@ export default function WorkSiteSelect({
   required = false,
   placeholder = "Select Work Site",
   dataAuto = "workSite",
+  multipleSelect = true,
 }: IWorkSiteSelectProps) {
   const { data, loading } = useQuery<{ workSites: { data: IWorkSite[] } }>(
     GET_WORK_SITES,
@@ -38,7 +40,7 @@ export default function WorkSiteSelect({
       dataAuto={dataAuto}
       required={required}
       isLoading={loading}
-      multipleSelect={true}
+      multipleSelect={multipleSelect}
     />
   );
 }

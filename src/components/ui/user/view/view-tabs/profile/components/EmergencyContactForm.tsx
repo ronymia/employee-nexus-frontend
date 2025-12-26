@@ -8,8 +8,9 @@ import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 import { UPDATE_EMERGENCY_CONTACT } from "@/graphql/profile.api";
 import { IEmployee } from "@/types";
 import { useMutation } from "@apollo/client/react";
+import { showToast } from "@/components/ui/CustomToast";
 
-interface EmergencyContactFormProps {
+interface IEmergencyContactFormProps {
   employee?: IEmployee;
   onClose: () => void;
 }
@@ -17,7 +18,7 @@ interface EmergencyContactFormProps {
 export default function EmergencyContactForm({
   employee,
   onClose,
-}: EmergencyContactFormProps) {
+}: IEmergencyContactFormProps) {
   // MUTATION TO UPDATE PROFILE
   const [updateEmergencyContact, updateResult] = useMutation(
     UPDATE_EMERGENCY_CONTACT,
@@ -37,18 +38,26 @@ export default function EmergencyContactForm({
         variables: {
           updateEmergencyContactInput: {
             ...data,
-            id: Number(employee?.profile?.id),
+            userId: Number(employee?.profile?.userId),
           },
         },
         fetchPolicy: "no-cache",
       });
 
       if (result.data) {
-        console.log(result);
+        showToast.success(
+          "Updated!",
+          "Emergency contact has been updated successfully"
+        );
         onClose();
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error("Error updating emergency contact:", error);
+      showToast.error(
+        "Error",
+        error.message || "Failed to update emergency contact"
+      );
+      throw error;
     }
   };
 

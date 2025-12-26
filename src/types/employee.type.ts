@@ -27,10 +27,10 @@ export interface IEmployee {
   roleId: number;
   role?: IRole;
   status: string;
-  deletedBy?: number;
   profile?: IProfile;
   employee?: IEmployeeDetails;
   permissions?: string[];
+  deletedBy?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,9 +41,8 @@ export interface IEmployeeDetails {
   departmentId: number;
   designationId: number;
   employmentStatusId?: number;
-  workSiteId?: number;
   workScheduleId?: number;
-  joiningDate?: string;
+  joiningDate: string;
   salaryPerMonth?: number;
   nidNumber?: string;
   rotaType?: string;
@@ -67,7 +66,7 @@ export interface ICreateEmployeeInput {
   };
   profile: {
     fullName: string;
-    dateOfBirth?: string;
+    dateOfBirth: string;
     gender?: string;
     maritalStatus?: string;
     phone?: string;

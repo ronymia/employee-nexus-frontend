@@ -86,20 +86,19 @@ export const UPDATE_PROFILE = gql`
       statusCode
       success
       data {
+        userId
         address
         city
         country
-        createdAt
         dateOfBirth
         fullName
         gender
-        id
         maritalStatus
         phone
         postcode
         profilePicture
+        createdAt
         updatedAt
-        userId
       }
     }
   }
@@ -136,7 +135,7 @@ export const UPDATE_EMPLOYMENT_DETAILS = gql`
       statusCode
       message
       data {
-        id
+        userId
         employeeId
         nidNumber
         joiningDate
@@ -146,10 +145,7 @@ export const UPDATE_EMPLOYMENT_DETAILS = gql`
         designationId
         employmentStatusId
         departmentId
-        workSiteId
         workScheduleId
-        createdAt
-        updatedAt
       }
     }
   }

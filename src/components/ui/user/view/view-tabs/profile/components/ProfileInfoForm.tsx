@@ -6,13 +6,15 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
-import { IEmployee } from "@/types";
+import { Gender, IEmployee } from "@/types";
 import dayjs from "dayjs";
 import { useMutation } from "@apollo/client/react";
 import { UPDATE_PROFILE } from "@/graphql/profile.api";
 import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
+import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
+import { showToast } from "@/components/ui/CustomToast";
 
-interface ProfileInfoFormProps {
+interface IProfileInfoFormProps {
   employee?: IEmployee;
   onClose: () => void;
 }
@@ -20,7 +22,7 @@ interface ProfileInfoFormProps {
 export default function ProfileInfoForm({
   employee,
   onClose,
-}: ProfileInfoFormProps) {
+}: IProfileInfoFormProps) {
   // MUTATION TO UPDATE PROFILE
   const [updateProfile, updateResult] = useMutation(UPDATE_PROFILE, {
     awaitRefetchQueries: true,
@@ -34,11 +36,11 @@ export default function ProfileInfoForm({
       // Remove email from submission as it's not part of profile update
       const { email, ...profileData } = formValues;
 
+      profileData["userId"] = Number(employee?.id);
       const result = await updateProfile({
         variables: {
           updateProfileInput: {
             ...profileData,
-            id: Number(employee?.profile?.id),
             profilePicture: employee?.profile?.profilePicture || "",
           },
         },
@@ -46,11 +48,13 @@ export default function ProfileInfoForm({
       });
 
       if (result.data) {
-        console.log(result);
+        showToast.success("Updated!", "Profile has been updated successfully");
         onClose();
       }
-    } catch (error) {
-      console.error("Error submitting employee:", error);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      showToast.error("Error", error.message || "Failed to update profile");
+      throw error;
     }
   };
 
@@ -59,7 +63,7 @@ export default function ProfileInfoForm({
     email: employee?.email || "",
     phone: employee?.profile?.phone || "",
     dateOfBirth: employee?.profile?.dateOfBirth
-      ? dayjs(employee.profile.dateOfBirth, "DD-MM-YYYY").format("DD-MM-YYYY")
+      ? dayjs(employee.profile.dateOfBirth).format("DD-MM-YYYY")
       : "",
     gender: employee?.profile?.gender || "",
     maritalStatus: employee?.profile?.maritalStatus || "",
@@ -110,32 +114,12 @@ export default function ProfileInfoForm({
               required={false}
               formatDate="DD-MM-YYYY"
             />
-            <CustomSelect
-              dataAuto="gender"
-              name="gender"
-              label="Gender"
-              placeholder="Select gender"
-              required={false}
-              isLoading={false}
-              options={[
-                { label: "Male", value: "MALE" },
-                { label: "Female", value: "FEMALE" },
-                { label: "Other", value: "OTHER" },
-              ]}
-            />
-            <CustomSelect
+            <GenderRadio dataAuto="gender" name="gender" label="Gender" />
+
+            <MaritalStatusRadio
               dataAuto="maritalStatus"
               name="maritalStatus"
               label="Marital Status"
-              placeholder="Select status"
-              required={false}
-              isLoading={false}
-              options={[
-                { label: "Single", value: "SINGLE" },
-                { label: "Married", value: "MARRIED" },
-                { label: "Divorced", value: "DIVORCED" },
-                { label: "Widowed", value: "WIDOWED" },
-              ]}
             />
           </div>
         </div>

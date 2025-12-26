@@ -100,6 +100,7 @@ export const GET_EMPLOYEE_BY_ID = gql`
         createdAt
         updatedAt
         profile {
+          userId
           fullName
           phone
           dateOfBirth

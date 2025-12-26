@@ -7,18 +7,15 @@ import ProfileInfoForm from "./components/ProfileInfoForm";
 import EmergencyContactForm from "./components/EmergencyContactForm";
 import EmploymentDetailsForm from "./components/EmploymentDetailsForm";
 import { PiPencilSimple } from "react-icons/pi";
-import { UPDATE_PROFILE } from "@/graphql/profile.api";
-import { useMutation } from "@apollo/client/react";
-import { GET_EMPLOYEES } from "@/graphql/employee.api";
 import dayjs from "dayjs";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 
-interface ProfileContentProps {
+interface IProfileContentProps {
   employee?: IEmployee;
 }
 
-export default function ProfileContent({ employee }: ProfileContentProps) {
+export default function ProfileContent({ employee }: IProfileContentProps) {
   const { hasPermission } = usePermissionGuard();
   // POPUP STATE MANAGEMENT
   const [popupOption, setPopupOption] = useState<IPopupOption>({
@@ -113,7 +110,7 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
             </label>
             <p className="text-base font-semibold text-base-content">
               {employee.profile?.dateOfBirth
-                ? new Date(employee.profile.dateOfBirth).toLocaleDateString()
+                ? dayjs(employee.profile.dateOfBirth).format("DD-MM-YYYY")
                 : "-"}
             </p>
           </div>
@@ -293,7 +290,9 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
               Work Site
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.workSite?.name || "-"}
+              {employee?.employee?.workSites
+                ?.map((site) => site.workSite.name)
+                .join(", ") || "-"}
             </p>
           </div>
           <div>
@@ -345,16 +344,25 @@ export default function ProfileContent({ employee }: ProfileContentProps) {
       <CustomPopup
         popupOption={popupOption}
         setPopupOption={setPopupOption}
-        customWidth="60%"
+        customWidth="50%"
       >
         {popupOption.form === "profileInfo" && (
-          <ProfileInfoForm employee={employee} onClose={handleCloseForm} />
+          <ProfileInfoForm
+            key={`profileInfo-form`}
+            employee={employee}
+            onClose={handleCloseForm}
+          />
         )}
         {popupOption.form === "emergencyContact" && (
-          <EmergencyContactForm employee={employee} onClose={handleCloseForm} />
+          <EmergencyContactForm
+            key={`emergencyContact-form`}
+            employee={employee}
+            onClose={handleCloseForm}
+          />
         )}
         {popupOption.form === "employmentDetails" && (
           <EmploymentDetailsForm
+            key={`employmentDetails-form`}
             employee={employee}
             onClose={handleCloseForm}
           />
