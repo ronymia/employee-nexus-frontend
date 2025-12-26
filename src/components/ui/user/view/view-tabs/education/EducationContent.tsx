@@ -20,7 +20,7 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
 import dayjs from "dayjs";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 // ==================== INTERFACES ====================
 interface IEducationContentProps {

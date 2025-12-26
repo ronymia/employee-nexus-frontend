@@ -1,5 +1,6 @@
 "use client";
 
+// ==================== EXTERNAL IMPORTS ====================
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
@@ -15,20 +16,26 @@ import {
   GET_JOB_HISTORY_BY_USER_ID,
 } from "@/graphql/job-history.api";
 import { IJobHistory } from "@/types";
+import dayjs from "dayjs";
+import { showToast } from "@/components/ui/CustomToast";
 
-interface ExperienceFormProps {
+// ==================== INTERFACES ====================
+interface IExperienceFormProps {
   userId: number;
   jobHistory?: IJobHistory;
   actionType: "create" | "update";
   onClose: () => void;
 }
 
+// ==================== MAIN COMPONENT ====================
 export default function ExperienceForm({
   userId,
   jobHistory,
   actionType,
   onClose,
-}: ExperienceFormProps) {
+}: IExperienceFormProps) {
+  // ==================== GRAPHQL MUTATIONS ====================
+  // CREATE JOB HISTORY MUTATION
   const [createJobHistory, createResult] = useMutation(CREATE_JOB_HISTORY, {
     awaitRefetchQueries: true,
     refetchQueries: [
@@ -36,6 +43,7 @@ export default function ExperienceForm({
     ],
   });
 
+  // UPDATE JOB HISTORY MUTATION
   const [updateJobHistory, updateResult] = useMutation(UPDATE_JOB_HISTORY, {
     awaitRefetchQueries: true,
     refetchQueries: [
@@ -43,50 +51,97 @@ export default function ExperienceForm({
     ],
   });
 
+  // ==================== FORM SUBMISSION ====================
   const handleSubmit = async (data: any) => {
     try {
-      // Remove isCurrentJob toggle field from submission
+      // PREPARE JOB HISTORY DATA
       const { isCurrentJob, ...jobData } = data;
 
+      // PREPARE DATE FIELDS
+      const processedData = {
+        ...jobData,
+        startDate: dayjs(data.startDate, "DD-MM-YYYY").toDate(),
+        endDate: data.endDate
+          ? dayjs(data.endDate, "DD-MM-YYYY").toDate()
+          : null,
+      };
+
+      // EXECUTE CREATE OR UPDATE MUTATION
       if (actionType === "create") {
         await createJobHistory({
           variables: {
             createJobHistoryInput: {
-              ...jobData,
+              ...processedData,
               userId,
             },
           },
         });
+
+        // SUCCESS TOAST FOR CREATE
+        showToast.success(
+          "Created!",
+          "Work experience has been added successfully"
+        );
       } else {
         await updateJobHistory({
           variables: {
             updateJobHistoryInput: {
-              ...jobData,
+              ...processedData,
               id: Number(jobHistory?.id),
               userId: Number(userId),
             },
           },
         });
+
+        // SUCCESS TOAST FOR UPDATE
+        showToast.success(
+          "Updated!",
+          "Work experience has been updated successfully"
+        );
       }
+
+      // CLOSE FORM
       onClose();
-    } catch (error) {
+    } catch (error: any) {
+      // ERROR HANDLING
       console.error("Error submitting job history:", error);
+      showToast.error(
+        "Error",
+        error.message ||
+          `Failed to ${
+            actionType === "create" ? "add" : "update"
+          } work experience`
+      );
+      throw error;
     }
   };
 
+  // ==================== DEFAULT VALUES ====================
   const defaultValues = {
+    // JOB DETAILS
     jobTitle: jobHistory?.jobTitle || "",
     companyName: jobHistory?.companyName || "",
     employmentType: jobHistory?.employmentType || "",
+
+    // LOCATION
     country: jobHistory?.country || "",
     city: jobHistory?.city || "",
-    startDate: jobHistory?.startDate || "",
-    endDate: jobHistory?.endDate || "",
+
+    // DURATION
+    startDate: jobHistory?.startDate
+      ? dayjs(jobHistory.startDate).format("DD-MM-YYYY")
+      : "",
+    endDate: jobHistory?.endDate
+      ? dayjs(jobHistory.endDate).format("DD-MM-YYYY")
+      : "",
     isCurrentJob: !jobHistory?.endDate || false,
+
+    // ADDITIONAL INFO
     responsibilities: jobHistory?.responsibilities || "",
     achievements: jobHistory?.achievements || "",
   };
 
+  // ==================== RENDER ====================
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <ExperienceFormFields />
@@ -98,14 +153,18 @@ export default function ExperienceForm({
   );
 }
 
+// ==================== EXPERIENCE FORM FIELDS COMPONENT ====================
 function ExperienceFormFields() {
   const { control } = useFormContext();
+
+  // WATCH FOR CURRENT JOB TOGGLE
   const isCurrentJob = useWatch({
     control,
     name: "isCurrentJob",
     defaultValue: false,
   });
 
+  // EMPLOYMENT TYPE OPTIONS
   const employmentTypeOptions = [
     { label: "Full-time", value: "Full-time" },
     { label: "Part-time", value: "Part-time" },
@@ -117,12 +176,13 @@ function ExperienceFormFields() {
 
   return (
     <div className="space-y-4">
-      {/* Job Information */}
+      {/* JOB INFORMATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">
           Job Details
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* JOB TITLE */}
           <CustomInputField
             dataAuto="jobTitle"
             name="jobTitle"
@@ -131,6 +191,8 @@ function ExperienceFormFields() {
             placeholder="e.g., Software Engineer, Project Manager"
             required={true}
           />
+
+          {/* COMPANY NAME */}
           <CustomInputField
             dataAuto="companyName"
             name="companyName"
@@ -139,6 +201,8 @@ function ExperienceFormFields() {
             placeholder="Enter company name"
             required={true}
           />
+
+          {/* EMPLOYMENT TYPE */}
           <div className="md:col-span-2">
             <CustomSelect
               dataAuto="employmentType"
@@ -153,10 +217,11 @@ function ExperienceFormFields() {
         </div>
       </div>
 
-      {/* Location */}
+      {/* LOCATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Location</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* COUNTRY */}
           <CustomInputField
             dataAuto="country"
             name="country"
@@ -165,6 +230,8 @@ function ExperienceFormFields() {
             placeholder="Enter country"
             required={true}
           />
+
+          {/* CITY */}
           <CustomInputField
             dataAuto="city"
             name="city"
@@ -176,10 +243,11 @@ function ExperienceFormFields() {
         </div>
       </div>
 
-      {/* Duration */}
+      {/* DURATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Duration</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* START DATE */}
           <CustomDatePicker
             dataAuto="startDate"
             name="startDate"
@@ -187,6 +255,8 @@ function ExperienceFormFields() {
             required={true}
             // formatDate="MM-YYYY"
           />
+
+          {/* END DATE - CONDITIONAL */}
           {!isCurrentJob && (
             <CustomDatePicker
               dataAuto="endDate"
@@ -196,16 +266,19 @@ function ExperienceFormFields() {
               // formatDate="MM-YYYY"
             />
           )}
+
+          {/* CURRENT JOB TOGGLE */}
           <div className="md:col-span-2">
             <ToggleSwitch name="isCurrentJob" label="I currently work here" />
           </div>
         </div>
       </div>
 
-      {/* Responsibilities and Achievements */}
+      {/* DETAILS SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Details</h4>
         <div className="space-y-4">
+          {/* RESPONSIBILITIES */}
           <CustomTextareaField
             dataAuto="responsibilities"
             name="responsibilities"
@@ -214,6 +287,8 @@ function ExperienceFormFields() {
             required={false}
             rows={5}
           />
+
+          {/* ACHIEVEMENTS */}
           <CustomTextareaField
             dataAuto="achievements"
             name="achievements"
