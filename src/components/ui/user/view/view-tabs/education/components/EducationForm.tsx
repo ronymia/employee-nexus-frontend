@@ -15,8 +15,9 @@ import {
 } from "@/graphql/education-history.api";
 import { IEducationHistory } from "@/types";
 import dayjs from "dayjs";
+import { showToast } from "@/components/ui/CustomToast";
 
-interface EducationFormProps {
+interface IEducationFormProps {
   userId: number;
   education?: IEducationHistory;
   actionType: "create" | "update";
@@ -28,7 +29,9 @@ export default function EducationForm({
   education,
   actionType,
   onClose,
-}: EducationFormProps) {
+}: IEducationFormProps) {
+  // ==================== GRAPHQL MUTATIONS ====================
+  // CREATE EDUCATION HISTORY MUTATION
   const [createEducation, createResult] = useMutation(
     CREATE_EDUCATION_HISTORY,
     {
@@ -39,6 +42,7 @@ export default function EducationForm({
     }
   );
 
+  // UPDATE EDUCATION HISTORY MUTATION
   const [updateEducation, updateResult] = useMutation(
     UPDATE_EDUCATION_HISTORY,
     {
@@ -49,51 +53,94 @@ export default function EducationForm({
     }
   );
 
+  // ==================== FORM SUBMISSION ====================
   const handleSubmit = async (data: any) => {
     try {
+      // PREPARE DATE FIELDS
+      const processedData = {
+        ...data,
+        startDate: dayjs(data.startDate, "DD-MM-YYYY").toDate(),
+        endDate: data.endDate
+          ? dayjs(data.endDate, "DD-MM-YYYY").toDate()
+          : null,
+      };
+
+      // EXECUTE CREATE OR UPDATE MUTATION
       if (actionType === "create") {
         await createEducation({
           variables: {
             createEducationHistoryInput: {
-              ...data,
+              ...processedData,
               userId,
             },
           },
         });
+
+        // SUCCESS TOAST FOR CREATE
+        showToast.success(
+          "Created!",
+          "Education history has been added successfully"
+        );
       } else {
         await updateEducation({
           variables: {
             updateEducationHistoryInput: {
-              ...data,
+              ...processedData,
               id: Number(education?.id),
               userId: Number(userId),
             },
           },
         });
+
+        // SUCCESS TOAST FOR UPDATE
+        showToast.success(
+          "Updated!",
+          "Education history has been updated successfully"
+        );
       }
+
+      // CLOSE FORM
       onClose();
-    } catch (error) {
+    } catch (error: any) {
+      // ERROR HANDLING
       console.error("Error submitting education:", error);
+      showToast.error(
+        "Error",
+        error.message ||
+          `Failed to ${
+            actionType === "create" ? "add" : "update"
+          } education history`
+      );
+      throw error;
     }
   };
 
+  // ==================== DEFAULT VALUES ====================
   const defaultValues = {
+    // EDUCATION DETAILS
     degree: education?.degree || "",
     fieldOfStudy: education?.fieldOfStudy || "",
     institution: education?.institution || "",
+
+    // LOCATION
     country: education?.country || "",
     city: education?.city || "",
+
+    // DURATION
     startDate: education?.startDate
-      ? dayjs(education.startDate, "DD-MM-YYYY").format("DD-MM-YYYY")
+      ? dayjs(education.startDate).format("DD-MM-YYYY")
       : "",
     endDate: education?.endDate
-      ? dayjs(education.endDate, "DD-MM-YYYY").format("DD-MM-YYYY")
+      ? dayjs(education.endDate).format("DD-MM-YYYY")
       : "",
     isCurrentlyStudying: education?.isCurrentlyStudying || false,
+
+    // ADDITIONAL INFO
     grade: education?.grade || "",
     description: education?.description || "",
   };
 
+  // ==================== RENDER ====================
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <EducationFormFields />
@@ -105,8 +152,11 @@ export default function EducationForm({
   );
 }
 
+// ==================== EDUCATION FORM FIELDS COMPONENT ====================
 function EducationFormFields() {
   const { control } = useFormContext();
+
+  // WATCH FOR CURRENTLY STUDYING TOGGLE
   const isCurrentlyStudying = useWatch({
     control,
     name: "isCurrentlyStudying",
@@ -115,12 +165,13 @@ function EducationFormFields() {
 
   return (
     <div className="space-y-4">
-      {/* Education Information */}
+      {/* EDUCATION INFORMATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">
           Education Details
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* DEGREE */}
           <CustomInputField
             dataAuto="degree"
             name="degree"
@@ -129,6 +180,8 @@ function EducationFormFields() {
             placeholder="e.g., Bachelor of Science, Master of Arts"
             required={true}
           />
+
+          {/* FIELD OF STUDY */}
           <CustomInputField
             dataAuto="fieldOfStudy"
             name="fieldOfStudy"
@@ -137,6 +190,8 @@ function EducationFormFields() {
             placeholder="e.g., Computer Science, Business Administration"
             required={true}
           />
+
+          {/* INSTITUTION */}
           <div className="md:col-span-2">
             <CustomInputField
               dataAuto="institution"
@@ -150,10 +205,11 @@ function EducationFormFields() {
         </div>
       </div>
 
-      {/* Location */}
+      {/* LOCATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Location</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* COUNTRY */}
           <CustomInputField
             dataAuto="country"
             name="country"
@@ -162,6 +218,8 @@ function EducationFormFields() {
             placeholder="Enter country"
             required={true}
           />
+
+          {/* CITY */}
           <CustomInputField
             dataAuto="city"
             name="city"
@@ -173,10 +231,11 @@ function EducationFormFields() {
         </div>
       </div>
 
-      {/* Duration */}
+      {/* DURATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">Duration</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* START DATE */}
           <CustomDatePicker
             dataAuto="startDate"
             name="startDate"
@@ -184,6 +243,8 @@ function EducationFormFields() {
             required={true}
             // formatDate="MM-YYYY"
           />
+
+          {/* END DATE - CONDITIONAL */}
           {!isCurrentlyStudying && (
             <CustomDatePicker
               dataAuto="endDate"
@@ -193,6 +254,8 @@ function EducationFormFields() {
               // formatDate="MM-YYYY"
             />
           )}
+
+          {/* CURRENTLY STUDYING TOGGLE */}
           <div className="md:col-span-2">
             <ToggleSwitch
               name="isCurrentlyStudying"
@@ -202,12 +265,13 @@ function EducationFormFields() {
         </div>
       </div>
 
-      {/* Additional Information */}
+      {/* ADDITIONAL INFORMATION SECTION */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">
           Additional Information
         </h4>
         <div className="space-y-4">
+          {/* GRADE/GPA */}
           <CustomInputField
             dataAuto="grade"
             name="grade"
@@ -216,6 +280,8 @@ function EducationFormFields() {
             placeholder="e.g., 3.8 GPA, First Class, 85%"
             required={false}
           />
+
+          {/* DESCRIPTION */}
           <CustomTextareaField
             dataAuto="description"
             name="description"
