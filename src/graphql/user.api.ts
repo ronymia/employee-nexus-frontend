@@ -37,17 +37,35 @@ export const GET_USERS = gql`
         }
         employee {
           employeeId
-          department {
-            id
-            name
+          designations {
+            designation {
+              id
+              name
+            }
           }
-          designation {
-            id
-            name
+          departments {
+            department {
+              id
+              name
+            }
           }
-          employmentStatus {
-            id
-            name
+          employmentStatuses {
+            employmentStatus {
+              id
+              name
+            }
+          }
+          workSchedules {
+            workSchedule {
+              id
+              name
+            }
+          }
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
         }
       }

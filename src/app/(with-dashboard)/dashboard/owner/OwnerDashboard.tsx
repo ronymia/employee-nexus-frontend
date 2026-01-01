@@ -312,7 +312,7 @@ export default function OwnerDashboard() {
     recentActivities,
   } = dashboardData;
 
-  console.log({ dashboardData });
+  // console.log({ dashboardData });
 
   if (loading) {
     return <CustomLoading />;

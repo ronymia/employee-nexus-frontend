@@ -35,3 +35,6 @@ export * from "./leave.type";
 export * from "./payroll.type";
 export * from "./notification.type";
 export * from "./dashboard.type";
+export * from "./employee-department.type";
+export * from "./employee-designation.type";
+export * from "./employee-employment-status.type";

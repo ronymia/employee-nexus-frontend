@@ -6,12 +6,12 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import { RelationSelect } from "@/components/input-fields";
 import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 import { UPDATE_EMERGENCY_CONTACT } from "@/graphql/profile.api";
-import { IEmployee } from "@/types";
+import { IUser } from "@/types";
 import { useMutation } from "@apollo/client/react";
 import { showToast } from "@/components/ui/CustomToast";
 
 interface IEmergencyContactFormProps {
-  employee?: IEmployee;
+  employee?: IUser;
   onClose: () => void;
 }
 

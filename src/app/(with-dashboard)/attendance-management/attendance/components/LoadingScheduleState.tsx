@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { PiClock } from "react-icons/pi";
 
 // ==================== LOADING SCHEDULE STATE COMPONENT ====================

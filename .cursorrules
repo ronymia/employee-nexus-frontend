@@ -1,26 +1,29 @@
 # Employee Nexus Frontend - Coding Standards
 
 ## 🎯 Project Overview
+
 This is a Next.js 14+ React application using TypeScript, GraphQL, and modern UI libraries.
 
 ## 📐 Naming Conventions
 
 ### TypeScript Interfaces & Types
+
 - **ALWAYS** prefix interface names with `I`
   - ✅ `interface IUserProps { ... }`
   - ✅ `interface IEmployee { ... }`
   - ❌ `interface UserProps { ... }`
-  
 - **ALWAYS** prefix type names with `I` when they represent object shapes
   - ✅ `type IFormData = { ... }`
   - ✅ `type ITableConfig = { ... }`
 
 ### Component Props
+
 - Use `I` prefix for props interfaces
   - ✅ `interface ICustomTableProps { ... }`
   - ✅ `interface IPageHeaderProps { ... }`
 
 ### Files & Folders
+
 - Components: PascalCase (e.g., `CustomTable.tsx`, `UserProfileCell.tsx`)
 - Utilities: camelCase (e.g., `formatDate.ts`, `validateEmail.ts`)
 - Constants: UPPER_SNAKE_CASE files (e.g., `API_ENDPOINTS.ts`)
@@ -28,12 +31,14 @@ This is a Next.js 14+ React application using TypeScript, GraphQL, and modern UI
 ## 🎬 Animation Standards
 
 ### Primary Animation Library
+
 - **REQUIRED**: Use **Framer Motion** for all animations
-  - ✅ `import { motion } from "framer-motion"`
+  - ✅ `import { motion } from "motion/react"`
   - ❌ Do NOT use CSS animations for complex interactions
   - ❌ Do NOT use other animation libraries (anime.js, GSAP, etc.)
 
 ### When to Use Framer Motion
+
 - ✅ Page transitions
 - ✅ Component enter/exit animations
 - ✅ Skeleton loaders
@@ -42,11 +47,13 @@ This is a Next.js 14+ React application using TypeScript, GraphQL, and modern UI
 - ✅ Hover/tap interactions that need orchestration
 
 ### Simple CSS Animations (Allowed)
+
 - ✅ Simple hover states (`:hover` pseudo-class)
 - ✅ Tailwind's `transition` utilities for basic transitions
 - ✅ `animate-spin`, `animate-pulse` for simple effects
 
 ### Animation Best Practices
+
 ```tsx
 // ✅ GOOD: Use variants for reusable animations
 const containerVariants = {
@@ -67,32 +74,38 @@ const containerVariants = {
 ## 🎨 Styling Standards
 
 ### CSS Framework
+
 - **Primary**: Tailwind CSS
 - **Component Library**: DaisyUI (built on Tailwind)
 
 ### Gradient Classes
+
 - Use `bg-linear-to-r`, `bg-linear-to-br` instead of `bg-gradient-to-r`
   - ✅ `className="bg-linear-to-br from-blue-50 to-blue-100"`
   - ❌ `className="bg-gradient-to-br from-blue-50 to-blue-100"`
 
 ### Custom Components
+
 - Create reusable components for repeated UI patterns
 - Examples: `UserProfileCell`, `StatusBadge`, `PageHeader`
 
 ## 📝 Code Documentation
 
 ### Comments Style
+
 - Use **UPPERCASE COMMENTS** for major sections
   - ✅ `// ==================== GRAPHQL QUERY: FETCH USERS ====================`
   - ✅ `// CUSTOM USER PROFILE COLUMN WITH AVATAR AND DESIGNATION`
 
 ### Function Documentation
+
 - Add JSDoc comments for complex functions
 - Document props interfaces with comments
 
 ## 🏗️ Component Structure
 
 ### Standard Component Pattern
+
 ```tsx
 "use client"; // For Next.js client components
 
@@ -107,10 +120,10 @@ interface IComponentProps {
 export default function ComponentName({ ...props }: IComponentProps) {
   // ==================== HOOKS ====================
   const [state, setState] = useState();
-  
+
   // ==================== HANDLERS ====================
   const handleClick = () => { ... };
-  
+
   // ==================== RENDER ====================
   return (
     <div>...</div>
@@ -121,8 +134,10 @@ export default function ComponentName({ ...props }: IComponentProps) {
 ## 🔄 State Management
 
 ### GraphQL
+
 - Use Apollo Client hooks (`useQuery`, `useMutation`)
 - Always type GraphQL responses
+
 ```tsx
 const { data, loading } = useQuery<{
   users: {
@@ -133,6 +148,7 @@ const { data, loading } = useQuery<{
 ```
 
 ### Local State
+
 - Use `useState` for component state
 - Use custom hooks for reusable logic
 - Prefix custom hooks with `use` (e.g., `usePermissionGuard`, `usePopupOption`)
@@ -140,6 +156,7 @@ const { data, loading } = useQuery<{
 ## 📦 File Organization
 
 ### Import Order
+
 1. React & Next.js imports
 2. External libraries
 3. Internal components
@@ -155,7 +172,7 @@ import { useRouter } from "next/navigation";
 
 // 2. External libraries
 import { useQuery } from "@apollo/client";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 // 3. Components
 import CustomTable from "@/components/table/CustomTable";
@@ -174,32 +191,38 @@ import { GET_USERS } from "@/graphql/user.api";
 ## 🎯 GraphQL Conventions
 
 ### Query/Mutation Naming
+
 - Use UPPER_SNAKE_CASE for queries and mutations
   - ✅ `GET_USERS`, `CREATE_EMPLOYEE`, `UPDATE_USER_STATUS`
   - ❌ `getUsers`, `createEmployee`
 
 ### File Organization
+
 - Group by domain: `user.api.ts`, `employee.api.ts`, `department.api.ts`
 
 ## ✅ Best Practices
 
 ### Type Safety
+
 - **NEVER** use `any` unless absolutely necessary
 - Prefer `unknown` over `any` when type is uncertain
 - Use type guards for runtime type checking
 
 ### Error Handling
+
 - Always handle GraphQL errors
 - Use try-catch for async operations
 - Provide user feedback via toast notifications
 
 ### Accessibility
+
 - Use semantic HTML elements
 - Add proper ARIA labels
 - Ensure keyboard navigation works
 - Maintain proper heading hierarchy
 
 ### Performance
+
 - Use `useMemo` for expensive computations
 - Use `useCallback` for memoized callbacks
 - Implement proper loading states
@@ -208,16 +231,19 @@ import { GET_USERS } from "@/graphql/user.api";
 ## 🚫 Anti-Patterns to Avoid
 
 ### Naming
+
 - ❌ Interfaces without `I` prefix
 - ❌ Magic numbers (use named constants)
 - ❌ Unclear variable names (`data`, `temp`, `x`)
 
 ### Code Structure
+
 - ❌ Inline styles (use Tailwind classes)
 - ❌ Deeply nested ternaries (extract to variables/functions)
 - ❌ Large component files (>500 lines - consider splitting)
 
 ### State Management
+
 - ❌ Prop drilling (use context or composition)
 - ❌ Mutating state directly
 - ❌ Storing derived state
@@ -225,12 +251,14 @@ import { GET_USERS } from "@/graphql/user.api";
 ## 🔧 Tools & Configuration
 
 ### Required Dev Tools
+
 - TypeScript
 - ESLint
 - Prettier
 - Tailwind CSS IntelliSense
 
 ### Code Formatting
+
 - Run `prettier` before committing
 - Follow existing `.prettierrc` configuration
 - Use 2 spaces for indentation
@@ -238,12 +266,14 @@ import { GET_USERS } from "@/graphql/user.api";
 ## 📚 Component Libraries
 
 ### Allowed
+
 - ✅ Framer Motion (animations)
 - ✅ React Icons (icons)
 - ✅ DaisyUI (UI components)
 - ✅ Tailwind CSS (styling)
 
 ### Avoid
+
 - ❌ Other animation libraries
 - ❌ Other CSS frameworks
 - ❌ jQuery or legacy libraries
@@ -251,17 +281,20 @@ import { GET_USERS } from "@/graphql/user.api";
 ## 🎨 UI/UX Standards
 
 ### Loading States
+
 - Use skeleton loaders with Framer Motion
 - Match skeleton structure to actual content
 - Implement stagger animations for lists
 
 ### Forms
+
 - Use controlled components
 - Implement proper validation
 - Show clear error messages
 - Provide loading states for submissions
 
 ### Tables
+
 - Use `CustomTable` component
 - Implement proper loading states
 - Support mobile responsive card view
@@ -272,6 +305,7 @@ import { GET_USERS } from "@/graphql/user.api";
 ## 📋 Quick Reference
 
 **When creating a new component:**
+
 1. ✅ Props interface starts with `I`
 2. ✅ Use Framer Motion for animations
 3. ✅ Add uppercase section comments
@@ -280,6 +314,7 @@ import { GET_USERS } from "@/graphql/user.api";
 6. ✅ Implement loading states
 
 **When adding animations:**
+
 1. ✅ Import `motion` from Framer Motion
 2. ✅ Define variants for reusability
 3. ✅ Use stagger for lists
@@ -287,6 +322,7 @@ import { GET_USERS } from "@/graphql/user.api";
 5. ✅ Use `easeOut` for entrances, `easeInOut` for loops
 
 **When writing interfaces:**
+
 1. ✅ Always use `I` prefix
 2. ✅ Document complex props with comments
 3. ✅ Use optional `?` sparingly, prefer defaults
@@ -294,4 +330,4 @@ import { GET_USERS } from "@/graphql/user.api";
 
 ---
 
-*These rules ensure consistency, maintainability, and professional quality across the codebase.*
+_These rules ensure consistency, maintainability, and professional quality across the codebase._

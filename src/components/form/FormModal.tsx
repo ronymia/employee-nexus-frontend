@@ -8,7 +8,7 @@ import React from "react";
 import CustomPopup from "../modal/CustomPopup";
 import CustomLoading from "../loader/CustomLoading";
 
-import type { Variants } from "framer-motion";
+import type { Variants } from "motion/react";
 import SubscriptionPlanForm from "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm";
 import JobTypeForm from "@/app/(with-dashboard)/recruitment/job-types/JobTypesForm";
 import RecruitmentProcessForm from "@/app/(with-dashboard)/recruitment/recruitment-processes/RecruitmentProcessesForm";

@@ -115,7 +115,8 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
             workScheduleData?.workScheduleById?.data?.description || "",
           scheduleType,
           breakType: workScheduleData?.workScheduleById?.data?.breakType || "",
-          breakHours: workScheduleData?.workScheduleById?.data?.breakHours || 0,
+          breakMinutes:
+            workScheduleData?.workScheduleById?.data?.breakMinutes || 0,
           weekendDays: getWeekendDays(schedules),
           schedules: workScheduleData?.workScheduleById?.data?.schedules?.map(
             (schedule) => ({
@@ -173,11 +174,11 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
         />
       </div>
 
-      {/* BREAK HOURS */}
+      {/* BREAK MINUTES */}
       <CustomInputField
         type="number"
-        name="breakHours"
-        label="Break Hours"
+        name="breakMinutes"
+        label="Break Minutes"
         required={!isUpdate}
         min={0}
       />

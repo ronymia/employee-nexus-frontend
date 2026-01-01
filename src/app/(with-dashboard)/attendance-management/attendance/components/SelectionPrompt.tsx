@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { PiCalendarCheck, PiUserCircle } from "react-icons/pi";
 
 // ==================== SELECTION PROMPT COMPONENT ====================

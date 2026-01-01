@@ -35,7 +35,7 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import { ATTENDANCE_SUMMARY } from "@/graphql/attendance.api";
 import { PiClockAfternoon } from "react-icons/pi";
 import { IconType } from "react-icons";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import PageHeader from "@/components/ui/PageHeader";
 import FormModal from "@/components/form/FormModal";
 import { showToast } from "@/components/ui/CustomToast";

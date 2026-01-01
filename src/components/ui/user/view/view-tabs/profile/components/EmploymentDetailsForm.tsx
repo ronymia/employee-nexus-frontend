@@ -9,7 +9,7 @@ import DesignationSelect from "@/components/input-fields/DesignationSelect";
 import EmploymentStatusSelect from "@/components/input-fields/EmploymentStatusSelect";
 import WorkSiteSelect from "@/components/input-fields/WorkSiteSelect";
 import WorkScheduleSelect from "@/components/input-fields/WorkScheduleSelect";
-import { IEmployee } from "@/types";
+import { IUser } from "@/types";
 import dayjs from "dayjs";
 import { UPDATE_EMPLOYMENT_DETAILS } from "@/graphql/profile.api";
 import { useMutation } from "@apollo/client/react";
@@ -17,7 +17,7 @@ import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 import { showToast } from "@/components/ui/CustomToast";
 
 interface IEmploymentDetailsFormProps {
-  employee?: IEmployee;
+  employee?: IUser;
   onClose: () => void;
 }
 

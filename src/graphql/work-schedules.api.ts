@@ -14,9 +14,8 @@ export const GET_WORK_SCHEDULES = gql`
         status
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
@@ -49,9 +48,8 @@ export const GET_WORK_SCHEDULE_BY_ID = gql`
         status
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
@@ -86,9 +84,8 @@ export const CREATE_WORK_SCHEDULE = gql`
         status
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
@@ -123,9 +120,8 @@ export const UPDATE_WORK_SCHEDULE = gql`
         status
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
@@ -183,7 +179,7 @@ export const GET_USER_SCHEDULE_ASSIGNMENTS = gql`
           status
           scheduleType
           breakType
-          breakHours
+          breakMinutes
           schedules {
             id
             day

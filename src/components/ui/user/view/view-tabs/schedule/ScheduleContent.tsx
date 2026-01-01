@@ -24,11 +24,11 @@ import moment from "moment";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 
-interface ScheduleContentProps {
+interface IScheduleContentProps {
   userId: number;
 }
 
-export default function ScheduleContent({ userId }: ScheduleContentProps) {
+export default function ScheduleContent({ userId }: IScheduleContentProps) {
   const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
@@ -301,7 +301,7 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
       )}
 
       {/* Assignment History */}
-      {/* {scheduleAssignments.length > 1 && (
+      {scheduleAssignments.length > 1 && (
         <div>
           <h4 className="text-base font-semibold text-base-content mb-3">
             Assignment History
@@ -326,7 +326,6 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
                       </button>
                     ) : null}
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-16">
                     <div>
                       <label className="text-xs text-base-content/60 font-medium">
@@ -368,7 +367,7 @@ export default function ScheduleContent({ userId }: ScheduleContentProps) {
               ))}
           </div>
         </div>
-      )} */}
+      )}
 
       {/* Popup Modal */}
       <CustomPopup

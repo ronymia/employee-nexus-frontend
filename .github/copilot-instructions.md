@@ -10,7 +10,7 @@ You are working on the Employee Nexus Frontend project, a Next.js 14+ applicatio
 - **ALWAYS** prefix all types representing object shapes with `I`
 - Examples:
   - `interface IUserProps { ... }`
-  - `interface IEmployee { ... }`
+  - `interface IUser { ... }`
   - `type ITableConfig = { ... }`
 - **NEVER** create interfaces without the `I` prefix
 
@@ -19,7 +19,7 @@ You are working on the Employee Nexus Frontend project, a Next.js 14+ applicatio
 ### Framer Motion is REQUIRED
 
 - **ALWAYS** use Framer Motion for animations
-- Import: `import { motion } from "framer-motion"`
+- Import: `import { motion } from "motion/react"`
 - **DO NOT** use other animation libraries (anime.js, GSAP)
 - Use CSS animations only for simple hover states
 

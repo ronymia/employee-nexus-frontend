@@ -4,7 +4,7 @@ import { use } from "react";
 import { useQuery } from "@apollo/client/react";
 import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 import CustomLoading from "@/components/loader/CustomLoading";
-import { IEmployee } from "@/types";
+import { IUser } from "@/types";
 import EmployeesForm from "../../EmployeesForm";
 import { IEmployeeFormData } from "@/schemas";
 import dayjs from "dayjs";
@@ -19,7 +19,7 @@ export default function UpdateEmployeePage({
 
   // Fetch employee data
   const { data: employeeData, loading: employeeLoading } = useQuery<{
-    employeeById: { data: IEmployee };
+    employeeById: { data: IUser };
   }>(GET_EMPLOYEE_BY_ID, {
     variables: { id: Number(id) },
   });

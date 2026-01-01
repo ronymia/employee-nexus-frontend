@@ -21,7 +21,7 @@ import AssetsContent from "./view-tabs/assets/AssetsContent";
 import DocumentsContent from "./view-tabs/documents/DocumentsContent";
 import NotesContent from "./view-tabs/notes/NotesContent";
 import AttendanceContent from "./view-tabs/attendance/AttendanceContent";
-import { IEmployee } from "@/types";
+import { IUser } from "@/types";
 
 interface UserViewProps {
   userId: number;
@@ -40,7 +40,7 @@ export default function UserView({ userId }: UserViewProps) {
       message: string;
       statusCode: number;
       success: boolean;
-      data: IEmployee;
+      data: IUser;
     };
   }>(GET_EMPLOYEE_BY_ID, {
     variables: { id: userId },

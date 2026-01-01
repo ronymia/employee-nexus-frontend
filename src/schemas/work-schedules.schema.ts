@@ -23,7 +23,7 @@ export const workScheduleSchema = z
       .enum(["REGULAR", "SCHEDULED", "FLEXIBLE"])
       .default("REGULAR"),
     breakType: z.enum(["PAID", "UNPAID"]),
-    breakHours: z.coerce.number().min(0, "Break hours must be 0 or more"),
+    breakMinutes: z.coerce.number().min(0, "Break minutes must be 0 or more"),
     schedules: z.array(scheduleSchema).optional().default([]),
   })
   .superRefine((data, ctx) => {

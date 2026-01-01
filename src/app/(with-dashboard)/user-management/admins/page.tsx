@@ -10,7 +10,7 @@ import { DELETE_EMPLOYEE } from "@/graphql/employee.api";
 import { GET_USERS } from "@/graphql/user.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IEmployee, IMeta } from "@/types";
+import { TableActionType, TableColumnType, IUser, IMeta } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -34,7 +34,7 @@ export default function AdminsPage() {
       message: string;
       statusCode: number;
       success: boolean;
-      data: IEmployee[];
+      data: IUser[];
       meta: IMeta;
     };
   }>(GET_USERS, {
@@ -54,12 +54,12 @@ export default function AdminsPage() {
   });
 
   // ==================== HANDLER: EDIT ADMIN ====================
-  const handleEdit = (row: IEmployee) => {
+  const handleEdit = (row: IUser) => {
     router.push(`/user-management/employees/${row.id}/update`);
   };
 
   // ==================== HANDLER: DELETE ADMIN ====================
-  const handleDelete = async (row: IEmployee) => {
+  const handleDelete = async (row: IUser) => {
     try {
       const result = await deleteEmployee({
         variables: {
@@ -75,7 +75,7 @@ export default function AdminsPage() {
   };
 
   // ==================== HANDLER: VIEW ADMIN ====================
-  const handleView = (row: IEmployee) => {
+  const handleView = (row: IUser) => {
     router.push(`/user-management/employees/${row.id}/view`);
   };
 

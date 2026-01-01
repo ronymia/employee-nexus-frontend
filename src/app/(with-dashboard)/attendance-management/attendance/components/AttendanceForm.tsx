@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useFormContext } from "react-hook-form";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 

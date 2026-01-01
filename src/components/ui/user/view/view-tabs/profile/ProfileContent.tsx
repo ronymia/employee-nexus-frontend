@@ -1,6 +1,6 @@
 "use client";
 
-import { IEmployee, IPopupOption } from "@/types";
+import { IUser, IPopupOption } from "@/types";
 import { useState } from "react";
 import CustomPopup from "@/components/modal/CustomPopup";
 import ProfileInfoForm from "./components/ProfileInfoForm";
@@ -12,7 +12,7 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 
 interface IProfileContentProps {
-  employee?: IEmployee;
+  employee?: IUser;
 }
 
 export default function ProfileContent({ employee }: IProfileContentProps) {

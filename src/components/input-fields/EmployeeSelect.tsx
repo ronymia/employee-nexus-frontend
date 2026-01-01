@@ -1,7 +1,7 @@
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
-import { IEmployee } from "@/types";
+import { IUser } from "@/types";
 
 // ==================== INTERFACE ====================
 interface IEmployeeSelectProps {
@@ -24,12 +24,12 @@ export default function EmployeeSelect({
 }: IEmployeeSelectProps) {
   // ==================== FETCH EMPLOYEES ====================
   const { data, loading } = useQuery<{
-    employees: { data: IEmployee[] };
+    employees: { data: IUser[] };
   }>(GET_EMPLOYEES, {});
 
   // ==================== MAP TO OPTIONS ====================
   const options =
-    data?.employees?.data?.map((emp: IEmployee) => ({
+    data?.employees?.data?.map((emp) => ({
       label: emp.profile?.fullName || emp.email,
       value: Number(emp.id),
     })) || [];
