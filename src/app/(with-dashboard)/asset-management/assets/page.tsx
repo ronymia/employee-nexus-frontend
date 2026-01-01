@@ -6,7 +6,7 @@ import { Permissions } from "@/constants/permissions.constant";
 import { DELETE_ASSET, GET_ASSETS } from "@/graphql/asset.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, Asset } from "@/types";
+import { TableActionType, TableColumnType, IAsset } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -22,7 +22,7 @@ export default function AssetsPage() {
   // ==================== GRAPHQL QUERY: FETCH ASSETS ====================
   const { data, loading } = useQuery<{
     assets: {
-      data: Asset[];
+      data: IAsset[];
     };
   }>(GET_ASSETS, {});
 
@@ -33,7 +33,7 @@ export default function AssetsPage() {
   });
 
   // ==================== HANDLER: EDIT ASSET ====================
-  const handleEdit = (row: Asset) => {
+  const handleEdit = (row: IAsset) => {
     const data = {
       id: row?.id,
       name: row?.name,
@@ -56,7 +56,7 @@ export default function AssetsPage() {
   };
 
   // ==================== HANDLER: DELETE ASSET ====================
-  const handleDelete = async (row: Asset) => {
+  const handleDelete = async (row: IAsset) => {
     try {
       const result = await deleteAsset({
         variables: {

@@ -7,7 +7,7 @@ import CustomFileUploader from "@/components/form/input/CustomFileUploader";
 import AssetTypeSelect from "@/components/input-fields/AssetTypeSelect";
 import { CREATE_ASSET, GET_ASSETS, UPDATE_ASSET } from "@/graphql/asset.api";
 import { assetSchema, IAssetFormData } from "@/schemas";
-import { Asset } from "@/types";
+import { IAsset } from "@/types";
 import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import useAppStore from "@/hooks/useAppStore";
@@ -19,7 +19,7 @@ export default function AssetsForm({
   data,
 }: {
   handleClosePopup: () => void;
-  data: Asset;
+  data: IAsset;
 }) {
   // ==================== STATE ====================
   const [isUploading, setIsUploading] = useState(false);
@@ -92,7 +92,7 @@ export default function AssetsForm({
     if (data?.id) {
       (formValues as any)["id"] = Number(data.id);
       const res = await updateAsset({
-        variables: formValues,
+        variables: { updateAssetInput: formValues },
       });
       if (res?.data) {
         showToast.success("Updated!", "Asset updated successfully");
@@ -102,7 +102,7 @@ export default function AssetsForm({
     // CREATE NEW ASSET
     else {
       const res = await createAsset({
-        variables: formValues,
+        variables: { createAssetInput: formValues },
       });
       if (res?.data) {
         showToast.success("Created!", "Asset created successfully");

@@ -29,24 +29,8 @@ export const GET_ASSETS = gql`
 `;
 
 export const CREATE_ASSET = gql`
-  mutation CreateAsset(
-    $name: String!
-    $code: String!
-    $date: String!
-    $note: String
-    $assetTypeId: Int
-    $image: String
-  ) {
-    createAsset(
-      createAssetInput: {
-        name: $name
-        code: $code
-        date: $date
-        note: $note
-        assetTypeId: $assetTypeId
-        image: $image
-      }
-    ) {
+  mutation CreateAsset($createAssetInput: CreateAssetInput!) {
+    createAsset(createAssetInput: $createAssetInput) {
       message
       statusCode
       success
@@ -73,26 +57,8 @@ export const CREATE_ASSET = gql`
 `;
 
 export const UPDATE_ASSET = gql`
-  mutation UpdateAsset(
-    $id: Int!
-    $name: String!
-    $code: String!
-    $date: String!
-    $note: String
-    $assetTypeId: Int
-    $image: String
-  ) {
-    updateAsset(
-      updateAssetInput: {
-        id: $id
-        name: $name
-        code: $code
-        date: $date
-        note: $note
-        assetTypeId: $assetTypeId
-        image: $image
-      }
-    ) {
+  mutation UpdateAsset($updateAssetInput: UpdateAssetInput!) {
+    updateAsset(updateAssetInput: $updateAssetInput) {
       message
       statusCode
       success

@@ -1,7 +1,7 @@
 import { IAssetType } from "./asset-type.type";
 import { IUser } from "./user.type";
 
-export interface Asset {
+export interface IAsset {
   id: number;
   name: string;
   code: string;
@@ -34,7 +34,7 @@ export interface Asset {
 export interface IAssetAssignment {
   id: number;
   assetId: number;
-  asset?: Asset;
+  asset?: IAsset;
   assignedTo: number;
   assignedToUser?: IUser;
   assignedBy: number;
@@ -45,25 +45,4 @@ export interface IAssetAssignment {
   note?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface AssetInput {
-  name: string;
-  code: string;
-  date: string;
-  note?: string;
-  assetTypeId?: number;
-  image?: string;
-}
-
-export interface AssignAssetInput {
-  assetId: number;
-  assignedTo: number;
-  assignedAt: string;
-  note?: string;
-}
-
-export interface ReturnAssetInput {
-  assetId: number;
-  note?: string;
 }
