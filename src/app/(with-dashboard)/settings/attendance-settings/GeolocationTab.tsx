@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { IAttendanceSettings } from "@/types";
+import { MdLocationOn, MdInfo, MdOpenInNew } from "react-icons/md";
 
+// ==================== INTERFACES ====================
 interface IGeolocationTabProps {
   settings?: IAttendanceSettings;
   updateSettings: any;
@@ -13,113 +14,163 @@ interface IGeolocationTabProps {
   refetch: () => void;
 }
 
+interface IFormValues {
+  isGeoLocationEnabled: boolean;
+  googleMapApiKey?: string;
+}
+
+// ==================== LOADING SKELETON SUB-COMPONENT ====================
+function GeolocationTabLoadingSkeleton() {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6 animate-pulse">
+      {/* HEADER SKELETON */}
+      <div className="space-y-3">
+        <div className="h-6 w-48 bg-gray-300 rounded"></div>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-6 bg-gray-300 rounded-full"></div>
+          <div className="h-4 w-16 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+
+      {/* INFO BOX SKELETON */}
+      <div className="mt-4 p-4 bg-gray-100 rounded-md">
+        <div className="space-y-2">
+          <div className="h-4 w-full bg-gray-200 rounded"></div>
+          <div className="h-4 w-5/6 bg-gray-200 rounded"></div>
+          <div className="h-4 w-4/6 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+
+      {/* BUTTON SKELETON */}
+      <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
+        <div className="h-10 w-full sm:w-32 bg-gray-300 rounded"></div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== GEOLOCATION TAB COMPONENT ====================
 export default function GeolocationTab({
   settings,
   updateSettings,
   isLoading,
 }: IGeolocationTabProps) {
-  const [geoEnabled, setGeoEnabled] = useState(
-    settings?.isGeoLocationEnabled ?? false
-  );
-  const [apiKey, setApiKey] = useState("");
-
-  const handleOnSubmit = async (formValues: any) => {
+  // ==================== HANDLERS ====================
+  const handleOnSubmit = async (formValues: IFormValues) => {
     await updateSettings({
       variables: {
         isGeoLocationEnabled: formValues.isGeoLocationEnabled,
+        googleMapApiKey: formValues.googleMapApiKey,
       },
     });
   };
 
+  // SHOW SKELETON WHILE LOADING
+  if (isLoading) {
+    return <GeolocationTabLoadingSkeleton />;
+  }
+
+  // ==================== RENDER ====================
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <CustomForm
         submitHandler={handleOnSubmit}
         defaultValues={{
-          punchInTimeTolerance: settings?.punchInTimeTolerance || 15,
-          workAvailabilityDefinition:
-            settings?.workAvailabilityDefinition || 80,
-          punchInOutAlert: settings?.punchInOutAlert ?? true,
-          punchInOutInterval: settings?.punchInOutInterval || 1,
-          autoApproval: settings?.autoApproval ?? false,
           isGeoLocationEnabled: settings?.isGeoLocationEnabled ?? false,
           googleMapApiKey: "",
         }}
-        className="space-y-6"
+        className="p-4 sm:p-6 space-y-6"
       >
-        {/* Chose geolocation service */}
-        <div className="space-y-4">
-          <h3 className="text-base font-semibold">Chose geolocation service</h3>
-
-          <div className="flex items-center gap-x-3">
-            <ToggleSwitch
-              name="isGeoLocationEnabled"
-              onChange={(value) => setGeoEnabled(value)}
-            />
-            <span className="text-sm font-medium">Enable</span>
+        {/* GEOLOCATION SERVICE SECTION */}
+        <div className="space-y-4 p-4 bg-linear-to-br from-purple-50/50 to-pink-50/30 rounded-lg border border-purple-100/50">
+          {/* HEADER WITH ICON */}
+          <div className="flex items-start gap-3">
+            <MdLocationOn className="text-purple-600 text-2xl shrink-0 mt-1" />
+            <div className="flex-1">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
+                Geolocation Service
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                Track employee location when they punch in using Google Maps
+                integration
+              </p>
+            </div>
           </div>
 
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-            <p className="text-sm text-blue-900">
-              <span className="font-semibold">Note:</span> Google Map is a map
-              and location service provider which is integrated with this app to
-              get the Geolocation data of an employee when Punching In. Create
-              an account to this website for the api key which is must need to
-              get the location data..
+          {/* TOGGLE SWITCH */}
+          <div className="flex items-center gap-3 p-3 bg-white/80 rounded-md border border-purple-200/50">
+            <ToggleSwitch name="isGeoLocationEnabled" />
+            <span className="text-sm sm:text-base font-medium text-gray-700">
+              Enable Geolocation Tracking
+            </span>
+          </div>
+
+          {/* INFO ALERT */}
+          <div className="flex items-start gap-2 p-4 bg-blue-50 rounded-md border border-blue-200">
+            <MdInfo className="text-blue-600 text-xl shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-xs sm:text-sm text-blue-900 leading-relaxed">
+                <span className="font-semibold">Google Maps Integration:</span>{" "}
+                This service captures employee location data during punch-in
+                events. You need a Google Maps API key to enable this feature.
+                Create an account on Google Cloud Platform to obtain your API
+                key.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* API KEY CONFIGURATION SECTION */}
+        <div className="space-y-4 p-4 bg-linear-to-br from-indigo-50/50 to-blue-50/30 rounded-lg border border-indigo-100/50">
+          {/* HEADER */}
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
+              Google Maps API Key
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-600">
+              Enter your Google Maps API key to enable location tracking
             </p>
           </div>
 
-          {/* API Key Input */}
-          {geoEnabled && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Api key
-              </label>
-              <CustomInputField
-                name="googleMapApiKey"
-                type="text"
-                placeholder="AIzaSyDz4_lORmoUdOKmYle0iYEgnrhIV-pEzeQ"
-                wrapperClassName="max-w-full"
-              />
-              <a
-                href="https://developers.google.com/maps/documentation/javascript/get-api-key"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Learn how to get the api key
-              </a>
-            </div>
-          )}
+          {/* API KEY INPUT */}
+          <div className="space-y-3">
+            <CustomInputField
+              name="googleMapApiKey"
+              type="text"
+              placeholder="AIzaSyDz4_lORmoUdOKmYle0iYEgnrhIV-pEzeQ"
+              wrapperClassName="max-w-full"
+            />
+
+            {/* HELP LINK */}
+            <a
+              href="https://developers.google.com/maps/documentation/javascript/get-api-key"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors font-medium"
+            >
+              <MdOpenInNew className="text-base" />
+              <span>Learn how to get your Google Maps API key</span>
+            </a>
+          </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
+        {/* ACTION BUTTONS */}
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-gray-200">
+          {/* SAVE BUTTON */}
           <button
             type="submit"
             disabled={isLoading}
-            className="btn btn-primary px-6"
+            className="btn btn-primary w-full sm:w-auto px-6 py-2.5 text-sm sm:text-base font-medium transition-all duration-200 hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isLoading ? (
-              <span className="flex items-center gap-2">
+              // LOADING STATE
+              <span className="flex items-center justify-center gap-2">
                 <span className="loading loading-spinner loading-sm"></span>
-                Saving...
+                <span>Saving...</span>
               </span>
             ) : (
-              <span className="flex items-center gap-2">
+              // NORMAL STATE
+              <span className="flex items-center justify-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -128,7 +179,7 @@ export default function GeolocationTab({
                 >
                   <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
                 </svg>
-                Save
+                <span>Save Changes</span>
               </span>
             )}
           </button>
