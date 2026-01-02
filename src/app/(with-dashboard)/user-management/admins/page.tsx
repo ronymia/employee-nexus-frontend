@@ -192,7 +192,10 @@ export default function AdminsPage() {
             customUserProfile: (
               <UserProfileCell
                 name={row?.profile?.fullName || "N/A"}
-                designation={row?.employee?.designation?.name || undefined}
+                designation={
+                  row?.employee?.designations?.at(0)?.designation?.name ||
+                  undefined
+                }
                 imageUrl={row?.profile?.profilePicture || undefined}
               />
             ),
@@ -222,33 +225,41 @@ export default function AdminsPage() {
               <span className="text-sm text-gray-400">N/A</span>
             ),
             // CUSTOM DEPARTMENT COLUMN
-            customDepartment: row?.employee?.department?.name ? (
+            customDepartment: row?.employee?.departments?.at(0)?.department
+              ?.name ? (
               <span className="text-sm text-gray-700">
-                {row.employee.department.name}
+                {row.employee.departments?.at(0)?.department?.name}
               </span>
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
             ),
             // CUSTOM EMPLOYMENT STATUS COLUMN WITH BADGE
-            customEmploymentStatus: row?.employee?.employmentStatus?.name ? (
+            customEmploymentStatus: row?.employee?.employmentStatuses?.at(0)
+              ?.employmentStatus?.name ? (
               <span
                 className={`badge badge-sm ${
-                  row.employee.employmentStatus.name
-                    .toLowerCase()
+                  row?.employee?.employmentStatuses
+                    ?.at(0)
+                    ?.employmentStatus?.name.toLowerCase()
                     .includes("full")
                     ? "badge-success"
-                    : row.employee.employmentStatus.name
-                        .toLowerCase()
+                    : row?.employee?.employmentStatuses
+                        ?.at(0)
+                        ?.employmentStatus?.name.toLowerCase()
                         .includes("part")
                     ? "badge-warning"
-                    : row.employee.employmentStatus.name
-                        .toLowerCase()
+                    : row?.employee?.employmentStatuses
+                        ?.at(0)
+                        ?.employmentStatus?.name.toLowerCase()
                         .includes("contract")
                     ? "badge-info"
                     : "badge-secondary"
                 }`}
               >
-                {row.employee.employmentStatus.name}
+                {
+                  row?.employee?.employmentStatuses?.at(0)?.employmentStatus
+                    ?.name
+                }
               </span>
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
