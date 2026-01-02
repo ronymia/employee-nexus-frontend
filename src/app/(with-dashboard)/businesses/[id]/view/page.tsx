@@ -6,8 +6,8 @@ import { IBusiness } from "@/types";
 import { useQuery } from "@apollo/client/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
-import BusinessSettingsOwnerProfile from "@/app/(with-dashboard)/settings/business-settings/tabs/BusinessSettingsOwnerProfile";
-import BusinessSettingsSchedule from "@/app/(with-dashboard)/settings/business-settings/tabs/BusinessSettingsSchedule";
+import BusinessOwnerProfile from "@/app/(with-dashboard)/business-profile/tabs/BusinessOwnerProfile";
+import BusinessSchedule from "@/app/(with-dashboard)/business-profile/tabs/BusinessSchedule";
 import { IUser } from "@/types/user.type";
 import CustomLoading from "@/components/loader/CustomLoading";
 import BusinessCard from "@/app/(with-dashboard)/businesses/[id]/view/components/BusinessCard";
@@ -56,13 +56,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       {/* Render content based on active tab */}
       <div className="mt-4 max-w-5xl w-full">
         {activeTab === "owner" && (
-          <BusinessSettingsOwnerProfile
+          <BusinessOwnerProfile
             key={`owner_information`}
             ownerData={singleBusinessData?.owner as IUser}
           />
         )}
         {activeTab === "schedule" && (
-          <BusinessSettingsSchedule
+          <BusinessSchedule
             key={`business_schedule`}
             businessSchedules={singleBusinessData?.businessSchedules || []}
           />

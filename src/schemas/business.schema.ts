@@ -106,3 +106,17 @@ export type IUpdateBusiness = z.infer<typeof updateBusinessSchema>;
 export type IUserRegisterWithBusiness = z.infer<
   typeof userRegisterWithBusinessSchema
 >;
+
+// Business Profile Card Schema
+export const businessProfileSchema = z.object({
+  name: z.string().nonempty("Business name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().nonempty("Phone is required"),
+  address: z.string().nonempty("Address is required"),
+  city: z.string().nonempty("City is required"),
+  country: z.string().nonempty("Country is required"),
+  postcode: z.string().nonempty("Postcode is required"),
+  website: z.string().optional(),
+});
+
+export type IBusinessProfileFormData = z.infer<typeof businessProfileSchema>;

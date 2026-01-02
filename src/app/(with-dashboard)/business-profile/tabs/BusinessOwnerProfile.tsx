@@ -17,13 +17,13 @@ import { Permissions } from "@/constants/permissions.constant";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
 
-interface BusinessSettingsOwnerProfileProps {
+interface IBusinessOwnerProfileProps {
   ownerData: IUser;
 }
 
-export default function BusinessSettingsOwnerProfile({
+export default function BusinessOwnerProfile({
   ownerData,
-}: BusinessSettingsOwnerProfileProps) {
+}: IBusinessOwnerProfileProps) {
   const { popupOption, setPopupOption } = usePopupOption();
   const { user } = useAppStore((state) => state);
   const { hasPermission } = usePermissionGuard();

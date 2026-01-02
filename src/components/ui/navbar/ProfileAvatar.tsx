@@ -1,5 +1,5 @@
-import { RxAvatar } from "react-icons/rx";
 import { LuLogOut } from "react-icons/lu";
+import { MdBusiness, MdPerson } from "react-icons/md";
 import CustomUserAvatar from "@/components/avatar/CustomUserAvatar";
 import { formatText } from "@/utils/format-text.utils";
 import useAppStore from "@/stores/appStore";
@@ -41,8 +41,17 @@ export default function ProfileAvatar() {
               href="/profile"
               className={`flex items-center gap-2 h-12 px-2`}
             >
-              <RxAvatar className={`text-2xl`} />
-              Profile
+              <MdPerson className={`text-2xl`} />
+              My Profile
+            </Link>
+          </li>
+          <li role="link" className={`hover:bg-primary hover:text-base-300`}>
+            <Link
+              href="/business-profile"
+              className={`flex items-center gap-2 h-12 px-2`}
+            >
+              <MdBusiness className={`text-2xl`} />
+              Business Profile
             </Link>
           </li>
           <li
@@ -54,7 +63,8 @@ export default function ProfileAvatar() {
               onClick={() => useAppStore.getState().logout()}
               className={`flex items-center gap-2 h-12 px-2`}
             >
-              <LuLogOut className={`text-2xl`} /> Log out
+              <LuLogOut className={`text-2xl`} />
+              Log out
             </button>
           </li>
         </ul>

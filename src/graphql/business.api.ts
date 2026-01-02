@@ -39,14 +39,12 @@ export const GET_BUSINESS_BY_ID = gql`
       statusCode
       message
       data {
+        id
+        name
+        email
+        ownerId
         address
         city
-        createdAt
-        email
-        id
-        lat
-        lng
-        name
         numberOfEmployeesAllowed
         phone
         country
@@ -54,17 +52,14 @@ export const GET_BUSINESS_BY_ID = gql`
         registrationDate
         status
         subscriptionPlanId
-        updatedAt
-        ownerId
         website
+        createdAt
+        updatedAt
         owner {
           id
           email
           roleId
           status
-          createdAt
-          updatedAt
-          deletedBy
           profile {
             userId
             fullName
@@ -77,15 +72,13 @@ export const GET_BUSINESS_BY_ID = gql`
             dateOfBirth
             maritalStatus
             profilePicture
-            updatedAt
-            createdAt
           }
         }
         businessSchedules {
+          id
           businessId
           day
           endTime
-          id
           isWeekend
           startTime
         }
