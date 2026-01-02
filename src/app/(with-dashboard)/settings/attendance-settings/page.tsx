@@ -7,16 +7,71 @@ import {
   GET_ATTENDANCE_SETTINGS,
   UPDATE_ATTENDANCE_SETTINGS,
 } from "@/graphql/attendance-settings.api";
-import {
-  IAttendanceSettings,
-  AttendanceTab,
-} from "@/types";
-import CustomLoading from "@/components/loader/CustomLoading";
+import { IAttendanceSettings, AttendanceTab } from "@/types";
 import { MdSettings, MdLocationOn } from "react-icons/md";
 import { FaListUl } from "react-icons/fa";
+import PageHeader from "@/components/ui/PageHeader";
 import PreferenceTab from "./PreferenceTab";
 import DefinitionsTab from "./DefinitionsTab";
 import GeolocationTab from "./GeolocationTab";
+
+// ==================== LOADING SKELETON SUB-COMPONENT ====================
+function AttendanceSettingsLoadingSkeleton() {
+  return (
+    <section className="space-y-6 animate-pulse">
+      {/* Header Skeleton */}
+      <div className="mb-6">
+        <div className="h-8 w-64 bg-gray-200 rounded mb-2"></div>
+        <div className="h-4 w-96 bg-gray-200 rounded"></div>
+      </div>
+
+      {/* Tabs Skeleton */}
+      <div className="flex justify-center">
+        <div className="w-full sm:w-[500px] grid grid-cols-3 gap-2 p-1 bg-gray-100 rounded-lg">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 bg-gray-200 rounded-md"></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Content Skeleton */}
+      <div className="mt-6 space-y-6">
+        {/* Card 1 */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+          <div className="h-6 w-48 bg-gray-200 rounded"></div>
+          <div className="space-y-3">
+            <div className="h-4 w-full bg-gray-200 rounded"></div>
+            <div className="h-4 w-5/6 bg-gray-200 rounded"></div>
+            <div className="h-4 w-4/6 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+          <div className="h-6 w-56 bg-gray-200 rounded"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="h-20 bg-gray-200 rounded"></div>
+            <div className="h-20 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+          <div className="h-6 w-52 bg-gray-200 rounded"></div>
+          <div className="space-y-3">
+            <div className="h-4 w-full bg-gray-200 rounded"></div>
+            <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        {/* Action Button Skeleton */}
+        <div className="flex justify-end">
+          <div className="h-10 w-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function AttendanceSettingsPage() {
   const [activeTab, setActiveTab] = useState<string>(AttendanceTab.PREFERENCE);
@@ -57,26 +112,19 @@ export default function AttendanceSettingsPage() {
       Icon: MdLocationOn,
     },
   ];
+  const settings = data?.attendanceSettingsByBusiness?.data;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <CustomLoading />
-      </div>
-    );
+    return <AttendanceSettingsLoadingSkeleton />;
   }
-
-  const settings = data?.attendanceSettingsByBusiness?.data;
 
   return (
     <section className="space-y-6">
       {/* Header */}
-      <header className="mb-5">
-        <h1 className="text-2xl font-medium">Attendance Settings</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Configure attendance tracking and approval settings
-        </p>
-      </header>
+      <PageHeader
+        title="Attendance Settings"
+        subtitle="Configure attendance tracking and approval settings"
+      />
 
       {/* Tabs */}
       <div className="flex justify-center">

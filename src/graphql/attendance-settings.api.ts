@@ -7,7 +7,6 @@ export const GET_ATTENDANCE_SETTINGS = gql`
       statusCode
       success
       data {
-        id
         businessId
         punchInTimeTolerance
         workAvailabilityDefinition
@@ -27,7 +26,6 @@ export const UPDATE_ATTENDANCE_SETTINGS = gql`
     $punchInOutAlert: Boolean
     $punchInOutInterval: Int
     $autoApproval: Boolean
-    $isGeoLocationEnabled: Boolean
   ) {
     updateAttendanceSetting(
       updateAttendanceSettingInput: {
@@ -36,14 +34,12 @@ export const UPDATE_ATTENDANCE_SETTINGS = gql`
         punchInOutAlert: $punchInOutAlert
         punchInOutInterval: $punchInOutInterval
         autoApproval: $autoApproval
-        isGeoLocationEnabled: $isGeoLocationEnabled
       }
     ) {
       message
       statusCode
       success
       data {
-        id
         businessId
         punchInTimeTolerance
         workAvailabilityDefinition
