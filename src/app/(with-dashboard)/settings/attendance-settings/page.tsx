@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client/react";
 import CustomTab from "@/components/ui/Tab/CustomTab";
 import {
@@ -15,65 +16,11 @@ import PreferenceTab from "./PreferenceTab";
 import DefinitionsTab from "./DefinitionsTab";
 import GeolocationTab from "./GeolocationTab";
 
-// ==================== LOADING SKELETON SUB-COMPONENT ====================
-function AttendanceSettingsLoadingSkeleton() {
-  return (
-    <section className="space-y-6 animate-pulse">
-      {/* Header Skeleton */}
-      <div className="mb-6">
-        <div className="h-8 w-64 bg-gray-200 rounded mb-2"></div>
-        <div className="h-4 w-96 bg-gray-200 rounded"></div>
-      </div>
-
-      {/* Tabs Skeleton */}
-      <div className="flex justify-center">
-        <div className="w-full sm:w-[500px] grid grid-cols-3 gap-2 p-1 bg-gray-100 rounded-lg">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-12 bg-gray-200 rounded-md"></div>
-          ))}
-        </div>
-      </div>
-
-      {/* Content Skeleton */}
-      <div className="mt-6 space-y-6">
-        {/* Card 1 */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-          <div className="h-6 w-48 bg-gray-200 rounded"></div>
-          <div className="space-y-3">
-            <div className="h-4 w-full bg-gray-200 rounded"></div>
-            <div className="h-4 w-5/6 bg-gray-200 rounded"></div>
-            <div className="h-4 w-4/6 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-          <div className="h-6 w-56 bg-gray-200 rounded"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-20 bg-gray-200 rounded"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-          <div className="h-6 w-52 bg-gray-200 rounded"></div>
-          <div className="space-y-3">
-            <div className="h-4 w-full bg-gray-200 rounded"></div>
-            <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-
-        {/* Action Button Skeleton */}
-        <div className="flex justify-end">
-          <div className="h-10 w-32 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
+// ==================== ATTENDANCE SETTINGS PAGE COMPONENT ====================
 export default function AttendanceSettingsPage() {
+  // ==================== HOOKS ====================
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>(AttendanceTab.PREFERENCE);
 
   // GET ATTENDANCE SETTINGS
@@ -95,6 +42,32 @@ export default function AttendanceSettingsPage() {
     }
   );
 
+  // SYNC ACTIVE TAB WITH URL SEARCH PARAMS
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+
+    // VALIDATE AND SET TAB FROM URL
+    if (tabParam) {
+      const validTabs = Object.values(AttendanceTab);
+      if (validTabs.includes(tabParam as AttendanceTab)) {
+        setActiveTab(tabParam);
+      } else {
+        // INVALID TAB - REDIRECT TO DEFAULT
+        router.replace(`?tab=${AttendanceTab.PREFERENCE}`);
+      }
+    } else {
+      // NO TAB PARAM - SET DEFAULT
+      router.replace(`?tab=${AttendanceTab.PREFERENCE}`);
+    }
+  }, [searchParams, router]);
+
+  // HANDLE TAB CHANGE AND UPDATE URL
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    router.push(`?tab=${tab}`, { scroll: false });
+  };
+
+  // TAB CONFIGURATION
   const tabs = [
     {
       id: AttendanceTab.PREFERENCE,
@@ -112,39 +85,37 @@ export default function AttendanceSettingsPage() {
       Icon: MdLocationOn,
     },
   ];
+
   const settings = data?.attendanceSettingsByBusiness?.data;
 
-  if (loading) {
-    return <AttendanceSettingsLoadingSkeleton />;
-  }
-
+  // ==================== RENDER ====================
   return (
     <section className="space-y-6">
-      {/* Header */}
+      {/* HEADER */}
       <PageHeader
         title="Attendance Settings"
         subtitle="Configure attendance tracking and approval settings"
       />
 
-      {/* Tabs */}
+      {/* TABS */}
       <div className="flex justify-center">
         <CustomTab
           tabs={tabs}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           gridColumns="grid-cols-3"
           containerWidth="w-full sm:w-[500px]"
           testId="attendance-settings"
         />
       </div>
 
-      {/* Tab Content */}
+      {/* TAB CONTENT */}
       <div className="mt-6">
         {activeTab === AttendanceTab.PREFERENCE && (
           <PreferenceTab
             settings={settings}
             updateSettings={updateSettings}
-            isLoading={updateResult.loading}
+            isLoading={loading || updateResult.loading}
             refetch={refetch}
           />
         )}
@@ -153,7 +124,7 @@ export default function AttendanceSettingsPage() {
           <DefinitionsTab
             settings={settings}
             updateSettings={updateSettings}
-            isLoading={updateResult.loading}
+            isLoading={loading || updateResult.loading}
             refetch={refetch}
           />
         )}
@@ -162,7 +133,7 @@ export default function AttendanceSettingsPage() {
           <GeolocationTab
             settings={settings}
             updateSettings={updateSettings}
-            isLoading={updateResult.loading}
+            isLoading={loading || updateResult.loading}
             refetch={refetch}
           />
         )}
