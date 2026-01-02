@@ -300,6 +300,264 @@ import { GET_USERS } from "@/graphql/user.api";
 - Support mobile responsive card view
 - Include search and filtering when applicable
 
+## 🏛️ Business Logic Separation (CRITICAL)
+
+### Architecture Philosophy
+
+**CRITICAL**: Separate business logic from UI components for:
+- ✅ Code reusability across web and React Native apps
+- ✅ Easier testing and maintenance
+- ✅ Clear separation of concerns
+- ✅ Shared logic between platforms
+
+### Folder Structure
+
+```
+src/
+├── app/                          # Next.js app router (UI only)
+├── components/                   # Presentational components (UI only)
+├── services/                     # 🔥 BUSINESS LOGIC LAYER
+│   ├── attendance/
+│   │   ├── attendanceService.ts  # Core business logic
+│   │   └── attendanceValidation.ts
+│   ├── employee/
+│   │   ├── employeeService.ts
+│   │   └── employeeTransformers.ts
+│   └── auth/
+│       └── authService.ts
+├── hooks/                        # 🔥 REACT-SPECIFIC BUSINESS LOGIC
+│   ├── useAttendance.ts          # Business logic + React integration
+│   ├── useEmployeeData.ts
+│   └── useAuth.ts
+├── graphql/                      # GraphQL queries/mutations (data layer)
+├── utils/                        # Pure utility functions (helpers)
+│   ├── formatters/               # Data formatters
+│   ├── validators/               # Validation functions
+│   └── calculations/             # Business calculations
+└── types/                        # TypeScript interfaces
+```
+
+### Service Layer Pattern
+
+**Services** contain pure business logic (platform-agnostic):
+
+```tsx
+// ✅ GOOD: services/attendance/attendanceService.ts
+export class AttendanceService {
+  // CALCULATE WORK HOURS
+  static calculateWorkHours(punchIn: Date, punchOut: Date): number {
+    const diff = punchOut.getTime() - punchIn.getTime();
+    return diff / (1000 * 60 * 60); // Convert to hours
+  }
+
+  // VALIDATE ATTENDANCE
+  static validateAttendance(data: IAttendanceInput): IValidationResult {
+    // Business validation logic
+    if (!data.punchIn) {
+      return { valid: false, error: "Punch in time required" };
+    }
+    return { valid: true };
+  }
+
+  // DETERMINE STATUS
+  static determineAttendanceStatus(
+    punchIn: Date,
+    scheduledTime: Date,
+    tolerance: number
+  ): AttendanceStatus {
+    // Business logic for status determination
+    const diff = punchIn.getTime() - scheduledTime.getTime();
+    if (diff > tolerance * 60 * 1000) return "late";
+    return "on-time";
+  }
+}
+```
+
+### Custom Hooks Pattern
+
+**Hooks** integrate services with React (web/React Native):
+
+```tsx
+// ✅ GOOD: hooks/useAttendance.ts
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { AttendanceService } from "@/services/attendance/attendanceService";
+import { CREATE_ATTENDANCE } from "@/graphql/attendance.api";
+
+export function useAttendance() {
+  // REACT STATE
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // GRAPHQL MUTATION
+  const [createAttendance] = useMutation(CREATE_ATTENDANCE);
+
+  // BUSINESS LOGIC METHOD
+  const submitAttendance = async (data: IAttendanceInput) => {
+    setIsProcessing(true);
+    
+    try {
+      // USE SERVICE FOR VALIDATION
+      const validation = AttendanceService.validateAttendance(data);
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
+      // USE SERVICE FOR CALCULATION
+      const hours = AttendanceService.calculateWorkHours(
+        data.punchIn,
+        data.punchOut
+      );
+
+      // SAVE TO BACKEND
+      await createAttendance({
+        variables: { ...data, workHours: hours }
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return { submitAttendance, isProcessing };
+}
+```
+
+### Component Pattern (UI Only)
+
+**Components** should ONLY handle presentation:
+
+```tsx
+// ✅ GOOD: Components use hooks, not direct business logic
+export default function AttendancePage() {
+  // USE HOOK FOR BUSINESS LOGIC
+  const { submitAttendance, isProcessing } = useAttendance();
+
+  // UI-ONLY LOGIC
+  const handleSubmit = async (formData: IFormData) => {
+    await submitAttendance(formData);
+  };
+
+  // RENDER UI
+  return <form onSubmit={handleSubmit}>...</form>;
+}
+```
+
+### What Goes Where?
+
+#### ✅ Services (`/services`)
+- Business calculations
+- Business validation rules
+- Data transformations
+- Business state machines
+- Domain-specific logic
+- **Platform-agnostic** (works in web & React Native)
+
+#### ✅ Hooks (`/hooks`)
+- React integration layer
+- GraphQL mutations/queries integration
+- React state management
+- Side effects (useEffect)
+- **React-specific** (uses React APIs)
+
+#### ✅ Utils (`/utils`)
+- Pure helper functions
+- Formatters (dates, currency)
+- Validators (email, phone)
+- Constants
+- **No business logic**
+
+#### ✅ Components (`/components`, `/app`)
+- UI rendering only
+- User interactions
+- Event handlers (call hooks)
+- **No business logic**
+- **No direct GraphQL calls**
+
+### Anti-Patterns to AVOID
+
+```tsx
+// ❌ BAD: Business logic in component
+export default function AttendancePage() {
+  const handleSubmit = (data) => {
+    // ❌ Business logic in component
+    const diff = data.punchOut.getTime() - data.punchIn.getTime();
+    const hours = diff / (1000 * 60 * 60);
+    
+    if (hours < 0) {
+      // ❌ Validation in component
+      return alert("Invalid times");
+    }
+    
+    // Save...
+  };
+}
+
+// ❌ BAD: Direct GraphQL in component
+export default function AttendancePage() {
+  const [createAttendance] = useMutation(CREATE_ATTENDANCE);
+  
+  const handleSubmit = async (data) => {
+    // ❌ No hook abstraction
+    await createAttendance({ variables: data });
+  };
+}
+```
+
+### Migration Strategy
+
+When refactoring existing code:
+
+1. **Identify business logic** in components
+2. **Extract to services** (pure functions/classes)
+3. **Create custom hooks** to integrate services with React
+4. **Update components** to use hooks only
+
+### Testing Benefits
+
+```tsx
+// ✅ Test business logic independently (no React)
+import { AttendanceService } from "@/services/attendance/attendanceService";
+
+test("calculates work hours correctly", () => {
+  const punchIn = new Date("2024-01-01T09:00:00");
+  const punchOut = new Date("2024-01-01T17:00:00");
+  
+  const hours = AttendanceService.calculateWorkHours(punchIn, punchOut);
+  
+  expect(hours).toBe(8);
+});
+```
+
+### Cross-Platform Reusability
+
+For React Native app:
+
+```tsx
+// ✅ REUSE: Same service in React Native
+import { AttendanceService } from "@/services/attendance/attendanceService";
+
+// ✅ REUSE: Same hook pattern (different GraphQL client)
+export function useAttendance() {
+  // React Native-specific GraphQL client
+  const [createAttendance] = useMutation(CREATE_ATTENDANCE);
+  
+  // ✅ SAME SERVICE LOGIC
+  const submitAttendance = async (data: IAttendanceInput) => {
+    const validation = AttendanceService.validateAttendance(data);
+    // ... rest of logic
+  };
+}
+```
+
+### Quick Checklist for Business Logic
+
+When adding new features:
+
+1. ✅ Is there business logic? → Create a service
+2. ✅ Need React integration? → Create a custom hook
+3. ✅ GraphQL call needed? → Use hook, not component
+4. ✅ Pure helper function? → Add to utils
+5. ✅ Component only renders UI and calls hooks
+
 ---
 
 ## 📋 Quick Reference
@@ -312,6 +570,16 @@ import { GET_USERS } from "@/graphql/user.api";
 4. ✅ Follow component structure pattern
 5. ✅ Use semantic HTML
 6. ✅ Implement loading states
+7. ✅ **NO business logic - use hooks**
+8. ✅ **NO direct GraphQL - use hooks**
+
+**When adding business logic:**
+
+1. ✅ Extract to service class/functions
+2. ✅ Make services platform-agnostic
+3. ✅ Create custom hook for React integration
+4. ✅ Components call hooks only
+5. ✅ Write tests for services independently
 
 **When adding animations:**
 
@@ -330,4 +598,5 @@ import { GET_USERS } from "@/graphql/user.api";
 
 ---
 
-_These rules ensure consistency, maintainability, and professional quality across the codebase._
+_These rules ensure consistency, maintainability, cross-platform reusability, and professional quality across the codebase._
+
