@@ -10,7 +10,7 @@ import {
   PiUser,
 } from "react-icons/pi";
 import dayjs from "dayjs";
-import { IAttendance } from "@/types/attendance.type";
+import { IAttendance, IAttendancePunch } from "@/types/attendance.type";
 
 // ==================== INTERFACES ====================
 interface IAttendanceRecordProps {
@@ -32,7 +32,7 @@ interface IHoursSummaryCardProps {
 }
 
 interface IPunchRecordCardProps {
-  record: any;
+  record: IAttendancePunch;
   index: number;
 }
 
@@ -209,7 +209,7 @@ function PunchRecordCard({ record, index }: IPunchRecordCardProps) {
         </div>
 
         {/* WORK HOURS */}
-        {record.workHours !== undefined && record.workHours > 0 && (
+        {record.workMinutes !== undefined && record.workMinutes > 0 && (
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-info/20 flex items-center justify-center">
               <PiClock size={20} className="text-info" />
@@ -217,14 +217,14 @@ function PunchRecordCard({ record, index }: IPunchRecordCardProps) {
             <div>
               <p className="text-xs text-base-content/60">Work Hours</p>
               <p className="font-semibold text-info">
-                {formatWorkHours(record.workHours)}
+                {formatWorkHours(record.workMinutes)}
               </p>
             </div>
           </div>
         )}
 
         {/* BREAK TIME */}
-        {record.breakStart && record.breakEnd && (
+        {record.breakMinutes !== undefined && record.breakMinutes > 0 && (
           <>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
@@ -233,7 +233,7 @@ function PunchRecordCard({ record, index }: IPunchRecordCardProps) {
               <div>
                 <p className="text-xs text-base-content/60">Break Start</p>
                 <p className="font-semibold text-base-content">
-                  {dayjs(record.breakStart).format("hh:mm A")}
+                  {dayjs(record?.breakStart).format("hh:mm A")}
                 </p>
               </div>
             </div>
@@ -244,7 +244,7 @@ function PunchRecordCard({ record, index }: IPunchRecordCardProps) {
               <div>
                 <p className="text-xs text-base-content/60">Break End</p>
                 <p className="font-semibold text-base-content">
-                  {dayjs(record.breakEnd).format("hh:mm A")}
+                  {dayjs(record?.breakEnd).format("hh:mm A")}
                 </p>
               </div>
             </div>
@@ -400,9 +400,9 @@ export default function AttendanceRecord({
               {/* HOURS SUMMARY */}
               <motion.div variants={itemVariants}>
                 <HoursSummaryCard
-                  totalHours={attendance.totalHours || 0}
-                  breakHours={attendance.breakHours || 0}
-                  workHours={firstPunch?.workHours || 0}
+                  totalHours={attendance.totalMinutes || 0}
+                  breakHours={attendance.breakMinutes || 0}
+                  workHours={firstPunch?.workMinutes || 0}
                   status={attendance.status}
                 />
               </motion.div>

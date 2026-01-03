@@ -134,22 +134,3 @@ export const UNASSIGN_WORK_SITE = gql`
     }
   }
 `;
-
-export const GET_EMPLOYEE_WORK_SITES = gql`
-  query EmployeeWorkSites($userId: Int!) {
-    employeeWorkSites(userId: $userId) {
-      success
-      message
-      data {
-        id
-        workSiteId
-        workSite {
-          name
-          address
-          status
-        }
-        createdAt
-      }
-    }
-  }
-`;

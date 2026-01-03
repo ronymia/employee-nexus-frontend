@@ -38,4 +38,6 @@ export * from "./dashboard.type";
 export * from "./employee-department.type";
 export * from "./employee-designation.type";
 export * from "./employee-employment-status.type";
+export * from "./employee-work-site.type";
+export * from "./employee-work-schedule.type";
 export * from "./business-subscription.type";

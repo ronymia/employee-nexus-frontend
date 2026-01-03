@@ -11,8 +11,8 @@ export const GET_ATTENDANCES = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -38,10 +38,8 @@ export const GET_ATTENDANCES = gql`
           }
           punchIn
           punchOut
-          breakStart
-          breakEnd
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           punchInIp
           punchOutIp
           punchInLat
@@ -70,8 +68,8 @@ export const GET_ATTENDANCE_BY_ID = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -91,8 +89,8 @@ export const GET_ATTENDANCE_BY_ID = gql`
           punchOut
           breakStart
           breakEnd
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           punchInIp
           punchOutIp
           punchInLat
@@ -121,8 +119,8 @@ export const ATTENDANCE_REQUEST = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -130,8 +128,8 @@ export const ATTENDANCE_REQUEST = gql`
           id
           punchIn
           punchOut
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           notes
         }
       }
@@ -149,8 +147,8 @@ export const CREATE_ATTENDANCE = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -158,8 +156,8 @@ export const CREATE_ATTENDANCE = gql`
           id
           punchIn
           punchOut
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           notes
         }
       }
@@ -178,8 +176,8 @@ export const UPDATE_ATTENDANCE = gql`
         id
         # userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt

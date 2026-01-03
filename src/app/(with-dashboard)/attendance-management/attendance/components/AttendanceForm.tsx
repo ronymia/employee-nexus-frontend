@@ -11,14 +11,12 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 // ==================== COMPONENT IMPORTS ====================
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
-import { EmployeeSelect } from "@/components/input-fields";
 
 // ==================== SUB-COMPONENT IMPORTS ====================
 import {
   BasicInfoFields,
   PunchRecordFields,
   LoadingScheduleState,
-  NoScheduleMessage,
   SelectionPrompt,
 } from "./";
 
@@ -151,7 +149,7 @@ export default function AttendanceForm({
             workSiteId: record.workSiteId ? parseInt(record.workSiteId) : null,
             punchIn: punchInTime,
             punchOut: punchOutTime,
-            breakHours: 0,
+            breakMinutes: 0,
             notes: record.notes || null,
             punchInIp: ipAddress,
             punchOutIp: ipAddress,
@@ -181,8 +179,8 @@ export default function AttendanceForm({
             createAttendanceInput: {
               userId: parseInt(formValues.userId),
               date: dayjs(formValues.date, "DD-MM-YYYY").toDate(),
-              breakHours: 0,
-              status: "approved",
+              breakMinutes: 0,
+              // status: "approved",
               punchRecords: processedPunchRecords,
             },
           },
@@ -193,8 +191,8 @@ export default function AttendanceForm({
             updateAttendanceInput: {
               id: Number(attendance?.id),
               userId: parseInt(formValues.userId),
-              breakHours: 0,
-              status: "approved",
+              breakMinutes: 0,
+              // status: "approved",
               punchRecords: processedPunchRecords,
             },
           },
@@ -203,7 +201,8 @@ export default function AttendanceForm({
 
       onClose();
     } catch (error) {
-      console.error("Error submitting attendance:", error);
+      console.log("Error submitting attendance:", error);
+      throw error;
     } finally {
       setIsPending(false);
     }
@@ -285,6 +284,7 @@ function PunchRecordsSection({
   });
 
   const hasSchedule = scheduleData?.getUserWorkSchedule?.data;
+  console.log({ hasSchedule });
 
   // ==================== AUTO-POPULATE PUNCH TIMES ====================
   // Auto-populate punch times when schedule is loaded
@@ -369,46 +369,79 @@ function PunchRecordsSection({
     return <LoadingScheduleState />;
   }
 
-  // Show message if no schedule (only for create mode)
-  if (actionType === "create" && !scheduleLoading && !hasSchedule) {
-    return <NoScheduleMessage />;
-  }
-
   // ==================== RENDER PUNCH RECORDS ====================
   return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-base font-semibold text-primary">Punch Records</h4>
-        <button
-          type="button"
-          onClick={() => addPunchRecord()}
-          className="btn btn-sm btn-primary gap-2"
+    <div className="space-y-4">
+      {/* OVERTIME ALERT - Show if no schedule in create mode */}
+      {actionType === "create" && !scheduleLoading && !hasSchedule && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="alert alert-warning shadow-md"
         >
-          <PiPlus size={16} />
-          Add Record
-        </button>
-      </div>
+          <div className="flex items-start gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div className="flex-1">
+              <h3 className="font-bold">No Work Schedule Found</h3>
+              <div className="text-sm">
+                This employee doesn't have a work schedule for this date. This
+                attendance will be counted as{" "}
+                <span className="font-semibold">overtime</span>.
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
-      {/* PUNCH RECORDS LIST */}
-      <AnimatePresence mode="popLayout">
-        {punchRecords.map((record: any, index: number) => (
-          <motion.div
-            key={record._key || record.id || `record-${index}`}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            layout
+      <div className="border border-primary/20 rounded-lg p-4">
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-base font-semibold text-primary">
+            Punch Records
+          </h4>
+          <button
+            type="button"
+            onClick={() => addPunchRecord()}
+            className="btn btn-sm btn-primary gap-2"
           >
-            <PunchRecordFields
-              index={index}
-              onRemove={() => removePunchRecord(index)}
-              canRemove={punchRecords.length > 1}
-            />
-          </motion.div>
-        ))}
-      </AnimatePresence>
+            <PiPlus size={16} />
+            Add Record
+          </button>
+        </div>
+
+        {/* PUNCH RECORDS LIST */}
+        <AnimatePresence mode="popLayout">
+          {punchRecords.map((record: any, index: number) => (
+            <motion.div
+              key={record._key || record.id || `record-${index}`}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              layout
+            >
+              <PunchRecordFields
+                index={index}
+                onRemove={() => removePunchRecord(index)}
+                canRemove={punchRecords.length > 1}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

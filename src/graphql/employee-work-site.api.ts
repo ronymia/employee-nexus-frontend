@@ -18,17 +18,27 @@ export const ASSIGN_EMPLOYEE_WORK_SITE = gql`
     }
   }
 `;
-export const GET_EMPLOYEE_WORK_SITE = gql`
-  query ($getEmployeeWorkSitesInput: GetEmployeeWorkSitesInput!) {
+export const GET_EMPLOYEE_WORK_SITES = gql`
+  query GetEmployeeWorkSites(
+    $queryEmployeeWorkSitesInput: QueryEmployeeWorkSitesInput
+  ) {
     getEmployeeWorkSites(
-      getEmployeeWorkSitesInput: $getEmployeeWorkSitesInput
+      queryEmployeeWorkSitesInput: $queryEmployeeWorkSitesInput
     ) {
       success
+      statusCode
+      message
       data {
+        userId
+        workSiteId
+        startDate
+        endDate
+        isActive
         workSite {
           name
+          address
+          status
         }
-        startDate
       }
     }
   }

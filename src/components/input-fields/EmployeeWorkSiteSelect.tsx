@@ -1,10 +1,7 @@
-import {
-  GET_EMPLOYEE_WORK_SITES,
-  GET_WORK_SITES,
-} from "@/graphql/work-sites.api";
+import { GET_EMPLOYEE_WORK_SITES } from "@/graphql/employee-work-site.api";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
-import { IEmployeeWorkSite, IWorkSite } from "@/types/work-sites.type";
+import { IEmployeeWorkSite } from "@/types/employee-work-site.type";
 
 interface IWorkSiteSelectProps {
   name: string;
@@ -26,18 +23,20 @@ export default function EmployeeWorkSiteSelect({
   query,
 }: IWorkSiteSelectProps) {
   const { data, loading } = useQuery<{
-    employeeWorkSites: {
+    getEmployeeWorkSites: {
       data: IEmployeeWorkSite[];
     };
   }>(GET_EMPLOYEE_WORK_SITES, {
     variables: {
-      userId: Number(query?.userId),
+      queryEmployeeWorkSitesInput: {
+        userId: Number(query?.userId),
+      },
     },
     skip: !query?.userId,
   });
 
   const options =
-    data?.employeeWorkSites?.data?.map((site: IEmployeeWorkSite) => ({
+    data?.getEmployeeWorkSites?.data?.map((site: IEmployeeWorkSite) => ({
       label: site.workSite.name,
       value: Number(site.workSiteId),
     })) || [];
