@@ -13,6 +13,7 @@ export const GET_ATTENDANCES = gql`
         date
         totalMinutes
         breakMinutes
+        scheduleMinutes
         status
         createdAt
         updatedAt
@@ -68,6 +69,7 @@ export const GET_ATTENDANCE_BY_ID = gql`
         id
         userId
         date
+        scheduleMinutes
         totalMinutes
         breakMinutes
         status

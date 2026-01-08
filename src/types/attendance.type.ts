@@ -31,6 +31,7 @@ export interface IAttendance {
   userId: number;
   user?: IUser;
   date: string;
+  scheduleMinutes: number;
   totalMinutes: number;
   breakMinutes: number;
   status: string;

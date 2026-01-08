@@ -149,6 +149,8 @@ export default function AttendanceForm({
             workSiteId: record.workSiteId ? parseInt(record.workSiteId) : null,
             punchIn: punchInTime,
             punchOut: punchOutTime,
+            // breakStart: punchInTime,
+            // breakEnd: punchInTime,
             breakMinutes: 0,
             notes: record.notes || null,
             punchInIp: ipAddress,

@@ -39,6 +39,7 @@ import { motion } from "motion/react";
 import PageHeader from "@/components/ui/PageHeader";
 import FormModal from "@/components/form/FormModal";
 import { showToast } from "@/components/ui/CustomToast";
+import { minutesToHoursAndMinutes } from "@/utils/time.utils";
 
 // ==================== SUB-COMPONENTS ====================
 
@@ -514,6 +515,24 @@ export default function AttendancePage() {
     },
     {
       key: "3",
+      header: "Schedule",
+      accessorKey: "customScheduleMinutes",
+      show: true,
+    },
+    {
+      key: "4",
+      header: "Total",
+      accessorKey: "customTotalMinutes",
+      show: true,
+    },
+    {
+      key: "5",
+      header: "Break",
+      accessorKey: "customBreakMinutes",
+      show: true,
+    },
+    {
+      key: "6",
       header: "Status",
       accessorKey: "customStatus",
       show: true,
@@ -606,6 +625,12 @@ export default function AttendancePage() {
           customEmployeeName: row.user?.profile?.fullName || "N/A",
           customDate: dayjs(row.date).format("MMM DD, YYYY"),
           customStatus: getStatusBadge(row.status),
+          customScheduleMinutes:
+            minutesToHoursAndMinutes(row.scheduleMinutes) || "N/A",
+          customTotalMinutes:
+            minutesToHoursAndMinutes(row.totalMinutes) || "N/A",
+          customBreakMinutes:
+            minutesToHoursAndMinutes(row.breakMinutes) || "N/A",
         }))}
         searchConfig={{
           searchable: false,
