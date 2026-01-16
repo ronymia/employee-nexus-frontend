@@ -10,7 +10,6 @@ export const GET_PROJECTS = gql`
         id
         name
         description
-        cover
         status
         startDate
         endDate
@@ -33,7 +32,6 @@ export const GET_PROJECT_BY_ID = gql`
         id
         name
         description
-        cover
         status
         startDate
         endDate
@@ -50,7 +48,6 @@ export const GET_PROJECT_BY_ID = gql`
             }
           }
           role
-          # joinedAt
         }
         creator {
           id
@@ -67,24 +64,8 @@ export const GET_PROJECT_BY_ID = gql`
 `;
 
 export const CREATE_PROJECT = gql`
-  mutation CreateProject(
-    $name: String!
-    $description: String
-    $cover: String!
-    $status: String!
-    $startDate: String
-    $endDate: String
-  ) {
-    createProject(
-      createProjectInput: {
-        name: $name
-        description: $description
-        cover: $cover
-        status: $status
-        startDate: $startDate
-        endDate: $endDate
-      }
-    ) {
+  mutation CreateProject($createProjectInput: CreateProjectInput!) {
+    createProject(createProjectInput: $createProjectInput) {
       message
       statusCode
       success
@@ -92,7 +73,6 @@ export const CREATE_PROJECT = gql`
         id
         name
         description
-        cover
         status
         startDate
         endDate
@@ -106,26 +86,8 @@ export const CREATE_PROJECT = gql`
 `;
 
 export const UPDATE_PROJECT = gql`
-  mutation UpdateProject(
-    $id: Int!
-    $name: String!
-    $description: String
-    $cover: String!
-    $status: String!
-    $startDate: String
-    $endDate: String
-  ) {
-    updateProject(
-      updateProjectInput: {
-        id: $id
-        name: $name
-        description: $description
-        cover: $cover
-        status: $status
-        startDate: $startDate
-        endDate: $endDate
-      }
-    ) {
+  mutation UpdateProject($updateProjectInput: UpdateProjectInput!) {
+    updateProject(updateProjectInput: $updateProjectInput) {
       message
       statusCode
       success
@@ -133,7 +95,6 @@ export const UPDATE_PROJECT = gql`
         id
         name
         description
-        cover
         status
         startDate
         endDate
@@ -156,7 +117,6 @@ export const DELETE_PROJECT = gql`
         id
         name
         description
-        cover
         status
         startDate
         endDate
@@ -226,7 +186,6 @@ export const GET_USER_PROJECTS = gql`
           status
           startDate
           endDate
-          cover
           business {
             id
             name

@@ -7,10 +7,12 @@ import {
   GET_ASSET_TYPES,
   UPDATE_ASSET_TYPE,
 } from "@/graphql/asset-type.api";
-import { IAssetTypeFormData } from "@/schemas";
+import { assetTypeSchema, IAssetTypeFormData } from "@/schemas";
 import { IAssetType } from "@/types";
 import { useMutation } from "@apollo/client/react";
+import { showToast } from "@/components/ui/CustomToast";
 
+// ==================== ASSET TYPE FORM COMPONENT ====================
 export default function AssetTypeForm({
   handleClosePopup,
   data,
@@ -18,35 +20,55 @@ export default function AssetTypeForm({
   handleClosePopup: () => void;
   data: IAssetType;
 }) {
-  // MUTATION TO CREATE A NEW ASSET TYPE
+  // ==================== GRAPHQL MUTATIONS ====================
+  // CREATE ASSET TYPE MUTATION
   const [createAssetType, createResult] = useMutation(CREATE_ASSET_TYPE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ASSET_TYPES }],
   });
+
+  // UPDATE ASSET TYPE MUTATION
   const [updateAssetType, updateResult] = useMutation(UPDATE_ASSET_TYPE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_ASSET_TYPES }],
   });
 
-  // HANDLER FOR FORM SUBMISSION
+  // ==================== FORM SUBMISSION HANDLER ====================
   const handleOnSubmit = async (formValues: IAssetTypeFormData) => {
+    // UPDATE EXISTING ASSET TYPE
     if (data?.id) {
       formValues["id"] = Number(data.id);
-      await updateAssetType({
+      const res = await updateAssetType({
         variables: formValues,
       });
-    } else {
-      await createAssetType({
-        variables: formValues,
-      });
+      if (res?.data) {
+        showToast.success("Updated!", "Asset type updated successfully");
+        handleClosePopup?.();
+      }
     }
-    handleClosePopup?.();
+    // CREATE NEW ASSET TYPE
+    else {
+      const res = await createAssetType({
+        variables: formValues,
+      });
+      if (res?.data) {
+        showToast.success("Created!", "Asset type created successfully");
+        handleClosePopup?.();
+      }
+    }
+  };
+
+  // ==================== DEFAULT FORM VALUES ====================
+  const defaultValues = {
+    name: data?.name || "",
+    description: data?.description || "",
   };
 
   return (
     <CustomForm
       submitHandler={handleOnSubmit}
-      defaultValues={data || {}}
+      resolver={assetTypeSchema}
+      defaultValues={defaultValues}
       className={`flex flex-col gap-y-3`}
     >
       {/* NAME */}

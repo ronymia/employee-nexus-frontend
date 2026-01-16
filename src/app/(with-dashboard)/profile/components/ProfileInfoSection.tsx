@@ -5,7 +5,6 @@ import { useMutation } from "@apollo/client/react";
 import { UPDATE_PROFILE } from "@/graphql/profile.api";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInputField from "@/components/form/input/CustomInputField";
-import CustomSelect from "@/components/form/input/CustomSelect";
 import FormActionButton from "@/components/form/FormActionButton";
 import { userProfileSchema } from "@/schemas/user.schema";
 import { FiEdit2 } from "react-icons/fi";
@@ -13,6 +12,9 @@ import dayjs from "dayjs";
 import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import { IUser } from "@/types";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 interface ProfileInfoSectionProps {
   user: IUser;
@@ -38,13 +40,15 @@ export default function ProfileInfoSection({
     try {
       // Remove email from submission as it's not part of profile update
       const { email, ...profileData } = formValues;
+      console.log({ profileData });
 
       const result = await updateProfile({
         variables: {
           updateProfileInput: {
             ...profileData,
-            id: Number(user?.profile?.id),
+            userId: Number(user?.profile?.userId),
             profilePicture: user?.profile?.profilePicture || "",
+            dateOfBirth: dayjs(profileData.dateOfBirth, "DD-MM-YYYY").toDate(),
           },
         },
         fetchPolicy: "no-cache",
@@ -86,7 +90,9 @@ export default function ProfileInfoSection({
             resolver={userProfileSchema}
             defaultValues={{
               fullName: profile?.fullName || "",
-              dateOfBirth: profile?.dateOfBirth || "",
+              dateOfBirth: profile?.dateOfBirth
+                ? dayjs(profile.dateOfBirth).format("DD-MM-YYYY")
+                : "",
               gender: profile?.gender || "",
               maritalStatus: profile?.maritalStatus || "",
               phone: profile?.phone || "",
@@ -202,7 +208,9 @@ export default function ProfileInfoSection({
           resolver={userProfileSchema}
           defaultValues={{
             fullName: profile?.fullName || "",
-            dateOfBirth: profile?.dateOfBirth || "",
+            dateOfBirth: profile?.dateOfBirth
+              ? dayjs(profile.dateOfBirth).format("DD-MM-YYYY")
+              : "",
             gender: profile?.gender || "",
             maritalStatus: profile?.maritalStatus || "",
             phone: profile?.phone || "",

@@ -12,20 +12,24 @@ export const GET_BUSINESSES = gql`
         address
         city
         country
-        createdAt
         email
         id
-        lat
-        lng
         name
-        numberOfEmployeesAllowed
         phone
         postcode
         registrationDate
         status
-        subscriptionPlanId
+        subscription {
+          id
+          subscriptionPlanId
+          startDate
+          endDate
+          trialEndDate
+          status
+          numberOfEmployeesAllowed
+        }
+        createdAt
         updatedAt
-        website
       }
     }
   }
@@ -39,32 +43,33 @@ export const GET_BUSINESS_BY_ID = gql`
       statusCode
       message
       data {
+        id
+        name
+        email
+        ownerId
         address
         city
-        createdAt
-        email
-        id
-        lat
-        lng
-        name
-        numberOfEmployeesAllowed
         phone
         country
         postcode
         registrationDate
         status
-        subscriptionPlanId
-        updatedAt
-        ownerId
+        subscription {
+          id
+          subscriptionPlanId
+          startDate
+          endDate
+          trialEndDate
+          numberOfEmployeesAllowed
+        }
         website
+        createdAt
+        updatedAt
         owner {
           id
           email
           roleId
           status
-          createdAt
-          updatedAt
-          deletedBy
           profile {
             userId
             fullName
@@ -77,28 +82,26 @@ export const GET_BUSINESS_BY_ID = gql`
             dateOfBirth
             maritalStatus
             profilePicture
-            updatedAt
-            createdAt
           }
         }
-        businessSchedules {
-          businessId
-          day
-          endTime
-          id
-          isWeekend
-          startTime
-        }
-        subscriptionPlan {
-          id
-          name
-          price
-          setupFee
-          status
-          description
-          createdAt
-          updatedAt
-        }
+        # businessSchedules {
+        #   id
+        #   businessId
+        #   day
+        #   endTime
+        #   isWeekend
+        #   startTime
+        # }
+        # subscriptionPlan {
+        #   id
+        #   name
+        #   price
+        #   setupFee
+        #   status
+        #   description
+        #   createdAt
+        #   updatedAt
+        # }
       }
     }
   }
@@ -161,77 +164,17 @@ export const REGISTER_USER_WITH_BUSINESSES = gql`
       id
       name
       email
+      ownerId
       website
       phone
       address
+      city
+      country
+      postcode
+      registrationDate
       status
       createdAt
-    }
-  }
-`;
-
-export const BUSINESS_SETTING_BY_BUSINESS_ID = gql`
-  query BusinessSettingByBusinessId {
-    businessSettingByBusinessId {
-      message
-      statusCode
-      success
-      data {
-        businessId
-        businessStartDay
-        businessTimeZone
-        currency
-        deleteReadNotifications
-        identifierPrefix
-        isSelfRegistered
-        theme
-      }
-    }
-  }
-`;
-
-export const UPDATE_BUSINESS_SETTING = gql`
-  mutation UpdateBusinessSetting(
-    $updateBusinessSettingInput: UpdateBusinessSettingInput!
-  ) {
-    updateBusinessSetting(
-      updateBusinessSettingInput: $updateBusinessSettingInput
-    ) {
-      message
-      statusCode
-      success
-      data {
-        businessId
-        businessStartDay
-        businessTimeZone
-        currency
-        deleteReadNotifications
-        identifierPrefix
-        isSelfRegistered
-        theme
-      }
-    }
-  }
-`;
-
-export const UPDATE_BUSINESS_SCHEDULE = gql`
-  mutation UpdateBusinessSchedule(
-    $updateBusinessScheduleInput: UpdateBusinessScheduleInput!
-  ) {
-    updateBusinessSchedule(
-      updateBusinessScheduleInput: $updateBusinessScheduleInput
-    ) {
-      message
-      statusCode
-      success
-      data {
-        id
-        businessId
-        day
-        startTime
-        endTime
-        isWeekend
-      }
+      updatedAt
     }
   }
 `;

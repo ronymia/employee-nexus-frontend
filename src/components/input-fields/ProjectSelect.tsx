@@ -3,7 +3,7 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
 import { IProject } from "@/types/project.type";
 
-interface ProjectSelectProps {
+interface IProjectSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -17,7 +17,7 @@ export default function ProjectSelect({
   required = false,
   placeholder = "Select Project",
   dataAuto = "project",
-}: ProjectSelectProps) {
+}: IProjectSelectProps) {
   const { data, loading } = useQuery<{ projects: { data: IProject[] } }>(
     GET_PROJECTS,
     {}

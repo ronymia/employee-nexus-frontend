@@ -3,7 +3,7 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
 import { IDepartment } from "@/types/departments.type";
 
-interface DepartmentSelectProps {
+interface IDepartmentSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -19,7 +19,7 @@ export default function DepartmentSelect({
   placeholder = "Select Department",
   dataAuto = "department",
   position = "bottom",
-}: DepartmentSelectProps) {
+}: IDepartmentSelectProps) {
   const { data, loading } = useQuery<{ departments: { data: IDepartment[] } }>(
     GET_DEPARTMENTS,
     {}

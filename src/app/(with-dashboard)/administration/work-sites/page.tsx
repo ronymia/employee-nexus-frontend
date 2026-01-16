@@ -107,7 +107,7 @@ export default function WorkSitesPage() {
       type: "button",
       permissions: [Permissions.WorkSiteUpdate],
       handler: handleEdit,
-      disabledOn: [{ accessorKey: "status", value: "inactive" }],
+      disabledOn: [],
     },
     {
       name: "delete",
@@ -123,7 +123,7 @@ export default function WorkSitesPage() {
           title: "Delete Work Site",
         });
       },
-      disabledOn: [],
+      disabledOn: [{ accessorKey: "isDefault", value: true }],
     },
   ];
 

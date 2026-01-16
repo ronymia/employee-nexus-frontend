@@ -2,14 +2,16 @@ import { z } from "zod";
 
 export const projectSchema = z
   .object({
-    name: z.string().min(1, "Name is required"),
+    id: z.number().optional(),
+    name: z.string({ error: "Name is required" }).min(1, "Name is required"),
     description: z.string().optional(),
-    cover: z.string().min(1, "Cover image is required"),
-    status: z.enum(["pending", "ongoing", "complete"], {
-      error: "Status must be pending, ongoing, or complete",
+    status: z.enum(["planning", "ongoing", "complete"], {
+      error: "Status must be planning, ongoing, or complete",
     }),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
+    startDate: z
+      .string({ error: "Start date is required" })
+      .min(1, "Start date is required"),
+    endDate: z.string({ error: "End date is required" }).optional(),
   })
   .refine(
     (data) => {
@@ -28,4 +30,4 @@ export const projectSchema = z
     }
   );
 
-export type ProjectFormData = z.infer<typeof projectSchema>;
+export type IProjectFormData = z.infer<typeof projectSchema>;

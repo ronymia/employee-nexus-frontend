@@ -3,7 +3,7 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
 import { IWorkSchedule } from "@/types/work-schedules.type";
 
-interface WorkScheduleSelectProps {
+interface IWorkScheduleSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -17,7 +17,7 @@ export default function WorkScheduleSelect({
   required = false,
   placeholder = "Select Schedule",
   dataAuto = "workSchedule",
-}: WorkScheduleSelectProps) {
+}: IWorkScheduleSelectProps) {
   const { data, loading } = useQuery<{
     workSchedules: { data: IWorkSchedule[] };
   }>(GET_WORK_SCHEDULES, {});

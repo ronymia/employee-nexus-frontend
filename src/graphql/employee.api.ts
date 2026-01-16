@@ -58,10 +58,11 @@ export const GET_EMPLOYEES = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {
@@ -99,6 +100,7 @@ export const GET_EMPLOYEE_BY_ID = gql`
         createdAt
         updatedAt
         profile {
+          userId
           fullName
           phone
           dateOfBirth
@@ -142,10 +144,11 @@ export const GET_EMPLOYEE_BY_ID = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {
@@ -202,35 +205,35 @@ export const CREATE_EMPLOYEE = gql`
           employeeId
           nidNumber
           joiningDate
-          salaryPerMonth
-          workingDaysPerWeek
-          workingHoursPerWeek
-          designationId
-          designation {
-            id
-            name
-          }
-          employmentStatusId
-          employmentStatus {
-            id
-            name
-          }
-          departmentId
-          department {
-            id
-            name
-          }
-          workSiteId
-          workSite {
-            id
-            name
-          }
-          workScheduleId
-          workSchedule {
-            id
-            name
-          }
-          rotaType
+          # salaryAmount
+          # salaryType
+          # salaryStartDate
+          # designationId
+          # designation {
+          #   id
+          #   name
+          # }
+          # employmentStatusId
+          # employmentStatus {
+          #   id
+          #   name
+          # }
+          # departmentId
+          # department {
+          #   id
+          #   name
+          # }
+          # workSites {
+          #   workSite {
+          #     id
+          #     name
+          #   }
+          # }
+          # workScheduleId
+          # workSchedule {
+          #   id
+          #   name
+          # }
           createdAt
           updatedAt
         }
@@ -298,10 +301,11 @@ export const UPDATE_EMPLOYEE = gql`
             id
             name
           }
-          workSiteId
-          workSite {
-            id
-            name
+          workSites {
+            workSite {
+              id
+              name
+            }
           }
           workScheduleId
           workSchedule {

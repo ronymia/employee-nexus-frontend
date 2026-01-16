@@ -16,6 +16,7 @@ export const GET_DEPARTMENTS = gql`
         name
         description
         status
+        isDefault
         businessId
         managerId
         manager {
@@ -47,6 +48,7 @@ export const CREATE_DEPARTMENT = gql`
         name
         description
         status
+        isDefault
         businessId
         managerId
         manager {
@@ -78,6 +80,7 @@ export const UPDATE_DEPARTMENT = gql`
         name
         description
         status
+        isDefault
         businessId
         managerId
         manager {

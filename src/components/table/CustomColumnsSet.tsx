@@ -29,7 +29,7 @@ export default function CustomColumnsSet({
       </div>
       <ul
         tabIndex={0}
-        className={`dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm border border-primary-content`}
+        className={`dropdown-content menu bg-base-300 rounded-box z-10 w-52 p-2 shadow-sm border border-primary-content`}
       >
         {columns.map((column) => (
           <li key={column?.accessorKey}>

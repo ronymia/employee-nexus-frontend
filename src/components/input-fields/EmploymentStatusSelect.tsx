@@ -3,7 +3,7 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
 import { IEmploymentStatus } from "@/types/employment-status.type";
 
-interface EmploymentStatusSelectProps {
+interface IEmploymentStatusSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -17,7 +17,7 @@ export default function EmploymentStatusSelect({
   required = false,
   placeholder = "Select Status",
   dataAuto = "employmentStatus",
-}: EmploymentStatusSelectProps) {
+}: IEmploymentStatusSelectProps) {
   const { data, loading } = useQuery<{
     employmentStatuses: { data: IEmploymentStatus[] };
   }>(GET_EMPLOYMENT_STATUSES, {});

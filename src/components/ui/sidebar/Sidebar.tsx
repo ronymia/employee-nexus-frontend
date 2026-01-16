@@ -39,7 +39,7 @@ export default function Sidebar({
   setIsOpen,
 }: ISidebarProps) {
   const { hasPermission } = usePermissionGuard();
-  const { permissions, user } = useAppStore((state) => state);
+  const { user } = useAppStore((state) => state);
 
   // console.log({ permissions });
   // Extract role name without the number suffix (e.g., "employee#1" -> "employee")
@@ -419,13 +419,6 @@ export default function Sidebar({
           label: "Leave Settings",
           path: "/settings/leave-settings",
           show: hasPermission(Permissions.LeaveSettingsRead),
-          subMenus: [],
-        },
-        {
-          Icon: VscFileSubmodule,
-          label: "Business Settings",
-          path: "/settings/business-settings",
-          show: hasPermission(Permissions.BusinessSettingsRead),
           subMenus: [],
         },
       ],

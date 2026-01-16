@@ -1,9 +1,10 @@
 "use client";
 
+import { IUser } from "@/types";
 import dayjs from "dayjs";
 
 interface EmploymentDetailsSectionProps {
-  user: any;
+  user: IUser;
   refetch: () => void;
 }
 

@@ -12,16 +12,16 @@ export const GET_WORK_SCHEDULES = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -47,16 +47,16 @@ export const GET_WORK_SCHEDULE_BY_ID = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -84,16 +84,16 @@ export const CREATE_WORK_SCHEDULE = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -121,16 +121,16 @@ export const UPDATE_WORK_SCHEDULE = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
-        breakHours
+        breakMinutes
         businessId
-        createdBy
         createdAt
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -181,12 +181,13 @@ export const GET_USER_SCHEDULE_ASSIGNMENTS = gql`
           name
           description
           status
+          isDefault
           scheduleType
           breakType
-          breakHours
+          breakMinutes
           schedules {
             id
-            day
+            dayOfWeek
             isWeekend
             workScheduleId
             timeSlots {
@@ -273,6 +274,42 @@ export const DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT = gql`
       success
       data {
         id
+      }
+    }
+  }
+`;
+
+// ==================== GET USER WORK SCHEDULE ====================
+
+export const GET_USER_WORK_SCHEDULE = gql`
+  query GetUserWorkSchedule($userId: Int!) {
+    getUserWorkSchedule(userId: $userId) {
+      success
+      message
+      data {
+        id
+        name
+        description
+        scheduleType
+        status
+        schedules {
+          day
+          isWeekend
+          timeSlots {
+            startTime
+            endTime
+          }
+        }
+        business {
+          id
+          name
+        }
+        creator {
+          id
+          profile {
+            fullName
+          }
+        }
       }
     }
   }

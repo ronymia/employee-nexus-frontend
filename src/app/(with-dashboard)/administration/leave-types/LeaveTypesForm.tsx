@@ -49,9 +49,9 @@ export default function LeaveTypesForm({
 
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: ILeaveTypeFormData) => {
-    // Ensure leaveHours is a number
-    if (formValues.leaveHours !== undefined) {
-      formValues.leaveHours = Number(formValues.leaveHours);
+    // Ensure leaveMinutes is a number
+    if (formValues.leaveMinutes !== undefined) {
+      formValues.leaveMinutes = Number(formValues.leaveMinutes);
     }
 
     // Ensure carryOverLimit is a number if provided
@@ -81,7 +81,7 @@ export default function LeaveTypesForm({
   const defaultValues = {
     name: data?.name || "",
     leaveType: data?.leaveType || "",
-    leaveHours: data?.leaveHours || 0,
+    leaveMinutes: data?.leaveMinutes || 0,
     leaveRolloverType: data?.leaveRolloverType || "",
     employmentStatuses:
       data?.employmentStatuses?.map((status) => Number(status.id)) || [],
@@ -120,7 +120,7 @@ export default function LeaveTypesForm({
       {/* LEAVE HOURS */}
       <CustomInputField
         name="leaveHours"
-        label="Leave Hours"
+        label="Leave Minutes"
         type="number"
         required
       />
@@ -156,7 +156,7 @@ export default function LeaveTypesForm({
         position="top"
         name="employmentStatuses"
         label="Employment Statuses"
-        required
+        required={false}
         dataAuto="employmentStatuses"
         isLoading={employmentStatusesLoading}
         options={employmentStatusesOptions}

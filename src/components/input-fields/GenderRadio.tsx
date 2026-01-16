@@ -5,7 +5,7 @@ const GENDER_OPTIONS = [
   { title: "Female", value: "FEMALE" },
 ];
 
-interface GenderRadioProps {
+interface IGenderRadioProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -19,7 +19,7 @@ export default function GenderRadio({
   required = false,
   dataAuto = "gender",
   radioGroupClassName = "grid-cols-3",
-}: GenderRadioProps) {
+}: IGenderRadioProps) {
   return (
     <CustomRadioButton
       dataAuto={dataAuto}

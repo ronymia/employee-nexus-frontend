@@ -6,7 +6,6 @@ export const businessSettingsSchema = z.object({
   currency: z.string().optional().default("BDT"),
   deleteReadNotifications: z.string().optional(),
   identifierPrefix: z.string().optional(),
-  isSelfRegistered: z.boolean().optional(),
   theme: z.string().optional().default("light"),
 });
 

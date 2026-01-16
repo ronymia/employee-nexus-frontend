@@ -18,6 +18,7 @@ export const GET_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }
@@ -43,6 +44,7 @@ export const CREATE_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }
@@ -68,6 +70,7 @@ export const UPDATE_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }
@@ -93,8 +96,44 @@ export const DELETE_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
+      }
+    }
+  }
+`;
+
+// ==================== EMPLOYEE WORK SITE ASSIGNMENT ====================
+
+export const ASSIGN_WORK_SITE = gql`
+  mutation AssignWorkSite($input: AssignWorkSiteInput!) {
+    assignWorkSite(input: $input) {
+      success
+      message
+      data {
+        id
+        userId
+        workSiteId
+        workSite {
+          name
+          address
+        }
+        createdAt
+      }
+    }
+  }
+`;
+
+export const UNASSIGN_WORK_SITE = gql`
+  mutation UnassignWorkSite($input: UnassignWorkSiteInput!) {
+    unassignWorkSite(input: $input) {
+      success
+      message
+      data {
+        id
+        userId
+        workSiteId
       }
     }
   }

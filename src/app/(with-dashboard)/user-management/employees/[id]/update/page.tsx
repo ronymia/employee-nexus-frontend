@@ -4,7 +4,7 @@ import { use } from "react";
 import { useQuery } from "@apollo/client/react";
 import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 import CustomLoading from "@/components/loader/CustomLoading";
-import { IEmployee } from "@/types";
+import { IUser } from "@/types";
 import EmployeesForm from "../../EmployeesForm";
 import { IEmployeeFormData } from "@/schemas";
 import dayjs from "dayjs";
@@ -19,7 +19,7 @@ export default function UpdateEmployeePage({
 
   // Fetch employee data
   const { data: employeeData, loading: employeeLoading } = useQuery<{
-    employeeById: { data: IEmployee };
+    employeeById: { data: IUser };
   }>(GET_EMPLOYEE_BY_ID, {
     variables: { id: Number(id) },
   });
@@ -40,7 +40,7 @@ export default function UpdateEmployeePage({
     profile: {
       fullName: data?.profile?.fullName || "",
       dateOfBirth: data?.profile?.dateOfBirth
-        ? dayjs(data?.profile?.dateOfBirth, "DD-MM-YYYY").format("DD-MM-YYYY")
+        ? dayjs(data?.profile?.dateOfBirth).format("DD-MM-YYYY")
         : "",
       gender: data?.profile?.gender || "",
       maritalStatus: data?.profile?.maritalStatus || "",
@@ -59,7 +59,10 @@ export default function UpdateEmployeePage({
     departmentId: data?.employee?.departmentId as number,
     designationId: data?.employee?.designationId as number,
     employmentStatusId: data?.employee?.employmentStatusId as number,
-    workSiteId: data?.employee?.workSiteId as number,
+    workSiteIds:
+      (data?.employee?.workSites?.map((site) =>
+        Number(site.workSite.id)
+      ) as number[]) || [],
     workScheduleId: data?.employee?.workScheduleId as number,
     joiningDate: data?.employee?.joiningDate
       ? dayjs(data?.employee?.joiningDate).format("DD-MM-YYYY")

@@ -25,7 +25,7 @@ export default function RegularSchedule() {
   useEffect(() => {
     if (startTime && endTime) {
       const schedules = DAYS.map((day) => ({
-        day: day.value,
+        dayOfWeek: day.value,
         isWeekend: weekendDays.includes(day.value),
         timeSlots: [
           {

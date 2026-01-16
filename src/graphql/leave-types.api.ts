@@ -10,7 +10,7 @@ export const GET_LEAVE_TYPES = gql`
         id
         name
         leaveType
-        leaveHours
+        leaveMinutes
         leaveRolloverType
         carryOverLimit
         employmentStatuses {
@@ -29,7 +29,7 @@ export const CREATE_LEAVE_TYPE = gql`
   mutation CreateLeaveType(
     $name: String!
     $leaveType: LeaveTypeEnum!
-    $leaveHours: Int!
+    $leaveMinutes: Int!
     $leaveRolloverType: LeaveRolloverType!
     $carryOverLimit: Int
     $employmentStatuses: [Int!]!
@@ -38,7 +38,7 @@ export const CREATE_LEAVE_TYPE = gql`
       createLeaveTypeInput: {
         name: $name
         leaveType: $leaveType
-        leaveHours: $leaveHours
+        leaveMinutes: $leaveMinutes
         leaveRolloverType: $leaveRolloverType
         carryOverLimit: $carryOverLimit
         employmentStatuses: $employmentStatuses
@@ -51,7 +51,7 @@ export const CREATE_LEAVE_TYPE = gql`
         id
         name
         leaveType
-        leaveHours
+        leaveMinutes
         leaveRolloverType
         carryOverLimit
         employmentStatuses {
@@ -71,7 +71,7 @@ export const UPDATE_LEAVE_TYPE = gql`
     $id: Int!
     $name: String!
     $leaveType: LeaveTypeEnum!
-    $leaveHours: Int!
+    $leaveMinutes: Int!
     $leaveRolloverType: LeaveRolloverType!
     $carryOverLimit: Int
     $employmentStatuses: [Int!]!
@@ -81,7 +81,7 @@ export const UPDATE_LEAVE_TYPE = gql`
         id: $id
         name: $name
         leaveType: $leaveType
-        leaveHours: $leaveHours
+        leaveMinutes: $leaveMinutes
         leaveRolloverType: $leaveRolloverType
         carryOverLimit: $carryOverLimit
         employmentStatuses: $employmentStatuses
@@ -94,7 +94,7 @@ export const UPDATE_LEAVE_TYPE = gql`
         id
         name
         leaveType
-        leaveHours
+        leaveMinutes
         leaveRolloverType
         carryOverLimit
         employmentStatuses {

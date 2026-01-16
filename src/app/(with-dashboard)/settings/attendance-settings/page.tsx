@@ -1,24 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client/react";
 import CustomTab from "@/components/ui/Tab/CustomTab";
 import {
   GET_ATTENDANCE_SETTINGS,
   UPDATE_ATTENDANCE_SETTINGS,
 } from "@/graphql/attendance-settings.api";
-import {
-  IAttendanceSettings,
-  AttendanceTab,
-} from "@/types";
-import CustomLoading from "@/components/loader/CustomLoading";
+import { IAttendanceSettings, AttendanceTab } from "@/types";
 import { MdSettings, MdLocationOn } from "react-icons/md";
 import { FaListUl } from "react-icons/fa";
+import PageHeader from "@/components/ui/PageHeader";
 import PreferenceTab from "./PreferenceTab";
 import DefinitionsTab from "./DefinitionsTab";
 import GeolocationTab from "./GeolocationTab";
 
+// ==================== ATTENDANCE SETTINGS PAGE COMPONENT ====================
 export default function AttendanceSettingsPage() {
+  // ==================== HOOKS ====================
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>(AttendanceTab.PREFERENCE);
 
   // GET ATTENDANCE SETTINGS
@@ -40,6 +42,32 @@ export default function AttendanceSettingsPage() {
     }
   );
 
+  // SYNC ACTIVE TAB WITH URL SEARCH PARAMS
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+
+    // VALIDATE AND SET TAB FROM URL
+    if (tabParam) {
+      const validTabs = Object.values(AttendanceTab);
+      if (validTabs.includes(tabParam as AttendanceTab)) {
+        setActiveTab(tabParam);
+      } else {
+        // INVALID TAB - REDIRECT TO DEFAULT
+        router.replace(`?tab=${AttendanceTab.PREFERENCE}`);
+      }
+    } else {
+      // NO TAB PARAM - SET DEFAULT
+      router.replace(`?tab=${AttendanceTab.PREFERENCE}`);
+    }
+  }, [searchParams, router]);
+
+  // HANDLE TAB CHANGE AND UPDATE URL
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    router.push(`?tab=${tab}`, { scroll: false });
+  };
+
+  // TAB CONFIGURATION
   const tabs = [
     {
       id: AttendanceTab.PREFERENCE,
@@ -58,45 +86,36 @@ export default function AttendanceSettingsPage() {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <CustomLoading />
-      </div>
-    );
-  }
-
   const settings = data?.attendanceSettingsByBusiness?.data;
 
+  // ==================== RENDER ====================
   return (
     <section className="space-y-6">
-      {/* Header */}
-      <header className="mb-5">
-        <h1 className="text-2xl font-medium">Attendance Settings</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Configure attendance tracking and approval settings
-        </p>
-      </header>
+      {/* HEADER */}
+      <PageHeader
+        title="Attendance Settings"
+        subtitle="Configure attendance tracking and approval settings"
+      />
 
-      {/* Tabs */}
+      {/* TABS */}
       <div className="flex justify-center">
         <CustomTab
           tabs={tabs}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           gridColumns="grid-cols-3"
           containerWidth="w-full sm:w-[500px]"
           testId="attendance-settings"
         />
       </div>
 
-      {/* Tab Content */}
+      {/* TAB CONTENT */}
       <div className="mt-6">
         {activeTab === AttendanceTab.PREFERENCE && (
           <PreferenceTab
             settings={settings}
             updateSettings={updateSettings}
-            isLoading={updateResult.loading}
+            isLoading={loading || updateResult.loading}
             refetch={refetch}
           />
         )}
@@ -105,7 +124,7 @@ export default function AttendanceSettingsPage() {
           <DefinitionsTab
             settings={settings}
             updateSettings={updateSettings}
-            isLoading={updateResult.loading}
+            isLoading={loading || updateResult.loading}
             refetch={refetch}
           />
         )}
@@ -114,7 +133,7 @@ export default function AttendanceSettingsPage() {
           <GeolocationTab
             settings={settings}
             updateSettings={updateSettings}
-            isLoading={updateResult.loading}
+            isLoading={loading || updateResult.loading}
             refetch={refetch}
           />
         )}

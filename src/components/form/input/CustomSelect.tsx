@@ -78,8 +78,8 @@ export default function CustomSelect({
       }}
       render={({ field }) => {
         const selectedValue = multipleSelect
-          ? options?.filter((item) => field.value?.includes(item.value)) ?? []
-          : options?.filter((item) => item.value === field.value) ?? [];
+          ? options?.filter((item) => field?.value?.includes(item.value)) ?? []
+          : options?.filter((item) => item?.value === field.value) ?? [];
         // HANDLE OPTION SELECTION
         const handleSelect = (option: IOption) => {
           // IF ALREADY SELECTED
@@ -92,10 +92,10 @@ export default function CustomSelect({
             // IF MULTIPLE
             if (isSelected) {
               field.onChange?.(
-                field.value?.filter((item: any) => item !== option?.value)
+                field?.value?.filter((item: any) => item !== option?.value)
               );
             } else {
-              field?.onChange?.([...field.value, option?.value]);
+              field?.onChange?.([...(field.value || []), option?.value]);
             }
           } else {
             if (isSelected) {

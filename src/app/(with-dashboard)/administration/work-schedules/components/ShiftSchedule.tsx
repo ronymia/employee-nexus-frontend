@@ -21,7 +21,7 @@ export default function ShiftSchedule() {
   // Initialize schedules array whenever day schedules change
   const weekendDays = watch("weekendDays") || [0, 6];
 
-  console.log({ daySchedules });
+  // console.log({ daySchedules });
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-base-200 border-primary-content">
       <h3 className="text-lg font-medium">Shift Schedule</h3>

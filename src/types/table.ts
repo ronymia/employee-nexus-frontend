@@ -9,6 +9,7 @@ export interface TableActionType {
   Icon?: ElementType | IconType;
   permissions: string[];
   disabledOn: { accessorKey: string; value: any }[];
+  isLoading?: (row: any) => boolean;
 }
 
 export interface TableColumnType {

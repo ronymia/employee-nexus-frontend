@@ -37,11 +37,16 @@ export const GET_USERS = gql`
         }
         employee {
           employeeId
-          department {
+          salary {
+            salaryType
+            salaryAmount
+            startDate
+          }
+          designation {
             id
             name
           }
-          designation {
+          department {
             id
             name
           }
@@ -49,6 +54,47 @@ export const GET_USERS = gql`
             id
             name
           }
+          workSchedule {
+            id
+            name
+          }
+          workSites {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+export const GET_BUSINESS_USER_BY_ID = gql`
+  query UserById($id: Int!) {
+    userById(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
+        email
+        roleId
+        status
+        createdAt
+        updatedAt
+        profile {
+          fullName
+          address
+          city
+          country
+          dateOfBirth
+          gender
+          maritalStatus
+          phone
+          postcode
+          profilePicture
+        }
+        role {
+          id
+          name
         }
       }
     }

@@ -1,0 +1,91 @@
+// ==================== IMPLEMENTATION INSTRUCTIONS ====================
+// Add this code to AttendanceForm.tsx PunchRecordsSection function
+
+// STEP 1: Replace lines ~337-350 (the query and hasSchedule) with:
+
+const date = watch("date"); // Format: DD-MM-YYYY
+
+// Query user's work schedule - ONLY after BOTH userId AND date are selected
+const { data: scheduleData, loading: scheduleLoading } = useQuery(
+  GET_USER_WORK_SCHEDULE,
+  {
+    variables: { userId: Number(userId) },
+    skip: !userId || !date || actionType === "update", // Skip if either missing OR update mode
+  }
+);
+
+const hasSchedule = scheduleData?.getUserWorkSchedule?.data;
+
+// Auto-populate punch times when schedule is loaded
+useEffect(() => {
+  if (hasSchedule && date && actionType === "create") {
+    // Convert selected date to weekday (0-6)
+    const selectedDate = dayjs(date, "DD-MM-YYYY");
+    const weekday = selectedDate.day(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    // Find schedule for this weekday
+    const daySchedule = hasSchedule.schedules?.find(
+      (s: any) => s.day === weekday && !s.isWeekend
+    );
+
+    if (daySchedule && daySchedule.timeSlots && daySchedule.timeSlots.length > 0) {
+      // Get first time slot
+      const firstSlot = daySchedule.timeSlots[0];
+      
+      // Combine selected date with start/end times
+      const punchInDateTime = dayjs(
+        `${selectedDate.format("YYYY-MM-DD")} ${firstSlot.startTime}`,
+        "YYYY-MM-DD HH:mm"
+      ).format("YYYY-MM-DDTHH:mm");
+      
+      const punchOutDateTime = dayjs(
+        `${selectedDate.format("YYYY-MM-DD")} ${firstSlot.endTime}`,
+        "YYYY-MM-DD HH:mm"
+      ).format("YYYY-MM-DDTHH:mm");
+
+      // Update first punch record with schedule times
+      const updatedRecords = [...punchRecords];
+      if (updatedRecords[0]) {
+        updatedRecords[0] = {
+          ...updatedRecords[0],
+          punchIn: punchInDateTime,
+          punchOut: punchOutDateTime,
+        };
+        setValue("punchRecords", updatedRecords);
+      }
+    }
+  }
+}, [hasSchedule, date, actionType, setValue]);
+
+
+// STEP 2: Add before the return statement (around line 375):
+
+// Show message if employee/date not selected
+if (!userId || !date) {
+  return (
+    <div className="border border-base-300/50 rounded-lg p-6 bg-base-200/30">
+      <p className="text-center text-base-content/60 text-sm">
+        Please select an employee and date to add punch records
+      </p>
+    </div>
+  );
+}
+
+// Show loading state while fetching schedule
+if (scheduleLoading && actionType === "create") {
+  return (
+    <div className="border border-primary/20 rounded-lg p-6">
+      <div className="flex flex-col items-center justify-center text-center space-y-3">
+        <span className="loading loading-spinner loading-md text-primary"></span>
+        <p className="text-sm text-base-content/60">
+          Loading work schedule...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Show message if no schedule (only for create mode)
+if (actionType === "create" && !scheduleLoading && !hasSchedule) {
+  return <NoScheduleMessage />;
+}

@@ -1,0 +1,35 @@
+// No Schedule Message Component
+function NoScheduleMessage() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="border border-warning/30 rounded-lg p-6 bg-warning/5"
+    >
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-warning/20 flex items-center justify-center">
+          <PiCalendarX size={32} className="text-warning" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-base-content mb-2">
+            No Work Schedule Assigned
+          </h3>
+          <p className="text-sm text-base-content/60 max-w-md">
+            This employee does not have a work schedule assigned yet. Please assign
+            a work schedule to this employee before creating attendance records.
+          </p>
+        </div>
+        <div className="pt-2">
+          <a
+            href="/work-schedules"
+            className="btn btn-sm btn-warning gap-2"
+          >
+            <PiCalendarX size={16} />
+            Assign Work Schedule
+          </a>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

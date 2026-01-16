@@ -8,9 +8,9 @@ export const leaveTypeSchema = z.object({
   leaveType: z.enum(["PAID", "UNPAID"], {
     error: "Leave Type must be either PAID or UNPAID",
   }),
-  leaveHours: z.coerce
-    .number({ error: `Leave Hours must be a number` })
-    .min(0, { error: "Leave Hours cannot be negative" }),
+  leaveMinutes: z.coerce
+    .number({ error: "Leave minutes must be a number" })
+    .min(1, { error: "Leave minutes must be at least 1" }),
   leaveRolloverType: z.enum(["NONE", "CARRY_OVER", "CARRY_FORWARD"], {
     error: "Invalid Leave Rollover Type",
   }),
@@ -20,7 +20,7 @@ export const leaveTypeSchema = z.object({
     .optional(),
   employmentStatuses: z
     .array(z.number({ error: "Employment Status ID must be a number" }))
-    .min(1, { error: "At least one employment status must be selected" }),
+    .optional(),
 });
 
 export type ILeaveTypeFormData = z.infer<typeof leaveTypeSchema>;

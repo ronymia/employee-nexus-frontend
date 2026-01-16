@@ -3,7 +3,7 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
 import { IRole } from "@/types/role.type";
 
-interface RoleSelectProps {
+interface IRoleSelectProps {
   name: string;
   label?: string;
   required?: boolean;
@@ -17,7 +17,7 @@ export default function RoleSelect({
   required = false,
   placeholder = "Select Role",
   dataAuto = "role",
-}: RoleSelectProps) {
+}: IRoleSelectProps) {
   const { data, loading } = useQuery<{ roles: { data: IRole[] } }>(
     GET_ROLES,
     {}

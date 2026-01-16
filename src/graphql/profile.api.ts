@@ -11,7 +11,7 @@ export const GET_MY_PROFILE = gql`
         roleId
         status
         profile {
-          id
+          userId
           fullName
           address
           city
@@ -40,19 +40,11 @@ export const GET_MY_PROFILE = gql`
           name
         }
         employee {
-          id
+          userId
           employeeId
-          departmentId
-          designationId
-          employmentStatusId
-          workSiteId
-          workScheduleId
           joiningDate
-          salaryPerMonth
           nidNumber
-          rotaType
-          workingDaysPerWeek
-          workingHoursPerWeek
+          # salaries
           department {
             id
             name
@@ -86,20 +78,19 @@ export const UPDATE_PROFILE = gql`
       statusCode
       success
       data {
+        userId
         address
         city
         country
-        createdAt
         dateOfBirth
         fullName
         gender
-        id
         maritalStatus
         phone
         postcode
         profilePicture
+        createdAt
         updatedAt
-        userId
       }
     }
   }
@@ -115,11 +106,11 @@ export const UPDATE_EMERGENCY_CONTACT = gql`
       statusCode
       success
       data {
-        createdAt
+        userId
         name
         phone
-        profileId
         relation
+        createdAt
         updatedAt
       }
     }
@@ -136,7 +127,7 @@ export const UPDATE_EMPLOYMENT_DETAILS = gql`
       statusCode
       message
       data {
-        id
+        userId
         employeeId
         nidNumber
         joiningDate
@@ -146,10 +137,7 @@ export const UPDATE_EMPLOYMENT_DETAILS = gql`
         designationId
         employmentStatusId
         departmentId
-        workSiteId
         workScheduleId
-        createdAt
-        updatedAt
       }
     }
   }

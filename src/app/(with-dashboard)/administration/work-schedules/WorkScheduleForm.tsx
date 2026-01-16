@@ -59,10 +59,12 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
   const handleSubmit = async (formValues: IWorkScheduleFormData) => {
     try {
       if (isUpdate) {
+        // console.log({ id, formValues });
+
         const res = await updateWorkSchedule({
           variables: {
             updateWorkScheduleInput: {
-              id,
+              id: Number(id),
               ...formValues,
             },
           },
@@ -98,7 +100,9 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
 
   // Helper function to extract weekend days from schedules
   const getWeekendDays = (schedules: any[]) => {
-    return schedules?.filter((s) => s.isWeekend).map((s) => s.day) || [0, 6];
+    return (
+      schedules?.filter((s) => s.isWeekend).map((s) => s.dayOfWeek) || [0, 6]
+    );
   };
 
   // DEFAULT VALUES FOR UPDATE
@@ -109,26 +113,63 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
         const scheduleType =
           workScheduleData?.workScheduleById?.data?.scheduleType || "";
 
-        const baseValues = {
+        const baseValues: any = {
           name: workScheduleData?.workScheduleById?.data?.name || "",
           description:
             workScheduleData?.workScheduleById?.data?.description || "",
           scheduleType,
           breakType: workScheduleData?.workScheduleById?.data?.breakType || "",
-          breakHours: workScheduleData?.workScheduleById?.data?.breakHours || 0,
+          breakMinutes:
+            workScheduleData?.workScheduleById?.data?.breakMinutes || 0,
           weekendDays: getWeekendDays(schedules),
-          schedules: workScheduleData?.workScheduleById?.data?.schedules?.map(
-            (schedule) => ({
-              day: schedule.day,
+        };
+
+        // For REGULAR schedule, extract start/end time from first schedule
+        if (scheduleType === "REGULAR" && schedules.length > 0) {
+          const firstSchedule = schedules[0];
+          if (firstSchedule?.timeSlots && firstSchedule.timeSlots.length > 0) {
+            baseValues.regularStartTime = firstSchedule.timeSlots[0].startTime;
+            baseValues.regularEndTime = firstSchedule.timeSlots[0].endTime;
+          }
+          // Also keep schedules array for form compatibility
+          baseValues.schedules = schedules.map((schedule) => ({
+            dayOfWeek: schedule.dayOfWeek,
+            isWeekend: schedule.isWeekend,
+            timeSlots:
+              schedule.timeSlots?.map((timeSlot) => ({
+                startTime: timeSlot.startTime,
+                endTime: timeSlot.endTime,
+              })) || [],
+          }));
+        }
+        // For SCHEDULED/SHIFT type, convert array to object indexed by dayOfWeek
+        else if (scheduleType === "SCHEDULED") {
+          const schedulesObject: any = {};
+          schedules.forEach((schedule) => {
+            schedulesObject[schedule.dayOfWeek] = {
+              dayOfWeek: schedule.dayOfWeek,
               isWeekend: schedule.isWeekend,
               timeSlots:
                 schedule.timeSlots?.map((timeSlot) => ({
                   startTime: timeSlot.startTime,
                   endTime: timeSlot.endTime,
                 })) || [],
-            })
-          ),
-        };
+            };
+          });
+          baseValues.schedules = schedulesObject;
+        }
+        // For FLEXIBLE or other types
+        else {
+          baseValues.schedules = schedules.map((schedule) => ({
+            dayOfWeek: schedule.dayOfWeek,
+            isWeekend: schedule.isWeekend,
+            timeSlots:
+              schedule.timeSlots?.map((timeSlot) => ({
+                startTime: timeSlot.startTime,
+                endTime: timeSlot.endTime,
+              })) || [],
+          }));
+        }
 
         return baseValues;
       })()
@@ -173,11 +214,11 @@ export default function WorkScheduleForm({ id = undefined }: { id?: number }) {
         />
       </div>
 
-      {/* BREAK HOURS */}
+      {/* BREAK MINUTES */}
       <CustomInputField
         type="number"
-        name="breakHours"
-        label="Break Hours"
+        name="breakMinutes"
+        label="Break Minutes"
         required={!isUpdate}
         min={0}
       />

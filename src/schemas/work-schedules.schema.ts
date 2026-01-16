@@ -8,7 +8,7 @@ const timeSlotSchema = z.object({
 
 // Schedule schema for individual days
 const scheduleSchema = z.object({
-  day: z.number().min(0).max(6), // 0 = Sunday, 6 = Saturday
+  dayOfWeek: z.number().min(0).max(6), // 0 = Sunday, 6 = Saturday
   isWeekend: z.boolean(),
   timeSlots: z
     .array(timeSlotSchema)
@@ -23,7 +23,7 @@ export const workScheduleSchema = z
       .enum(["REGULAR", "SCHEDULED", "FLEXIBLE"])
       .default("REGULAR"),
     breakType: z.enum(["PAID", "UNPAID"]),
-    breakHours: z.coerce.number().min(0, "Break hours must be 0 or more"),
+    breakMinutes: z.coerce.number().min(0, "Break minutes must be 0 or more"),
     schedules: z.array(scheduleSchema).optional().default([]),
   })
   .superRefine((data, ctx) => {

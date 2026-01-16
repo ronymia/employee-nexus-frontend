@@ -1,7 +1,12 @@
 import { IBusiness } from "./business.type";
-import { Status } from "./common.type";
-import { IEmergencyContact, IEmployee } from "./employee.type";
+import { IEmergencyContact, IEmployeeDetails } from "./employee.type";
 import { ISocialLinks } from "./social-links.type";
+
+export interface IRole {
+  id: number;
+  name: string;
+  businessId?: number;
+}
 
 export interface IProfile {
   id: number;
@@ -10,57 +15,56 @@ export interface IProfile {
   address: string;
   city: string;
   country: string;
-  dateOfBirth: string; // format "DD-MM-YYYY"
+  dateOfBirth: Date; // format "DD-MM-YYYY"
   gender: "MALE" | "FEMALE";
   maritalStatus: "SINGLE" | "MARRIED";
   phone: string;
   postcode: string;
   profilePicture: string | null;
-  createdAt: Date;
-  updatedAt: Date;
   emergencyContact?: IEmergencyContact;
   socialLinks: ISocialLinks;
+  createdAt: Date;
+  updatedAt: Date;
 }
 export interface IUser {
   id: number;
   name: string;
   email: string;
-  password: string;
+  role?: IRole;
   roleId: number;
   status: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedBy: Date;
   profile: IProfile;
   business: IBusiness;
-  employee: IEmployee;
+  employee: IEmployeeDetails;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface IUserFormData {
-  id?: number;
-  name: string;
-  email: string;
-  roleId: number;
-  status: Status;
-  profile: {
-    fullName: string;
-    address: string;
-    city: string;
-    country: string;
-    dateOfBirth: string;
-    gender: "MALE" | "FEMALE";
-    maritalStatus: "SINGLE" | "MARRIED";
-    phone: string;
-    postcode: string;
-  };
-}
+// export interface IUserFormData {
+//   id?: number;
+//   name: string;
+//   email: string;
+//   roleId: number;
+//   status: Status;
+//   profile: {
+//     fullName: string;
+//     address: string;
+//     city: string;
+//     country: string;
+//     dateOfBirth: string;
+//     gender: "MALE" | "FEMALE";
+//     maritalStatus: "SINGLE" | "MARRIED";
+//     phone: string;
+//     postcode: string;
+//   };
+// }
 
-export interface IUserWithRole extends IUser {
-  role?: {
-    id: number;
-    name: string;
-  };
-}
+// export interface IUserWithRole extends IUser {
+//   role?: {
+//     id: number;
+//     name: string;
+//   };
+// }
 
 export enum UserStatus {
   ACTIVE = "ACTIVE",

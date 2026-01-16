@@ -11,8 +11,9 @@ export const GET_ATTENDANCES = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
+        scheduleMinutes
         status
         createdAt
         updatedAt
@@ -38,10 +39,8 @@ export const GET_ATTENDANCES = gql`
           }
           punchIn
           punchOut
-          breakStart
-          breakEnd
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           punchInIp
           punchOutIp
           punchInLat
@@ -70,8 +69,9 @@ export const GET_ATTENDANCE_BY_ID = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        scheduleMinutes
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -91,8 +91,8 @@ export const GET_ATTENDANCE_BY_ID = gql`
           punchOut
           breakStart
           breakEnd
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           punchInIp
           punchOutIp
           punchInLat
@@ -121,8 +121,8 @@ export const ATTENDANCE_REQUEST = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -130,8 +130,8 @@ export const ATTENDANCE_REQUEST = gql`
           id
           punchIn
           punchOut
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           notes
         }
       }
@@ -149,8 +149,8 @@ export const CREATE_ATTENDANCE = gql`
         id
         userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -158,8 +158,8 @@ export const CREATE_ATTENDANCE = gql`
           id
           punchIn
           punchOut
-          workHours
-          breakHours
+          workMinutes
+          breakMinutes
           notes
         }
       }
@@ -178,8 +178,8 @@ export const UPDATE_ATTENDANCE = gql`
         id
         # userId
         date
-        totalHours
-        breakHours
+        totalMinutes
+        breakMinutes
         status
         createdAt
         updatedAt
@@ -229,6 +229,32 @@ export const REJECT_ATTENDANCE = gql`
         id
         status
         updatedAt
+      }
+    }
+  }
+`;
+
+// ==================== ATTENDANCE SUMMARY ====================
+export const ATTENDANCE_SUMMARY = gql`
+  query AttendanceSummary(
+    $startDate: DateTime
+    $endDate: DateTime
+    $userId: Int
+  ) {
+    attendanceSummary(
+      startDate: $startDate
+      endDate: $endDate
+      userId: $userId
+    ) {
+      success
+      statusCode
+      message
+      data {
+        pending
+        approved
+        absent
+        late
+        halfDay
       }
     }
   }

@@ -10,7 +10,7 @@ import { DELETE_EMPLOYEE } from "@/graphql/employee.api";
 import { GET_USERS } from "@/graphql/user.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IEmployee, IMeta } from "@/types";
+import { TableActionType, TableColumnType, IUser, IMeta } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -34,7 +34,7 @@ export default function AdminsPage() {
       message: string;
       statusCode: number;
       success: boolean;
-      data: IEmployee[];
+      data: IUser[];
       meta: IMeta;
     };
   }>(GET_USERS, {
@@ -54,12 +54,12 @@ export default function AdminsPage() {
   });
 
   // ==================== HANDLER: EDIT ADMIN ====================
-  const handleEdit = (row: IEmployee) => {
+  const handleEdit = (row: IUser) => {
     router.push(`/user-management/employees/${row.id}/update`);
   };
 
   // ==================== HANDLER: DELETE ADMIN ====================
-  const handleDelete = async (row: IEmployee) => {
+  const handleDelete = async (row: IUser) => {
     try {
       const result = await deleteEmployee({
         variables: {
@@ -75,7 +75,7 @@ export default function AdminsPage() {
   };
 
   // ==================== HANDLER: VIEW ADMIN ====================
-  const handleView = (row: IEmployee) => {
+  const handleView = (row: IUser) => {
     router.push(`/user-management/employees/${row.id}/view`);
   };
 
@@ -192,7 +192,10 @@ export default function AdminsPage() {
             customUserProfile: (
               <UserProfileCell
                 name={row?.profile?.fullName || "N/A"}
-                designation={row?.employee?.designation?.name || undefined}
+                designation={
+                  row?.employee?.designations?.at(0)?.designation?.name ||
+                  undefined
+                }
                 imageUrl={row?.profile?.profilePicture || undefined}
               />
             ),
@@ -224,7 +227,7 @@ export default function AdminsPage() {
             // CUSTOM DEPARTMENT COLUMN
             customDepartment: row?.employee?.department?.name ? (
               <span className="text-sm text-gray-700">
-                {row.employee.department.name}
+                {row.employee.department?.name}
               </span>
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
@@ -233,22 +236,22 @@ export default function AdminsPage() {
             customEmploymentStatus: row?.employee?.employmentStatus?.name ? (
               <span
                 className={`badge badge-sm ${
-                  row.employee.employmentStatus.name
+                  row?.employee?.employmentStatus?.name
                     .toLowerCase()
                     .includes("full")
                     ? "badge-success"
-                    : row.employee.employmentStatus.name
+                    : row?.employee?.employmentStatus?.name
                         .toLowerCase()
                         .includes("part")
                     ? "badge-warning"
-                    : row.employee.employmentStatus.name
+                    : row?.employee?.employmentStatus?.name
                         .toLowerCase()
                         .includes("contract")
                     ? "badge-info"
                     : "badge-secondary"
                 }`}
               >
-                {row.employee.employmentStatus.name}
+                {row?.employee?.employmentStatus?.name}
               </span>
             ) : (
               <span className="text-sm text-gray-400">N/A</span>

@@ -50,9 +50,6 @@ export const userRegisterWithBusinessSchema = z.object({
     phone: z
       .string({ error: "Phone is required" })
       .nonempty({ error: "Phone is required" }),
-    numberOfEmployeesAllowed: z.coerce
-      .number({ error: "Number of employees is required" })
-      .min(0, { error: "Number of employees is required" }),
     address: z
       .string({ error: "Address is required" })
       .nonempty({ error: "Address is required" }),
@@ -68,8 +65,17 @@ export const userRegisterWithBusinessSchema = z.object({
     registrationDate: z
       .string({ error: "Registration Date is required" })
       .nonempty({ error: "Registration Date is required" }),
-    subscriptionPlanId: z.coerce.number({
-      error: "Subscription plan is required",
+    subscription: z.object({
+      subscriptionPlanId: z.coerce.number({
+        error: "Subscription plan is required",
+      }),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      trialEndDate: z.string().optional(),
+      numberOfEmployeesAllowed: z.coerce
+        .number({ error: "Number of employees is required" })
+        .min(0, { error: "Number of employees is required" })
+        .or(z.string()),
     }),
   }),
 });
@@ -106,3 +112,17 @@ export type IUpdateBusiness = z.infer<typeof updateBusinessSchema>;
 export type IUserRegisterWithBusiness = z.infer<
   typeof userRegisterWithBusinessSchema
 >;
+
+// Business Profile Card Schema
+export const businessProfileSchema = z.object({
+  name: z.string().nonempty("Business name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().nonempty("Phone is required"),
+  address: z.string().nonempty("Address is required"),
+  city: z.string().nonempty("City is required"),
+  country: z.string().nonempty("Country is required"),
+  postcode: z.string().nonempty("Postcode is required"),
+  website: z.string().optional(),
+});
+
+export type IBusinessProfileFormData = z.infer<typeof businessProfileSchema>;

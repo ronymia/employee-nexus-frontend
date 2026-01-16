@@ -26,7 +26,7 @@ export const generateWeekDays = ({
     return {
       name: day,
       shortName: weekdaysShort[originalIndex],
-      value: originalIndex,
+      dayOfWeek: originalIndex,
     };
   });
 };

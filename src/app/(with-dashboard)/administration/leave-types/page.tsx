@@ -85,8 +85,8 @@ export default function LeaveTypesPage() {
     },
     {
       key: "3",
-      header: "Leave Hours",
-      accessorKey: "leaveHours",
+      header: "Leave Minutes",
+      accessorKey: "leaveMinutes",
       show: true,
       sortDirection: "ascending",
     },

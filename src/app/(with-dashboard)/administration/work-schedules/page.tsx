@@ -111,7 +111,7 @@ export default function WorkSchedules() {
     {
       key: "5",
       header: "Break Hours",
-      accessorKey: "breakHours",
+      accessorKey: "customBreakMinutes",
       show: true,
       sortDirection: "ascending",
       sortable: false,
@@ -164,7 +164,7 @@ export default function WorkSchedules() {
           title: "Delete Work Schedule",
         });
       },
-      disabledOn: [],
+      disabledOn: [{ accessorKey: "isDefault", value: true }],
     },
   ];
 
@@ -196,6 +196,9 @@ export default function WorkSchedules() {
         dataSource={
           data?.workSchedules?.data?.map((row) => ({
             ...row,
+            customBreakMinutes: row.breakMinutes
+              ? `${row.breakMinutes} mins`
+              : "N/A",
             customScheduleType: (() => {
               const type = row.scheduleType?.replace(/_/g, " ") || "N/A";
               let badgeColor = "";

@@ -8,7 +8,6 @@ export const GET_SUBSCRIPTION_PLANS = gql`
       success
       data {
         createdAt
-        createdBy
         description
         id
         name
@@ -50,7 +49,6 @@ export const CREATE_SUBSCRIPTION_PLAN = gql`
         status
         createdAt
         updatedAt
-        createdBy
       }
     }
   }
@@ -86,7 +84,6 @@ export const UPDATE_SUBSCRIPTION_PLAN = gql`
         status
         createdAt
         updatedAt
-        createdBy
       }
     }
   }

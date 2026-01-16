@@ -7,7 +7,6 @@ export const GET_LEAVE_SETTINGS = gql`
       statusCode
       success
       data {
-        id
         businessId
         startMonth
         autoApproval
@@ -28,7 +27,6 @@ export const UPDATE_LEAVE_SETTINGS = gql`
       statusCode
       success
       data {
-        id
         businessId
         startMonth
         autoApproval

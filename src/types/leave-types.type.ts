@@ -2,7 +2,7 @@ export interface ILeaveType {
   id?: number;
   name: string;
   leaveType: string;
-  leaveHours: number;
+  leaveMinutes: number;
   leaveRolloverType: LeaveRolloverType;
   carryOverLimit?: number;
   employmentStatuses: ILeaveTypeEmploymentStatus[];
