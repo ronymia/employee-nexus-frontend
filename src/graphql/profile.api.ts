@@ -11,7 +11,7 @@ export const GET_MY_PROFILE = gql`
         roleId
         status
         profile {
-          id
+          userId
           fullName
           address
           city
@@ -40,19 +40,11 @@ export const GET_MY_PROFILE = gql`
           name
         }
         employee {
-          id
+          userId
           employeeId
-          departmentId
-          designationId
-          employmentStatusId
-          workSiteId
-          workScheduleId
           joiningDate
-          salaryPerMonth
           nidNumber
-          rotaType
-          workingDaysPerWeek
-          workingHoursPerWeek
+          # salaries
           department {
             id
             name
@@ -114,11 +106,11 @@ export const UPDATE_EMERGENCY_CONTACT = gql`
       statusCode
       success
       data {
-        createdAt
+        userId
         name
         phone
-        profileId
         relation
+        createdAt
         updatedAt
       }
     }

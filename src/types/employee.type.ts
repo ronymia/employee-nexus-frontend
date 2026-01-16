@@ -23,4 +23,9 @@ export interface IEmployeeDetails {
   employmentStatuses: IEmployeeEmploymentStatus[];
   workSchedules: IEmployeeWorkSchedule[];
   workSites: IEmployeeWorkSite[];
+  department: IDepartment;
+  designation: IDesignation;
+  employmentStatus: IEmploymentStatus;
+  workSchedule: IWorkSchedule;
+  workSite: IWorkSite;
 }
