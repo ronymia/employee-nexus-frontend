@@ -85,7 +85,7 @@ export default function LeaveSettingsPage() {
   };
 
   // SHOW SKELETON WHILE LOADING
-  if (loading) {
+  if (loading || updateResult.loading) {
     return <LeaveSettingsLoadingSkeleton />;
   }
 
