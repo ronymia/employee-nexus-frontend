@@ -62,8 +62,8 @@ export const UPDATE_ASSET_TYPE = gql`
 `;
 
 export const DELETE_ASSET_TYPE = gql`
-  mutation DeleteAssetType($id: Int!) {
-    deleteAssetType(id: $id) {
+  mutation RemoveAssetType($id: Int!) {
+    removeAssetType(id: $id) {
       message
       statusCode
       success

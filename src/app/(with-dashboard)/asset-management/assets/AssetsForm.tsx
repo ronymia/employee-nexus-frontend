@@ -12,6 +12,10 @@ import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import useAppStore from "@/hooks/useAppStore";
 import { showToast } from "@/components/ui/CustomToast";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 // ==================== ASSETS FORM COMPONENT ====================
 export default function AssetsForm({
@@ -92,7 +96,12 @@ export default function AssetsForm({
     if (data?.id) {
       (formValues as any)["id"] = Number(data.id);
       const res = await updateAsset({
-        variables: { updateAssetInput: formValues },
+        variables: {
+          updateAssetInput: {
+            ...formValues,
+            date: dayjs(formValues.date, "DD-MM-YYYY").toDate(),
+          },
+        },
       });
       if (res?.data) {
         showToast.success("Updated!", "Asset updated successfully");
@@ -102,7 +111,12 @@ export default function AssetsForm({
     // CREATE NEW ASSET
     else {
       const res = await createAsset({
-        variables: { createAssetInput: formValues },
+        variables: {
+          createAssetInput: {
+            ...formValues,
+            date: dayjs(formValues.date, "DD-MM-YYYY").toDate(),
+          },
+        },
       });
       if (res?.data) {
         showToast.success("Created!", "Asset created successfully");
@@ -115,7 +129,7 @@ export default function AssetsForm({
   const defaultValues = {
     name: data?.name || "",
     code: data?.code || "",
-    date: data?.date || "",
+    date: data?.date ? dayjs(data.date).format("DD-MM-YYYY") : "",
     assetTypeId: data?.assetTypeId || "",
     image: data?.image || "",
     note: data?.note || "",

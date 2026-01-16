@@ -12,6 +12,10 @@ import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import PageHeader from "@/components/ui/PageHeader";
 import { showToast } from "@/components/ui/CustomToast";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+
+dayjs.extend(localizedFormat);
 
 // ==================== ASSETS PAGE COMPONENT ====================
 export default function AssetsPage() {
@@ -101,7 +105,7 @@ export default function AssetsPage() {
     {
       key: "3",
       header: "Date",
-      accessorKey: "date",
+      accessorKey: "customDate",
       show: true,
       sortDirection: "ascending",
     },
@@ -182,6 +186,7 @@ export default function AssetsPage() {
           data?.assets?.data?.map((row) => ({
             ...row,
             customAssetTypeName: row.assetType?.name || "-",
+            customDate: row?.date ? dayjs(row.date).format("ll") : "-",
             // CUSTOM STATUS COLUMN WITH COLOR-CODED BADGES
             customStatus: row?.status ? (
               <span
