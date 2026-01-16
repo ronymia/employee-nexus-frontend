@@ -109,10 +109,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className={`flex flex-col items-center justify-center w-full`}>
       {/* HEADER */}
-      <BusinessProfileCard
-        businessData={singleBusinessData as IBusiness}
-        isLoading={businessByIdQuery.loading}
-      />
+      {/* BUSINESS INFO CARD */}
+      <div className={`max-w-5xl w-full`}>
+        <BusinessProfileCard
+          businessData={singleBusinessData as IBusiness}
+          isLoading={businessByIdQuery.loading}
+        />
+      </div>
+
       <CustomTab
         tabs={[
           { title: "Owner", id: "owner" },
