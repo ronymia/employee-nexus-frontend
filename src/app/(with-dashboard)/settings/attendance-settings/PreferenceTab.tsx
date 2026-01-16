@@ -1,6 +1,7 @@
 "use client";
 
 import CustomForm from "@/components/form/CustomForm";
+import CustomInputField from "@/components/form/input/CustomInputField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { IAttendanceSettings } from "@/types";
 import { MdCheckCircle, MdInfo } from "react-icons/md";
@@ -68,10 +69,16 @@ export default function PreferenceTab({
   isLoading,
 }: IPreferenceTabProps) {
   // HANDLE FORM SUBMISSION
-  const handleOnSubmit = async (formValues: { autoApproval: boolean }) => {
+  const handleOnSubmit = async (formValues: {
+    autoApproval: boolean;
+    punchInOutAlert: boolean;
+    punchInOutInterval: number;
+  }) => {
     await updateSettings({
       variables: {
         autoApproval: formValues.autoApproval,
+        punchInOutAlert: formValues.punchInOutAlert,
+        punchInOutInterval: Number(formValues.punchInOutInterval),
       },
     });
   };
@@ -165,6 +172,114 @@ export default function PreferenceTab({
                   employee management section.
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* PUNCH IN/OUT ALERT SETTING */}
+          <div className="p-4 bg-linear-to-br from-purple-50/50 to-pink-50/30 rounded-lg border border-purple-100/50">
+            {/* HEADER WITH TOGGLE */}
+            <div className="flex items-center justify-between gap-3 mb-3 sm:mb-0">
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-purple-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                </svg>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                  Punch In/Out Alert
+                </h3>
+              </div>
+
+              <div className="sm:hidden">
+                <ToggleSwitch name="punchInOutAlert" />
+              </div>
+            </div>
+
+            {/* DESKTOP LAYOUT */}
+            <div className="hidden sm:flex sm:items-start gap-4">
+              <div className="pt-1">
+                <ToggleSwitch name="punchInOutAlert" />
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  Enable automated alerts to remind employees to punch in/out at
+                  their scheduled times. This helps ensure timely attendance
+                  tracking.
+                </p>
+
+                <div className="flex items-start gap-2 mt-3 p-3 bg-white/80 rounded-md border border-purple-200/50">
+                  <MdInfo className="text-purple-600 text-lg shrink-0 mt-0.5" />
+                  <p className="text-xs sm:text-sm text-gray-700">
+                    <span className="font-medium text-gray-900">Tip:</span>{" "}
+                    Alerts are sent based on the interval configured below.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* MOBILE LAYOUT */}
+            <div className="sm:hidden space-y-3 mt-3">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Enable automated alerts to remind employees to punch in/out at
+                their scheduled times.
+              </p>
+
+              <div className="flex items-start gap-2 p-3 bg-white/80 rounded-md border border-purple-200/50">
+                <MdInfo className="text-purple-600 text-lg shrink-0 mt-0.5" />
+                <p className="text-xs text-gray-700">
+                  <span className="font-medium text-gray-900">Tip:</span> Alerts
+                  are sent based on the interval configured below.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* PUNCH IN/OUT INTERVAL SETTING */}
+          <div className="p-4 bg-linear-to-br from-orange-50/50 to-amber-50/30 rounded-lg border border-orange-100/50">
+            <div className="flex items-start gap-3 mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-orange-600 mt-1"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <div className="flex-1">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
+                  Alert Interval (Minutes)
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  Set how frequently (in minutes) reminder alerts should be sent
+                  to employees for punch in/out.
+                </p>
+              </div>
+            </div>
+
+            <CustomInputField
+              name="punchInOutInterval"
+              type="number"
+              placeholder="60"
+              min={1}
+              max={1440}
+              wrapperClassName="max-w-full"
+            />
+
+            <div className="flex items-start gap-2 mt-3 p-3 bg-white/80 rounded-md border border-orange-200/50">
+              <MdInfo className="text-orange-600 text-lg shrink-0 mt-0.5" />
+              <p className="text-xs sm:text-sm text-gray-700">
+                <span className="font-medium text-gray-900">Example:</span>{" "}
+                Setting this to 60 minutes means alerts will be sent every hour
+                if an employee hasn't punched in/out.
+              </p>
             </div>
           </div>
         </div>

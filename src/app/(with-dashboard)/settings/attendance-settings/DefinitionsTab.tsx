@@ -199,8 +199,9 @@ export default function DefinitionsTab({
                 Work Availability Definition (Percentage)
               </h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                The attendance percentage that defines an employee as Good or
-                Bad.
+                Set the attendance percentage threshold that defines employee
+                performance levels. This value determines when an employee's
+                attendance is considered Good or needs improvement.
               </p>
             </div>
           </div>
@@ -220,23 +221,30 @@ export default function DefinitionsTab({
             <MdInfo className="text-green-600 text-lg shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-xs sm:text-sm text-gray-700 font-medium mb-2">
-                Quality Indicators:
+                Performance Levels:
               </p>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4">
+              <div className="flex flex-col gap-2">
                 <StatusBadge
                   label="Good"
-                  description="Equal or above the percent"
+                  description="≥ Set percentage (e.g., ≥80%)"
                   isActive={true}
                   onClick={() => {}}
                   colorClass="bg-green-500"
                 />
                 <StatusBadge
-                  label="Bad"
-                  description="Below the percent"
+                  label="Needs Improvement"
+                  description="< Set percentage (e.g., <80%)"
                   isActive={true}
                   onClick={() => {}}
                   colorClass="bg-red-500"
                 />
+              </div>
+              <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                <p className="text-xs text-blue-800">
+                  <strong>Example:</strong> If set to 80%, employees with ≥80%
+                  attendance are marked as "Good", while those below 80% need
+                  improvement.
+                </p>
               </div>
             </div>
           </div>

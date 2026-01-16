@@ -6,4 +6,5 @@ export interface IBusinessSetting {
   deleteReadNotifications: string;
   identifierPrefix: string;
   theme: string;
+  googleApiKey?: string;
 }

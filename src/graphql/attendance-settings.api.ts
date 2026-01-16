@@ -13,7 +13,7 @@ export const GET_ATTENDANCE_SETTINGS = gql`
         punchInOutAlert
         punchInOutInterval
         autoApproval
-        isGeoLocationEnabled
+        isGeoFencingEnabled
       }
     }
   }
@@ -26,6 +26,7 @@ export const UPDATE_ATTENDANCE_SETTINGS = gql`
     $punchInOutAlert: Boolean
     $punchInOutInterval: Int
     $autoApproval: Boolean
+    $isGeoFencingEnabled: Boolean
   ) {
     updateAttendanceSetting(
       updateAttendanceSettingInput: {
@@ -34,6 +35,7 @@ export const UPDATE_ATTENDANCE_SETTINGS = gql`
         punchInOutAlert: $punchInOutAlert
         punchInOutInterval: $punchInOutInterval
         autoApproval: $autoApproval
+        isGeoFencingEnabled: $isGeoFencingEnabled
       }
     ) {
       message
@@ -46,7 +48,7 @@ export const UPDATE_ATTENDANCE_SETTINGS = gql`
         punchInOutAlert
         punchInOutInterval
         autoApproval
-        isGeoLocationEnabled
+        isGeoFencingEnabled
       }
     }
   }

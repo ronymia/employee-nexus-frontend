@@ -9,7 +9,7 @@ export interface IAttendanceSettings {
   punchInOutAlert: boolean;
   punchInOutInterval: number;
   autoApproval: boolean;
-  isGeoLocationEnabled: boolean;
+  isGeoFencingEnabled: boolean;
 }
 
 export enum AttendanceTab {

@@ -14,6 +14,7 @@ export const BUSINESS_SETTING_BY_BUSINESS_ID = gql`
         deleteReadNotifications
         identifierPrefix
         theme
+        googleApiKey
       }
     }
   }
@@ -39,6 +40,7 @@ export const UPDATE_BUSINESS_SETTING = gql`
         deleteReadNotifications
         identifierPrefix
         theme
+        googleApiKey
       }
     }
   }

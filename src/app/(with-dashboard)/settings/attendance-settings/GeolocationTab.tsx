@@ -3,7 +3,12 @@
 import CustomForm from "@/components/form/CustomForm";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
-import { IAttendanceSettings } from "@/types";
+import {
+  BUSINESS_SETTING_BY_BUSINESS_ID,
+  UPDATE_BUSINESS_SETTING,
+} from "@/graphql/business-settings.api";
+import { IAttendanceSettings, IBusinessSetting } from "@/types";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { MdLocationOn, MdInfo, MdOpenInNew } from "react-icons/md";
 
 // ==================== INTERFACES ====================
@@ -15,7 +20,7 @@ interface IGeolocationTabProps {
 }
 
 interface IFormValues {
-  isGeoLocationEnabled: boolean;
+  isGeoFencingEnabled: boolean;
   googleMapApiKey?: string;
 }
 
@@ -55,18 +60,63 @@ export default function GeolocationTab({
   updateSettings,
   isLoading,
 }: IGeolocationTabProps) {
+  // ==================== QUERIES ====================
+  const { data, loading } = useQuery<{
+    businessSettingByBusinessId: {
+      data: IBusinessSetting;
+    };
+  }>(BUSINESS_SETTING_BY_BUSINESS_ID, {
+    variables: {
+      businessId: settings?.businessId,
+    },
+    skip: !settings?.businessId,
+  });
+
+  // ==================== MUTATIONS ====================
+  const [updateBusinessSetting, updateResult] = useMutation(
+    UPDATE_BUSINESS_SETTING,
+    {
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        {
+          query: BUSINESS_SETTING_BY_BUSINESS_ID,
+          variables: { businessId: settings?.businessId },
+        },
+      ],
+    }
+  );
+
+  // ==================== COMPUTED VALUES ====================
+  const businessSettings = data?.businessSettingByBusinessId?.data;
+
   // ==================== HANDLERS ====================
   const handleOnSubmit = async (formValues: IFormValues) => {
-    await updateSettings({
-      variables: {
-        isGeoLocationEnabled: formValues.isGeoLocationEnabled,
-        googleMapApiKey: formValues.googleMapApiKey,
-      },
-    });
+    try {
+      // SAVE GEO FENCING TO ATTENDANCE SETTINGS
+      await updateSettings({
+        variables: {
+          isGeoFencingEnabled: formValues.isGeoFencingEnabled,
+        },
+      });
+
+      // SAVE GOOGLE MAPS API KEY TO BUSINESS SETTINGS
+      if (formValues.googleMapApiKey && settings?.businessId) {
+        await updateBusinessSetting({
+          variables: {
+            businessId: settings.businessId,
+            updateBusinessSettingInput: {
+              googleApiKey: formValues.googleMapApiKey,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error updating geolocation settings:", error);
+    }
   };
 
   // SHOW SKELETON WHILE LOADING
-  if (isLoading) {
+  if (isLoading || loading || updateResult.loading) {
     return <GeolocationTabLoadingSkeleton />;
   }
 
@@ -76,8 +126,8 @@ export default function GeolocationTab({
       <CustomForm
         submitHandler={handleOnSubmit}
         defaultValues={{
-          isGeoLocationEnabled: settings?.isGeoLocationEnabled ?? false,
-          googleMapApiKey: "",
+          isGeoFencingEnabled: settings?.isGeoFencingEnabled ?? false,
+          googleMapApiKey: businessSettings?.googleApiKey || "",
         }}
         className="p-4 sm:p-6 space-y-6"
       >
@@ -99,7 +149,7 @@ export default function GeolocationTab({
 
           {/* TOGGLE SWITCH */}
           <div className="flex items-center gap-3 p-3 bg-white/80 rounded-md border border-purple-200/50">
-            <ToggleSwitch name="isGeoLocationEnabled" />
+            <ToggleSwitch name="isGeoFencingEnabled" />
             <span className="text-sm sm:text-base font-medium text-gray-700">
               Enable Geolocation Tracking
             </span>
