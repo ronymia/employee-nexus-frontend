@@ -37,18 +37,11 @@ export const employeeSchema = z.object({
   workSiteIds: z.array(z.number().min(1, "Work Site is required")),
   workScheduleId: z.number().min(1, "Work Schedule is required"),
   joiningDate: z.string(),
-  salaryPerMonth: z
-    .number()
-    .or(z.string().min(1, "Salary per month is required")),
+  salaryAmount: z.number().or(z.string().min(1, "Salary amount is required")),
   employeeId: z.string().optional(),
   nidNumber: z.string().min(1, "NID number is required"),
-  rotaType: z.string().optional().default("day_based"),
-  workingDaysPerWeek: z
-    .number("Working days per week is required")
-    .or(z.string().min(1, "Working days per week is required")),
-  workingHoursPerWeek: z
-    .number("Working hours per week is required")
-    .or(z.string().min(1, "Working hours per week is required")),
+  salaryType: z.string().optional().default("MONTHLY"),
+  salaryStartDate: z.string().optional(),
 });
 
 export type IEmployeeFormData = z.infer<typeof employeeSchema>;

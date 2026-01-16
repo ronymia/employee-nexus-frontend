@@ -3,29 +3,32 @@ import { IDesignation } from "./designation.type";
 import { IEmploymentStatus } from "./employment-status.type";
 import { IWorkSite } from "./work-sites.type";
 import { IWorkSchedule } from "./work-schedules.type";
-import { IEmployeeDepartment } from "./employee-department.type";
-import { IEmployeeDesignation } from "./employee-designation.type";
-import { IEmployeeEmploymentStatus } from "./employee-employment-status.type";
-import { IEmployeeWorkSchedule } from "./employee-work-schedule.type";
-import { IEmployeeWorkSite } from "./employee-work-site.type";
+// import { IEmployeeDepartment } from "./employee-department.type";
+// import { IEmployeeDesignation } from "./employee-designation.type";
+// import { IEmployeeEmploymentStatus } from "./employee-employment-status.type";
+// import { IEmployeeWorkSchedule } from "./employee-work-schedule.type";
+// import { IEmployeeWorkSite } from "./employee-work-site.type";
 
 export interface IEmployeeDetails {
   userId: number;
   employeeId?: string;
   joiningDate: string;
-  salaryPerMonth?: number;
+  // salaryPerMonth?: number;
   nidNumber?: string;
-  rotaType?: string;
-  workingDaysPerWeek?: number;
-  workingHoursPerWeek?: number;
-  departments: IEmployeeDepartment[];
-  designations: IEmployeeDesignation[];
-  employmentStatuses: IEmployeeEmploymentStatus[];
-  workSchedules: IEmployeeWorkSchedule[];
-  workSites: IEmployeeWorkSite[];
+  // departments: IEmployeeDepartment[];
+  // designations: IEmployeeDesignation[];
+  // employmentStatuses: IEmployeeEmploymentStatus[];
+  // workSchedules: IEmployeeWorkSchedule[];
+  // workSites: IEmployeeWorkSite[];
   department: IDepartment;
   designation: IDesignation;
   employmentStatus: IEmploymentStatus;
   workSchedule: IWorkSchedule;
-  workSite: IWorkSite;
+  workSites: IWorkSite[];
+}
+
+export interface IEmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
 }

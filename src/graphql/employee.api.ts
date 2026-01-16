@@ -205,36 +205,35 @@ export const CREATE_EMPLOYEE = gql`
           employeeId
           nidNumber
           joiningDate
-          salaryPerMonth
-          workingDaysPerWeek
-          workingHoursPerWeek
-          designationId
-          designation {
-            id
-            name
-          }
-          employmentStatusId
-          employmentStatus {
-            id
-            name
-          }
-          departmentId
-          department {
-            id
-            name
-          }
-          workSites {
-            workSite {
-              id
-              name
-            }
-          }
-          workScheduleId
-          workSchedule {
-            id
-            name
-          }
-          rotaType
+          # salaryAmount
+          # salaryType
+          # salaryStartDate
+          # designationId
+          # designation {
+          #   id
+          #   name
+          # }
+          # employmentStatusId
+          # employmentStatus {
+          #   id
+          #   name
+          # }
+          # departmentId
+          # department {
+          #   id
+          #   name
+          # }
+          # workSites {
+          #   workSite {
+          #     id
+          #     name
+          #   }
+          # }
+          # workScheduleId
+          # workSchedule {
+          #   id
+          #   name
+          # }
           createdAt
           updatedAt
         }

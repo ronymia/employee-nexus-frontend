@@ -4,6 +4,7 @@ import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomRadioButton from "@/components/form/input/CustomRadioButton";
 import {
   CREATE_EMPLOYEE,
   GET_EMPLOYEES,
@@ -57,29 +58,8 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
     }
 
     // CONVERT SALARY TO NUMBER
-    if (formValues["salaryPerMonth"]) {
-      formValues["salaryPerMonth"] = Number(formValues["salaryPerMonth"]);
-    }
-
-    // CONVERT WORKING DAYS PER WEEK TO NUMBER
-    if (formValues["workingDaysPerWeek"]) {
-      formValues["workingDaysPerWeek"] = Number(
-        formValues["workingDaysPerWeek"]
-      );
-    }
-
-    // CONVERT WORKING HOURS PER WEEK TO NUMBER
-    if (formValues["workingHoursPerWeek"]) {
-      formValues["workingHoursPerWeek"] = Number(
-        formValues["workingHoursPerWeek"]
-      );
-    }
-
-    if (formValues["profile"]["dateOfBirth"]) {
-      formValues["profile"]["dateOfBirth"] = dayjs(
-        formValues["profile"]["dateOfBirth"],
-        "DD-MM-YYYY"
-      ).toDate();
+    if (formValues["salaryAmount"]) {
+      formValues["salaryAmount"] = Number(formValues["salaryAmount"]);
     }
 
     // TRY TO SUBMIT EMPLOYEE DATA
@@ -95,6 +75,18 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
                 formValues["joiningDate"],
                 "DD-MM-YYYY"
               ).toDate(),
+              // CONVERT SALARY START DATE FROM DD-MM-YYYY TO DATETIME
+              salaryStartDate: formValues["salaryStartDate"]
+                ? dayjs(formValues["salaryStartDate"], "DD-MM-YYYY").toDate()
+                : null,
+              profile: {
+                ...formValues["profile"],
+                // CONVERT DATE OF BIRTH FROM DD-MM-YYYY TO DATETIME
+                dateOfBirth: dayjs(
+                  formValues["profile"]["dateOfBirth"],
+                  "DD-MM-YYYY"
+                ).toDate(),
+              },
             },
           },
         }).then(() => {
@@ -107,7 +99,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
           joiningDate: formValues["joiningDate"],
         });
 
-        await createEmployee({
+        const createdEmployee = await createEmployee({
           variables: {
             createEmployeeInput: {
               ...formValues,
@@ -116,12 +108,26 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
                 formValues["joiningDate"],
                 "DD-MM-YYYY"
               ).toDate(),
+              // CONVERT SALARY START DATE FROM DD-MM-YYYY TO DATETIME
+              salaryStartDate: formValues["salaryStartDate"]
+                ? dayjs(formValues["salaryStartDate"], "DD-MM-YYYY").toDate()
+                : null,
+              profile: {
+                ...formValues["profile"],
+                // CONVERT DATE OF BIRTH FROM DD-MM-YYYY TO DATETIME
+                dateOfBirth: dayjs(
+                  formValues["profile"]["dateOfBirth"],
+                  "DD-MM-YYYY"
+                ).toDate(),
+              },
             },
           },
-        }).then(() => {
-          // REDIRECT TO EMPLOYEE LIST AFTER SUCCESSFUL CREATION
-          router.push("/user-management/employees");
         });
+
+        // REDIRECT TO EMPLOYEE LIST AFTER SUCCESSFUL CREATION
+        if (createdEmployee.data) {
+          router.push("/user-management/employees");
+        }
       }
     } catch (error) {
       // LOG AND RE-THROW ERROR FOR FORM HANDLING
@@ -263,7 +269,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
           />
 
           {/* WORK SITE SELECTION */}
-          <WorkSiteSelect name="workSiteIds" required={true} />
+          <WorkSiteSelect name="workSiteIds" required={true} multipleSelect />
 
           {/* WORK SCHEDULE SELECTION */}
           <WorkScheduleSelect name="workScheduleId" required={true} />
@@ -280,28 +286,36 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
           <span>Compensation & Schedule</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {/* MONTHLY SALARY INPUT */}
+          {/* SALARY TYPE RADIO */}
+          <div className="sm:col-span-2 lg:col-span-3">
+            <CustomRadioButton
+              name="salaryType"
+              label="Salary Type"
+              required
+              dataAuto="salary-type-radio"
+              radioGroupClassName="grid-cols-3"
+              options={[
+                { title: "Hourly", value: "HOURLY" },
+                { title: "Daily", value: "DAILY" },
+                { title: "Monthly", value: "MONTHLY" },
+              ]}
+            />
+          </div>
+
+          {/* SALARY AMOUNT INPUT */}
           <CustomInputField
-            name="salaryPerMonth"
-            label="Monthly Salary"
+            name="salaryAmount"
+            label="Salary Amount"
             type="number"
             required
           />
 
-          {/* WORKING DAYS PER WEEK INPUT */}
-          <CustomInputField
-            name="workingDaysPerWeek"
-            label="Working Days per Week"
-            type="number"
-            required
-          />
-
-          {/* WORKING HOURS PER WEEK INPUT */}
-          <CustomInputField
-            name="workingHoursPerWeek"
-            label="Working Hours per Week"
-            type="number"
-            required
+          {/* SALARY START DATE */}
+          <CustomDatePicker
+            name="salaryStartDate"
+            label="Salary Start Date"
+            dataAuto="salaryStartDate"
+            required={false}
           />
         </div>
       </div>

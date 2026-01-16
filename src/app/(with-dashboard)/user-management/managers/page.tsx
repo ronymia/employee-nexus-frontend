@@ -225,41 +225,33 @@ export default function ManagersPage() {
               <span className="text-sm text-gray-400">N/A</span>
             ),
             // CUSTOM DEPARTMENT COLUMN
-            customDepartment: row?.employee?.departments?.at(0)?.department
-              ?.name ? (
+            customDepartment: row?.employee?.department?.name ? (
               <span className="text-sm text-gray-700">
-                {row.employee.departments?.at(0)?.department?.name}
+                {row.employee.department?.name}
               </span>
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
             ),
             // CUSTOM EMPLOYMENT STATUS COLUMN WITH BADGE
-            customEmploymentStatus: row?.employee?.employmentStatuses?.at(0)
-              ?.employmentStatus?.name ? (
+            customEmploymentStatus: row?.employee?.employmentStatus?.name ? (
               <span
                 className={`badge badge-sm ${
-                  row?.employee?.employmentStatuses
-                    ?.at(0)
-                    ?.employmentStatus?.name.toLowerCase()
+                  row?.employee?.employmentStatus?.name
+                    .toLowerCase()
                     .includes("full")
                     ? "badge-success"
-                    : row?.employee?.employmentStatuses
-                        ?.at(0)
-                        ?.employmentStatus?.name.toLowerCase()
+                    : row?.employee?.employmentStatus?.name
+                        .toLowerCase()
                         .includes("part")
                     ? "badge-warning"
-                    : row?.employee?.employmentStatuses
-                        ?.at(0)
-                        ?.employmentStatus?.name.toLowerCase()
+                    : row?.employee?.employmentStatus?.name
+                        .toLowerCase()
                         .includes("contract")
                     ? "badge-info"
                     : "badge-secondary"
                 }`}
               >
-                {
-                  row?.employee?.employmentStatuses?.at(0)?.employmentStatus
-                    ?.name
-                }
+                {row?.employee?.employmentStatus?.name}
               </span>
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
