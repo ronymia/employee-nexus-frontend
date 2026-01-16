@@ -179,8 +179,6 @@ export default function BusinessProfileCard({
     return <BusinessProfileCardSkeleton />;
   }
 
-  const isActive = businessData?.status === "ACTIVE";
-
   // ==================== RENDER ====================
   return (
     <motion.section
@@ -225,14 +223,6 @@ export default function BusinessProfileCard({
                 <h2 className="text-2xl md:text-3xl font-bold drop-shadow text-green-950">
                   {businessData?.name}
                 </h2>
-                {/* STATUS BADGE */}
-                <span
-                  className={`badge badge-sm ${
-                    isActive ? "badge-success" : "badge-error"
-                  } font-medium`}
-                >
-                  {businessData?.status}
-                </span>
               </div>
               {hasPermission(Permissions.BusinessUpdate) && (
                 <motion.button
@@ -327,30 +317,6 @@ export default function BusinessProfileCard({
                   <div className="font-semibold">{businessData?.phone}</div>
                 </div>
               </motion.div>
-
-              {/* WEBSITE */}
-              {businessData?.website && (
-                <motion.div
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 hover:bg-white/20 transition-all duration-200"
-                >
-                  <span className="text-lg shrink-0">🌐</span>
-                  <div className="truncate">
-                    <div className="text-xs text-green-800 opacity-80">
-                      Website
-                    </div>
-                    <a
-                      href={businessData.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold hover:underline truncate block"
-                    >
-                      {businessData.website}
-                    </a>
-                  </div>
-                </motion.div>
-              )}
             </motion.div>
           </motion.div>
         </div>
@@ -370,7 +336,6 @@ export default function BusinessProfileCard({
               name: businessData?.name || "",
               email: businessData?.email || "",
               phone: businessData?.phone || "",
-              website: businessData?.website || "",
               address: businessData?.address || "",
               city: businessData?.city || "",
               country: businessData?.country || "",

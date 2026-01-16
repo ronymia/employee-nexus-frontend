@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
+
 import CustomTab from "@/components/ui/Tab/CustomTab";
 import PageHeader from "@/components/ui/PageHeader";
+import BusinessProfileCard from "../businesses/[id]/view/BusinessProfileCard";
 import { GET_BUSINESS_BY_ID } from "@/graphql/business.api";
 import { IBusiness } from "@/types";
-import BusinessProfileCard from "../businesses/[id]/view/BusinessProfileCard";
-import BusinessSchedule from "../businesses/[id]/view/tabs/BusinessSchedule";
-import BusinessConfig from "./tabs/BusinessConfig";
 import useAppStore from "@/stores/appStore";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
@@ -19,7 +18,31 @@ import {
   MdSettings,
   MdBlock,
 } from "react-icons/md";
-import BusinessSubscription from "../businesses/[id]/view/tabs/BusinessSubscription";
+
+// ==================== LAZY LOADED TAB COMPONENTS ====================
+const BusinessSchedule = lazy(
+  () => import("../businesses/[id]/view/tabs/BusinessSchedule")
+);
+const BusinessSubscription = lazy(
+  () => import("../businesses/[id]/view/tabs/BusinessSubscription")
+);
+const BusinessSettings = lazy(
+  () => import("../businesses/[id]/view/tabs/BusinessSettings")
+);
+
+// ==================== TAB LOADING SKELETON ====================
+function TabLoadingFallback() {
+  return (
+    <div className="max-w-5xl w-full p-8 animate-pulse">
+      <div className="h-8 w-48 bg-gray-300 rounded mb-4" />
+      <div className="space-y-3">
+        <div className="h-24 bg-gray-200 rounded" />
+        <div className="h-24 bg-gray-200 rounded" />
+        <div className="h-24 bg-gray-200 rounded" />
+      </div>
+    </div>
+  );
+}
 
 // ==================== LOADING SKELETON SUB-COMPONENT ====================
 function BusinessProfileLoadingSkeleton() {
@@ -96,6 +119,8 @@ export default function BusinessProfilePage() {
     skip: !user.businessId,
   });
 
+  const businessData = data?.businessById.data;
+
   // FILTER TABS BASED ON PERMISSIONS
   const availableTabs = useMemo(() => {
     const allTabs = [
@@ -150,6 +175,34 @@ export default function BusinessProfilePage() {
     router.push(`?tab=${tabId}`, { scroll: false });
   };
 
+  // ==================== MEMOIZED TAB CONTENT ====================
+  const tabContent = useMemo(() => {
+    if (!businessData?.id) return null;
+
+    const tabComponents = {
+      schedule: (
+        <BusinessSchedule
+          key={`business_schedule_${businessData.id}`}
+          businessId={businessData.id as number}
+        />
+      ),
+      subscription: (
+        <BusinessSubscription
+          key={`business_subscription_${businessData.id}`}
+          businessId={businessData.id as number}
+        />
+      ),
+      config: (
+        <BusinessSettings
+          key={`business_settings_${businessData.id}`}
+          businessId={businessData.id as number}
+        />
+      ),
+    };
+
+    return tabComponents[activeTab as keyof typeof tabComponents] || null;
+  }, [activeTab, businessData?.id]);
+
   // CHECK PERMISSION
   if (!hasPermission(Permissions.BusinessSettingsRead)) {
     return <AccessDeniedMessage />;
@@ -160,55 +213,37 @@ export default function BusinessProfilePage() {
     return <BusinessProfileLoadingSkeleton />;
   }
 
-  const businessData = data?.businessById.data;
-
   // ==================== RENDER ====================
   return (
-    <section className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 p-6 space-y-6">
+    <section
+      className={`min-h-screen bg-linear-to-br from-gray-50 to-blue-50 p-6 space-y-6 flex flex-col items-center justify-center w-full`}
+    >
       {/* HEADER */}
       <PageHeader
         title="Business Profile"
         subtitle="Manage your business profile, schedule, and configuration"
+        className={`self-start`}
       />
 
       {/* BUSINESS INFO CARD */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-5xl">
-          <BusinessProfileCard
-            businessData={businessData as IBusiness}
-            isLoading={loading}
-          />
-        </div>
+      <div className={`max-w-5xl w-full`}>
+        <BusinessProfileCard
+          businessData={businessData as IBusiness}
+          isLoading={loading}
+        />
       </div>
 
       {/* TABS */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-5xl flex justify-center">
-          <CustomTab
-            tabs={availableTabs}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            gridColumns={`grid-cols-${availableTabs.length}`}
-          />
-        </div>
-      </div>
+      <CustomTab
+        tabs={availableTabs}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        gridColumns={`grid-cols-${availableTabs.length}`}
+      />
 
-      {/* TAB CONTENT */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-5xl">
-          {activeTab === "schedule" && (
-            <BusinessSchedule
-              key="business_schedule"
-              businessSchedules={businessData?.businessSchedules || []}
-            />
-          )}
-
-          {activeTab === "subscription" && (
-            <BusinessSubscription businessId={businessData?.id as number} />
-          )}
-
-          {activeTab === "config" && <BusinessConfig />}
-        </div>
+      {/* TAB CONTENT WITH SUSPENSE */}
+      <div className={`w-full max-w-5xl`}>
+        <Suspense fallback={<TabLoadingFallback />}>{tabContent}</Suspense>
       </div>
     </section>
   );

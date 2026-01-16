@@ -174,7 +174,7 @@ export default function BusinessSettings({
   ];
 
   // ==================== LOADING STATE ====================
-  if (loading) {
+  if (loading || updateResult.loading) {
     return <SettingsSkeleton />;
   }
 
