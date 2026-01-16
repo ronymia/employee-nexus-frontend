@@ -12,6 +12,7 @@ export const GET_WORK_SCHEDULES = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
         breakMinutes
@@ -20,7 +21,7 @@ export const GET_WORK_SCHEDULES = gql`
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -46,6 +47,7 @@ export const GET_WORK_SCHEDULE_BY_ID = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
         breakMinutes
@@ -54,7 +56,7 @@ export const GET_WORK_SCHEDULE_BY_ID = gql`
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -82,6 +84,7 @@ export const CREATE_WORK_SCHEDULE = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
         breakMinutes
@@ -90,7 +93,7 @@ export const CREATE_WORK_SCHEDULE = gql`
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -118,6 +121,7 @@ export const UPDATE_WORK_SCHEDULE = gql`
         name
         description
         status
+        isDefault
         scheduleType
         breakType
         breakMinutes
@@ -126,7 +130,7 @@ export const UPDATE_WORK_SCHEDULE = gql`
         updatedAt
         schedules {
           id
-          day
+          dayOfWeek
           isWeekend
           workScheduleId
           timeSlots {
@@ -177,12 +181,13 @@ export const GET_USER_SCHEDULE_ASSIGNMENTS = gql`
           name
           description
           status
+          isDefault
           scheduleType
           breakType
           breakMinutes
           schedules {
             id
-            day
+            dayOfWeek
             isWeekend
             workScheduleId
             timeSlots {

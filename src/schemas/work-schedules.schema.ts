@@ -8,7 +8,7 @@ const timeSlotSchema = z.object({
 
 // Schedule schema for individual days
 const scheduleSchema = z.object({
-  day: z.number().min(0).max(6), // 0 = Sunday, 6 = Saturday
+  dayOfWeek: z.number().min(0).max(6), // 0 = Sunday, 6 = Saturday
   isWeekend: z.boolean(),
   timeSlots: z
     .array(timeSlotSchema)

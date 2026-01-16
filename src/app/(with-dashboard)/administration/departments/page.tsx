@@ -140,7 +140,7 @@ export default function DepartmentsPage() {
           title: "Delete Department",
         });
       },
-      disabledOn: [],
+      disabledOn: [{ accessorKey: "isDefault", value: true }],
     },
   ];
 

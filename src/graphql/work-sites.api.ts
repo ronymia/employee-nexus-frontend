@@ -18,6 +18,7 @@ export const GET_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }
@@ -43,6 +44,7 @@ export const CREATE_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }
@@ -68,6 +70,7 @@ export const UPDATE_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }
@@ -93,6 +96,7 @@ export const DELETE_WORK_SITES = gql`
         ipAddress
         locationTrackingType
         businessId
+        isDefault
         createdAt
         updatedAt
       }

@@ -2,7 +2,7 @@
 
 import CustomTimeInput from "@/components/form/input/CustomTimeInput";
 import { useFormContext } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import { MdDelete } from "react-icons/md";
 
@@ -47,7 +47,7 @@ export default function FlexibleSchedule() {
       );
 
       return {
-        day: day.value,
+        dayOfWeek: day.value,
         isWeekend: weekendDays.includes(day.value),
         timeSlots: validSlots.length > 0 ? validSlots : [],
       };
