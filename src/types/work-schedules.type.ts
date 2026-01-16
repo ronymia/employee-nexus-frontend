@@ -6,7 +6,7 @@ export interface ITimeSlot {
 
 export interface IDaySchedule {
   id: number;
-  day: number;
+  dayOfWeek: number;
   isWeekend: boolean;
   workScheduleId: number;
   timeSlots?: ITimeSlot[];

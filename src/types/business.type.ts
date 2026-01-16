@@ -1,19 +1,19 @@
-import { ISubscriptionPlan } from "./subscription-plan.type";
+import { IBusinessSubscription } from "./business-subscription.type";
 import { IUser } from "./user.type";
 
 export interface IBusinessSchedule {
   id: number;
   businessId: number;
-  day: string;
+  dayOfWeek: string;
   startTime: string;
   endTime: string;
   isWeekend?: boolean;
-  // createdAt: string;
-  // updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IBusiness {
-  id: string;
+  id: number;
   name: string;
   email: string;
   phone: string;
@@ -21,18 +21,14 @@ export interface IBusiness {
   city: string;
   country: string;
   postcode: string;
-  numberOfEmployeesAllowed: string;
-  registrationDate: string;
+  registrationDate: Date;
   status: string;
-  subscriptionPlanId: number;
-  subscriptionPlan: ISubscriptionPlan;
-  userId: number;
+  subscriptions: IBusinessSubscription[];
+  subscription: IBusinessSubscription;
+  ownerId: number;
   owner: IUser;
   logo: string;
-  website?: string;
-  lat?: number;
-  lng?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   businessSchedules: IBusinessSchedule[];
 }

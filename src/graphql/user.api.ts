@@ -72,6 +72,39 @@ export const GET_USERS = gql`
     }
   }
 `;
+export const GET_BUSINESS_USER_BY_ID = gql`
+  query UserById($id: Int!) {
+    userById(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        id
+        email
+        roleId
+        status
+        createdAt
+        updatedAt
+        profile {
+          fullName
+          address
+          city
+          country
+          dateOfBirth
+          gender
+          maritalStatus
+          phone
+          postcode
+          profilePicture
+        }
+        role {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
 
 export const GET_USER_BY_ID = gql`
   query UserById($id: Int!) {

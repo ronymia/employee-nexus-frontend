@@ -7,9 +7,8 @@ import CustomTab from "@/components/ui/Tab/CustomTab";
 import PageHeader from "@/components/ui/PageHeader";
 import { GET_BUSINESS_BY_ID } from "@/graphql/business.api";
 import { IBusiness } from "@/types";
-import BusinessProfileCard from "./components/BusinessProfileCard";
-import BusinessSchedule from "./tabs/BusinessSchedule";
-import BusinessSubscription from "./tabs/BusinessSubscription";
+import BusinessProfileCard from "../businesses/[id]/view/BusinessProfileCard";
+import BusinessSchedule from "../businesses/[id]/view/tabs/BusinessSchedule";
 import BusinessConfig from "./tabs/BusinessConfig";
 import useAppStore from "@/stores/appStore";
 import usePermissionGuard from "@/guards/usePermissionGuard";
@@ -20,6 +19,7 @@ import {
   MdSettings,
   MdBlock,
 } from "react-icons/md";
+import BusinessSubscription from "../businesses/[id]/view/tabs/BusinessSubscription";
 
 // ==================== LOADING SKELETON SUB-COMPONENT ====================
 function BusinessProfileLoadingSkeleton() {
@@ -203,7 +203,9 @@ export default function BusinessProfilePage() {
             />
           )}
 
-          {activeTab === "subscription" && <BusinessSubscription />}
+          {activeTab === "subscription" && (
+            <BusinessSubscription businessId={businessData?.id as number} />
+          )}
 
           {activeTab === "config" && <BusinessConfig />}
         </div>

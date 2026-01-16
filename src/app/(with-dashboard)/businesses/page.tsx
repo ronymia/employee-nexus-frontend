@@ -9,9 +9,15 @@ import { DELETE_BUSINESS, GET_BUSINESSES } from "@/graphql/business.api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Permissions } from "@/constants/permissions.constant";
-import StatusBadge from "@/components/ui/StatusBadge";
+import SubscriptionStatusBadge from "@/components/ui/SubscriptionStatusBadge";
 import usePopupOption from "@/hooks/usePopupOption";
 import FormModal from "@/components/form/FormModal";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(localizedFormat);
 
 export default function AllBusinesses() {
   // ROUTER
@@ -88,8 +94,18 @@ export default function AllBusinesses() {
     },
     {
       key: "1",
-      header: "Status",
-      accessorKey: "customStatus",
+      header: "Subscription",
+      accessorKey: "customSubscriptionStatus",
+      show: true,
+      sortDirection: "ascending",
+      sortable: false,
+      filterable: false,
+      minWidth: 10,
+    },
+    {
+      key: "1",
+      header: "Expire At",
+      accessorKey: "customSubscriptionExpireAt",
       show: true,
       sortDirection: "ascending",
       sortable: false,
@@ -168,9 +184,15 @@ export default function AllBusinesses() {
         dataSource={
           data?.businesses?.data?.map((row) => ({
             ...row,
-            customStatus: (
-              <StatusBadge status={row.status} onClick={() => {}} />
+            customSubscriptionStatus: (
+              <SubscriptionStatusBadge
+                status={row.subscription.status}
+                onClick={() => {}}
+              />
             ),
+            customSubscriptionExpireAt: row.subscription.endDate
+              ? dayjs(row.subscription.endDate).format("ll")
+              : null,
           })) || []
         }
       >

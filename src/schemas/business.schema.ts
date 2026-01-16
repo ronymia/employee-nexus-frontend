@@ -50,9 +50,6 @@ export const userRegisterWithBusinessSchema = z.object({
     phone: z
       .string({ error: "Phone is required" })
       .nonempty({ error: "Phone is required" }),
-    numberOfEmployeesAllowed: z.coerce
-      .number({ error: "Number of employees is required" })
-      .min(0, { error: "Number of employees is required" }),
     address: z
       .string({ error: "Address is required" })
       .nonempty({ error: "Address is required" }),
@@ -68,8 +65,17 @@ export const userRegisterWithBusinessSchema = z.object({
     registrationDate: z
       .string({ error: "Registration Date is required" })
       .nonempty({ error: "Registration Date is required" }),
-    subscriptionPlanId: z.coerce.number({
-      error: "Subscription plan is required",
+    subscription: z.object({
+      subscriptionPlanId: z.coerce.number({
+        error: "Subscription plan is required",
+      }),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      trialEndDate: z.string().optional(),
+      numberOfEmployeesAllowed: z.coerce
+        .number({ error: "Number of employees is required" })
+        .min(0, { error: "Number of employees is required" })
+        .or(z.string()),
     }),
   }),
 });
