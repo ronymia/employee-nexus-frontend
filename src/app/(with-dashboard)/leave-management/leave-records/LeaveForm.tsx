@@ -17,7 +17,7 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import useAppStore from "@/hooks/useAppStore";
-import { motion, AnimatePresence } from "motion/react;
+import { motion, AnimatePresence } from "motion/react";
 import { PiCheck, PiClock } from "react-icons/pi";
 import { showToast } from "@/components/ui/CustomToast";
 
