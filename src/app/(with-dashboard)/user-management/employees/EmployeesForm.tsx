@@ -26,8 +26,10 @@ import {
 } from "@/components/input-fields";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
   // ==================== INITIALIZE ROUTER ====================
@@ -70,22 +72,22 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
           variables: {
             updateEmployeeInput: {
               ...formValues,
-              // CONVERT JOINING DATE FROM DD-MM-YYYY TO DATETIME
-              joiningDate: dayjs(
-                formValues["joiningDate"],
-                "DD-MM-YYYY"
-              ).toDate(),
-              // CONVERT SALARY START DATE FROM DD-MM-YYYY TO DATETIME
+              // CONVERT JOINING DATE FROM DD-MM-YYYY TO DATETIME (UTC)
+              joiningDate: dayjs
+                .utc(formValues["joiningDate"], "DD-MM-YYYY")
+                .toDate(),
+              // CONVERT SALARY START DATE FROM DD-MM-YYYY TO DATETIME (UTC)
               salaryStartDate: formValues["salaryStartDate"]
-                ? dayjs(formValues["salaryStartDate"], "DD-MM-YYYY").toDate()
+                ? dayjs
+                    .utc(formValues["salaryStartDate"], "DD-MM-YYYY")
+                    .toDate()
                 : null,
               profile: {
                 ...formValues["profile"],
-                // CONVERT DATE OF BIRTH FROM DD-MM-YYYY TO DATETIME
-                dateOfBirth: dayjs(
-                  formValues["profile"]["dateOfBirth"],
-                  "DD-MM-YYYY"
-                ).toDate(),
+                // CONVERT DATE OF BIRTH FROM DD-MM-YYYY TO DATETIME (UTC)
+                dateOfBirth: dayjs
+                  .utc(formValues["profile"]["dateOfBirth"], "DD-MM-YYYY")
+                  .toDate(),
               },
             },
           },
@@ -103,22 +105,22 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
           variables: {
             createEmployeeInput: {
               ...formValues,
-              // CONVERT JOINING DATE FROM DD-MM-YYYY TO DATETIME
-              joiningDate: dayjs(
-                formValues["joiningDate"],
-                "DD-MM-YYYY"
-              ).toDate(),
-              // CONVERT SALARY START DATE FROM DD-MM-YYYY TO DATETIME
+              // CONVERT JOINING DATE FROM DD-MM-YYYY TO DATETIME (UTC)
+              joiningDate: dayjs
+                .utc(formValues["joiningDate"], "DD-MM-YYYY")
+                .toDate(),
+              // CONVERT SALARY START DATE FROM DD-MM-YYYY TO DATETIME (UTC)
               salaryStartDate: formValues["salaryStartDate"]
-                ? dayjs(formValues["salaryStartDate"], "DD-MM-YYYY").toDate()
+                ? dayjs
+                    .utc(formValues["salaryStartDate"], "DD-MM-YYYY")
+                    .toDate()
                 : null,
               profile: {
                 ...formValues["profile"],
-                // CONVERT DATE OF BIRTH FROM DD-MM-YYYY TO DATETIME
-                dateOfBirth: dayjs(
-                  formValues["profile"]["dateOfBirth"],
-                  "DD-MM-YYYY"
-                ).toDate(),
+                // CONVERT DATE OF BIRTH FROM DD-MM-YYYY TO DATETIME (UTC)
+                dateOfBirth: dayjs
+                  .utc(formValues["profile"]["dateOfBirth"], "DD-MM-YYYY")
+                  .toDate(),
               },
             },
           },

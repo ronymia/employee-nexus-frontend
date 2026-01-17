@@ -14,8 +14,10 @@ import useAppStore from "@/hooks/useAppStore";
 import { showToast } from "@/components/ui/CustomToast";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 // ==================== ASSETS FORM COMPONENT ====================
 export default function AssetsForm({
@@ -99,7 +101,7 @@ export default function AssetsForm({
         variables: {
           updateAssetInput: {
             ...formValues,
-            date: dayjs(formValues.date, "DD-MM-YYYY").toDate(),
+            date: dayjs.utc(formValues.date, "DD-MM-YYYY").toDate(),
           },
         },
       });
@@ -114,7 +116,7 @@ export default function AssetsForm({
         variables: {
           createAssetInput: {
             ...formValues,
-            date: dayjs(formValues.date, "DD-MM-YYYY").toDate(),
+            date: dayjs.utc(formValues.date, "DD-MM-YYYY").toDate(),
           },
         },
       });

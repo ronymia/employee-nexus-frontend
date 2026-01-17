@@ -7,6 +7,7 @@ import { useFormContext } from "react-hook-form";
 import { motion, AnimatePresence } from "motion/react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 
 // ==================== COMPONENT IMPORTS ====================
 import CustomForm from "@/components/form/CustomForm";
@@ -35,8 +36,9 @@ import { IAttendance } from "@/types/attendance.type";
 import { PiPlus } from "react-icons/pi";
 import { IWorkSchedule } from "@/types";
 
-// Extend dayjs with custom parse format
+// Extend dayjs with plugins
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 // ==================== TYPESCRIPT INTERFACES ====================
 
@@ -176,11 +178,21 @@ export default function AttendanceForm({
       );
 
       if (actionType === "create") {
+        // Parse date in UTC to avoid timezone issues
+        // DD-MM-YYYY → UTC date at midnight
+        const utcDate = dayjs.utc(formValues.date, "DD-MM-YYYY").toDate();
+
+        console.log({
+          date: formValues.date,
+          parseDate: utcDate,
+          iso: utcDate.toISOString(),
+        });
+
         await createAttendance({
           variables: {
             createAttendanceInput: {
               userId: parseInt(formValues.userId),
-              date: dayjs(formValues.date, "DD-MM-YYYY").toDate(),
+              date: utcDate,
               breakMinutes: 0,
               // status: "approved",
               punchRecords: processedPunchRecords,

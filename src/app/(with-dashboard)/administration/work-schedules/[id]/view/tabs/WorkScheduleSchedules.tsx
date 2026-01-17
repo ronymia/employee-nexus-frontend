@@ -18,7 +18,7 @@ export default function WorkScheduleSchedules({
         <div className="space-y-2">
           {schedules.map((schedule) => {
             const dayName = weekDays.find(
-              (day) => day.value === schedule.day
+              (day) => day.dayOfWeek === schedule.dayOfWeek
             )?.name;
             const timeSlot = schedule.timeSlots?.[0];
             return (

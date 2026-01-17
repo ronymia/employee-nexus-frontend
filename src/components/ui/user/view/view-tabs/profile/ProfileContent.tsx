@@ -209,10 +209,10 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
           </div>
           <div>
             <label className="text-sm text-base-content/60 font-medium">
-              Relation
+              Relationship
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.profile?.emergencyContact?.relation || "-"}
+              {employee.profile?.emergencyContact?.relationship || "-"}
             </p>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
             </label>
             <p className="text-base font-semibold text-base-content">
               {employee?.employee?.workSites
-                ?.map((site) => site.workSite.name)
+                ?.map((site) => site.name)
                 .join(", ") || "-"}
             </p>
           </div>
@@ -309,32 +309,6 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
             </label>
             <p className="text-base font-semibold text-base-content">
               {employee?.employee?.nidNumber || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Salary (Monthly)
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.salaryPerMonth
-                ? `${employee?.employee?.salaryPerMonth.toLocaleString()} BDT`
-                : "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Working Days/Week
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.workingDaysPerWeek || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Working Hours/Week
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.workingHoursPerWeek || "-"}
             </p>
           </div>
         </div>

@@ -14,9 +14,11 @@ import { IProject } from "@/types";
 import { useMutation } from "@apollo/client/react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 import { showToast } from "@/components/ui/CustomToast";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 // ==================== STATUS OPTIONS ====================
 const STATUS_OPTIONS = [
@@ -56,10 +58,10 @@ export default function ProjectsForm({
           updateProjectInput: {
             ...formValues,
             startDate: formValues.startDate
-              ? dayjs(formValues.startDate, "DD-MM-YYYY").toDate()
+              ? dayjs.utc(formValues.startDate, "DD-MM-YYYY").toDate()
               : "",
             endDate: formValues.endDate
-              ? dayjs(formValues.endDate, "DD-MM-YYYY").toDate()
+              ? dayjs.utc(formValues.endDate, "DD-MM-YYYY").toDate()
               : undefined,
           },
         },
@@ -76,10 +78,10 @@ export default function ProjectsForm({
           createProjectInput: {
             ...formValues,
             startDate: formValues.startDate
-              ? dayjs(formValues.startDate, "DD-MM-YYYY").toDate()
+              ? dayjs.utc(formValues.startDate, "DD-MM-YYYY").toDate()
               : "",
             endDate: formValues.endDate
-              ? dayjs(formValues.endDate, "DD-MM-YYYY").toDate()
+              ? dayjs.utc(formValues.endDate, "DD-MM-YYYY").toDate()
               : undefined,
           },
         },

@@ -112,7 +112,7 @@ export default function FlexibleSchedule() {
                 </button>
               </div>
 
-              {daySlots.map((slot: TimeSlot, slotIndex: number) => (
+              {daySlots.map((_slot: TimeSlot, slotIndex: number) => (
                 <div
                   key={slotIndex}
                   className="grid grid-cols-[1fr,1fr,auto] gap-3 items-end"

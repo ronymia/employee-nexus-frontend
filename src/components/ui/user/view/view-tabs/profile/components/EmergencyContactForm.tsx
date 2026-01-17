@@ -64,7 +64,7 @@ export default function EmergencyContactForm({
   const defaultValues = {
     name: employee?.profile?.emergencyContact?.name || "",
     phone: employee?.profile?.emergencyContact?.phone || "",
-    relation: employee?.profile?.emergencyContact?.relation || "",
+    // relation: employee?.profile?.emergencyContact?.relation || "",
   };
 
   return (
@@ -91,9 +91,9 @@ export default function EmergencyContactForm({
               placeholder="Enter phone number"
               required={false}
             />
-            <div className="md:col-span-2">
+            {/* <div className="md:col-span-2">
               <RelationSelect name="relation" label="Relation" required />
-            </div>
+            </div> */}
           </div>
         </div>
 

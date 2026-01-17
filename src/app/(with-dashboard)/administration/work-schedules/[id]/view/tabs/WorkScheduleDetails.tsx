@@ -28,7 +28,7 @@ export default function WorkScheduleDetails({
           <FieldView label="Break Type" value={workScheduleData?.breakType} />
           <FieldView
             label="Break Hours"
-            value={workScheduleData?.breakHours?.toString()}
+            value={workScheduleData?.breakMinutes?.toString()}
           />
           <FieldView label="Status" value={workScheduleData?.status} />
           <FieldView

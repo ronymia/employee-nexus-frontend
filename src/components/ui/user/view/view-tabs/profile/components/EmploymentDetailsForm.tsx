@@ -15,6 +15,11 @@ import { UPDATE_EMPLOYMENT_DETAILS } from "@/graphql/profile.api";
 import { useMutation } from "@apollo/client/react";
 import { GET_EMPLOYEE_BY_ID } from "@/graphql/employee.api";
 import { showToast } from "@/components/ui/CustomToast";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 interface IEmploymentDetailsFormProps {
   employee?: IUser;
@@ -47,7 +52,7 @@ export default function EmploymentDetailsForm({
       const employmentDetailsInput = {
         ...data,
         userId: Number(employee?.employee?.userId),
-        joiningDate: dayjs(data.joiningDate, "DD-MM-YYYY").toDate(),
+        joiningDate: dayjs.utc(data.joiningDate, "DD-MM-YYYY").toDate(),
       };
 
       // EXECUTE UPDATE MUTATION
@@ -87,20 +92,14 @@ export default function EmploymentDetailsForm({
     nidNumber: employee?.employee?.nidNumber || "",
 
     // ORGANIZATIONAL STRUCTURE
-    departmentId: employee?.employee?.departmentId || "",
-    designationId: employee?.employee?.designationId || "",
-    employmentStatusId: employee?.employee?.employmentStatusId || "",
+    departmentId: employee?.employee?.department?.id || "",
+    designationId: employee?.employee?.designation?.id || "",
+    employmentStatusId: employee?.employee?.employmentStatus?.id || "",
 
     // WORK LOCATION AND SCHEDULE
     workSiteIds:
-      employee?.employee?.workSites?.map((site) => Number(site.workSite.id)) ||
-      [],
-    workScheduleId: employee?.employee?.workScheduleId || "",
-
-    // COMPENSATION AND HOURS
-    salaryPerMonth: employee?.employee?.salaryPerMonth || "",
-    workingDaysPerWeek: employee?.employee?.workingDaysPerWeek || "",
-    workingHoursPerWeek: employee?.employee?.workingHoursPerWeek || "",
+      employee?.employee?.workSites?.map((site) => Number(site.id)) || [],
+    workScheduleId: employee?.employee?.workSchedule?.id || "",
   };
 
   // ==================== RENDER ====================
@@ -185,36 +184,6 @@ export default function EmploymentDetailsForm({
               type="text"
               label="NID Number"
               placeholder="Enter NID number"
-              required={false}
-            />
-
-            {/* MONTHLY SALARY */}
-            <CustomInputField
-              dataAuto="salaryPerMonth"
-              name="salaryPerMonth"
-              type="number"
-              label="Salary (Monthly)"
-              placeholder="Enter monthly salary"
-              required={false}
-            />
-
-            {/* WORKING DAYS PER WEEK */}
-            <CustomInputField
-              dataAuto="workingDaysPerWeek"
-              name="workingDaysPerWeek"
-              type="number"
-              label="Working Days/Week"
-              placeholder="Enter working days"
-              required={false}
-            />
-
-            {/* WORKING HOURS PER WEEK */}
-            <CustomInputField
-              dataAuto="workingHoursPerWeek"
-              name="workingHoursPerWeek"
-              type="number"
-              label="Working Hours/Week"
-              placeholder="Enter working hours"
               required={false}
             />
           </div>
