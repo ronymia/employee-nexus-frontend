@@ -40,6 +40,12 @@ const ALL_TABS: Tab[] = [
     permission: Permissions.ProfileRead,
   },
   {
+    id: "employment-details",
+    label: "Employment Details",
+    icon: PiUser,
+    permission: Permissions.ProfileRead,
+  },
+  {
     id: "education",
     label: "Education History",
     icon: PiGraduationCap,

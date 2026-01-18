@@ -9,69 +9,53 @@ export const GET_EMPLOYEES = gql`
       data {
         id
         email
-        businessId
         roleId
         status
         createdAt
         updatedAt
         profile {
           fullName
-          phone
-          dateOfBirth
-          gender
-          maritalStatus
           address
           city
           country
+          dateOfBirth
+          gender
+          maritalStatus
+          phone
           postcode
           profilePicture
-          emergencyContact {
-            name
-            phone
-            relation
-          }
         }
         role {
           id
           name
         }
         employee {
-          userId
           employeeId
-          nidNumber
-          joiningDate
-          salaryPerMonth
-          workingDaysPerWeek
-          workingHoursPerWeek
-          designationId
+          salary {
+            salaryType
+            salaryAmount
+            startDate
+          }
           designation {
             id
             name
           }
-          employmentStatusId
-          employmentStatus {
-            id
-            name
-          }
-          departmentId
           department {
             id
             name
           }
-          workSites {
-            workSite {
-              id
-              name
-            }
+          employmentStatus {
+            id
+            name
           }
-          workScheduleId
           workSchedule {
             id
             name
           }
-          rotaType
-          createdAt
-          updatedAt
+          workSites {
+            id
+            name
+          }
         }
       }
       meta {
@@ -94,70 +78,61 @@ export const GET_EMPLOYEE_BY_ID = gql`
       data {
         id
         email
-        businessId
         roleId
         status
         createdAt
         updatedAt
+        role {
+          id
+          name
+        }
         profile {
-          userId
           fullName
-          phone
-          dateOfBirth
-          gender
           address
           city
           country
-          profilePicture
+          dateOfBirth
+          gender
           maritalStatus
+          phone
           postcode
+          profilePicture
           emergencyContact {
             name
             phone
             relation
           }
         }
-        role {
-          id
-          name
-        }
+
         employee {
-          userId
           employeeId
           nidNumber
           joiningDate
-          salaryPerMonth
-          workingDaysPerWeek
-          workingHoursPerWeek
-          designationId
+          salary {
+            salaryType
+            salaryAmount
+            startDate
+          }
           designation {
             id
             name
           }
-          employmentStatusId
-          employmentStatus {
-            id
-            name
-          }
-          departmentId
           department {
             id
             name
           }
-          workSites {
-            workSite {
-              id
-              name
-            }
+          employmentStatus {
+            id
+            name
           }
-          workScheduleId
           workSchedule {
             id
             name
           }
-          rotaType
-          createdAt
-          updatedAt
+          workSites {
+            id
+            name
+          }
         }
       }
     }
@@ -329,6 +304,49 @@ export const DELETE_EMPLOYEE = gql`
       success
       data {
         id
+      }
+    }
+  }
+`;
+
+export const GET_EMPLOYMENT_DETAILS = gql`
+  query GetEmploymentDetails($id: Int!) {
+    getEmploymentDetails(id: $id) {
+      message
+      statusCode
+      success
+      data {
+        userId
+        employeeId
+        nidNumber
+        joiningDate
+        salary {
+          salaryType
+          salaryAmount
+          startDate
+        }
+        designation {
+          id
+          name
+        }
+        department {
+          id
+          name
+        }
+        employmentStatus {
+          id
+          name
+        }
+        workSchedule {
+          id
+          name
+        }
+        workSites {
+          id
+          name
+        }
+        createdAt
+        updatedAt
       }
     }
   }

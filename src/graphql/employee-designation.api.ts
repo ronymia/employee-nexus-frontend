@@ -13,7 +13,6 @@ export const ASSIGN_EMPLOYEE_DESIGNATION = gql`
         designationId
         startDate
         endDate
-        salary
         isActive
       }
     }
@@ -21,23 +20,116 @@ export const ASSIGN_EMPLOYEE_DESIGNATION = gql`
 `;
 
 export const GET_EMPLOYEE_DESIGNATION = gql`
-  query ($getEmployeeDesignationsInput: GetEmployeeDesignationsInput!) {
-    getEmployeeDesignations(
-      getEmployeeDesignationsInput: $getEmployeeDesignationsInput
-    ) {
-      message
-      statusCode
+  query DesignationHistory($userId: Int!) {
+    designationHistory(userId: $userId) {
       success
+      statusCode
+      message
       data {
         userId
         designationId
-        designation {
-          name
-        }
         startDate
         endDate
+        isActive
+        remarks
+        designation {
+          id
+          name
+          description
+          status
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const GET_ACTIVE_EMPLOYEE_DESIGNATION = gql`
+  query GetActiveDesignation($userId: Int!) {
+    getActiveDesignation(userId: $userId) {
+      success
+      statusCode
+      message
+      data {
+        userId
+        designationId
+        isActive
+        startDate
+        endDate
+        employee {
+          userId
+          user {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+        }
+        designation {
+          id
+          name
+          description
+        }
+      }
+    }
+  }
+`;
+
+export const GET_EMPLOYEE_DESIGNATION_BY_ID = gql`
+  query GetDesignationById($userId: Int!, $designationId: Int!) {
+    getDesignationById(userId: $userId, designationId: $designationId) {
+      success
+      statusCode
+      message
+      data {
+        userId
+        designationId
         salary
         isActive
+        startDate
+        endDate
+        employee {
+          userId
+          user {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+        }
+        designation {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_EMPLOYEE_DESIGNATION = gql`
+  mutation UpdateEmployeeDesignation(
+    $updateEmployeeDesignationInput: UpdateEmployeeDesignationInput!
+  ) {
+    updateEmployeeDesignation(
+      updateEmployeeDesignationInput: $updateEmployeeDesignationInput
+    ) {
+      success
+      statusCode
+      message
+      data {
+        userId
+        designationId
+        salary
+        isActive
+        startDate
+        endDate
+        designation {
+          id
+          name
+        }
       }
     }
   }
