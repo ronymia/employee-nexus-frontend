@@ -21,13 +21,13 @@ import CustomLoading from "@/components/loader/CustomLoading";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 
-interface SocialLinksContentProps {
+interface ISocialLinksContentProps {
   userId: number;
 }
 
 export default function SocialLinksContent({
   userId,
-}: SocialLinksContentProps) {
+}: ISocialLinksContentProps) {
   const { hasPermission } = usePermissionGuard();
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
@@ -44,7 +44,7 @@ export default function SocialLinksContent({
       data: ISocialLinks;
     };
   }>(GET_SOCIAL_LINKS_BY_PROFILE_ID, {
-    variables: { profileId: userId },
+    variables: { userId },
   });
 
   const socialLinks = data?.socialLinksByProfileId?.data;
@@ -147,7 +147,7 @@ export default function SocialLinksContent({
         >
           {popupOption.form === "socialLink" && (
             <SocialLinkForm
-              profileId={userId}
+              userId={userId}
               socialLinks={popupOption.data}
               actionType={popupOption.actionType as "create" | "update"}
               onClose={handleCloseForm}
@@ -201,7 +201,7 @@ export default function SocialLinksContent({
                 if (url) {
                   window.open(
                     url.startsWith("http") ? url : `https://${url}`,
-                    "_blank"
+                    "_blank",
                   );
                 }
               }}
@@ -260,7 +260,7 @@ export default function SocialLinksContent({
       >
         {popupOption.form === "socialLink" && (
           <SocialLinkForm
-            profileId={userId}
+            userId={userId}
             socialLinks={popupOption.data}
             actionType={popupOption.actionType as "create" | "update"}
             onClose={handleCloseForm}

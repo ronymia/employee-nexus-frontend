@@ -1,13 +1,13 @@
 import { gql } from "@apollo/client";
 
 export const GET_SOCIAL_LINKS_BY_PROFILE_ID = gql`
-  query GetSocialLinksByProfileId($profileId: Int!) {
-    socialLinksByProfileId(profileId: $profileId) {
+  query GetSocialLinksByProfileId($userId: Int!) {
+    socialLinksByProfileId(userId: $userId) {
       success
       statusCode
       message
       data {
-        profileId
+        userId
         facebook
         twitter
         linkedin
@@ -29,7 +29,7 @@ export const CREATE_SOCIAL_LINKS = gql`
       statusCode
       message
       data {
-        profileId
+        userId
         facebook
         twitter
         linkedin
@@ -49,7 +49,7 @@ export const UPDATE_SOCIAL_LINKS = gql`
       statusCode
       message
       data {
-        profileId
+        userId
         facebook
         twitter
         linkedin

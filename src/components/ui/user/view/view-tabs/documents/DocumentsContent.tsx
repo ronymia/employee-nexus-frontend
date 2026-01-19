@@ -25,16 +25,20 @@ import {
   DELETE_DOCUMENT,
 } from "@/graphql/document.api";
 import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
+import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
 
-interface DocumentsContentProps {
+interface IDocumentsContentProps {
   userId: number;
 }
 
-export default function DocumentsContent({ userId }: DocumentsContentProps) {
+export default function DocumentsContent({ userId }: IDocumentsContentProps) {
+  // ==================== HOOKS ====================
   const { hasPermission } = usePermissionGuard();
+  const deleteConfirmation = useDeleteConfirmation();
+
+  // ==================== LOCAL STATE ====================
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -68,7 +72,7 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
 
   const handleOpenForm = (
     actionType: "create" | "update",
-    document?: IDocument
+    document?: IDocument,
   ) => {
     setPopupOption({
       open: true,
@@ -91,33 +95,19 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
     });
   };
 
-  const handleDelete = async ({ id }: { id: number }) => {
-    try {
-      await deleteDocument({
-        variables: { id: Number(id), userId: Number(userId) },
-      });
-
-      setPopupOption({
-        open: false,
-        closeOnDocumentClick: true,
-        actionType: "create",
-        form: "",
-        data: null,
-        title: "",
-      });
-    } catch (error) {
-      console.error("Error deleting document:", error);
-    }
-  };
-
-  const documentDeleteHandler = async (id: number) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "delete",
-      form: "",
-      deleteHandler: () => handleDelete({ id }),
-      title: "",
+  // ==================== DELETE HANDLER ====================
+  const handleDelete = async (document: IDocument) => {
+    await deleteConfirmation.confirm({
+      title: "Delete Document",
+      itemName: document.title,
+      itemDescription: `Type: ${getFileExtension(document.attachment)}`,
+      confirmButtonText: "Delete Document",
+      successMessage: "Document deleted successfully",
+      onDelete: async () => {
+        await deleteDocument({
+          variables: { id: Number(document.id), userId: Number(userId) },
+        });
+      },
     });
   };
 
@@ -262,15 +252,15 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
                     <PiPencilSimple size={16} />
                   </button>
                 ) : null}
-                {hasPermission(Permissions.DocumentDelete) ? (
+                {hasPermission(Permissions.DocumentDelete) && (
                   <button
-                    onClick={() => documentDeleteHandler(document.id)}
+                    onClick={() => handleDelete(document)}
                     className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
                     title="Delete"
                   >
                     <PiTrash size={16} />
                   </button>
-                ) : null}
+                )}
               </div>
 
               {/* Document Content */}
@@ -312,7 +302,7 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
 
                   {/* Updated Date (if different from created) */}
                   {moment(document.updatedAt).isAfter(
-                    moment(document.createdAt).add(1, "minute")
+                    moment(document.createdAt).add(1, "minute"),
                   ) && (
                     <div className="flex items-center gap-2 text-xs text-base-content/60">
                       <PiCalendar size={14} />
@@ -330,24 +320,20 @@ export default function DocumentsContent({ userId }: DocumentsContentProps) {
       </div>
 
       {/* Popup Modal */}
-      {popupOption.actionType === "delete" ? (
-        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
-      ) : (
-        <CustomPopup
-          popupOption={popupOption}
-          setPopupOption={setPopupOption}
-          customWidth="60%"
-        >
-          {popupOption.form === "document" && (
-            <DocumentForm
-              userId={userId}
-              document={popupOption.data}
-              actionType={popupOption.actionType as "create" | "update"}
-              onClose={handleCloseForm}
-            />
-          )}
-        </CustomPopup>
-      )}
+      <CustomPopup
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+        customWidth="60%"
+      >
+        {popupOption.form === "document" && (
+          <DocumentForm
+            userId={userId}
+            document={popupOption.data}
+            actionType={popupOption.actionType as "create" | "update"}
+            onClose={handleCloseForm}
+          />
+        )}
+      </CustomPopup>
     </div>
   );
 }

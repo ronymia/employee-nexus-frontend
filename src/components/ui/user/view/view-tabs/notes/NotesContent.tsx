@@ -19,11 +19,11 @@ import moment from "moment";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_NOTES_BY_USER_ID, DELETE_NOTE } from "@/graphql/note.api";
 import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
+import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
 
-interface NotesContentProps {
+interface INotesContentProps {
   userId: number;
   currentUserId?: number; // The logged-in user ID to check permissions
 }
@@ -31,8 +31,12 @@ interface NotesContentProps {
 export default function NotesContent({
   userId,
   currentUserId,
-}: NotesContentProps) {
+}: INotesContentProps) {
+  // ==================== HOOKS ====================
   const { hasPermission } = usePermissionGuard();
+  const deleteConfirmation = useDeleteConfirmation();
+
+  // ==================== LOCAL STATE ====================
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -88,33 +92,19 @@ export default function NotesContent({
     });
   };
 
-  const handleDelete = async ({ id }: { id: number }) => {
-    try {
-      await deleteNote({
-        variables: { id: Number(id), userId: Number(userId) },
-      });
-
-      setPopupOption({
-        open: false,
-        closeOnDocumentClick: true,
-        actionType: "create",
-        form: "",
-        data: null,
-        title: "",
-      });
-    } catch (error) {
-      console.error("Error deleting note:", error);
-    }
-  };
-
-  const noteDeleteHandler = async (id: number) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "delete",
-      form: "",
-      deleteHandler: () => handleDelete({ id }),
-      title: "",
+  // ==================== DELETE HANDLER ====================
+  const handleDelete = async (note: INote) => {
+    await deleteConfirmation.confirm({
+      title: "Delete Note",
+      itemName: note.title,
+      itemDescription: `Category: ${note.category || "General"} • ${note.isPrivate ? "Private" : "Public"}`,
+      confirmButtonText: "Delete Note",
+      successMessage: "Note deleted successfully",
+      onDelete: async () => {
+        await deleteNote({
+          variables: { id: Number(note.id), userId: Number(userId) },
+        });
+      },
     });
   };
 
@@ -146,14 +136,17 @@ export default function NotesContent({
   };
 
   // Group notes by category
-  const categorizedNotes = notes.reduce((acc, note) => {
-    const category = note.category || "General";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(note);
-    return acc;
-  }, {} as Record<string, INote[]>);
+  const categorizedNotes = notes.reduce(
+    (acc, note) => {
+      const category = note.category || "General";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(note);
+      return acc;
+    },
+    {} as Record<string, INote[]>,
+  );
 
   if (loading) {
     return <CustomLoading />;
@@ -249,15 +242,15 @@ export default function NotesContent({
                           <PiPencilSimple size={16} />
                         </button>
                       ) : null}
-                      {hasPermission(Permissions.NoteDelete) ? (
+                      {hasPermission(Permissions.NoteDelete) && (
                         <button
-                          onClick={() => noteDeleteHandler(note.id)}
+                          onClick={() => handleDelete(note)}
                           className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
                           title="Delete"
                         >
                           <PiTrash size={16} />
                         </button>
-                      ) : null}
+                      )}
                     </div>
 
                     {/* Note Content */}
@@ -271,7 +264,7 @@ export default function NotesContent({
                           {note.category && (
                             <span
                               className={`badge badge-sm ${getCategoryBadgeClass(
-                                note.category
+                                note.category,
                               )}`}
                             >
                               {note.category}
@@ -332,21 +325,21 @@ export default function NotesContent({
                           <span>
                             Created:{" "}
                             {moment(note.createdAt).format(
-                              "MMM DD, YYYY HH:mm"
+                              "MMM DD, YYYY HH:mm",
                             )}
                           </span>
                         </div>
 
                         {/* Updated Date (if different) */}
                         {moment(note.updatedAt).isAfter(
-                          moment(note.createdAt).add(1, "minute")
+                          moment(note.createdAt).add(1, "minute"),
                         ) && (
                           <div className="flex items-center gap-2 text-xs text-base-content/60">
                             <PiCalendar size={14} />
                             <span>
                               Updated:{" "}
                               {moment(note.updatedAt).format(
-                                "MMM DD, YYYY HH:mm"
+                                "MMM DD, YYYY HH:mm",
                               )}
                             </span>
                           </div>
@@ -362,24 +355,20 @@ export default function NotesContent({
       ))}
 
       {/* Popup Modal */}
-      {popupOption.actionType === "delete" ? (
-        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
-      ) : (
-        <CustomPopup
-          popupOption={popupOption}
-          setPopupOption={setPopupOption}
-          customWidth="60%"
-        >
-          {popupOption.form === "note" && (
-            <NoteForm
-              userId={userId}
-              note={popupOption.data}
-              actionType={popupOption.actionType as "create" | "update"}
-              onClose={handleCloseForm}
-            />
-          )}
-        </CustomPopup>
-      )}
+      <CustomPopup
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+        customWidth="60%"
+      >
+        {popupOption.form === "note" && (
+          <NoteForm
+            userId={userId}
+            note={popupOption.data}
+            actionType={popupOption.actionType as "create" | "update"}
+            onClose={handleCloseForm}
+          />
+        )}
+      </CustomPopup>
     </div>
   );
 }
