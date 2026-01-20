@@ -12,6 +12,7 @@ import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
 import PageHeader from "@/components/ui/PageHeader";
 import { showToast } from "@/components/ui/CustomToast";
+import AssetStatusBadge from "@/components/ui/AssetStatusBadge";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 
@@ -189,19 +190,7 @@ export default function AssetsPage() {
             customDate: row?.date ? dayjs(row.date).format("ll") : "-",
             // CUSTOM STATUS COLUMN WITH COLOR-CODED BADGES
             customStatus: row?.status ? (
-              <span
-                className={`badge badge-sm font-semibold ${
-                  row.status.toLowerCase() === "assign"
-                    ? "badge-success"
-                    : row.status.toLowerCase() === "unassigned"
-                    ? "badge-warning"
-                    : row.status.toLowerCase() === "damage"
-                    ? "badge-error"
-                    : "badge-secondary"
-                }`}
-              >
-                {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
-              </span>
+              <AssetStatusBadge status={row.status} showIcon={false} />
             ) : (
               <span className="text-sm text-gray-400">N/A</span>
             ),

@@ -1,3 +1,5 @@
+import Swal from "sweetalert2";
+
 export default function FormActionButton({
   isPending,
   cancelHandler,
@@ -5,6 +7,23 @@ export default function FormActionButton({
   isPending: boolean;
   cancelHandler: () => void;
 }) {
+  const handleCancel = () => {
+    Swal.fire({
+      title: "Unsaved Changes",
+      text: "You have unsaved changes. Are you sure you want to close?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, close it!",
+      cancelButtonText: "No, keep editing",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cancelHandler?.();
+      }
+    });
+  };
+
   return (
     <div
       className={`w-full md:w-1/2 self-end flex items-center justify-end gap-x-2 px-2`}
@@ -12,7 +31,7 @@ export default function FormActionButton({
       <button
         type="button"
         disabled={isPending}
-        onClick={cancelHandler}
+        onClick={handleCancel}
         className={`btn btn-outline btn-primary min-w-1/2 rounded-sm`}
       >
         Cancel

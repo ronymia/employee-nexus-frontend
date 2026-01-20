@@ -5,7 +5,6 @@ import { useState } from "react";
 import CustomPopup from "@/components/modal/CustomPopup";
 import ProfileInfoForm from "./components/ProfileInfoForm";
 import EmergencyContactForm from "./components/EmergencyContactForm";
-import EmploymentDetailsForm from "./components/EmploymentDetailsForm";
 import { PiPencilSimple } from "react-icons/pi";
 import dayjs from "dayjs";
 import usePermissionGuard from "@/guards/usePermissionGuard";
@@ -218,102 +217,6 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
         </div>
       </div>
 
-      {/* Employment Details */}
-      <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20 relative">
-        {hasPermission(Permissions.ProfileUpdate) ? (
-          <button
-            onClick={() =>
-              handleOpenForm("employmentDetails", "Update Employment Details")
-            }
-            className="absolute top-4 right-4 btn btn-sm btn-ghost btn-circle text-primary hover:bg-primary/10"
-            title="Edit Employment Details"
-          >
-            <PiPencilSimple size={18} />
-          </button>
-        ) : null}
-        <h3 className="text-lg font-semibold mb-4 pb-2 border-b border-primary/30">
-          Employment Details
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Employee ID
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.employeeId || "-"}
-            </p>
-          </div>
-          {/* <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Role
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.role?.name || "-"}
-            </p>
-          </div> */}
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Department
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.department?.name || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Designation
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.designation?.name || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Employment Status
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.employmentStatus?.name || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Joining Date
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.joiningDate
-                ? dayjs(employee?.employee.joiningDate).format("DD-MM-YYYY")
-                : "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Work Site
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.workSites
-                ?.map((site) => site.name)
-                .join(", ") || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              Work Schedule
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.workSchedule?.name || "-"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-base-content/60 font-medium">
-              NID Number
-            </label>
-            <p className="text-base font-semibold text-base-content">
-              {employee?.employee?.nidNumber || "-"}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Popup Modals */}
       <CustomPopup
         popupOption={popupOption}
@@ -330,13 +233,6 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
         {popupOption.form === "emergencyContact" && (
           <EmergencyContactForm
             key={`emergencyContact-form`}
-            employee={employee}
-            onClose={handleCloseForm}
-          />
-        )}
-        {popupOption.form === "employmentDetails" && (
-          <EmploymentDetailsForm
-            key={`employmentDetails-form`}
             employee={employee}
             onClose={handleCloseForm}
           />

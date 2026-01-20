@@ -15,7 +15,14 @@ import {
   PiTag,
 } from "react-icons/pi";
 import NoteForm from "./components/NoteForm";
-import moment from "moment";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
+dayjs.extend(isSameOrAfter);
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_NOTES_BY_USER_ID, DELETE_NOTE } from "@/graphql/note.api";
 import CustomLoading from "@/components/loader/CustomLoading";
@@ -23,20 +30,19 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
 import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
 
+// ==================== INTERFACES ====================
 interface INotesContentProps {
   userId: number;
-  currentUserId?: number; // The logged-in user ID to check permissions
 }
 
-export default function NotesContent({
-  userId,
-  currentUserId,
-}: INotesContentProps) {
+// ==================== MAIN COMPONENT ====================
+
+export default function NotesContent({ userId }: INotesContentProps) {
   // ==================== HOOKS ====================
   const { hasPermission } = usePermissionGuard();
-  const deleteConfirmation = useDeleteConfirmation();
+  const { confirm } = useDeleteConfirmation();
 
-  // ==================== LOCAL STATE ====================
+  // ==================== STATE ====================
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -48,7 +54,7 @@ export default function NotesContent({
 
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
 
-  // Fetch notes
+  // ==================== API QUERIES ====================
   const { data, loading } = useQuery<{
     notesByUserId: {
       data: INote[];
@@ -57,7 +63,6 @@ export default function NotesContent({
     variables: { userId },
   });
 
-  // Delete mutation
   const [deleteNote] = useMutation(DELETE_NOTE, {
     awaitRefetchQueries: true,
     refetchQueries: [
@@ -68,8 +73,10 @@ export default function NotesContent({
     ],
   });
 
+  // ==================== DATA ====================
   const notes = data?.notesByUserId?.data || [];
 
+  // ==================== HANDLERS ====================
   const handleOpenForm = (actionType: "create" | "update", note?: INote) => {
     setPopupOption({
       open: true,
@@ -92,9 +99,8 @@ export default function NotesContent({
     });
   };
 
-  // ==================== DELETE HANDLER ====================
   const handleDelete = async (note: INote) => {
-    await deleteConfirmation.confirm({
+    await confirm({
       title: "Delete Note",
       itemName: note.title,
       itemDescription: `Category: ${note.category || "General"} • ${note.isPrivate ? "Private" : "Public"}`,
@@ -108,6 +114,7 @@ export default function NotesContent({
     });
   };
 
+  // ==================== HELPER FUNCTIONS ====================
   const toggleExpand = (noteId: number) => {
     setExpandedNotes((prev) => {
       const newSet = new Set(prev);
@@ -135,7 +142,7 @@ export default function NotesContent({
     }
   };
 
-  // Group notes by category
+  // ==================== COMPUTED DATA ====================
   const categorizedNotes = notes.reduce(
     (acc, note) => {
       const category = note.category || "General";
@@ -148,6 +155,7 @@ export default function NotesContent({
     {} as Record<string, INote[]>,
   );
 
+  // ==================== COMPONENT STATES ====================
   if (loading) {
     return <CustomLoading />;
   }
@@ -324,21 +332,19 @@ export default function NotesContent({
                           <PiCalendar size={14} />
                           <span>
                             Created:{" "}
-                            {moment(note.createdAt).format(
-                              "MMM DD, YYYY HH:mm",
-                            )}
+                            {dayjs(note.createdAt).format("MMM DD, YYYY HH:mm")}
                           </span>
                         </div>
 
                         {/* Updated Date (if different) */}
-                        {moment(note.updatedAt).isAfter(
-                          moment(note.createdAt).add(1, "minute"),
+                        {dayjs(note.updatedAt).isAfter(
+                          dayjs(note.createdAt).add(1, "minute"),
                         ) && (
                           <div className="flex items-center gap-2 text-xs text-base-content/60">
                             <PiCalendar size={14} />
                             <span>
                               Updated:{" "}
-                              {moment(note.updatedAt).format(
+                              {dayjs(note.updatedAt).format(
                                 "MMM DD, YYYY HH:mm",
                               )}
                             </span>

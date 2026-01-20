@@ -56,7 +56,7 @@ export default function useDeleteConfirmation() {
           return true;
         } catch (error: any) {
           Swal.showValidationMessage(
-            `Delete failed: ${error.message || "Unknown error"}`
+            `Delete failed: ${error.message || "Unknown error"}`,
           );
           return false;
         }

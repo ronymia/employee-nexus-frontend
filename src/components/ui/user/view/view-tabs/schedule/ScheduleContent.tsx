@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { IPopupOption } from "@/types";
-import { IScheduleAssignment } from "@/types/work-schedules.type";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import {
   PiPencilSimple,
   PiTrash,
@@ -17,19 +15,29 @@ import {
 import ScheduleAssignmentForm from "./components/ScheduleAssignmentForm";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
-  GET_USER_SCHEDULE_ASSIGNMENTS,
-  DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
-} from "@/graphql/work-schedules.api";
+  GET_EMPLOYEE_WORK_SCHEDULE,
+  UPDATE_EMPLOYEE_WORK_SCHEDULE,
+} from "@/graphql/employee-work-schedule.api";
 import moment from "moment";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
+import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
+import { IEmployeeWorkSchedule } from "@/types/employee-work-schedule.type";
+import {
+  generateWeekDays,
+  convertTo12HourFormat,
+} from "@/utils/date-time.utils";
 
 interface IScheduleContentProps {
   userId: number;
 }
 
 export default function ScheduleContent({ userId }: IScheduleContentProps) {
+  // ==================== HOOKS ====================
   const { hasPermission } = usePermissionGuard();
+  const deleteConfirmation = useDeleteConfirmation();
+
+  // ==================== LOCAL STATE ====================
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -39,35 +47,20 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
     title: "",
   });
 
-  // Query to get user schedule assignments
+  // ==================== API QUERIES ====================
   const { data, loading, refetch } = useQuery<{
-    employeeScheduleAssignmentsByUser: {
-      data: IScheduleAssignment[];
+    workScheduleHistory: {
+      data: IEmployeeWorkSchedule[];
     };
-  }>(GET_USER_SCHEDULE_ASSIGNMENTS, {
+  }>(GET_EMPLOYEE_WORK_SCHEDULE, {
     variables: { userId },
   });
 
-  // Delete schedule assignment mutation
-  const [deleteScheduleAssignment] = useMutation(
-    DELETE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
-    {
-      awaitRefetchQueries: true,
-      refetchQueries: [
-        { query: GET_USER_SCHEDULE_ASSIGNMENTS, variables: { userId } },
-      ],
-      onCompleted: () => {
-        setPopupOption({ ...popupOption, open: false });
-      },
-    }
-  );
-
-  const scheduleAssignments =
-    data?.employeeScheduleAssignmentsByUser?.data || [];
+  const scheduleAssignments = data?.workScheduleHistory?.data || [];
 
   const handleOpenForm = (
     actionType: "create" | "update",
-    assignment?: IScheduleAssignment
+    assignment?: IEmployeeWorkSchedule,
   ) => {
     setPopupOption({
       open: true,
@@ -94,28 +87,35 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
     refetch();
   };
 
-  const handleDelete = (assignment: IScheduleAssignment) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: false,
-      actionType: "delete",
-      form: "scheduleAssignment",
-      data: { id: assignment.id },
+  // ==================== DELETE HANDLER ====================
+  const handleDelete = async (assignment: IEmployeeWorkSchedule) => {
+    await deleteConfirmation.confirm({
       title: "Delete Schedule Assignment",
-      deleteHandler: async () => {
-        try {
-          await deleteScheduleAssignment({
-            variables: { id: assignment.id },
-          });
-        } catch (error) {
-          console.error("Error deleting schedule assignment:", error);
-        }
+      itemName: assignment.workSchedule.name,
+      itemDescription: `Start Date: ${moment(assignment.startDate).format("MMM DD, YYYY")}`,
+      confirmButtonText: "Delete Assignment",
+      successMessage: "Schedule assignment deleted successfully",
+      onDelete: async () => {
+        await updateSchedule({
+          variables: {
+            updateEmployeeScheduleInput: {
+              userId: assignment.userId,
+              workScheduleId: assignment.workScheduleId,
+              startDate: assignment.startDate,
+              endDate: new Date().toISOString(),
+              notes: assignment.notes,
+            },
+          },
+        });
+        refetch();
       },
     });
   };
 
+  const [updateSchedule] = useMutation(UPDATE_EMPLOYEE_WORK_SCHEDULE);
+
   const activeAssignment = scheduleAssignments.find(
-    (assignment) => assignment.isActive
+    (assignment) => assignment.isActive,
   );
 
   if (loading) {
@@ -180,18 +180,21 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
 
       {/* Active Schedule Card */}
       {activeAssignment && (
-        <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-6 shadow-sm border-2 border-primary/30">
+        <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
-              <PiCheckCircle size={24} className="text-primary" />
-              <h4 className="text-lg font-semibold text-primary">
-                Current Schedule
+              <PiCheckCircle size={24} className="text-success" />
+              <h4 className="text-lg font-semibold text-base-content">
+                Current Work Schedule
               </h4>
             </div>
-            <span className="badge badge-primary">Active</span>
+            <span className="badge badge-success gap-1">
+              <PiCheckCircle size={14} />
+              Active
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="text-sm text-base-content/60 font-medium">
                 Schedule Name
@@ -210,11 +213,11 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
             </div>
             <div>
               <label className="text-sm text-base-content/60 font-medium">
-                Break Type
+                Break Time
               </label>
               <p className="text-base font-semibold text-base-content">
                 {activeAssignment.workSchedule.breakType} (
-                {activeAssignment.workSchedule.breakHours}h)
+                {activeAssignment.workSchedule.breakMinutes} min)
               </p>
             </div>
             <div>
@@ -222,77 +225,102 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
                 Start Date
               </label>
               <p className="text-base font-semibold text-base-content">
-                {new Date(activeAssignment.startDate).toLocaleDateString()}
+                {moment(activeAssignment.startDate).format("MMM DD, YYYY")}
               </p>
             </div>
-            <div className="md:col-span-2">
+            {activeAssignment.assignedByUser && (
+              <div>
+                <label className="text-sm text-base-content/60 font-medium">
+                  Assigned By
+                </label>
+                <p className="text-base font-semibold text-base-content">
+                  {activeAssignment.assignedByUser.profile?.fullName ||
+                    activeAssignment.assignedByUser.email}
+                </p>
+              </div>
+            )}
+            <div>
               <label className="text-sm text-base-content/60 font-medium">
                 Description
               </label>
               <p className="text-base text-base-content">
-                {activeAssignment.workSchedule.description}
+                {activeAssignment.workSchedule.description || "No description"}
               </p>
             </div>
-            {activeAssignment.notes && (
-              <div className="md:col-span-2">
-                <label className="text-sm text-base-content/60 font-medium">
-                  Notes
-                </label>
-                <p className="text-sm text-base-content/80">
-                  {activeAssignment.notes}
-                </p>
-              </div>
-            )}
           </div>
 
-          {/* Day Schedule */}
+          {activeAssignment.notes && (
+            <div className="mb-4">
+              <label className="text-sm text-base-content/60 font-medium">
+                Notes
+              </label>
+              <p className="text-sm text-base-content/80">
+                {activeAssignment.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Weekly Schedule */}
           {activeAssignment.workSchedule.schedules &&
             activeAssignment.workSchedule.schedules.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-primary/20">
-                <h5 className="text-sm font-semibold text-base-content mb-3">
+              <div className="pt-4 border-t border-base-300">
+                <h5 className="text-sm font-semibold text-base-content mb-4">
                   Weekly Schedule
                 </h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
                   {activeAssignment.workSchedule.schedules.map(
                     (daySchedule) => (
                       <div
                         key={daySchedule.id}
-                        className={`p-3 rounded-lg border ${
+                        className={`p-4 rounded-lg border-2 text-center transition-all ${
                           !daySchedule.isWeekend
-                            ? "bg-base-100 border-primary/20"
-                            : "bg-base-200 border-base-300"
+                            ? "bg-success/5 border-success/30 hover:border-success hover:shadow-sm"
+                            : "bg-base-200 border-base-300 opacity-60"
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-sm">
-                            {
-                              [
-                                "Sunday",
-                                "Monday",
-                                "Tuesday",
-                                "Wednesday",
-                                "Thursday",
-                                "Friday",
-                                "Saturday",
-                              ][daySchedule.day]
-                            }
-                          </span>
-                          {!daySchedule.isWeekend ? (
-                            <PiCheckCircle size={16} className="text-success" />
-                          ) : (
-                            <PiXCircle size={16} className="text-error" />
-                          )}
+                        <div className="font-bold text-sm mb-2 text-base-content">
+                          {
+                            generateWeekDays({ startOfWeekDay: 0 })[
+                              daySchedule.dayOfWeek
+                            ]?.shortName
+                          }
                         </div>
-                        {!daySchedule.isWeekend &&
-                          daySchedule.timeSlots &&
-                          daySchedule.timeSlots.length > 0 && (
-                            <p className="text-xs text-base-content/60 mt-1">
-                              {daySchedule.timeSlots[0].startTime} -{" "}
-                              {daySchedule.timeSlots[0].endTime}
+                        {!daySchedule.isWeekend ? (
+                          <div className="space-y-2">
+                            <PiCheckCircle
+                              size={20}
+                              className="text-success mx-auto"
+                            />
+                            {daySchedule.timeSlots &&
+                              daySchedule.timeSlots.length > 0 && (
+                                <div className="text-xs text-base-content/70 space-y-0.5">
+                                  <div className="font-medium">
+                                    {convertTo12HourFormat(
+                                      daySchedule.timeSlots[0].startTime,
+                                    )}
+                                  </div>
+                                  <div className="text-base-content/40">to</div>
+                                  <div className="font-medium">
+                                    {convertTo12HourFormat(
+                                      daySchedule.timeSlots[0].endTime,
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <PiXCircle
+                              size={20}
+                              className="text-error mx-auto"
+                            />
+                            <p className="text-xs text-base-content/50 font-medium mt-1">
+                              Weekend
                             </p>
-                          )}
+                          </div>
+                        )}
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -311,12 +339,12 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
               .filter((assignment) => !assignment.isActive)
               .map((assignment) => (
                 <div
-                  key={assignment.id}
+                  key={assignment.userId + assignment.workScheduleId}
                   className="bg-base-100 rounded-lg p-4 shadow-sm border border-primary/20 relative"
                 >
-                  Action Buttons
+                  {/* Action Buttons */}
                   <div className="absolute top-3 right-3">
-                    {hasPermission(Permissions.WorkScheduleUpdate) ? (
+                    {hasPermission(Permissions.WorkScheduleUpdate) && (
                       <button
                         onClick={() => handleDelete(assignment)}
                         className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
@@ -324,8 +352,9 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
                       >
                         <PiTrash size={16} />
                       </button>
-                    ) : null}
+                    )}
                   </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-16">
                     <div>
                       <label className="text-xs text-base-content/60 font-medium">
@@ -333,6 +362,9 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
                       </label>
                       <p className="text-sm font-semibold text-base-content">
                         {assignment.workSchedule.name}
+                      </p>
+                      <p className="text-xs text-base-content/60 mt-0.5">
+                        {assignment.workSchedule.scheduleType}
                       </p>
                     </div>
                     <div>
@@ -351,14 +383,8 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
                         Status
                       </label>
                       <p>
-                        <span
-                          className={`badge badge-xs ${
-                            assignment.isActive
-                              ? "badge-success"
-                              : "badge-ghost"
-                          }`}
-                        >
-                          {assignment.isActive ? "Active" : "Inactive"}
+                        <span className="badge badge-xs badge-ghost">
+                          Inactive
                         </span>
                       </p>
                     </div>
@@ -384,9 +410,6 @@ export default function ScheduleContent({ userId }: IScheduleContentProps) {
           />
         )}
       </CustomPopup>
-
-      {/* Delete Confirmation Modal */}
-      {/* <FormModal popupOption={popupOption} setPopupOption={setPopupOption} /> */}
     </div>
   );
 }

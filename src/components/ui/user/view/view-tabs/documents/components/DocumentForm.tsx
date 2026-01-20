@@ -15,7 +15,7 @@ import {
 import { IDocument } from "@/types";
 import useAppStore from "@/hooks/useAppStore";
 
-interface DocumentFormProps {
+interface IDocumentFormProps {
   userId: number;
   document?: IDocument;
   actionType: "create" | "update";
@@ -27,7 +27,7 @@ export default function DocumentForm({
   document,
   actionType,
   onClose,
-}: DocumentFormProps) {
+}: IDocumentFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string>(
     document?.attachment || ""
