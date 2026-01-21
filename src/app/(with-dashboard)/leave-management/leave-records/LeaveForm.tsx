@@ -20,8 +20,10 @@ import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "motion/react";
 import { PiCheck, PiClock } from "react-icons/pi";
 import { showToast } from "@/components/ui/CustomToast";
+import dayjsUTC from "dayjs/plugin/utc";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(dayjsUTC);
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface ILeaveFormProps {
@@ -176,8 +178,8 @@ function LeaveBalanceDisplay({
                   usagePercentage > 80
                     ? "bg-error/20 text-error border border-error/30"
                     : usagePercentage > 50
-                    ? "bg-warning/20 text-warning border border-warning/30"
-                    : "bg-success/20 text-success border border-success/30"
+                      ? "bg-warning/20 text-warning border border-warning/30"
+                      : "bg-success/20 text-success border border-success/30"
                 }`}
               >
                 {usagePercentage}% Used
@@ -273,8 +275,8 @@ function LeaveBalanceDisplay({
                     usagePercentage > 80
                       ? "bg-linear-to-r from-error to-error/70"
                       : usagePercentage > 50
-                      ? "bg-linear-to-r from-warning to-warning/70"
-                      : "bg-linear-to-r from-success to-success/70"
+                        ? "bg-linear-to-r from-warning to-warning/70"
+                        : "bg-linear-to-r from-success to-success/70"
                   }`}
                 />
               </div>
@@ -468,7 +470,7 @@ export default function LeaveForm({
             Authorization: `Bearer ${token}`,
           },
           body: formData,
-        }
+        },
       );
 
       if (!response.ok) {
@@ -486,7 +488,7 @@ export default function LeaveForm({
   const calculateTotalHours = (
     startDate: string,
     endDate: string | undefined,
-    duration: LeaveDuration
+    duration: LeaveDuration,
   ): number => {
     if (duration === LeaveDuration.HALF_DAY) {
       return 4;
@@ -522,17 +524,17 @@ export default function LeaveForm({
       }
 
       // CALCULATE TOTAL HOURS
-      const totalHours = calculateTotalHours(
+      const totalMinutes = calculateTotalHours(
         data.startDate,
         data.endDate,
-        data.leaveDuration
+        data.leaveDuration,
       );
 
       // FORMAT DATES TO ISO 8601
-      const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
+      const startDate = dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString();
       const endDate =
         data.endDate && data.leaveDuration === LeaveDuration.MULTI_DAY
-          ? dayjs(data.endDate, "DD-MM-YYYY").toISOString()
+          ? dayjs.utc(data.endDate, "DD-MM-YYYY").toISOString()
           : undefined;
 
       // PREPARE INPUT
@@ -543,7 +545,6 @@ export default function LeaveForm({
         leaveDuration: data.leaveDuration,
         startDate,
         endDate,
-        totalHours,
         attachments:
           attachmentPaths.length > 0
             ? JSON.stringify(attachmentPaths)
@@ -560,7 +561,7 @@ export default function LeaveForm({
         });
         showToast.success(
           "Created!",
-          "Leave request has been created successfully"
+          "Leave request has been created successfully",
         );
       } else {
         await updateLeave({
@@ -570,7 +571,7 @@ export default function LeaveForm({
         });
         showToast.success(
           "Updated!",
-          "Leave request has been updated successfully"
+          "Leave request has been updated successfully",
         );
       }
 
@@ -580,7 +581,7 @@ export default function LeaveForm({
       console.error("Error submitting leave:", error);
       showToast.error(
         "Error",
-        error.message || `Failed to ${actionType} leave request`
+        error.message || `Failed to ${actionType} leave request`,
       );
     } finally {
       setIsPending(false);

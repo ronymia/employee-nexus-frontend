@@ -293,7 +293,7 @@ export const GET_USER_WORK_SCHEDULE = gql`
         scheduleType
         status
         schedules {
-          day
+          dayOfWeek
           isWeekend
           timeSlots {
             startTime

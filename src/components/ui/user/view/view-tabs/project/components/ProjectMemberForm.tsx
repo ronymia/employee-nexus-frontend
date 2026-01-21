@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
 import CustomSelect from "@/components/form/input/CustomSelect";
-import CustomInputField from "@/components/form/input/CustomInputField";
+import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
   GET_PROJECTS,
@@ -12,8 +11,15 @@ import {
   GET_USER_PROJECTS,
 } from "@/graphql/project.api";
 import { IProject, IUserProjectMember } from "@/types/project.type";
+import dayjs from "dayjs";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import utc from "dayjs/plugin/utc";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
-interface ProjectMemberFormProps {
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
+
+interface IProjectMemberFormProps {
   userId: number;
   projectMember?: IUserProjectMember;
   actionType: "create" | "update";
@@ -25,7 +31,7 @@ export default function ProjectMemberForm({
   projectMember,
   actionType,
   onClose,
-}: ProjectMemberFormProps) {
+}: IProjectMemberFormProps) {
   // Fetch all projects
   const { data: projectsData, loading: loadingProjects } = useQuery<{
     projects: {
@@ -48,6 +54,15 @@ export default function ProjectMemberForm({
           projectId: parseInt(data.projectId),
           userId: userId,
           role: data.role || null,
+          startDate: data.startDate
+            ? dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString()
+            : null,
+          endDate: data.endDate
+            ? dayjs.utc(data.endDate, "DD-MM-YYYY").toISOString()
+            : null,
+          isActive: true, // Always true for new assignments
+          remarks: data.remarks || null,
+          notes: data.notes || null,
         },
       };
 
@@ -60,6 +75,14 @@ export default function ProjectMemberForm({
   const defaultValues = {
     projectId: projectMember?.projectId?.toString() || "",
     role: projectMember?.role || "",
+    startDate: projectMember?.startDate
+      ? dayjs.utc(projectMember.startDate).format("DD-MM-YYYY")
+      : dayjs().format("DD-MM-YYYY"),
+    endDate: projectMember?.endDate
+      ? dayjs.utc(projectMember.endDate).format("DD-MM-YYYY")
+      : "",
+    remarks: projectMember?.remarks || "",
+    notes: projectMember?.notes || "",
   };
 
   // Map projects to options
@@ -114,10 +137,10 @@ export default function ProjectMemberForm({
           </div>
         </div>
 
-        {/* Role Selection */}
+        {/* Role & Dates */}
         <div className="border border-primary/20 rounded-lg p-4">
           <h4 className="text-base font-semibold mb-3 text-primary">
-            Role in Project
+            Role & Duration
           </h4>
           <div className="space-y-4">
             <CustomSelect
@@ -129,6 +152,22 @@ export default function ProjectMemberForm({
               isLoading={false}
               options={roleOptions}
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CustomDatePicker
+                dataAuto="startDate"
+                name="startDate"
+                label="Start Date"
+                placeholder="Select start date"
+                required={true}
+              />
+              <CustomDatePicker
+                dataAuto="endDate"
+                name="endDate"
+                label="End Date"
+                placeholder="Select end date (optional)"
+                required={false}
+              />
+            </div>
             <div className="alert alert-info text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -143,11 +182,33 @@ export default function ProjectMemberForm({
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 ></path>
               </svg>
-              <span>
-                Specify the employee's role and responsibilities within this
-                project.
-              </span>
+              <span>Leave end date empty for ongoing assignments.</span>
             </div>
+          </div>
+        </div>
+
+        {/* Remarks & Notes */}
+        <div className="border border-primary/20 rounded-lg p-4">
+          <h4 className="text-base font-semibold mb-3 text-primary">
+            Additional Information
+          </h4>
+          <div className="space-y-4">
+            <CustomTextareaField
+              dataAuto="remarks"
+              name="remarks"
+              label="Remarks"
+              placeholder="Any special remarks or conditions..."
+              required={false}
+              rows={2}
+            />
+            <CustomTextareaField
+              dataAuto="notes"
+              name="notes"
+              label="Notes"
+              placeholder="Internal notes about this assignment..."
+              required={false}
+              rows={2}
+            />
           </div>
         </div>
 

@@ -27,7 +27,7 @@ import {
 } from "@/graphql/attendance.api";
 import dayjs from "dayjs";
 import CustomPopup from "@/components/modal/CustomPopup";
-import AttendanceForm from "./components/AttendanceForm";
+import AttendanceForm from "./AttendanceForm";
 import AttendanceRecord from "./components/AttendanceRecord";
 import usePopupOption from "@/hooks/usePopupOption";
 import { Permissions } from "@/constants/permissions.constant";
@@ -320,7 +320,7 @@ export default function AttendancePage() {
 
   // ==================== LOCAL STATE ====================
   const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
+    dayjs().format("YYYY-MM-DD"),
   );
 
   // POPUP STATE MANAGEMENT

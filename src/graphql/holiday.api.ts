@@ -17,19 +17,11 @@ export const GET_HOLIDAYS = gql`
         isPaid
         holidayType
         businessId
-        createdBy
         createdAt
         updatedAt
         business {
           id
           name
-        }
-        creator {
-          id
-          email
-          profile {
-            fullName
-          }
         }
       }
     }
@@ -53,19 +45,11 @@ export const GET_HOLIDAY_BY_ID = gql`
         isPaid
         holidayType
         businessId
-        createdBy
         createdAt
         updatedAt
         business {
           id
           name
-        }
-        creator {
-          id
-          email
-          profile {
-            fullName
-          }
         }
       }
     }
@@ -89,7 +73,6 @@ export const CREATE_HOLIDAY = gql`
         isPaid
         holidayType
         businessId
-        createdBy
         createdAt
         updatedAt
       }
@@ -114,7 +97,6 @@ export const UPDATE_HOLIDAY = gql`
         isPaid
         holidayType
         businessId
-        createdBy
         createdAt
         updatedAt
       }

@@ -1,12 +1,22 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { getErrorMessageByPropertyName } from "@/utils/schema-validator";
-import moment, { Moment } from "moment";
+import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { BiReset } from "react-icons/bi";
 import { generateWeekDays } from "@/utils/date-time.utils";
 import FieldLabel from "./components/FieldLabel";
+
+// Extend dayjs with plugins
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const generateYears = ({
   startOfYear,
@@ -30,7 +40,7 @@ interface ICustomDatePicker {
   wrapperClassName?: string;
   fieldClassName?: string;
   labelClassName?: string;
-  startOfYear?: Moment;
+  startOfYear?: Dayjs;
   right?: boolean;
   disableBeforeDate?: any;
   disableAfterDate?: any;
@@ -96,16 +106,19 @@ export default function CustomDatePicker({
   const [calendarVisible, setCalendarVisible] = useState(false);
   const errorMessage = getErrorMessageByPropertyName(errors, name);
 
-  const [currentMonth, setCurrentMonth] = useState(moment());
+  const [currentMonth, setCurrentMonth] = useState(dayjs());
   const [currentYear, setCurrentYear] = useState(
-    startOfYear && moment(startOfYear, "DD-MM-YYYY", true).isValid()
-      ? moment(startOfYear, "DD-MM-YYYY").year()
-      : moment().year()
+    startOfYear && dayjs(startOfYear, "DD-MM-YYYY", true).isValid()
+      ? dayjs(startOfYear, "DD-MM-YYYY").year()
+      : dayjs().year(),
   );
 
   // GENERATE YEAR ARRAY FOR CALENDER
   const [allYears, setAllYears] = useState(
-    generateYears({ startOfYear: currentYear - (currentYear % 12), length: 12 })
+    generateYears({
+      startOfYear: currentYear - (currentYear % 12),
+      length: 12,
+    }),
   );
   const [renderComponent, setRenderComponent] = useState(pick);
   const value = watch(name);
@@ -141,7 +154,7 @@ export default function CustomDatePicker({
     // Validate the default date
     if (value) {
       // Validate the default date
-      const parsedDefaultDate = moment(value, formatDate, true);
+      const parsedDefaultDate = dayjs(value, formatDate, true);
       if (!parsedDefaultDate.isValid()) {
         setError(name, {
           type: "manual",
@@ -152,51 +165,48 @@ export default function CustomDatePicker({
         parsedDefaultDate.isValid() &&
         !!disableBeforeDate &&
         parsedDefaultDate.isSameOrBefore(
-          moment(disableBeforeDate, formatDate),
-          "day"
+          dayjs(disableBeforeDate, formatDate),
+          "day",
         )
       ) {
         setError(name, {
           type: "manual",
-          message: `Please enter a date after ${moment(
+          message: `Please enter a date after ${dayjs(
             disableBeforeDate,
-            formatDate
+            formatDate,
           ).format(formatDate)}`,
         });
         return;
       } else if (
         parsedDefaultDate.isValid() &&
         !!disableAfterDate &&
-        parsedDefaultDate.isSameOrAfter(
-          moment(disableAfterDate, formatDate),
-          "day"
-        )
+        parsedDefaultDate.isAfter(dayjs(disableAfterDate, formatDate), "day")
       ) {
         setError(name, {
           type: "manual",
-          message: `Please enter a date before ${moment(
+          message: `Please enter a date on or before ${dayjs(
             disableAfterDate,
-            formatDate
+            formatDate,
           ).format(formatDate)}`,
         });
         return;
       } else if (
         parsedDefaultDate.isValid() &&
         !!disabledDates?.some((disabledDate) =>
-          parsedDefaultDate.isSame(moment(disabledDate.date, formatDate), "day")
+          parsedDefaultDate.isSame(dayjs(disabledDate.date, formatDate), "day"),
         )
       ) {
         setError(name, {
           type: "manual",
-          message: `Please enter a date before ${moment(
+          message: `Please enter a date before ${dayjs(
             disableAfterDate,
-            formatDate
+            formatDate,
           ).format(formatDate)}`,
         });
         return;
       } else {
-        setCurrentMonth(moment(parsedDefaultDate, formatDate));
-        setCurrentYear(moment(parsedDefaultDate, formatDate).year());
+        setCurrentMonth(dayjs(parsedDefaultDate, formatDate));
+        setCurrentYear(dayjs(parsedDefaultDate, formatDate).year());
       }
     }
 
@@ -206,7 +216,10 @@ export default function CustomDatePicker({
   // SET CURRENT MONTH
   useEffect(() => {
     setCurrentMonth((prevMonth) => {
-      const newMonth = moment([currentYear, prevMonth.month(), 1]);
+      const newMonth = dayjs()
+        .year(currentYear)
+        .month(prevMonth.month())
+        .date(1);
       return newMonth;
     });
   }, [currentYear]);
@@ -236,7 +249,7 @@ export default function CustomDatePicker({
   // GENERATE MONTHS FOR CALENDER
   const renderCalendarMonths = () => {
     return Array.from({ length: 12 }, (_, i) =>
-      moment().month(i).format("MMMM")
+      dayjs().month(i).format("MMMM"),
     );
   };
   // RENDER WEEKDAYS
@@ -249,7 +262,7 @@ export default function CustomDatePicker({
         >
           {weekDay?.shortName}
         </div>
-      )
+      ),
     );
   };
 
@@ -270,18 +283,18 @@ export default function CustomDatePicker({
       currentDay = currentDay.clone().add(1, "day");
     }
 
-    const today = moment();
+    const today = dayjs();
 
     // This gives how many empty boxes to insert at the beginning
     const emptyDivs = (startOfMonth.day() - startOfWeekDay + 7) % 7;
 
     //
-    const previousMonth = moment(startOfMonth).subtract(1, "month");
+    const previousMonth = dayjs(startOfMonth).subtract(1, "month");
 
     const daysInPrevMonth = previousMonth.daysInMonth();
 
     const prevMonthDates = Array.from({ length: emptyDivs }, (_, i) => {
-      return moment(previousMonth).date(daysInPrevMonth - emptyDivs + i + 1);
+      return dayjs(previousMonth).date(daysInPrevMonth - emptyDivs + i + 1);
     });
 
     const daysInMonthBoxes = currentMonth.daysInMonth();
@@ -293,7 +306,7 @@ export default function CustomDatePicker({
     const nextMonth = currentMonth.clone().add(1, "month");
 
     const nextMonthDates = Array.from({ length: emptyEndBoxes }, (_, i) => {
-      return moment(nextMonth).date(i + 1);
+      return dayjs(nextMonth).date(i + 1);
     });
 
     return (
@@ -310,29 +323,29 @@ export default function CustomDatePicker({
 
         {/* Render days of the month */}
         {daysInMonth.map((day) => {
-          const isSelected = day.isSame(moment(fieldValue, formatDate), "day");
+          const isSelected = day.isSame(dayjs(fieldValue, formatDate), "day");
 
-          const isToday = day.isSame(today, "day");
+          const isToday = day.isSame(dayjs(), "day");
 
           // DISABLE BEFORE DATES
           const isDisabledBefore =
             disableBeforeDate &&
-            day.isBefore(moment(disableBeforeDate, formatDate));
+            day.isBefore(dayjs(disableBeforeDate, formatDate));
 
           // DISABLE AFTER DATES
           const isDisabledAfter =
             disableAfterDate &&
-            day.isAfter(moment(disableAfterDate, formatDate));
+            day.isAfter(dayjs(disableAfterDate, formatDate));
 
           // DISABLE DATES
           const isDisabled =
             disabledDates?.some((disabledDate) =>
-              day.isSame(moment(disabledDate.date, formatDate), "day")
+              day.isSame(dayjs(disabledDate.date, formatDate), "day"),
             ) ||
             specialDates?.some(
               (specialDate) =>
                 !!specialDate.disabled &&
-                day.isSame(moment(specialDate.date, formatDate), "day")
+                day.isSame(dayjs(specialDate.date, formatDate), "day"),
             );
 
           // BUTTON CLASS
@@ -354,16 +367,16 @@ export default function CustomDatePicker({
                 // DISABLED DATES TITLE
                 disabledDates?.find(
                   (d) =>
-                    moment(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
-                    day.format("DD-MM-YYYY")
+                    dayjs(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
+                    day.format("DD-MM-YYYY"),
                 )?.title || ""
               }
                 ${
                   // SPECIAL DATES TITLE
                   specialDates?.find(
                     (d) =>
-                      moment(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
-                      day.format("DD-MM-YYYY")
+                      dayjs(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
+                      day.format("DD-MM-YYYY"),
                   )?.title || ""
                 }
                 ${
@@ -387,15 +400,15 @@ export default function CustomDatePicker({
                   ${
                     disabledDates?.find(
                       (d) =>
-                        moment(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
-                        day.format("DD-MM-YYYY")
+                        dayjs(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
+                        day.format("DD-MM-YYYY"),
                     )?.className || ""
                   }
                   ${
                     specialDates?.find(
                       (d) =>
-                        moment(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
-                        day.format("DD-MM-YYYY")
+                        dayjs(d.date, "DD-MM-YYYY").format("DD-MM-YYYY") ===
+                        day.format("DD-MM-YYYY"),
                     )?.className || ""
                   }
                    ${
@@ -505,7 +518,7 @@ export default function CustomDatePicker({
                   }`}
                 >
                   {field.value
-                    ? moment(field.value, formatDate).format("MMMM D, YYYY")
+                    ? dayjs(field.value, formatDate).format("MMMM D, YYYY")
                     : ""}
                   <FaRegCalendarAlt />
                 </button>
@@ -518,7 +531,7 @@ export default function CustomDatePicker({
                     name={name}
                     value={
                       field.value
-                        ? moment(field.value, formatDate).format(formatDate)
+                        ? dayjs(field.value, formatDate).format(formatDate)
                         : ""
                     }
                     placeholder={placeholder ? placeholder : label}
@@ -689,10 +702,11 @@ export default function CustomDatePicker({
                         className="grid grid-cols-3 mt-4"
                       >
                         {allYears.map((year, index) => {
-                          const yearMoment = moment(year, "YYYY");
-                          const isSelected = moment(currentYear, "YYYY").isSame(
-                            yearMoment
-                          );
+                          const yearDayjs = dayjs(year.toString(), "YYYY");
+                          const isSelected = dayjs(
+                            currentYear.toString(),
+                            "YYYY",
+                          ).isSame(yearDayjs);
                           return (
                             <button
                               key={index}

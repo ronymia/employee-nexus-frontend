@@ -1,5 +1,7 @@
 import { EmployeeSelect } from "@/components/input-fields";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import dayjs from "dayjs";
+import { IWorkSchedule } from "@/types";
 
 // ==================== BASIC INFO FIELDS COMPONENT ====================
 /**
@@ -10,9 +12,49 @@ import CustomDatePicker from "@/components/form/input/CustomDatePicker";
  */
 interface IBasicInfoFieldsProps {
   actionType: "create" | "update";
+  calendarData?: any; // Calendar data from employee calendar API
+  workSchedule?: IWorkSchedule; // Employee work schedule for weekend detection
 }
 
-export default function BasicInfoFields({ actionType }: IBasicInfoFieldsProps) {
+export default function BasicInfoFields({
+  actionType,
+  calendarData,
+  workSchedule,
+}: IBasicInfoFieldsProps) {
+  // ==================== CALCULATE WEEKEND DATES ====================
+  /**
+   * Generate all weekend dates for the current year based on work schedule
+   */
+  const getWeekendDates = () => {
+    if (!workSchedule?.schedules) return [];
+
+    // Find which days are weekends (where isWeekend = true)
+    const weekendDays = workSchedule.schedules
+      .filter((schedule) => schedule.isWeekend)
+      .map((schedule) => schedule.dayOfWeek); // 0 = Sunday, 1 = Monday, etc.
+
+    if (weekendDays.length === 0) return [];
+
+    // Generate all dates for the current year that match weekend days
+    const startOfYear = dayjs().startOf("year");
+    const endOfYear = dayjs().endOf("year");
+    const weekendDates = [];
+
+    let current = startOfYear;
+    while (current.isBefore(endOfYear) || current.isSame(endOfYear, "day")) {
+      if (weekendDays.includes(current.day())) {
+        weekendDates.push({
+          date: current.format("DD-MM-YYYY"),
+          title: "Weekend (Can mark as overtime)",
+          className: "bg-blue-100 border-2 border-blue-400",
+          disabled: false,
+        });
+      }
+      current = current.add(1, "day");
+    }
+
+    return weekendDates;
+  };
   return (
     <div className="border border-primary/20 rounded-lg p-4">
       <h4 className="text-base font-semibold mb-3 text-primary">
@@ -38,6 +80,78 @@ export default function BasicInfoFields({ actionType }: IBasicInfoFieldsProps) {
           required={true}
           disabled={actionType === "update"}
           formatDate="DD-MM-YYYY"
+          disableAfterDate={dayjs().format("DD-MM-YYYY")}
+          disableBeforeDate={
+            calendarData?.employeeCalendar?.data?.joiningDate
+              ? dayjs(calendarData.employeeCalendar.data.joiningDate).format(
+                  "DD-MM-YYYY",
+                )
+              : undefined
+          }
+          disabledDates={
+            calendarData?.employeeCalendar?.data?.attendances?.map(
+              (att: any) => ({
+                date: dayjs(att.date).format("DD-MM-YYYY"),
+                title: `Attendance already exists: ${att.status}`,
+                className:
+                  "bg-red-200 border-2 border-red-600 text-black opacity-100",
+              }),
+            ) || []
+          }
+          specialDates={
+            calendarData?.employeeCalendar?.data
+              ? [
+                  // Mark weekend dates
+                  ...getWeekendDates(),
+                  // Mark leave dates as overtime opportunity
+                  ...(calendarData.employeeCalendar.data.leaves?.flatMap(
+                    (leave: any) => {
+                      const start = dayjs(leave.startDate);
+                      const end = leave.endDate ? dayjs(leave.endDate) : start;
+                      const dates = [];
+                      let current = start;
+                      while (
+                        current.isBefore(end) ||
+                        current.isSame(end, "day")
+                      ) {
+                        dates.push({
+                          date: current.format("DD-MM-YYYY"),
+                          title: `Leave Day - ${leave.status} (Can mark as overtime)`,
+                          className: "bg-yellow-100 border-2 border-yellow-400",
+                          disabled: false,
+                        });
+                        current = current.add(1, "day");
+                      }
+                      return dates;
+                    },
+                  ) || []),
+                  // Mark holiday dates
+                  ...(calendarData.employeeCalendar.data.holidays?.flatMap(
+                    (holiday: any) => {
+                      const start = dayjs(holiday.startDate);
+                      const end = holiday.endDate
+                        ? dayjs(holiday.endDate)
+                        : start;
+                      const dates = [];
+                      let current = start;
+                      while (
+                        current.isBefore(end) ||
+                        current.isSame(end, "day")
+                      ) {
+                        dates.push({
+                          date: current.format("DD-MM-YYYY"),
+                          title: `Holiday: ${holiday.name} (Can mark as overtime)`,
+                          className: "bg-purple-100 border-2 border-purple-400",
+                          disabled: false,
+                        });
+                        current = current.add(1, "day");
+                      }
+                      return dates;
+                    },
+                  ) || []),
+                ]
+              : undefined
+          }
         />
       </div>
     </div>

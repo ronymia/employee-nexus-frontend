@@ -15,7 +15,7 @@ export const GET_LEAVES = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         reviewedAt
         reviewedBy
@@ -63,7 +63,7 @@ export const GET_LEAVE_BY_ID = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         reviewedAt
         reviewedBy
@@ -111,7 +111,7 @@ export const LEAVE_REQUEST = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         attachments
         notes
@@ -136,7 +136,7 @@ export const CREATE_LEAVE = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         attachments
         notes
@@ -162,7 +162,7 @@ export const UPDATE_LEAVE = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         attachments
         notes

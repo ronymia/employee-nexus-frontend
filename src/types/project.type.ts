@@ -35,7 +35,13 @@ export interface IUserProjectMember {
   userId: number;
   project: IProject;
   user: IUser;
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+  remarks?: string;
+  notes?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface IProjectInput {
