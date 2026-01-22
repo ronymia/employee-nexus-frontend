@@ -259,3 +259,21 @@ export const ATTENDANCE_SUMMARY = gql`
     }
   }
 `;
+
+// ==================== ATTENDANCE OVERVIEW ====================
+export const ATTENDANCE_OVERVIEW = gql`
+  query AttendanceOverview {
+    attendanceOverview {
+      success
+      statusCode
+      message
+      data {
+        pending
+        approved
+        absent
+        late
+        halfDay
+      }
+    }
+  }
+`;
