@@ -4,46 +4,34 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import CustomTable from "@/components/table/CustomTable";
-import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import {
   TableColumnType,
   IPayrollCycle,
   PayrollCycleStatus,
   PayrollFrequency,
 } from "@/types";
-import {
-  PiPlusCircle,
-  PiPencil,
-  PiTrash,
-  PiEye,
-  PiCalendar,
-  PiCurrencyDollar,
-  PiUsers,
-  PiCheckCircle,
-  PiClock,
-  PiFileText,
-} from "react-icons/pi";
+import { PiPlusCircle, PiTrash, PiEye } from "react-icons/pi";
 import {
   GET_PAYROLL_CYCLES,
   DELETE_PAYROLL_CYCLE,
 } from "@/graphql/payroll-cycle.api";
-import moment from "moment";
+import dayjs from "dayjs";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayrollCycleForm from "./PayrollCycleForm";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
+import useConfirmation from "@/hooks/useConfirmation";
+import PageHeader from "@/components/ui/PageHeader";
+import toast from "react-hot-toast";
+import PayrollCycleStatusBadge from "@/components/ui/payroll/PayrollCycleStatusBadge";
 
 export default function PayrollCyclesPage() {
   const { hasPermission } = usePermissionGuard();
+  const { confirm } = useConfirmation();
   const router = useRouter();
 
   const { popupOption, setPopupOption } = usePopupOption();
-  const [deleteModal, setDeleteModal] = useState<{
-    open: boolean;
-    id: number | null;
-  }>({ open: false, id: null });
 
   const {
     data: cyclesData,
@@ -61,82 +49,46 @@ export default function PayrollCyclesPage() {
 
   const cycles = cyclesData?.payrollCycles?.data || [];
 
-  const [deleteCycle, { loading: deleting }] = useMutation(
-    DELETE_PAYROLL_CYCLE,
-    {
-      awaitRefetchQueries: true,
-      refetchQueries: [{ query: GET_PAYROLL_CYCLES, variables: { query: {} } }],
-    },
-  );
+  const [deleteCycle] = useMutation(DELETE_PAYROLL_CYCLE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: GET_PAYROLL_CYCLES, variables: { query: {} } }],
+  });
 
-  const handleDelete = async () => {
-    if (deleteModal.id) {
-      try {
-        await deleteCycle({
-          variables: { id: deleteModal.id },
-        });
-        setDeleteModal({ open: false, id: null });
-      } catch (error) {
-        console.error("Error deleting cycle:", error);
-      }
-    }
-  };
-
-  const handleEdit = (cycle: IPayrollCycle) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "update",
-      form: "payrollCycle" as any,
-      data: cycle,
-      title: "Update Payroll Cycle",
+  const handleDelete = async (cycle: IPayrollCycle) => {
+    await confirm({
+      title: "Delete Payroll Cycle",
+      message: `Are you sure you want to delete <strong>${cycle.name}</strong>?`,
+      confirmButtonText: "Delete",
+      confirmButtonColor: "#ef4444",
+      icon: "warning",
+      onConfirm: async () => {
+        try {
+          await deleteCycle({
+            variables: { id: cycle.id },
+          });
+        } catch (error) {
+          console.error("Error deleting cycle:", error);
+          toast.error("Failed to delete payroll cycle");
+        }
+      },
+      successTitle: "Deleted!",
+      successMessage: "Payroll cycle deleted successfully",
     });
   };
 
+  // const handleEdit = (cycle: IPayrollCycle) => {
+  //   setPopupOption({
+  //     open: true,
+  //     closeOnDocumentClick: true,
+  //     actionType: "update",
+  //     form: "payrollCycle" as any,
+  //     data: cycle,
+  //     title: "Update Payroll Cycle",
+  //   });
+  // };
+
   const handleView = (cycle: IPayrollCycle) => {
     router.push(`/payroll-management/payroll-cycles/${cycle.id}/view`);
-  };
-
-  const getStatusBadge = (status: PayrollCycleStatus) => {
-    switch (status) {
-      case PayrollCycleStatus.DRAFT:
-        return (
-          <span className="badge badge-ghost gap-1">
-            <PiFileText size={14} />
-            Draft
-          </span>
-        );
-      case PayrollCycleStatus.PROCESSING:
-        return (
-          <span className="badge badge-warning gap-1">
-            <PiClock size={14} />
-            Processing
-          </span>
-        );
-      case PayrollCycleStatus.APPROVED:
-        return (
-          <span className="badge badge-info gap-1">
-            <PiCheckCircle size={14} />
-            Approved
-          </span>
-        );
-      case PayrollCycleStatus.PAID:
-        return (
-          <span className="badge badge-success gap-1">
-            <PiCheckCircle size={14} />
-            Paid
-          </span>
-        );
-      case PayrollCycleStatus.CANCELLED:
-        return (
-          <span className="badge badge-error gap-1">
-            <PiFileText size={14} />
-            Cancelled
-          </span>
-        );
-      default:
-        return <span className="badge badge-ghost">{status}</span>;
-    }
   };
 
   const getFrequencyLabel = (frequency: PayrollFrequency) => {
@@ -221,8 +173,7 @@ export default function PayrollCyclesPage() {
     {
       name: "Delete",
       type: "button" as const,
-      handler: (cycle: IPayrollCycle) =>
-        setDeleteModal({ open: true, id: cycle.id }),
+      handler: handleDelete,
       Icon: PiTrash,
       permissions: [Permissions.PayrollCycleDelete],
       disabledOn: [
@@ -235,16 +186,10 @@ export default function PayrollCyclesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content">
-            Payroll Cycles
-          </h1>
-          <p className="text-sm text-base-content/60 mt-1">
-            Manage payroll processing cycles and runs
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Payroll Cycles"
+        subtitle="Manage payroll processing cycles and runs"
+      />
 
       {/* Cycles Table */}
       <CustomTable
@@ -255,12 +200,12 @@ export default function PayrollCyclesPage() {
         dataSource={cycles.map((row) => ({
           ...row,
           customFrequency: getFrequencyLabel(row.frequency),
-          customPeriod: `${moment(row.periodStart).format(
+          customPeriod: `${dayjs(row.periodStart).format(
             "MMM DD",
-          )} - ${moment(row.periodEnd).format("MMM DD, YYYY")}`,
-          customPaymentDate: moment(row.paymentDate).format("MMM DD, YYYY"),
+          )} - ${dayjs(row.periodEnd).format("MMM DD, YYYY")}`,
+          customPaymentDate: dayjs(row.paymentDate).format("MMM DD, YYYY"),
           customNetPay: `$${row.totalNetPay.toFixed(2)}`,
-          customStatus: getStatusBadge(row.status),
+          customStatus: <PayrollCycleStatusBadge status={row.status} />,
         }))}
         searchConfig={{
           searchable: false,
@@ -308,36 +253,6 @@ export default function PayrollCyclesPage() {
           />
         )}
       </CustomPopup>
-
-      {/* Delete Confirmation Modal */}
-      <FormModal
-        popupOption={{
-          open: deleteModal.open,
-          closeOnDocumentClick: false,
-          actionType: "delete",
-          form: "payrollCycle" as any,
-          data: null,
-          title: "Delete Payroll Cycle",
-          deleteHandler: handleDelete,
-        }}
-        setPopupOption={(value) => {
-          if (typeof value === "function") {
-            setDeleteModal((prev) => {
-              const newPopup = value({
-                open: prev.open,
-                closeOnDocumentClick: false,
-                actionType: "delete",
-                form: "payrollCycle" as any,
-                data: null,
-                title: "Delete Payroll Cycle",
-              });
-              return { open: newPopup.open, id: prev.id };
-            });
-          } else {
-            setDeleteModal({ open: value.open, id: deleteModal.id });
-          }
-        }}
-      />
     </div>
   );
 }
