@@ -15,11 +15,12 @@ import {
 } from "@/schemas/employee-payroll-component.schema";
 import {
   ASSIGN_PAYROLL_COMPONENT,
+  UPDATE_EMPLOYEE_PAYROLL_COMPONENT,
   GET_ACTIVE_EMPLOYEE_PAYROLL_COMPONENTS,
   EMPLOYEE_PAYROLL_COMPONENTS_HISTORY,
 } from "@/graphql/employee-payroll-components.api";
 import { GET_PAYROLL_COMPONENTS } from "@/graphql/payroll-component.api";
-import { IPayrollComponent } from "@/types";
+import { IEmployeePayrollComponent, IPayrollComponent } from "@/types";
 import { useFormContext } from "react-hook-form";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
@@ -33,15 +34,22 @@ dayjs.extend(customParseFormat);
 interface IAssignPayrollComponentFormProps {
   userId: number;
   onClose: () => void;
+  initialData?: IEmployeePayrollComponent;
 }
 
 // ==================== HELPER COMPONENT ====================
-function FormFields({ components }: { components: IPayrollComponent[] }) {
+function FormFields({
+  components,
+  isEdit,
+}: {
+  components: IPayrollComponent[];
+  isEdit: boolean;
+}) {
   const { watch, setValue } = useFormContext<IAssignPayrollComponentFormData>();
   const selectedComponentId = watch("componentId");
 
   useEffect(() => {
-    if (selectedComponentId) {
+    if (selectedComponentId && !isEdit) {
       const component = components.find(
         (c) => c.id === Number(selectedComponentId),
       );
@@ -49,26 +57,26 @@ function FormFields({ components }: { components: IPayrollComponent[] }) {
         setValue("value", component.defaultValue || 0);
       }
     }
-  }, [selectedComponentId, components, setValue]);
+  }, [selectedComponentId, components, setValue, isEdit]);
 
   const componentOptions = components.map((c) => ({
     label: `${c.name} (${c.code})`,
-    value: c.id,
+    value: Number(c.id),
   }));
 
   return (
     <div className="space-y-4">
-      <CustomSelect
-        name="componentId"
-        label="Select Component"
-        placeholder="Choose a payroll component"
-        options={componentOptions}
-        dataAuto="component-select"
-        required={true}
-        isLoading={false}
-      />
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CustomSelect
+          name="componentId"
+          label="Select Component"
+          placeholder="Choose a payroll component"
+          options={componentOptions}
+          dataAuto="component-select"
+          required={true}
+          isLoading={false}
+          disabled={isEdit}
+        />
         <CustomInputField
           name="value"
           label="Value"
@@ -76,9 +84,6 @@ function FormFields({ components }: { components: IPayrollComponent[] }) {
           placeholder="Enter assignment value"
           dataAuto="component-value"
         />
-        <div className="flex flex-col justify-center">
-          <ToggleSwitch name="isOverride" label="Override Default" />
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -93,6 +98,7 @@ function FormFields({ components }: { components: IPayrollComponent[] }) {
           label="Effective To"
           dataAuto="effective-to"
           required={false}
+          right
         />
       </div>
 
@@ -109,8 +115,11 @@ function FormFields({ components }: { components: IPayrollComponent[] }) {
 export default function AssignPayrollComponentForm({
   userId,
   onClose,
+  initialData,
 }: IAssignPayrollComponentFormProps) {
-  // ==================== API Mutation ====================
+  const isEdit = !!initialData;
+
+  // ==================== API Mutation: Assign ====================
   const [assignComponent, { loading: assigning }] = useMutation<{
     assignEmployeePayrollComponent: {
       success: boolean;
@@ -143,6 +152,39 @@ export default function AssignPayrollComponentForm({
     },
   });
 
+  // ==================== API Mutation: Update ====================
+  const [updateComponent, { loading: updating }] = useMutation<{
+    updateEmployeePayrollComponent: {
+      success: boolean;
+      message?: string;
+    };
+  }>(UPDATE_EMPLOYEE_PAYROLL_COMPONENT, {
+    refetchQueries: [
+      {
+        query: GET_ACTIVE_EMPLOYEE_PAYROLL_COMPONENTS,
+        variables: { query: { userId: Number(userId) } },
+      },
+      {
+        query: EMPLOYEE_PAYROLL_COMPONENTS_HISTORY,
+        variables: { query: { userId: Number(userId) } },
+      },
+    ],
+    onCompleted: (data) => {
+      if (data.updateEmployeePayrollComponent?.success) {
+        toast.success("Payroll component updated successfully");
+        onClose();
+      } else {
+        toast.error(
+          data.updateEmployeePayrollComponent?.message ||
+            "Failed to update component",
+        );
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   // ==================== API Query: Components ====================
   const { data: componentsData, loading: componentsLoading } = useQuery<{
     payrollComponents: {
@@ -157,35 +199,56 @@ export default function AssignPayrollComponentForm({
   // ==================== HANDLERS ====================
   const handleSubmit = async (data: IAssignPayrollComponentFormData) => {
     try {
-      await assignComponent({
-        variables: {
-          assignEmployeePayrollComponentInput: {
-            userId: Number(userId),
-            componentId: Number(data.componentId),
-            value: Number(data.value),
-            isOverride: data.isOverride,
-            effectiveFrom: data.effectiveFrom
-              ? dayjs.utc(data.effectiveFrom, "DD-MM-YYYY").toISOString()
-              : null,
-            effectiveTo: data.effectiveTo
-              ? dayjs.utc(data.effectiveTo, "DD-MM-YYYY").toISOString()
-              : null,
-            notes: data.notes,
+      if (isEdit) {
+        await updateComponent({
+          variables: {
+            updateEmployeePayrollComponentInput: {
+              ...data,
+              id: initialData.id,
+              componentId: Number(data.componentId),
+              userId: Number(userId),
+              effectiveFrom: data.effectiveFrom
+                ? dayjs.utc(data.effectiveFrom, "DD-MM-YYYY").toISOString()
+                : null,
+              effectiveTo: data.effectiveTo
+                ? dayjs.utc(data.effectiveTo, "DD-MM-YYYY").toISOString()
+                : null,
+            },
           },
-        },
-      });
+        });
+      } else {
+        await assignComponent({
+          variables: {
+            assignEmployeePayrollComponentInput: {
+              ...data,
+              userId: Number(userId),
+              componentId: Number(data.componentId),
+              effectiveFrom: data.effectiveFrom
+                ? dayjs.utc(data.effectiveFrom, "DD-MM-YYYY").toISOString()
+                : null,
+              effectiveTo: data.effectiveTo
+                ? dayjs.utc(data.effectiveTo, "DD-MM-YYYY").toISOString()
+                : null,
+            },
+          },
+        });
+      }
     } catch (error) {
-      console.error("Assignment error:", error);
+      console.error("Assignment/Update error:", error);
     }
   };
 
   const defaultValues = {
-    componentId: "",
-    value: 0,
-    isOverride: false,
-    effectiveFrom: "",
-    effectiveTo: "",
-    notes: "",
+    componentId: initialData?.componentId || "",
+    value: initialData?.value || 0,
+    isOverride: initialData?.isOverride || false,
+    effectiveFrom: initialData?.effectiveFrom
+      ? dayjs(initialData.effectiveFrom).format("DD-MM-YYYY")
+      : "",
+    effectiveTo: initialData?.effectiveTo
+      ? dayjs(initialData.effectiveTo).format("DD-MM-YYYY")
+      : "",
+    notes: initialData?.notes || "",
   };
 
   // ==================== RENDER ====================
@@ -199,9 +262,12 @@ export default function AssignPayrollComponentForm({
       resolver={assignPayrollComponentSchema}
       className="flex flex-col gap-6"
     >
-      <FormFields components={activeComponents} />
+      <FormFields components={activeComponents} isEdit={isEdit} />
 
-      <FormActionButton cancelHandler={onClose} isPending={assigning} />
+      <FormActionButton
+        cancelHandler={onClose}
+        isPending={assigning || updating}
+      />
     </CustomForm>
   );
 }

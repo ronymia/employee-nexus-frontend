@@ -10,16 +10,17 @@ import {
   IActiveEmployeePayrollComponentsResponse,
   IEmployeePayrollComponentHistoryResponse,
   CalculationType,
-  ComponentType,
   TableColumnType,
+  IEmployeePayrollComponent,
+  TableActionType,
 } from "@/types";
 import CustomTable from "@/components/table/CustomTable";
 import CustomLoading from "@/components/loader/CustomLoading";
-import moment from "moment";
 import {
   PiCheckCircle,
   PiClockCounterClockwise,
   PiInfo,
+  PiPencil,
   PiPlusCircle,
 } from "react-icons/pi";
 import CustomPopup from "@/components/modal/CustomPopup";
@@ -27,6 +28,14 @@ import usePopupOption from "@/hooks/usePopupOption";
 import AssignPayrollComponentForm from "./AssignPayrollComponentForm";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
+
+import PayrollComponentTypeBadge from "@/components/ui/payroll/PayrollComponentTypeBadge";
+import CalculationTypeLabel from "@/components/ui/payroll/CalculationTypeLabel";
+import PayrollComponentProperties from "@/components/ui/payroll/PayrollComponentProperties";
 
 interface IEmployeePayrollComponentProps {
   userId: number;
@@ -62,18 +71,7 @@ export default function EmployeePayrollComponent({
     return `${value}%`;
   };
 
-  const getComponentTypeBadge = (type: ComponentType) => {
-    switch (type) {
-      case ComponentType.EARNING:
-        return <span className="badge badge-success badge-sm">Earning</span>;
-      case ComponentType.DEDUCTION:
-        return <span className="badge badge-error badge-sm">Deduction</span>;
-      default:
-        return <span className="badge badge-ghost badge-sm">{type}</span>;
-    }
-  };
-
-  // ==================== COLUMNS ====================
+  // ==================== COLUMNS & ACTIONS ====================
   const activeColumns: TableColumnType[] = [
     {
       key: "name",
@@ -100,6 +98,25 @@ export default function EmployeePayrollComponent({
       header: "Details",
       accessorKey: "customDetails",
       show: true,
+    },
+  ];
+
+  const activeActions: TableActionType[] = [
+    {
+      name: "Edit",
+      Icon: PiPencil,
+      type: "button",
+      handler: (row: IEmployeePayrollComponent) =>
+        setPopupOption({
+          open: true,
+          actionType: "update",
+          form: "assignPayroll" as any,
+          data: row,
+          title: "Update Payroll Component",
+          closeOnDocumentClick: true,
+        }),
+      permissions: [Permissions.PayrollComponentUpdate],
+      disabledOn: [],
     },
   ];
 
@@ -143,7 +160,7 @@ export default function EmployeePayrollComponent({
       <div className="flex flex-col">
         <span className="font-semibold">{item.component.name}</span>
         <span className="text-xs text-gray-500">
-          {item.component.calculationType.replace(/_/g, " ")}
+          <CalculationTypeLabel type={item.component.calculationType} />
         </span>
       </div>
     ),
@@ -152,7 +169,12 @@ export default function EmployeePayrollComponent({
         {item.component.code}
       </code>
     ),
-    customType: getComponentTypeBadge(item.component.componentType),
+    customType: (
+      <PayrollComponentTypeBadge
+        type={item.component.componentType}
+        size="sm"
+      />
+    ),
     customValue: (
       <div className="flex flex-col">
         <span className="font-bold text-primary">
@@ -167,21 +189,18 @@ export default function EmployeePayrollComponent({
     ),
     customValidity: (
       <div className="text-xs">
-        <p>From: {moment(item.effectiveFrom).format("MMM DD, YYYY")}</p>
+        <p>From: {dayjs(item.effectiveFrom).format("MMM DD, YYYY")}</p>
         {item.effectiveTo && (
-          <p>To: {moment(item.effectiveTo).format("MMM DD, YYYY")}</p>
+          <p>To: {dayjs(item.effectiveTo).format("MMM DD, YYYY")}</p>
         )}
       </div>
     ),
     customDetails: (
-      <div className="flex gap-1 flex-wrap">
-        {item.component.isTaxable && (
-          <span className="badge badge-xs badge-warning">Taxable</span>
-        )}
-        {item.component.isStatutory && (
-          <span className="badge badge-xs badge-info">Statutory</span>
-        )}
-      </div>
+      <PayrollComponentProperties
+        isTaxable={item.component.isTaxable}
+        isStatutory={item.component.isStatutory}
+        size="sm"
+      />
     ),
   }));
 
@@ -199,17 +218,15 @@ export default function EmployeePayrollComponent({
     ),
     customPeriod: (
       <span className="text-xs">
-        {moment(item.effectiveFrom).format("MM/YY")} -{" "}
-        {item.effectiveTo
-          ? moment(item.effectiveTo).format("MM/YY")
-          : "Present"}
+        {dayjs(item.effectiveFrom).format("MM/YY")} -{" "}
+        {item.effectiveTo ? dayjs(item.effectiveTo).format("MM/YY") : "Present"}
       </span>
     ),
     customAssignedBy: (
       <div className="flex flex-col text-xs">
         <span>{item.assignedByUser?.profile?.fullName || "System"}</span>
         <span className="text-[10px] text-gray-400">
-          {moment(item.createdAt).format("MMM DD, YYYY")}
+          {dayjs(item.createdAt).format("MMM DD, YYYY")}
         </span>
       </div>
     ),
@@ -270,7 +287,7 @@ export default function EmployeePayrollComponent({
             setColumns={setActiveCols}
             dataSource={activeDataSource}
             isLoading={activeLoading}
-            actions={[]}
+            actions={activeActions}
             searchConfig={{
               searchable: false,
               debounceDelay: 500,
@@ -320,10 +337,15 @@ export default function EmployeePayrollComponent({
       </section>
 
       {/* Assign Form Modal */}
-      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
+      <CustomPopup
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+        customWidth="500px"
+      >
         {popupOption.form === "assignPayroll" && (
           <AssignPayrollComponentForm
             userId={userId}
+            initialData={popupOption.data}
             onClose={() => setPopupOption({ ...popupOption, open: false })}
           />
         )}

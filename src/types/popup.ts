@@ -16,7 +16,7 @@ type IForm_NAME =
   | "project"
   | "employee"
   | "business"
-  | "academic_semester"
+  | "assignPayroll"
   | "academic_faculty"
   | "academic_department"
   | "building"

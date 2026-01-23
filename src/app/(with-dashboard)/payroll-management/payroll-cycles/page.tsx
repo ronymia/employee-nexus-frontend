@@ -38,50 +38,6 @@ import usePermissionGuard from "@/guards/usePermissionGuard";
 export default function PayrollCyclesPage() {
   const { hasPermission } = usePermissionGuard();
   const router = useRouter();
-  const [columns, setColumns] = useState<TableColumnType[]>([
-    {
-      key: "1",
-      header: "Cycle Name",
-      accessorKey: "name",
-      show: true,
-    },
-    {
-      key: "2",
-      header: "Frequency",
-      accessorKey: "customFrequency",
-      show: true,
-    },
-    {
-      key: "3",
-      header: "Period",
-      accessorKey: "customPeriod",
-      show: true,
-    },
-    {
-      key: "4",
-      header: "Payment Date",
-      accessorKey: "customPaymentDate",
-      show: true,
-    },
-    {
-      key: "5",
-      header: "Employees",
-      accessorKey: "totalEmployees",
-      show: true,
-    },
-    {
-      key: "6",
-      header: "Net Pay",
-      accessorKey: "customNetPay",
-      show: true,
-    },
-    {
-      key: "7",
-      header: "Status",
-      accessorKey: "customStatus",
-      show: true,
-    },
-  ]);
 
   const { popupOption, setPopupOption } = usePopupOption();
   const [deleteModal, setDeleteModal] = useState<{
@@ -110,7 +66,7 @@ export default function PayrollCyclesPage() {
     {
       awaitRefetchQueries: true,
       refetchQueries: [{ query: GET_PAYROLL_CYCLES, variables: { query: {} } }],
-    }
+    },
   );
 
   const handleDelete = async () => {
@@ -198,14 +154,83 @@ export default function PayrollCyclesPage() {
     }
   };
 
-  const stats = {
-    total: cycles.length,
-    draft: cycles.filter((c) => c.status === PayrollCycleStatus.DRAFT).length,
-    approved: cycles.filter((c) => c.status === PayrollCycleStatus.APPROVED)
-      .length,
-    paid: cycles.filter((c) => c.status === PayrollCycleStatus.PAID).length,
-    totalNetPay: cycles.reduce((sum, c) => sum + c.totalNetPay, 0),
-  };
+  const [columns, setColumns] = useState<TableColumnType[]>([
+    {
+      key: "1",
+      header: "Cycle Name",
+      accessorKey: "name",
+      show: true,
+    },
+    {
+      key: "2",
+      header: "Frequency",
+      accessorKey: "customFrequency",
+      show: true,
+    },
+    {
+      key: "3",
+      header: "Period",
+      accessorKey: "customPeriod",
+      show: true,
+    },
+    {
+      key: "4",
+      header: "Payment Date",
+      accessorKey: "customPaymentDate",
+      show: true,
+    },
+    {
+      key: "5",
+      header: "Employees",
+      accessorKey: "totalEmployees",
+      show: true,
+    },
+    {
+      key: "6",
+      header: "Net Pay",
+      accessorKey: "customNetPay",
+      show: true,
+    },
+    {
+      key: "7",
+      header: "Status",
+      accessorKey: "customStatus",
+      show: true,
+    },
+  ]);
+
+  const actions = [
+    {
+      name: "View",
+      type: "button" as const,
+      handler: handleView,
+      Icon: PiEye,
+      permissions: [Permissions.DepartmentUpdate],
+      disabledOn: [],
+    },
+    // {
+    //   name: "Edit",
+    //   type: "button" as const,
+    //   handler: handleEdit,
+    //   Icon: PiPencil,
+    //   permissions: [Permissions.DepartmentUpdate],
+    //   disabledOn: [
+    //     { accessorKey: "status", value: PayrollCycleStatus.PAID },
+    //   ],
+    // },
+    {
+      name: "Delete",
+      type: "button" as const,
+      handler: (cycle: IPayrollCycle) =>
+        setDeleteModal({ open: true, id: cycle.id }),
+      Icon: PiTrash,
+      permissions: [Permissions.PayrollCycleDelete],
+      disabledOn: [
+        { accessorKey: "status", value: PayrollCycleStatus.PAID },
+        { accessorKey: "status", value: PayrollCycleStatus.APPROVED },
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -221,143 +246,51 @@ export default function PayrollCyclesPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Total Cycles</p>
-              <p className="text-2xl font-bold text-primary">{stats.total}</p>
-            </div>
-            <PiCalendar size={32} className="text-primary" />
-          </div>
-        </div>
-
-        <div className="bg-base-300 border border-base-content/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Draft</p>
-              <p className="text-2xl font-bold text-base-content">
-                {stats.draft}
-              </p>
-            </div>
-            <PiFileText size={32} className="text-base-content" />
-          </div>
-        </div>
-
-        <div className="bg-info/10 border border-info/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Approved</p>
-              <p className="text-2xl font-bold text-info">{stats.approved}</p>
-            </div>
-            <PiCheckCircle size={32} className="text-info" />
-          </div>
-        </div>
-
-        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Paid</p>
-              <p className="text-2xl font-bold text-success">{stats.paid}</p>
-            </div>
-            <PiCheckCircle size={32} className="text-success" />
-          </div>
-        </div>
-
-        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Total Net Pay</p>
-              <p className="text-2xl font-bold text-success">
-                ${stats.totalNetPay.toFixed(0)}
-              </p>
-            </div>
-            <PiCurrencyDollar size={32} className="text-success" />
-          </div>
-        </div>
-      </div> */}
-
       {/* Cycles Table */}
-      {loading ? (
-        <CustomLoading />
-      ) : (
-        <CustomTable
-          isLoading={loading}
-          actions={[
-            {
-              name: "View",
-              type: "button" as const,
-              handler: handleView,
-              Icon: PiEye,
-              permissions: [Permissions.DepartmentUpdate],
-              disabledOn: [],
-            },
-            // {
-            //   name: "Edit",
-            //   type: "button" as const,
-            //   handler: handleEdit,
-            //   Icon: PiPencil,
-            //   permissions: [Permissions.DepartmentUpdate],
-            //   disabledOn: [
-            //     { accessorKey: "status", value: PayrollCycleStatus.PAID },
-            //   ],
-            // },
-            {
-              name: "Delete",
-              type: "button" as const,
-              handler: (cycle: IPayrollCycle) =>
-                setDeleteModal({ open: true, id: cycle.id }),
-              Icon: PiTrash,
-              permissions: [Permissions.PayrollCycleDelete],
-              disabledOn: [
-                { accessorKey: "status", value: PayrollCycleStatus.PAID },
-                { accessorKey: "status", value: PayrollCycleStatus.APPROVED },
-              ],
-            },
-          ]}
-          columns={columns}
-          setColumns={setColumns}
-          dataSource={cycles.map((row) => ({
-            ...row,
-            customFrequency: getFrequencyLabel(row.frequency),
-            customPeriod: `${moment(row.periodStart).format(
-              "MMM DD"
-            )} - ${moment(row.periodEnd).format("MMM DD, YYYY")}`,
-            customPaymentDate: moment(row.paymentDate).format("MMM DD, YYYY"),
-            customNetPay: `$${row.totalNetPay.toFixed(2)}`,
-            customStatus: getStatusBadge(row.status),
-          }))}
-          searchConfig={{
-            searchable: false,
-            debounceDelay: 500,
-            defaultField: "name",
-            searchableFields: [
-              { label: "Cycle Name", value: "name" },
-              { label: "Status", value: "status" },
-            ],
-          }}
-        >
-          {hasPermission(Permissions.PayrollCycleCreate) ? (
-            <button
-              className="btn btn-primary gap-2"
-              onClick={() =>
-                setPopupOption({
-                  open: true,
-                  closeOnDocumentClick: true,
-                  actionType: "create",
-                  form: "payrollCycle" as any,
-                  data: null,
-                  title: "Create Payroll Cycle",
-                })
-              }
-            >
-              <PiPlusCircle size={18} />
-              Add Cycle
-            </button>
-          ) : null}
-        </CustomTable>
-      )}
+      <CustomTable
+        isLoading={loading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumns}
+        dataSource={cycles.map((row) => ({
+          ...row,
+          customFrequency: getFrequencyLabel(row.frequency),
+          customPeriod: `${moment(row.periodStart).format(
+            "MMM DD",
+          )} - ${moment(row.periodEnd).format("MMM DD, YYYY")}`,
+          customPaymentDate: moment(row.paymentDate).format("MMM DD, YYYY"),
+          customNetPay: `$${row.totalNetPay.toFixed(2)}`,
+          customStatus: getStatusBadge(row.status),
+        }))}
+        searchConfig={{
+          searchable: false,
+          debounceDelay: 500,
+          defaultField: "name",
+          searchableFields: [
+            { label: "Cycle Name", value: "name" },
+            { label: "Status", value: "status" },
+          ],
+        }}
+      >
+        {hasPermission(Permissions.PayrollCycleCreate) ? (
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "create",
+                form: "payrollCycle" as any,
+                data: null,
+                title: "Create Payroll Cycle",
+              })
+            }
+          >
+            <PiPlusCircle size={18} />
+            Add Cycle
+          </button>
+        ) : null}
+      </CustomTable>
 
       {/* Cycle Form Modal */}
       <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>

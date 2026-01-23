@@ -7,7 +7,6 @@ import CustomTable from "@/components/table/CustomTable";
 import {
   TableColumnType,
   IPayrollComponent,
-  ComponentType,
   CalculationType,
   IPayrollComponentOverviewResponse,
 } from "@/types";
@@ -17,7 +16,6 @@ import {
   PiTrash,
   PiCurrencyDollar,
   PiMinus,
-  PiBuildings,
   PiToggleLeft,
   PiCheckCircle,
   PiPercent,
@@ -37,6 +35,9 @@ import useConfirmation from "@/hooks/useConfirmation";
 import PageHeader from "@/components/ui/PageHeader";
 import OverviewCard from "@/components/card/OverviewCard";
 import { motion } from "motion/react";
+import PayrollComponentTypeBadge from "@/components/ui/payroll/PayrollComponentTypeBadge";
+import CalculationTypeLabel from "@/components/ui/payroll/CalculationTypeLabel";
+import PayrollComponentProperties from "@/components/ui/payroll/PayrollComponentProperties";
 
 function PayrollComponentOverview() {
   const { data, loading, error } = useQuery<IPayrollComponentOverviewResponse>(
@@ -204,49 +205,6 @@ export default function PayrollComponentsPage() {
     });
   };
 
-  const getComponentTypeBadge = (type: ComponentType) => {
-    switch (type) {
-      case ComponentType.EARNING:
-        return (
-          <span className="badge badge-success gap-1">
-            <PiCurrencyDollar size={14} />
-            Earning
-          </span>
-        );
-      case ComponentType.DEDUCTION:
-        return (
-          <span className="badge badge-error gap-1">
-            <PiMinus size={14} />
-            Deduction
-          </span>
-        );
-      case ComponentType.EMPLOYER_COST:
-        return (
-          <span className="badge badge-info gap-1">
-            <PiBuildings size={14} />
-            Employer Cost
-          </span>
-        );
-      default:
-        return <span className="badge badge-ghost">{type}</span>;
-    }
-  };
-
-  const getCalculationTypeLabel = (type: CalculationType) => {
-    switch (type) {
-      case CalculationType.FIXED_AMOUNT:
-        return "Fixed Amount";
-      case CalculationType.PERCENTAGE_OF_BASIC:
-        return "Percentage of Basic Salary";
-      case CalculationType.PERCENTAGE_OF_GROSS:
-        return "Percentage of Gross Salary";
-      case CalculationType.HOURLY_RATE:
-        return "Hourly Rate";
-      default:
-        return type;
-    }
-  };
-
   // ==================== STATE ====================
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
@@ -331,8 +289,12 @@ export default function PayrollComponentsPage() {
         setColumns={setColumns}
         dataSource={components.map((row) => ({
           ...row,
-          customComponentType: getComponentTypeBadge(row.componentType),
-          customCalculationType: getCalculationTypeLabel(row.calculationType),
+          customComponentType: (
+            <PayrollComponentTypeBadge type={row.componentType} />
+          ),
+          customCalculationType: (
+            <CalculationTypeLabel type={row.calculationType} />
+          ),
           customDefaultValue: row.defaultValue
             ? row.calculationType === CalculationType.FIXED_AMOUNT
               ? `$${row.defaultValue.toFixed(2)}`
@@ -345,14 +307,10 @@ export default function PayrollComponentsPage() {
               <span className="badge badge-ghost">Inactive</span>
             ),
           customProperties: (
-            <div className="flex gap-1">
-              {row.isTaxable && (
-                <span className="badge badge-sm badge-warning">Taxable</span>
-              )}
-              {row.isStatutory && (
-                <span className="badge badge-sm badge-info">Statutory</span>
-              )}
-            </div>
+            <PayrollComponentProperties
+              isTaxable={row.isTaxable}
+              isStatutory={row.isStatutory}
+            />
           ),
         }))}
         searchConfig={{

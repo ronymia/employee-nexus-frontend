@@ -171,3 +171,12 @@ export const EMPLOYEE_PAYROLL_COMPONENTS_HISTORY = gql`
     }
   }
 `;
+export const DELETE_EMPLOYEE_PAYROLL_COMPONENT = gql`
+  mutation DeleteEmployeePayrollComponent($id: Float!) {
+    deleteEmployeePayrollComponent(id: $id) {
+      success
+      statusCode
+      message
+    }
+  }
+`;
