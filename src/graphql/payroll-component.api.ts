@@ -17,7 +17,7 @@ export const GET_PAYROLL_COMPONENTS = gql`
         defaultValue
         description
         displayOrder
-        isActive
+        status
         isStatutory
         isTaxable
         createdAt
@@ -42,7 +42,7 @@ export const GET_PAYROLL_COMPONENT_BY_ID = gql`
         componentType
         calculationType
         defaultValue
-        isActive
+        status
         isTaxable
         isStatutory
         displayOrder
@@ -76,7 +76,7 @@ export const CREATE_PAYROLL_COMPONENT = gql`
         componentType
         calculationType
         defaultValue
-        isActive
+        status
         createdAt
       }
     }
@@ -114,6 +114,31 @@ export const DELETE_PAYROLL_COMPONENT = gql`
       success
       data {
         id
+      }
+    }
+  }
+`;
+
+// PAYROLL COMPONENT OVERVIEW
+export const PAYROLL_COMPONENT_OVERVIEW = gql`
+  query PayrollComponentOverview {
+    payrollComponentOverview {
+      success
+      statusCode
+      message
+      data {
+        total
+        earning
+        deduction
+        fixedAmount
+        percentageOfBasic
+        active
+        draft
+        disabled
+        taxable
+        nonTaxable
+        statutory
+        nonStatutory
       }
     }
   }

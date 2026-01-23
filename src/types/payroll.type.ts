@@ -1,3 +1,5 @@
+import { ComponentType } from "react";
+import { IPayrollComponent } from "./payroll-component.type";
 import { IUser } from "./user.type";
 
 export enum PayrollCycleStatus {
@@ -15,74 +17,12 @@ export enum PayrollFrequency {
   MONTHLY = "MONTHLY",
 }
 
-export enum ComponentType {
-  EARNING = "EARNING",
-  DEDUCTION = "DEDUCTION",
-  EMPLOYER_COST = "EMPLOYER_COST",
-}
-
-export enum CalculationType {
-  FIXED_AMOUNT = "FIXED_AMOUNT",
-  PERCENTAGE_OF_BASIC = "PERCENTAGE_OF_BASIC",
-  PERCENTAGE_OF_GROSS = "PERCENTAGE_OF_GROSS",
-  HOURLY_RATE = "HOURLY_RATE",
-}
-
 export enum PayrollItemStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
   PAID = "PAID",
   ON_HOLD = "ON_HOLD",
   CANCELLED = "CANCELLED",
-}
-
-// Payroll Component
-export interface IPayrollComponent {
-  id: number;
-  name: string;
-  code: string;
-  description?: string;
-  componentType: ComponentType;
-  calculationType: CalculationType;
-  defaultValue?: number;
-  isActive: boolean;
-  isTaxable: boolean;
-  isStatutory: boolean;
-  displayOrder?: number;
-  businessId?: number;
-  business?: {
-    id: number;
-    name: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ICreatePayrollComponentInput {
-  name: string;
-  code: string;
-  description?: string;
-  componentType: ComponentType;
-  calculationType: CalculationType;
-  defaultValue?: number;
-  isActive?: boolean;
-  isTaxable?: boolean;
-  isStatutory?: boolean;
-  displayOrder?: number;
-  businessId?: number;
-}
-
-export interface IUpdatePayrollComponentInput {
-  name?: string;
-  code?: string;
-  description?: string;
-  componentType?: ComponentType;
-  calculationType?: CalculationType;
-  defaultValue?: number;
-  isActive?: boolean;
-  isTaxable?: boolean;
-  isStatutory?: boolean;
-  displayOrder?: number;
 }
 
 // Payroll Cycle
@@ -239,14 +179,6 @@ export interface IGetPayrollCyclesInput {
 export interface IGetPayrollComponentsInput {
   businessId?: number;
   componentType?: ComponentType;
-  isActive?: boolean;
-  isStatutory?: boolean;
-}
-
-// Backend uses this naming convention
-export interface QueryPayrollComponentInput {
-  businessId?: number;
-  componentType?: ComponentType;
-  isActive?: boolean;
+  status?: string;
   isStatutory?: boolean;
 }

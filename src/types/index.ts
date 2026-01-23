@@ -42,3 +42,4 @@ export * from "./employee-work-site.type";
 export * from "./employee-work-schedule.type";
 export * from "./employee-salary.type";
 export * from "./business-subscription.type";
+export * from "./payroll-component.type";
