@@ -5,7 +5,11 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
 import { TableColumnType } from "@/types";
-import { IAttendance } from "@/types/attendance.type";
+import {
+  IAttendance,
+  IAttendanceOverview,
+  IAttendanceOverviewResponse,
+} from "@/types/attendance.type";
 import {
   PiCheckCircle,
   PiXCircle,
@@ -31,13 +35,13 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import AttendanceForm from "./AttendanceForm";
 import AttendanceRecord from "./components/AttendanceRecord";
 import usePopupOption from "@/hooks/usePopupOption";
+import useConfirmation from "@/hooks/useConfirmation";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { PiClockAfternoon } from "react-icons/pi";
 import { motion } from "motion/react";
 import PageHeader from "@/components/ui/PageHeader";
-import FormModal from "@/components/form/FormModal";
-import { showToast } from "@/components/ui/CustomToast";
+
 import { minutesToHoursAndMinutes } from "@/utils/time.utils";
 import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";
 
@@ -47,17 +51,8 @@ import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";
 import OverviewCard from "@/components/card/OverviewCard";
 
 function AttendanceOverview() {
-  const { data, loading, error } = useQuery<{
-    attendanceOverview: {
-      data: {
-        pending: number;
-        approved: number;
-        absent: number;
-        late: number;
-        halfDay: number;
-      };
-    };
-  }>(ATTENDANCE_OVERVIEW);
+  const { data, loading, error } =
+    useQuery<IAttendanceOverviewResponse>(ATTENDANCE_OVERVIEW);
 
   const summary = data?.attendanceOverview?.data;
 
@@ -95,7 +90,9 @@ function AttendanceOverview() {
       bgColor: "bg-[#fff7d6]",
       decorationColor: "bg-[#ffeea3]",
       iconColor: "text-[#b08800]",
-      subText: "Awaiting Approval",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance entries submitted by employees but not yet reviewed or approved by a manager.",
     },
     {
       title: "Approved",
@@ -104,7 +101,9 @@ function AttendanceOverview() {
       bgColor: "bg-[#e3f9eb]",
       decorationColor: "bg-[#bcf0cf]",
       iconColor: "text-[#1f8c54]",
-      subText: "Regularized",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance records that have been verified and approved, and are considered valid for payroll.",
     },
     {
       title: "Absent",
@@ -113,7 +112,19 @@ function AttendanceOverview() {
       bgColor: "bg-[#ffe3e3]",
       decorationColor: "bg-[#ffc2c2]",
       iconColor: "text-[#c92a2a]",
-      subText: "Unaccounted",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Days where employees did not check in and no valid attendance was recorded.",
+    },
+    {
+      title: "Rejected",
+      value: summary?.rejected || 0,
+      Icon: PiXCircle,
+      bgColor: "bg-[#ffe3e3]",
+      decorationColor: "bg-[#ffc2c2]",
+      iconColor: "text-[#c92a2a]",
+      subText: `out of ${summary?.total}`,
+      description: "Attendance records that have been rejected by a manager.",
     },
     {
       title: "Late",
@@ -122,21 +133,25 @@ function AttendanceOverview() {
       bgColor: "bg-[#e0f2ff]",
       decorationColor: "bg-[#bae0ff]",
       iconColor: "text-[#1a7bc7]",
-      subText: "Check-in Delay",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance records where the employee checked in after the allowed time threshold.",
     },
     {
       title: "Half Day",
-      value: summary?.halfDay || 0,
+      value: summary?.partial || 0,
       Icon: PiClockAfternoon,
       bgColor: "bg-[#edebff]",
       decorationColor: "bg-[#d0c9ff]",
       iconColor: "text-[#5b4eb1]",
-      subText: "Partial Duty",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance marked as partial working hours, below the required full-day duration.",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
       {stats.map((stat, index) => (
         <motion.div
           key={stat.title}
@@ -144,19 +159,26 @@ function AttendanceOverview() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <OverviewCard stat={stat} handler={undefined} isLoading={loading} />
+          <OverviewCard
+            stat={stat}
+            handler={undefined}
+            isLoading={loading}
+            position={stats.length - 1 === index ? "right" : "left"}
+          />
         </motion.div>
       ))}
     </div>
   );
 }
-
 // ==================== MAIN COMPONENT ====================
 
 export default function AttendancePage() {
   // ==================== PERMISSIONS ====================
+  // ==================== PERMISSIONS ====================
   const { hasPermission } = usePermissionGuard();
+  const { confirm } = useConfirmation();
 
+  // ==================== LOCAL STATE ====================
   // POPUP STATE MANAGEMENT
   const { popupOption, setPopupOption } = usePopupOption();
 
@@ -185,7 +207,10 @@ export default function AttendancePage() {
   // DELETE ATTENDANCE
   const [deleteAttendance] = useMutation(DELETE_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+      { query: ATTENDANCE_OVERVIEW },
+    ],
     onCompleted: () => {
       setPopupOption({ ...popupOption, open: false });
     },
@@ -194,13 +219,19 @@ export default function AttendancePage() {
   // APPROVE ATTENDANCE
   const [approveAttendance] = useMutation(APPROVE_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+      { query: ATTENDANCE_OVERVIEW },
+    ],
   });
 
   // REJECT ATTENDANCE
   const [rejectAttendance] = useMutation(REJECT_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+      { query: ATTENDANCE_OVERVIEW },
+    ],
   });
 
   // ==================== DATA PREPARATION ====================
@@ -210,16 +241,31 @@ export default function AttendancePage() {
   // ==================== HANDLERS ====================
   // DELETE HANDLER
   const handleDelete = async (attendance: IAttendance) => {
-    try {
-      const res = await deleteAttendance({
-        variables: { id: Number(attendance.id) },
-      });
-      if (res?.data) {
-        showToast.success("Deleted!", "Attendance deleted successfully");
-      }
-    } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to delete attendance");
-    }
+    // Format details for confirmation
+    const name = attendance.user?.profile?.fullName || "Employee";
+    const date = dayjs(attendance.date).format("MMM DD, YYYY");
+    const totalTime = attendance.overtimeMinutes
+      ? `${minutesToHoursAndMinutes(attendance.totalMinutes)} (${minutesToHoursAndMinutes(attendance.overtimeMinutes)})`
+      : minutesToHoursAndMinutes(attendance.totalMinutes);
+
+    await confirm({
+      title: "Delete Attendance",
+      message: `Do you want to delete <strong>${name} - ${date}</strong>?${
+        `Total Worked: ${totalTime}. This action cannot be undone.`
+          ? `<br/><small style="color: rgba(0,0,0,0.6);">${`Total Worked: ${totalTime}. This action cannot be undone.`}</small>`
+          : ""
+      }`,
+      confirmButtonText: "Delete Record",
+      confirmButtonColor: "#ef4444",
+      icon: "warning",
+      successTitle: "Deleted!",
+      successMessage: "Attendance deleted successfully",
+      onConfirm: async () => {
+        await deleteAttendance({
+          variables: { id: Number(attendance.id) },
+        });
+      },
+    });
   };
 
   // UPDATE HANDLER
@@ -236,30 +282,76 @@ export default function AttendancePage() {
 
   // APPROVE HANDLER
   const handleApprove = async (attendance: IAttendance) => {
-    try {
-      const res = await approveAttendance({
-        variables: { attendanceId: Number(attendance.id) },
-      });
-      if (res?.data) {
-        showToast.success("Approved!", "Attendance approved successfully");
-      }
-    } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to approve attendance");
-    }
+    // Format details for confirmation
+    const name = attendance.user?.profile?.fullName || "Employee";
+    const date = dayjs(attendance.date).format("MMM DD, YYYY");
+    const totalTime = minutesToHoursAndMinutes(attendance.totalMinutes);
+    const scheduleTime = minutesToHoursAndMinutes(attendance.scheduleMinutes);
+
+    await confirm({
+      title: "Approve Attendance?",
+      // We leave message undefined to prioritize itemName/itemDescription layout
+      message: undefined,
+      itemName: `${name} - ${date}`,
+      itemDescription: `Total: ${totalTime} | Scheduled: ${scheduleTime}`,
+      icon: "question",
+      confirmButtonText: "Yes, Approve",
+      confirmButtonColor: "#10b981", // success color
+      input: "textarea",
+      inputPlaceholder: "Enter approval remarks...",
+      inputRequired: attendance.status === "rejected" ? true : false,
+      onConfirm: async (remarks) => {
+        const res = await approveAttendance({
+          variables: {
+            approveAttendanceInput: {
+              attendanceId: Number(attendance.id),
+              remarks,
+            },
+          },
+        });
+        if (res?.data) {
+          // Success handled by hook
+        }
+      },
+      successTitle: "Approved!",
+      successMessage: "Attendance approved successfully",
+    });
   };
 
   // REJECT HANDLER
   const handleReject = async (attendance: IAttendance) => {
-    try {
-      const res = await rejectAttendance({
-        variables: { attendanceId: Number(attendance.id) },
-      });
-      if (res?.data) {
-        showToast.success("Rejected!", "Attendance rejected successfully");
-      }
-    } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to reject attendance");
-    }
+    // Format details for confirmation
+    const name = attendance.user?.profile?.fullName || "Employee";
+    const date = dayjs(attendance.date).format("MMM DD, YYYY");
+    const totalTime = minutesToHoursAndMinutes(attendance.totalMinutes);
+
+    await confirm({
+      title: "Reject Attendance?",
+      message: undefined,
+      itemName: `${name} - ${date}`,
+      itemDescription: `Total Worked: ${totalTime}. This action cannot be undone.`,
+      icon: "warning",
+      confirmButtonText: "Yes, Reject",
+      confirmButtonColor: "#ef4444", // error color
+      input: "textarea",
+      inputPlaceholder: "Enter reason for rejection...",
+      inputRequired: true,
+      onConfirm: async (remarks) => {
+        const res = await rejectAttendance({
+          variables: {
+            rejectAttendanceInput: {
+              attendanceId: Number(attendance.id),
+              remarks,
+            },
+          },
+        });
+        if (res?.data) {
+          // Success handled by hook
+        }
+      },
+      successTitle: "Rejected!",
+      successMessage: "Attendance rejected successfully",
+    });
   };
 
   // VIEW RECORD HANDLER
@@ -299,18 +391,12 @@ export default function AttendancePage() {
     },
     {
       key: "4",
-      header: "Total",
+      header: "Total Worked",
       accessorKey: "customTotalMinutes",
       show: true,
     },
     {
       key: "5",
-      header: "Break",
-      accessorKey: "customBreakMinutes",
-      show: true,
-    },
-    {
-      key: "6",
       header: "Status",
       accessorKey: "customStatus",
       show: true,
@@ -356,16 +442,7 @@ export default function AttendancePage() {
       name: "Delete",
       type: "button" as const,
       Icon: PiTrash,
-      handler: (row: IAttendance) => {
-        setPopupOption({
-          open: true,
-          closeOnDocumentClick: true,
-          actionType: "delete",
-          form: "attendance",
-          deleteHandler: () => handleDelete(row),
-          title: "Delete Attendance",
-        });
-      },
+      handler: (row: IAttendance) => handleDelete(row),
       permissions: [Permissions.AttendanceDelete],
       disabledOn: [],
     },
@@ -405,10 +482,11 @@ export default function AttendancePage() {
           customStatus: <AttendanceStatusBadge status={row.status} />,
           customScheduleMinutes:
             minutesToHoursAndMinutes(row.scheduleMinutes) || "N/A",
-          customTotalMinutes:
-            minutesToHoursAndMinutes(row.totalMinutes) || "N/A",
-          customBreakMinutes:
-            minutesToHoursAndMinutes(row.breakMinutes) || "N/A",
+          customTotalMinutes: row.overtimeMinutes
+            ? `${minutesToHoursAndMinutes(row.totalMinutes)} (${minutesToHoursAndMinutes(row.overtimeMinutes)} overtime)`
+            : minutesToHoursAndMinutes(row.totalMinutes) || "N/A",
+          customType:
+            row.type.charAt(0).toUpperCase() + row.type.slice(1) || "N/A",
         }))}
         searchConfig={{
           searchable: false,
@@ -461,10 +539,6 @@ export default function AttendancePage() {
             />
           )}
         </CustomPopup>
-      )}
-
-      {popupOption.actionType === "delete" && (
-        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
       )}
 
       {/* Attendance Record Modal */}

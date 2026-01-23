@@ -33,10 +33,12 @@ export default function OverviewCard({
   stat,
   handler,
   isLoading = true,
+  position = "left",
 }: {
   stat: any;
   handler?: () => void;
   isLoading?: boolean;
+  position?: "left" | "right";
 }) {
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -110,10 +112,12 @@ export default function OverviewCard({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -5, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute left-0 top-full mt-2 z-50 w-64 bg-slate-800 text-white text-xs p-3 rounded-xl shadow-xl border border-slate-700"
+                  className={`absolute ${position}-0 top-full mt-2 z-50 w-64 bg-slate-800 text-white text-xs p-3 rounded-xl shadow-xl border border-slate-700`}
                   style={{ pointerEvents: "none" }}
                 >
-                  <div className="absolute -top-1.5 left-4 w-3 h-3 bg-slate-800 border-l border-t border-slate-700 rotate-45" />
+                  <div
+                    className={`absolute -top-1.5 ${position}-2 w-3 h-3 bg-slate-800 border-l border-t border-slate-700 rotate-45`}
+                  />
                   <p className="leading-relaxed">{stat.description}</p>
                 </motion.div>
               )}

@@ -91,6 +91,7 @@ export const GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE = gql`
           breakMinutes
           schedules {
             dayOfWeek
+            isWeekend
             timeSlots {
               startTime
               endTime

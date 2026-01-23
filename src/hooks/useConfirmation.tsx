@@ -11,10 +11,25 @@ interface IUseConfirmationOptions {
   confirmButtonText?: string;
   confirmButtonColor?: string;
   cancelButtonText?: string;
-  onConfirm: () => Promise<void>;
+  onConfirm: (inputValue?: any) => Promise<void>;
   successTitle?: string;
   successMessage?: string;
   showSuccessToast?: boolean;
+  input?:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "tel"
+    | "range"
+    | "textarea"
+    | "select"
+    | "radio"
+    | "checkbox"
+    | "file"
+    | "url";
+  inputPlaceholder?: string;
+  inputRequired?: boolean;
 }
 
 // ==================== CUSTOM HOOK ====================
@@ -32,6 +47,9 @@ export default function useConfirmation() {
     successTitle = "Success!",
     successMessage = "Action completed successfully",
     showSuccessToast = true,
+    input,
+    inputPlaceholder,
+    inputRequired = false,
   }: IUseConfirmationOptions) => {
     // Build HTML message
     let htmlMessage = message || "";
@@ -58,6 +76,16 @@ export default function useConfirmation() {
       showLoaderOnConfirm: true,
       allowOutsideClick: false,
       backdrop: true,
+      input,
+      inputPlaceholder,
+      inputValidator: inputRequired
+        ? (value: any) => {
+            if (!value) {
+              return "This field is required";
+            }
+            return null;
+          }
+        : undefined,
       showClass: {
         popup: "swal2-show",
         backdrop: "swal2-backdrop-show",
@@ -66,9 +94,9 @@ export default function useConfirmation() {
         popup: "swal2-hide",
         backdrop: "swal2-backdrop-hide",
       },
-      preConfirm: async () => {
+      preConfirm: async (inputValue) => {
         try {
-          await onConfirm();
+          await onConfirm(inputValue);
           return true;
         } catch (error: any) {
           Swal.showValidationMessage(
