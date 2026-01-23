@@ -3,12 +3,13 @@
 // ==================== EXTERNAL IMPORTS ====================
 import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { showToast } from "@/components/ui/CustomToast";
-import CustomTable from "@/components/table/CustomTable";
-import CustomLoading from "@/components/loader/CustomLoading";
 import { TableColumnType, ILeave, LeaveDuration } from "@/types";
-import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
+import useConfirmation from "@/hooks/useConfirmation";
 import {
+  PiCheck,
+  PiX,
+  PiCalendar,
+  PiCalendarPlus,
   PiClock,
   PiCheckCircle,
   PiXCircle,
@@ -16,14 +17,14 @@ import {
   PiPlusCircle,
   PiPencil,
   PiTrash,
-  PiCheck,
-  PiX,
 } from "react-icons/pi";
+import { LiaUserClockSolid } from "react-icons/lia";
 import {
   GET_LEAVES,
   DELETE_LEAVE,
   APPROVE_LEAVE,
   REJECT_LEAVE,
+  LEAVE_OVERVIEW,
 } from "@/graphql/leave.api";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -33,45 +34,16 @@ import LeaveForm from "./LeaveForm";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import PageHeader from "@/components/ui/PageHeader";
+import CustomTable from "@/components/table/CustomTable";
+import OverviewCard from "@/components/card/OverviewCard";
+import { motion } from "motion/react";
+
+import { ILeaveOverviewResponse } from "@/types/leave.type";
+import LeaveRecord from "./components/LeaveRecord";
 
 dayjs.extend(customParseFormat);
 
 // ==================== SUB-COMPONENTS ====================
-
-// STATS CARD
-interface IStatsCardProps {
-  label: string;
-  value: number | string;
-  icon: React.ElementType;
-  color: "warning" | "success" | "error" | "primary";
-}
-
-function StatsCard({ label, value, icon: Icon, color }: IStatsCardProps) {
-  const colorClasses = {
-    warning: "bg-warning/10 border-warning/20 text-warning",
-    success: "bg-success/10 border-success/20 text-success",
-    error: "bg-error/10 border-error/20 text-error",
-    primary: "bg-primary/10 border-primary/20 text-primary",
-  };
-
-  return (
-    <div className={`${colorClasses[color]} border rounded-lg p-4`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-base-content/60">{label}</p>
-          <p
-            className={`text-2xl font-bold ${
-              colorClasses[color].split(" ")[2]
-            }`}
-          >
-            {value}
-          </p>
-        </div>
-        <Icon size={32} className={colorClasses[color].split(" ")[2]} />
-      </div>
-    </div>
-  );
-}
 
 // STATUS BADGE
 function getStatusBadge(status: string) {
@@ -110,6 +82,7 @@ function getStatusBadge(status: string) {
 }
 
 // DURATION LABEL
+// DURATION LABEL
 function getDurationLabel(duration: LeaveDuration): string {
   switch (duration) {
     case LeaveDuration.SINGLE_DAY:
@@ -123,13 +96,121 @@ function getDurationLabel(duration: LeaveDuration): string {
   }
 }
 
+function LeaveOverview() {
+  const { data, loading, error } =
+    useQuery<ILeaveOverviewResponse>(LEAVE_OVERVIEW);
+
+  const summary = data?.leaveOverview?.data;
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="alert alert-error mb-6"
+      >
+        <PiXCircle size={24} />
+        <span>Failed to load leave summary</span>
+      </motion.div>
+    );
+  }
+
+  const stats = [
+    {
+      title: "Pending",
+      value: summary?.pending || 0,
+      Icon: PiClock,
+      bgColor: "bg-[#fff7d6]",
+      decorationColor: "bg-[#ffeea3]",
+      iconColor: "text-[#b08800]",
+      subText: `out of ${summary?.total}`,
+      description: "Leave requests awaiting approval.",
+    },
+    {
+      title: "Approved",
+      value: summary?.approved || 0,
+      Icon: PiCheckCircle,
+      bgColor: "bg-[#e3f9eb]",
+      decorationColor: "bg-[#bcf0cf]",
+      iconColor: "text-[#1f8c54]",
+      subText: `out of ${summary?.total}`,
+      description: "Leave requests that have been approved.",
+    },
+    {
+      title: "Rejected",
+      value: summary?.rejected || 0,
+      Icon: PiXCircle,
+      bgColor: "bg-[#ffe3e3]",
+      decorationColor: "bg-[#ffc2c2]",
+      iconColor: "text-[#c92a2a]",
+      subText: `out of ${summary?.total}`,
+      description: "Leave requests that have been rejected.",
+    },
+    {
+      title: "Cancelled",
+      value: summary?.cancelled || 0,
+      Icon: PiXCircle,
+      bgColor: "bg-base-200",
+      decorationColor: "bg-base-300",
+      iconColor: "text-base-content/60",
+      subText: `out of ${summary?.total}`,
+      description: "Leave requests that were cancelled.",
+    },
+    {
+      title: "Single Day",
+      value: summary?.singleDay || 0,
+      Icon: PiCalendar,
+      bgColor: "bg-[#e0f2ff]",
+      decorationColor: "bg-[#bae0ff]",
+      iconColor: "text-[#1a7bc7]",
+      subText: `out of ${summary?.total}`,
+      description: "Leave requests for a single day.",
+    },
+    {
+      title: "Multi Day",
+      value: summary?.multiDay || 0,
+      Icon: PiCalendarPlus,
+      bgColor: "bg-[#edebff]",
+      decorationColor: "bg-[#d0c9ff]",
+      iconColor: "text-[#5b4eb1]",
+      subText: `out of ${summary?.total}`,
+      description: "Leave requests spanning multiple days.",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <OverviewCard
+            stat={stat}
+            handler={undefined}
+            isLoading={loading}
+            position={stats.length - 1 === index ? "right" : "left"}
+          />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 // ==================== MAIN COMPONENT ====================
 export default function LeaveRecordsPage() {
   // ==================== PERMISSIONS ====================
   const { hasPermission } = usePermissionGuard();
 
   // ====================HOOKS ====================
-  const deleteConfirmation = useDeleteConfirmation();
+  const { confirm } = useConfirmation();
+
+  // ==================== LOCAL STATE ====================
+  // LEAVE RECORD MODAL STATE
+  const [selectedLeave, setSelectedLeave] = useState<ILeave | null>(null);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
   // ==================== LOCAL STATE ====================
   const [columns, setColumns] = useState<TableColumnType[]>([
@@ -141,6 +222,12 @@ export default function LeaveRecordsPage() {
     },
     {
       key: "2",
+      header: "Leave Details",
+      accessorKey: "customLeaveRecord",
+      show: true,
+    },
+    {
+      key: "3",
       header: "Leave Type",
       accessorKey: "customLeaveType",
       show: true,
@@ -159,7 +246,7 @@ export default function LeaveRecordsPage() {
     },
     {
       key: "5",
-      header: "Total Hours",
+      header: "Leave Hours",
       accessorKey: "customTotalHours",
       show: true,
     },
@@ -173,11 +260,6 @@ export default function LeaveRecordsPage() {
 
   // POPUP STATE MANAGEMENT
   const { popupOption, setPopupOption } = usePopupOption();
-
-  // LOADING STATE FOR INDIVIDUAL ROWS
-  const [processingLeaveId, setProcessingLeaveId] = useState<number | null>(
-    null
-  );
 
   // ==================== GRAPHQL QUERIES ====================
 
@@ -200,47 +282,54 @@ export default function LeaveRecordsPage() {
 
   // ==================== GRAPHQL MUTATIONS ====================
   // DELETE LEAVE
-  const [deleteLeave, { loading: deleting }] = useMutation(DELETE_LEAVE, {
+  const [deleteLeave] = useMutation(DELETE_LEAVE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
   });
 
   // APPROVE LEAVE
   const [approveLeave] = useMutation(APPROVE_LEAVE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
   });
 
   // REJECT LEAVE
   const [rejectLeave] = useMutation(REJECT_LEAVE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_LEAVES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
   });
-
-  // ==================== CALCULATE STATS ====================
-  const stats = {
-    pending: leaves.filter((l) => l.status === "pending").length,
-    approved: leaves.filter((l) => l.status === "approved").length,
-    rejected: leaves.filter((l) => l.status === "rejected").length,
-    totalHours: leaves.reduce((sum, l) => sum + l.totalHours, 0),
-  };
 
   // ==================== HANDLERS ====================
   // DELETE HANDLER
+  // DELETE HANDLER
   const handleDelete = async (leave: ILeave) => {
-    await deleteConfirmation.confirm({
-      title: "Are you sure?",
-      itemName: leave.user?.profile?.fullName || "this employee",
-      itemDescription: `Leave Period: ${
-        leave.endDate
-          ? `${dayjs(leave.startDate).format("MMM DD, YYYY")} - ${dayjs(
-              leave.endDate
-            ).format("MMM DD, YYYY")}`
-          : dayjs(leave.startDate).format("MMM DD, YYYY")
-      }`,
-      confirmButtonText: "Yes, delete it!",
+    const itemName = leave.user?.profile?.fullName || "this employee";
+    const itemDescription = `Leave Period: ${
+      leave.endDate
+        ? `${dayjs(leave.startDate).format("MMM DD, YYYY")} - ${dayjs(
+            leave.endDate,
+          ).format("MMM DD, YYYY")}`
+        : dayjs(leave.startDate).format("MMM DD, YYYY")
+    }`;
+
+    await confirm({
+      title: "Delete Leave Request",
+      message: `Do you want to delete leave request for <strong>${itemName}</strong>?<br/><small style="color: rgba(0,0,0,0.6);">${itemDescription}</small>`,
+      confirmButtonText: "Delete Record",
+      confirmButtonColor: "#ef4444",
+      icon: "warning",
+      successTitle: "Deleted!",
       successMessage: "Leave request has been deleted successfully",
-      onDelete: async () => {
+      onConfirm: async () => {
         await deleteLeave({
           variables: { id: Number(leave.id) },
         });
@@ -249,45 +338,90 @@ export default function LeaveRecordsPage() {
   };
 
   // APPROVE HANDLER
+  // APPROVE HANDLER
   const handleApprove = async (leave: ILeave) => {
-    try {
-      setProcessingLeaveId(leave.id);
-      await approveLeave({ variables: { leaveId: Number(leave.id) } });
-      showToast.success(
-        "Approved!",
-        `Leave request for ${
-          leave.user?.profile?.fullName || "employee"
-        } has been approved`
-      );
-    } catch (error: any) {
-      showToast.error(
-        "Error",
-        error.message || "Failed to approve leave request"
-      );
-    } finally {
-      setProcessingLeaveId(null);
-    }
+    const itemName = leave.user?.profile?.fullName || "this employee";
+    const itemDescription = `Leave Period: ${
+      leave.endDate
+        ? `${dayjs(leave.startDate).format("MMM DD, YYYY")} - ${dayjs(
+            leave.endDate,
+          ).format("MMM DD, YYYY")}`
+        : dayjs(leave.startDate).format("MMM DD, YYYY")
+    }`;
+
+    await confirm({
+      title: "Approve Leave Request?",
+      message: undefined,
+      itemName,
+      itemDescription,
+      icon: "question",
+      confirmButtonText: "Yes, Approve",
+      confirmButtonColor: "#10b981", // success color
+      input: "textarea",
+      inputPlaceholder: "Enter approval remarks...",
+      inputRequired: leave.status === "rejected" ? true : false,
+      onConfirm: async (remarks) => {
+        const res = await approveLeave({
+          variables: {
+            approveLeaveInput: {
+              leaveId: Number(leave.id),
+              remarks,
+            },
+          },
+        });
+        if (res?.data) {
+          // Success handled by hook
+        }
+      },
+      successTitle: "Approved!",
+      successMessage: "Leave request has been approved",
+    });
   };
 
   // REJECT HANDLER
   const handleReject = async (leave: ILeave) => {
-    try {
-      setProcessingLeaveId(leave.id);
-      await rejectLeave({ variables: { leaveId: Number(leave.id) } });
-      showToast.success(
-        "Rejected!",
-        `Leave request for ${
-          leave.user?.profile?.fullName || "employee"
-        } has been rejected`
-      );
-    } catch (error: any) {
-      showToast.error(
-        "Error",
-        error.message || "Failed to reject leave request"
-      );
-    } finally {
-      setProcessingLeaveId(null);
-    }
+    const itemName = leave.user?.profile?.fullName || "this employee";
+    const itemDescription = `Leave Period: ${
+      leave.endDate
+        ? `${dayjs(leave.startDate).format("MMM DD, YYYY")} - ${dayjs(
+            leave.endDate,
+          ).format("MMM DD, YYYY")}`
+        : dayjs(leave.startDate).format("MMM DD, YYYY")
+    }`;
+
+    await confirm({
+      title: "Reject Leave Request?",
+      message: undefined,
+      itemName,
+      itemDescription,
+      icon: "warning",
+      confirmButtonText: "Yes, Reject",
+      confirmButtonColor: "#ef4444", // error color
+      input: "textarea",
+      inputPlaceholder: "Enter reason for rejection...",
+      inputRequired: true,
+      onConfirm: async (remarks) => {
+        const res = await rejectLeave({
+          variables: {
+            rejectLeaveInput: {
+              leaveId: Number(leave.id),
+              remarks,
+            },
+          },
+        });
+        if (res?.data) {
+          // Success handled by hook
+        }
+      },
+      successTitle: "Rejected!",
+      successMessage: "Leave request has been rejected",
+    });
+  };
+
+  // VIEW RECORD HANDLER
+  const handleViewRecord = (leave: ILeave) => {
+    setSelectedLeave(leave);
+    setIsRecordModalOpen(true);
   };
 
   // UPDATE HANDLER
@@ -311,11 +445,7 @@ export default function LeaveRecordsPage() {
       handler: handleApprove,
       Icon: PiCheck,
       permissions: [Permissions.LeaveUpdate],
-      disabledOn: [
-        { accessorKey: "status", value: "approved" },
-        { accessorKey: "id", value: processingLeaveId },
-      ],
-      isLoading: (row: ILeave) => processingLeaveId === row.id,
+      disabledOn: [{ accessorKey: "status", value: "approved" }],
     },
     {
       name: "Reject",
@@ -323,11 +453,7 @@ export default function LeaveRecordsPage() {
       handler: handleReject,
       Icon: PiX,
       permissions: [Permissions.LeaveUpdate],
-      disabledOn: [
-        { accessorKey: "status", value: "rejected" },
-        { accessorKey: "id", value: processingLeaveId },
-      ],
-      isLoading: (row: ILeave) => processingLeaveId === row.id,
+      disabledOn: [{ accessorKey: "status", value: "rejected" }],
     },
     {
       name: "Edit",
@@ -356,33 +482,8 @@ export default function LeaveRecordsPage() {
         subtitle="Manage employee leave requests and records"
       />
 
-      {/* STATS CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <StatsCard
-          label="Pending"
-          value={stats.pending}
-          icon={PiWarning}
-          color="warning"
-        />
-        <StatsCard
-          label="Approved"
-          value={stats.approved}
-          icon={PiCheckCircle}
-          color="success"
-        />
-        <StatsCard
-          label="Rejected"
-          value={stats.rejected}
-          icon={PiXCircle}
-          color="error"
-        />
-        <StatsCard
-          label="Total Hours"
-          value={`${stats.totalHours}h`}
-          icon={PiClock}
-          color="primary"
-        />
-      </div>
+      {/* LEAVE OVERVIEW */}
+      <LeaveOverview />
 
       {/* LEAVE TABLE */}
       <CustomTable
@@ -402,15 +503,25 @@ export default function LeaveRecordsPage() {
         }}
         dataSource={leaves.map((row) => ({
           ...row,
+          customLeaveRecord: (
+            <button
+              onClick={() => handleViewRecord(row)}
+              className="btn btn-sm btn-ghost gap-2 text-primary hover:bg-primary/10"
+              title="View Leave Details"
+            >
+              <LiaUserClockSolid size={24} />
+              <span className="hidden sm:inline">View Details</span>
+            </button>
+          ),
           customEmployeeName: row.user?.profile?.fullName || "N/A",
           customLeaveType: row.leaveType?.name || "N/A",
           customDuration: getDurationLabel(row.leaveDuration),
           customLeavePeriod: row.endDate
             ? `${dayjs(row.startDate).format("MMM DD, YYYY")} - ${dayjs(
-                row.endDate
+                row.endDate,
               ).format("MMM DD, YYYY")}`
             : dayjs(row.startDate).format("MMM DD, YYYY"),
-          customTotalHours: `${row.totalHours}h`,
+          customTotalHours: `${row.totalMinutes}h`,
           customStatus: getStatusBadge(row.status),
         }))}
       >
@@ -454,6 +565,16 @@ export default function LeaveRecordsPage() {
           />
         )}
       </CustomPopup>
+
+      {/* Leave Record Modal */}
+      <LeaveRecord
+        leave={selectedLeave}
+        isOpen={isRecordModalOpen}
+        onClose={() => {
+          setIsRecordModalOpen(false);
+          setSelectedLeave(null);
+        }}
+      />
     </div>
   );
 }

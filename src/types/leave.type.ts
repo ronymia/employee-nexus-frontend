@@ -27,16 +27,33 @@ export interface ILeave {
   leaveDuration: LeaveDuration;
   startDate: string;
   endDate?: string;
-  totalHours: number;
+  totalMinutes: number;
   status: string;
   reviewedAt?: string;
   reviewedBy?: number;
   reviewer?: IUser;
-  rejectionReason?: string;
+  remarks?: string;
   attachments?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ILeaveOverview {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  cancelled: number;
+  singleDay: number;
+  multiDay: number;
+  halfDay: number;
+}
+
+export interface ILeaveOverviewResponse {
+  leaveOverview: {
+    data: ILeaveOverview;
+  };
 }
 
 export interface ICreateLeaveInput {
