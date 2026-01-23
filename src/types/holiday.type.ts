@@ -51,3 +51,20 @@ export interface IUpdateHolidayInput {
   isPaid?: boolean;
   holidayType?: HolidayType;
 }
+
+export interface IHolidayOverview {
+  total: number;
+  public: number;
+  religious: number;
+  companySpecific: number;
+  regional: number;
+  recurring: number;
+  paid: number;
+  unpaid: number;
+}
+
+export interface IHolidayOverviewResponse {
+  holidayOverview: {
+    data: IHolidayOverview;
+  };
+}

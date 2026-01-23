@@ -523,13 +523,6 @@ export default function LeaveForm({
         }
       }
 
-      // CALCULATE TOTAL HOURS
-      const totalMinutes = calculateTotalHours(
-        data.startDate,
-        data.endDate,
-        data.leaveDuration,
-      );
-
       // FORMAT DATES TO ISO 8601
       const startDate = dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString();
       const endDate =

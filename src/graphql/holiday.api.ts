@@ -117,3 +117,24 @@ export const DELETE_HOLIDAY = gql`
     }
   }
 `;
+
+// HOLIDAY OVERVIEW
+export const HOLIDAY_OVERVIEW = gql`
+  query HolidayOverview {
+    holidayOverview {
+      success
+      statusCode
+      message
+      data {
+        total
+        public
+        religious
+        companySpecific
+        regional
+        recurring
+        paid
+        unpaid
+      }
+    }
+  }
+`;

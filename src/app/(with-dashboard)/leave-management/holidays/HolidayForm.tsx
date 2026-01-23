@@ -13,6 +13,9 @@ import { CREATE_HOLIDAY, UPDATE_HOLIDAY } from "@/graphql/holiday.api";
 import { IHoliday, HolidayType } from "@/types/holiday.type";
 import dayjs from "dayjs";
 import { showToast } from "@/components/ui/CustomToast";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface IHolidayFormProps {
@@ -149,8 +152,8 @@ export default function HolidayForm({
   const handleSubmit = async (data: any) => {
     try {
       // FORMAT DATES TO ISO 8601
-      const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
-      const endDate = dayjs(data.endDate, "DD-MM-YYYY").toISOString();
+      const startDate = dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString();
+      const endDate = dayjs.utc(data.endDate, "DD-MM-YYYY").toISOString();
 
       // PREPARE INPUT
       const input = {
@@ -185,7 +188,7 @@ export default function HolidayForm({
       console.error("Error submitting holiday:", error);
       showToast.error(
         "Error",
-        error.message || `Failed to ${actionType} holiday`
+        error.message || `Failed to ${actionType} holiday`,
       );
       throw error;
     }
