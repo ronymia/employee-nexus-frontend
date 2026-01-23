@@ -76,8 +76,8 @@ const ALL_TABS: Tab[] = [
     permission: Permissions.LeaveRead,
   },
   {
-    id: "payslip",
-    label: "Pay Slip",
+    id: "payroll",
+    label: "Payroll",
     icon: PiReceipt,
     permission: Permissions.PayrollItemRead,
   },

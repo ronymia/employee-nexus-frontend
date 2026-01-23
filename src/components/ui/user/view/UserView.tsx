@@ -23,6 +23,7 @@ import NotesContent from "./view-tabs/notes/NotesContent";
 import AttendanceContent from "./view-tabs/attendance/AttendanceContent";
 import { IUser } from "@/types";
 import EmploymentDetailsContent from "./view-tabs/employment-details/EmploymentDetailsContent";
+import PayrollContent from "./view-tabs/payroll/PayrollContent";
 
 interface UserViewProps {
   userId: number;
@@ -1124,6 +1125,9 @@ export default function UserView({ userId }: UserViewProps) {
         )}
         {activeTab === "payslip" && (
           <PaySlipContent key={`payslip-tab`} userId={userId} />
+        )}
+        {activeTab === "payroll" && (
+          <PayrollContent key={`payroll-tab`} userId={userId} />
         )}
         {activeTab === "projects" && (
           <ProjectsContent key={`projects-tab`} userId={userId} />
