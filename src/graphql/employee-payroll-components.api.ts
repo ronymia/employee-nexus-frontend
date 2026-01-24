@@ -13,9 +13,9 @@ export const ASSIGN_PAYROLL_COMPONENT = gql`
       data {
         id
         userId
-        componentId
+        payrollComponentId
         value
-        isActive
+        # isActive
         effectiveFrom
         effectiveTo
         isOverride
@@ -49,14 +49,14 @@ export const GET_EMPLOYEE_PAYROLL_COMPONENTS = gql`
       data {
         id
         userId
-        componentId
+        payrollComponentId
         value
-        isActive
+        # isActive
         effectiveFrom
         effectiveTo
-        isOverride
+        # isOverride
         notes
-        component {
+        payrollComponent {
           id
           name
           code
@@ -87,17 +87,17 @@ export const GET_ACTIVE_EMPLOYEE_PAYROLL_COMPONENTS = gql`
       data {
         id
         userId
-        componentId
+        payrollComponentId
         value
-        isActive
+        # isActive
         effectiveFrom
         effectiveTo
-        isOverride
+        # isOverride
         assignedBy
         notes
         createdAt
         updatedAt
-        component {
+        payrollComponent {
           id
           name
           code
@@ -135,17 +135,17 @@ export const EMPLOYEE_PAYROLL_COMPONENTS_HISTORY = gql`
       data {
         id
         userId
-        componentId
+        payrollComponentId
         value
-        isActive
+        # isActive
         effectiveFrom
         effectiveTo
-        isOverride
+        # isOverride
         assignedBy
         notes
         createdAt
         updatedAt
-        component {
+        payrollComponent {
           id
           name
           code

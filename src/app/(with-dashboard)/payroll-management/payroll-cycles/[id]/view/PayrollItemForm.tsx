@@ -69,7 +69,7 @@ export default function PayrollItemForm({
 
       const adjustmentsTotal = adjustmentsData.reduce(
         (sum: number, a: any) => sum + (a.amount || 0),
-        0
+        0,
       );
 
       const netPay = grossPay - totalDeductions + adjustmentsTotal;
@@ -236,7 +236,7 @@ function PayrollItemFormFields({
   // ADD BASIC SALARY
   useEffect(() => {
     const selectedEmployee = employees.find(
-      (e) => e.id.toString() === watch("userId")
+      (e) => e.id.toString() === watch("userId"),
     );
 
     if (selectedEmployee && selectedEmployee.employee) {
@@ -360,7 +360,7 @@ function PayrollItemFormFields({
       <PayrollComponentsSection components={components} />
 
       {/* Adjustments Section */}
-      {/* <PayslipAdjustmentsSection /> */}
+      <PayslipAdjustmentsSection />
 
       {/* Notes */}
       <div className="border border-primary/20 rounded-lg p-4">
@@ -417,7 +417,7 @@ function PayrollComponentsSection({
     }
 
     const currentComponentIds = componentsFormValue.map(
-      (comp: any) => comp.componentId || ""
+      (comp: any) => comp.componentId || "",
     );
     const prevComponentIds = prevComponentIdsRef.current;
 
@@ -426,7 +426,7 @@ function PayrollComponentsSection({
         if (!comp.componentId) return comp;
 
         const component = components.find(
-          (c) => c.id === Number(comp.componentId)
+          (c) => c.id === Number(comp.componentId),
         );
         if (!component) return comp;
 
@@ -463,7 +463,7 @@ function PayrollComponentsSection({
         }
 
         return comp;
-      }
+      },
     );
 
     // Check if there are actual changes before updating
@@ -493,7 +493,7 @@ function PayrollComponentsSection({
   const removeComponent = (index: number) => {
     const currentComponents = componentsFormValue || [];
     const newComponents = currentComponents.filter(
-      (_: any, i: number) => i !== index
+      (_: any, i: number) => i !== index,
     );
     setValue("components", newComponents);
   };

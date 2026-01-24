@@ -43,6 +43,7 @@ export enum PermissionResource {
   JOB_HISTORY = "Job History",
   EMERGENCY_CONTACT = "Emergency Contact",
   EMPLOYMENT_DETAILS = "Employment Details",
+  PAYROLL_ADJUSTMENT = "Payroll Adjustment",
 }
 
 // Permission Constants for easy usage
@@ -261,4 +262,11 @@ export const Permissions = {
   EmploymentDetailsRead: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.READ}`,
   EmploymentDetailsUpdate: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.UPDATE}`,
   EmploymentDetailsDelete: `${PermissionResource.EMPLOYMENT_DETAILS}:${PermissionAction.DELETE}`,
+
+  // Payroll Adjustment Permissions
+  PayrollAdjustmentCreate: `${PermissionResource.PAYROLL_ADJUSTMENT}:${PermissionAction.CREATE}`,
+  PayrollAdjustmentRead: `${PermissionResource.PAYROLL_ADJUSTMENT}:${PermissionAction.READ}`,
+  PayrollAdjustmentUpdate: `${PermissionResource.PAYROLL_ADJUSTMENT}:${PermissionAction.UPDATE}`,
+  PayrollAdjustmentDelete: `${PermissionResource.PAYROLL_ADJUSTMENT}:${PermissionAction.DELETE}`,
+  PayrollAdjustmentApprove: `${PermissionResource.PAYROLL_ADJUSTMENT}:approve`,
 } as const;

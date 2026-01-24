@@ -4,18 +4,18 @@ import { IUser } from "./user.type";
 export interface IEmployeePayrollComponent {
   id: number;
   userId: number;
-  componentId: number;
+  payrollComponentId: number;
   value: number;
-  isActive: boolean;
+  // isActive: boolean;
   effectiveFrom: Date;
   effectiveTo?: Date;
-  isOverride: boolean;
+  // isOverride: boolean;
   notes?: string;
   assignedBy?: number;
   assignedByUser?: IUser;
   createdAt: Date;
   updatedAt: Date;
-  component: IPayrollComponent;
+  payrollComponent: IPayrollComponent;
 }
 
 export interface IEmployeePayrollComponentsResponse {
@@ -45,6 +45,6 @@ export interface IEmployeePayrollComponentHistoryResponse {
 
 export interface IQueryEmployeePayrollComponentInput {
   userId?: number;
-  componentId?: number;
-  isActive?: boolean;
+  payrollComponentId?: number;
+  // isActive?: boolean;
 }

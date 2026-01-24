@@ -86,7 +86,7 @@ export interface IPayrollItemComponent {
   updatedAt: string;
 }
 
-export interface IPayslipAdjustment {
+export interface IPayrollItemAdjustment {
   id: number;
   payrollItemId: number;
   type: string;
@@ -121,7 +121,7 @@ export interface IPayrollItem {
   paidAt?: string;
   notes?: string;
   components?: IPayrollItemComponent[];
-  adjustments?: IPayslipAdjustment[];
+  adjustments?: IPayrollItemAdjustment[];
   createdAt: string;
   updatedAt: string;
 }

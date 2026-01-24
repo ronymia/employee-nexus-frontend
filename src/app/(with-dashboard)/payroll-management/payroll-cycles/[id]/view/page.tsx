@@ -5,7 +5,6 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { useParams } from "next/navigation";
 import CustomTable from "@/components/table/CustomTable";
 import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import {
   TableColumnType,
   IPayrollItem,
@@ -20,12 +19,9 @@ import {
   PiCheckCircle,
   PiCurrencyDollar,
   PiClock,
-  PiXCircle,
-  PiWarning,
 } from "react-icons/pi";
 import {
   GET_PAYROLL_CYCLE_BY_ID,
-  DELETE_PAYROLL_CYCLE,
   APPROVE_PAYROLL_CYCLE,
   PROCESS_PAYROLL_CYCLE,
 } from "@/graphql/payroll-cycle.api";
@@ -35,18 +31,201 @@ import {
   APPROVE_PAYROLL_ITEM,
   MARK_PAYROLL_ITEM_PAID,
 } from "@/graphql/payroll-item.api";
-import moment from "moment";
+import dayjs from "dayjs";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayrollItemForm from "./PayrollItemForm";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import PayslipWrapper from "@/components/payroll/PayslipWrapper";
+import useConfirmation from "@/hooks/useConfirmation";
+import toast from "react-hot-toast";
+import PayrollCycleStatusBadge from "@/components/ui/payroll/PayrollCycleStatusBadge";
+import PayrollItemStatusBadge from "@/components/ui/payroll/PayrollItemStatusBadge";
 
 export default function PayrollCycleDetailPage() {
   const { hasPermission } = usePermissionGuard();
+  const { confirm } = useConfirmation();
   const params = useParams();
   const cycleId = params.id as string;
+
+  const { popupOption, setPopupOption } = usePopupOption();
+
+  // Fetch cycle details
+  const {
+    data: cycleData,
+    loading: cycleLoading,
+    refetch: refetchCycle,
+  } = useQuery<{
+    payrollCycleById: {
+      data: IPayrollCycle;
+    };
+  }>(GET_PAYROLL_CYCLE_BY_ID, {
+    variables: { id: Number(cycleId) },
+  });
+
+  // Fetch payroll items
+  const {
+    data: itemsData,
+    loading: itemsLoading,
+    refetch: refetchItems,
+  } = useQuery<{
+    payrollItems: {
+      data: IPayrollItem[];
+    };
+  }>(GET_PAYROLL_ITEMS, {
+    variables: {
+      query: {
+        payrollCycleId: Number(cycleId),
+      },
+    },
+  });
+
+  const cycle = cycleData?.payrollCycleById?.data;
+  const items = itemsData?.payrollItems?.data || [];
+
+  // Mutations
+  const [deleteItem] = useMutation(DELETE_PAYROLL_ITEM);
+  const [approveCycle] = useMutation(APPROVE_PAYROLL_CYCLE);
+  const [processCycle] = useMutation(PROCESS_PAYROLL_CYCLE);
+  const [approveItem] = useMutation(APPROVE_PAYROLL_ITEM);
+  const [markItemPaid] = useMutation(MARK_PAYROLL_ITEM_PAID);
+
+  const handleDeleteItem = async (item: IPayrollItem) => {
+    await confirm({
+      title: "Delete Payroll Item",
+      message: `Are you sure you want to delete the payroll record for <strong>${item.user?.profile?.fullName}</strong>?`,
+      confirmButtonText: "Delete",
+      confirmButtonColor: "#ef4444",
+      icon: "warning",
+      onConfirm: async () => {
+        try {
+          await deleteItem({
+            variables: { id: item.id },
+          });
+          refetchItems();
+        } catch (error) {
+          console.error("Error deleting item:", error);
+          toast.error("Failed to delete payroll item");
+        }
+      },
+      successTitle: "Deleted!",
+      successMessage: "Payroll item deleted successfully",
+    });
+  };
+
+  const handleApproveCycle = async () => {
+    await confirm({
+      title: "Approve Payroll Cycle",
+      message:
+        "Are you sure you want to approve this payroll cycle? This will allow payments to be processed.",
+      confirmButtonText: "Approve",
+      confirmButtonColor: "#22c55e",
+      icon: "success",
+      onConfirm: async () => {
+        try {
+          await approveCycle({
+            variables: { approvePayrollCycleInput: { id: Number(cycleId) } },
+          });
+          refetchCycle();
+        } catch (error: any) {
+          console.error("Error approving cycle:", error);
+          throw error;
+        }
+      },
+      successTitle: "Approved!",
+      successMessage: "Payroll cycle has been approved successfully.",
+    });
+  };
+
+  const handleProcessCycle = async () => {
+    await confirm({
+      title: "Process Payroll Cycle",
+      message:
+        "Are you sure you want to process this payroll cycle? This will generate payroll items for all eligible employees.",
+      confirmButtonText: "Process",
+      confirmButtonColor: "#3b82f6",
+      icon: "info",
+      onConfirm: async () => {
+        try {
+          await processCycle({
+            variables: { processPayrollCycleInput: { id: Number(cycleId) } },
+          });
+          refetchCycle();
+          refetchItems();
+        } catch (error: any) {
+          console.error("Error processing cycle:", error);
+          throw error;
+        }
+      },
+      successTitle: "Processed!",
+      successMessage: "Payroll cycle has been processed successfully.",
+    });
+  };
+
+  const handleApproveItem = async (item: IPayrollItem) => {
+    await confirm({
+      title: "Approve Payroll Item",
+      message: `Are you sure you want to approve the payroll item for <strong>${item.user?.profile?.fullName}</strong>?`,
+      confirmButtonText: "Approve",
+      confirmButtonColor: "#22c55e",
+      icon: "success",
+      onConfirm: async () => {
+        try {
+          await approveItem({
+            variables: { id: item.id },
+          });
+          refetchItems();
+        } catch (error: any) {
+          console.error("Error approving item:", error);
+          throw error;
+        }
+      },
+      successTitle: "Approved!",
+      successMessage: "Payroll item has been approved successfully.",
+    });
+  };
+
+  const handleMarkPaid = async (item: IPayrollItem) => {
+    await confirm({
+      title: "Mark as Paid",
+      message: `Enter the transaction reference for <strong>${item.user?.profile?.fullName}</strong>.`,
+      confirmButtonText: "Confirm Payment",
+      confirmButtonColor: "#22c55e",
+      icon: "question",
+      input: "text",
+      inputPlaceholder: "Transaction Reference (e.g. TXN123456)",
+      inputRequired: true,
+      onConfirm: async (transactionRef) => {
+        try {
+          await markItemPaid({
+            variables: {
+              id: item.id,
+              transactionRef: transactionRef,
+              paymentMethod: "bank_transfer",
+            },
+          });
+          refetchItems();
+        } catch (error: any) {
+          console.error("Error marking as paid:", error);
+          throw error;
+        }
+      },
+      successTitle: "Paid!",
+      successMessage: "Payroll item has been marked as paid.",
+    });
+  };
+
+  const handleEdit = (item: IPayrollItem) => {
+    setPopupOption({
+      open: true,
+      closeOnDocumentClick: true,
+      actionType: "update",
+      form: "payrollItem" as any,
+      data: item,
+      title: "Update Payroll Item",
+    });
+  };
 
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
@@ -87,181 +266,60 @@ export default function PayrollCycleDetailPage() {
     },
   ]);
 
-  const { popupOption, setPopupOption } = usePopupOption();
-  const [deleteModal, setDeleteModal] = useState<{
-    open: boolean;
-    id: number | null;
-    type: "cycle" | "item";
-  }>({ open: false, id: null, type: "item" });
-
-  // Fetch cycle details
-  const {
-    data: cycleData,
-    loading: cycleLoading,
-    refetch: refetchCycle,
-  } = useQuery<{
-    payrollCycleById: {
-      data: IPayrollCycle;
-    };
-  }>(GET_PAYROLL_CYCLE_BY_ID, {
-    variables: { id: Number(cycleId) },
-  });
-
-  // Fetch payroll items
-  const {
-    data: itemsData,
-    loading: itemsLoading,
-    refetch: refetchItems,
-  } = useQuery<{
-    payrollItems: {
-      data: IPayrollItem[];
-    };
-  }>(GET_PAYROLL_ITEMS, {
-    variables: {
-      query: {
-        payrollCycleId: Number(cycleId),
+  const actions = [
+    {
+      name: "View Payslip",
+      type: "button" as const,
+      handler: (item: IPayrollItem) => {
+        setPopupOption({
+          open: true,
+          closeOnDocumentClick: false,
+          actionType: "view",
+          form: "payslip" as any,
+          data: item,
+          title: "Employee Payslip",
+        });
       },
+      Icon: PiEye,
+      permissions: [Permissions.PayrollItemRead],
+      disabledOn: [],
     },
-  });
-
-  const cycle = cycleData?.payrollCycleById?.data;
-  const items = itemsData?.payrollItems?.data || [];
-
-  // Mutations
-  const [deleteCycle] = useMutation(DELETE_PAYROLL_CYCLE);
-  const [deleteItem] = useMutation(DELETE_PAYROLL_ITEM);
-  const [approveCycle] = useMutation(APPROVE_PAYROLL_CYCLE);
-  const [processCycle] = useMutation(PROCESS_PAYROLL_CYCLE);
-  const [approveItem] = useMutation(APPROVE_PAYROLL_ITEM);
-  const [markItemPaid] = useMutation(MARK_PAYROLL_ITEM_PAID);
-
-  const handleDelete = async () => {
-    if (deleteModal.type === "cycle") {
-      try {
-        await deleteCycle({
-          variables: { id: deleteModal.id },
-        });
-        // Navigate back or show success
-      } catch (error) {
-        console.error("Error deleting cycle:", error);
-      }
-    } else {
-      try {
-        await deleteItem({
-          variables: { id: deleteModal.id },
-        });
-        refetchItems();
-      } catch (error) {
-        console.error("Error deleting item:", error);
-      }
-    }
-    setDeleteModal({ open: false, id: null, type: "item" });
-  };
-
-  const handleApproveCycle = async () => {
-    try {
-      await approveCycle({
-        variables: { approvePayrollCycleInput: { id: Number(cycleId) } },
-      });
-      refetchCycle();
-    } catch (error) {
-      console.error("Error approving cycle:", error);
-    }
-  };
-
-  const handleProcessCycle = async () => {
-    try {
-      await processCycle({
-        variables: { processPayrollCycleInput: { id: Number(cycleId) } },
-      });
-      refetchCycle();
-      refetchItems();
-    } catch (error) {
-      console.error("Error processing cycle:", error);
-    }
-  };
-
-  const handleApproveItem = async (item: IPayrollItem) => {
-    try {
-      await approveItem({
-        variables: { id: item.id },
-      });
-      refetchItems();
-    } catch (error) {
-      console.error("Error approving item:", error);
-    }
-  };
-
-  const handleMarkPaid = async (item: IPayrollItem) => {
-    const transactionRef = prompt("Enter transaction reference:");
-    if (transactionRef) {
-      try {
-        await markItemPaid({
-          variables: {
-            id: item.id,
-            transactionRef: transactionRef,
-            paymentMethod: "bank_transfer",
-          },
-        });
-        refetchItems();
-      } catch (error) {
-        console.error("Error marking as paid:", error);
-      }
-    }
-  };
-
-  const handleEdit = (item: IPayrollItem) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "update",
-      form: "payrollItem" as any,
-      data: item,
-      title: "Update Payroll Item",
-    });
-  };
-
-  const getStatusBadge = (status: PayrollItemStatus) => {
-    switch (status) {
-      case PayrollItemStatus.PENDING:
-        return (
-          <span className="badge badge-warning gap-1">
-            <PiClock size={14} />
-            Pending
-          </span>
-        );
-      case PayrollItemStatus.APPROVED:
-        return (
-          <span className="badge badge-info gap-1">
-            <PiCheckCircle size={14} />
-            Approved
-          </span>
-        );
-      case PayrollItemStatus.PAID:
-        return (
-          <span className="badge badge-success gap-1">
-            <PiCheckCircle size={14} />
-            Paid
-          </span>
-        );
-      case PayrollItemStatus.ON_HOLD:
-        return (
-          <span className="badge badge-ghost gap-1">
-            <PiWarning size={14} />
-            On Hold
-          </span>
-        );
-      case PayrollItemStatus.CANCELLED:
-        return (
-          <span className="badge badge-error gap-1">
-            <PiXCircle size={14} />
-            Cancelled
-          </span>
-        );
-      default:
-        return <span className="badge badge-ghost">{status}</span>;
-    }
-  };
+    {
+      name: "Edit",
+      type: "button" as const,
+      handler: handleEdit,
+      Icon: PiPencil,
+      permissions: [Permissions.PayrollItemUpdate],
+      disabledOn: [{ accessorKey: "status", value: PayrollItemStatus.PAID }],
+    },
+    {
+      name: "Approve",
+      type: "button" as const,
+      handler: handleApproveItem,
+      Icon: PiCheckCircle,
+      permissions: [Permissions.PayrollItemUpdate],
+      disabledOn: [
+        { accessorKey: "status", value: PayrollItemStatus.APPROVED },
+        { accessorKey: "status", value: PayrollItemStatus.PAID },
+      ],
+    },
+    {
+      name: "Mark Paid",
+      type: "button" as const,
+      handler: handleMarkPaid,
+      Icon: PiCurrencyDollar,
+      permissions: [Permissions.PayrollItemUpdate],
+      disabledOn: [{ accessorKey: "status", value: PayrollItemStatus.PAID }],
+    },
+    {
+      name: "Delete",
+      type: "button" as const,
+      handler: handleDeleteItem,
+      Icon: PiTrash,
+      permissions: [Permissions.PayrollItemUpdate],
+      disabledOn: [{ accessorKey: "status", value: PayrollItemStatus.PAID }],
+    },
+  ];
 
   const stats = {
     totalItems: items.length,
@@ -289,8 +347,8 @@ export default function PayrollCycleDetailPage() {
         <div>
           <h1 className="text-2xl font-bold text-base-content">{cycle.name}</h1>
           <p className="text-sm text-base-content/60 mt-1">
-            {moment(cycle.periodStart).format("MMM DD, YYYY")} -{" "}
-            {moment(cycle.periodEnd).format("MMM DD, YYYY")}
+            {dayjs(cycle.periodStart).format("MMM DD, YYYY")} -{" "}
+            {dayjs(cycle.periodEnd).format("MMM DD, YYYY")}
           </p>
         </div>
         <div className="flex gap-2">
@@ -312,7 +370,7 @@ export default function PayrollCycleDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <p className="text-sm text-base-content/60">Status</p>
-            <p className="font-semibold">{cycle.status}</p>
+            <PayrollCycleStatusBadge status={cycle.status} />
           </div>
           <div>
             <p className="text-sm text-base-content/60">Frequency</p>
@@ -321,7 +379,7 @@ export default function PayrollCycleDetailPage() {
           <div>
             <p className="text-sm text-base-content/60">Payment Date</p>
             <p className="font-semibold">
-              {moment(cycle.paymentDate).format("MMM DD, YYYY")}
+              {dayjs(cycle.paymentDate).format("MMM DD, YYYY")}
             </p>
           </div>
           <div>
@@ -401,113 +459,49 @@ export default function PayrollCycleDetailPage() {
       </div>
 
       {/* Payroll Items Table */}
-      {itemsLoading ? (
-        <CustomLoading />
-      ) : (
-        <CustomTable
-          isLoading={itemsLoading}
-          actions={[
-            {
-              name: "View Payslip",
-              type: "button" as const,
-              handler: (item: IPayrollItem) => {
-                setPopupOption({
-                  open: true,
-                  closeOnDocumentClick: false,
-                  actionType: "view",
-                  form: "payslip" as any,
-                  data: item,
-                  title: "Employee Payslip",
-                });
-              },
-              Icon: PiEye,
-              permissions: [Permissions.PayrollItemRead],
-              disabledOn: [],
-            },
-            {
-              name: "Edit",
-              type: "button" as const,
-              handler: handleEdit,
-              Icon: PiPencil,
-              permissions: [Permissions.PayrollItemUpdate],
-              disabledOn: [
-                { accessorKey: "status", value: PayrollItemStatus.PAID },
-              ],
-            },
-            {
-              name: "Approve",
-              type: "button" as const,
-              handler: handleApproveItem,
-              Icon: PiCheckCircle,
-              permissions: [Permissions.PayrollItemUpdate],
-              disabledOn: [
-                { accessorKey: "status", value: PayrollItemStatus.APPROVED },
-                { accessorKey: "status", value: PayrollItemStatus.PAID },
-              ],
-            },
-            {
-              name: "Mark Paid",
-              type: "button" as const,
-              handler: handleMarkPaid,
-              Icon: PiCurrencyDollar,
-              permissions: [Permissions.PayrollItemUpdate],
-              disabledOn: [
-                { accessorKey: "status", value: PayrollItemStatus.PAID },
-              ],
-            },
-            {
-              name: "Delete",
-              type: "button" as const,
-              handler: (item: IPayrollItem) =>
-                setDeleteModal({ open: true, id: item.id, type: "item" }),
-              Icon: PiTrash,
-              permissions: [Permissions.PayrollItemUpdate],
-              disabledOn: [
-                { accessorKey: "status", value: PayrollItemStatus.PAID },
-              ],
-            },
-          ]}
-          columns={columns}
-          setColumns={setColumns}
-          dataSource={items.map((row) => ({
-            ...row,
-            customEmployeeName: row.user?.profile?.fullName || "N/A",
-            customBasicSalary: `$${row.basicSalary.toFixed(2)}`,
-            customGrossPay: `$${row.grossPay.toFixed(2)}`,
-            customDeductions: `$${row.totalDeductions.toFixed(2)}`,
-            customNetPay: `$${row.netPay.toFixed(2)}`,
-            customStatus: getStatusBadge(row.status),
-          }))}
-          searchConfig={{
-            searchable: false,
-            debounceDelay: 500,
-            defaultField: "customEmployeeName",
-            searchableFields: [
-              { label: "Employee Name", value: "customEmployeeName" },
-              { label: "Status", value: "status" },
-            ],
-          }}
-        >
-          {hasPermission(Permissions.PayrollItemCreate) ? (
-            <button
-              className="btn btn-primary gap-2"
-              onClick={() =>
-                setPopupOption({
-                  open: true,
-                  closeOnDocumentClick: true,
-                  actionType: "create",
-                  form: "payrollItem" as any,
-                  data: { payrollCycleId: Number(cycleId) },
-                  title: "Add Payroll Item",
-                })
-              }
-            >
-              <PiPlusCircle size={18} />
-              Add Employee
-            </button>
-          ) : null}
-        </CustomTable>
-      )}
+      <CustomTable
+        isLoading={itemsLoading}
+        actions={actions}
+        columns={columns}
+        setColumns={setColumns}
+        dataSource={items.map((row) => ({
+          ...row,
+          customEmployeeName: row.user?.profile?.fullName || "N/A",
+          customBasicSalary: `$${row.basicSalary.toFixed(2)}`,
+          customGrossPay: `$${row.grossPay.toFixed(2)}`,
+          customDeductions: `$${row.totalDeductions.toFixed(2)}`,
+          customNetPay: `$${row.netPay.toFixed(2)}`,
+          customStatus: <PayrollItemStatusBadge status={row.status} />,
+        }))}
+        searchConfig={{
+          searchable: false,
+          debounceDelay: 500,
+          defaultField: "customEmployeeName",
+          searchableFields: [
+            { label: "Employee Name", value: "customEmployeeName" },
+            { label: "Status", value: "status" },
+          ],
+        }}
+      >
+        {hasPermission(Permissions.PayrollItemCreate) ? (
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() =>
+              setPopupOption({
+                open: true,
+                closeOnDocumentClick: true,
+                actionType: "create",
+                form: "payrollItem" as any,
+                data: { payrollCycleId: Number(cycleId) },
+                title: "Add Payroll Item",
+              })
+            }
+          >
+            <PiPlusCircle size={18} />
+            Add Employee
+          </button>
+        ) : null}
+      </CustomTable>
 
       {/* Item Form Modal */}
       <CustomPopup
@@ -540,50 +534,6 @@ export default function PayrollCycleDetailPage() {
           />
         )}
       </CustomPopup>
-
-      {/* Delete Confirmation Modal */}
-      <FormModal
-        popupOption={{
-          open: deleteModal.open,
-          closeOnDocumentClick: false,
-          actionType: "delete",
-          form:
-            deleteModal.type === "cycle"
-              ? "payrollCycle"
-              : ("payrollItem" as any),
-          data: null,
-          title: `Delete ${
-            deleteModal.type === "cycle" ? "Payroll Cycle" : "Payroll Item"
-          }`,
-          deleteHandler: handleDelete,
-        }}
-        setPopupOption={(value) => {
-          if (typeof value === "function") {
-            setDeleteModal((prev) => {
-              const newPopup = value({
-                open: prev.open,
-                closeOnDocumentClick: false,
-                actionType: "delete",
-                form:
-                  deleteModal.type === "cycle"
-                    ? "payrollCycle"
-                    : ("payrollItem" as any),
-                data: null,
-                title: `Delete ${
-                  prev.type === "cycle" ? "Payroll Cycle" : "Payroll Item"
-                }`,
-              });
-              return { open: newPopup.open, id: prev.id, type: prev.type };
-            });
-          } else {
-            setDeleteModal({
-              open: value.open,
-              id: deleteModal.id,
-              type: deleteModal.type,
-            });
-          }
-        }}
-      />
     </div>
   );
 }

@@ -44,3 +44,4 @@ export * from "./employee-salary.type";
 export * from "./business-subscription.type";
 export * from "./payroll-component.type";
 export * from "./employee-payroll-component.type";
+export * from "./payslip-adjustment.type";

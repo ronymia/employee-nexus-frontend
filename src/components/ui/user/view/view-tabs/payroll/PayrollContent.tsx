@@ -3,15 +3,16 @@
 import { useState } from "react";
 import PaySlipContent from "../payslip/PaySlipContent";
 import EmployeePayrollComponent from "./EmployeePayrollComponent";
+import EmployeePayslipAdjustment from "./EmployeePayslipAdjustment";
 
 interface IPayrollContentProps {
   userId: number;
 }
 
 export default function PayrollContent({ userId }: IPayrollContentProps) {
-  const [activeSubTab, setActiveSubTab] = useState<"payslip" | "components">(
-    "components",
-  );
+  const [activeSubTab, setActiveSubTab] = useState<
+    "payslip" | "components" | "adjustments"
+  >("components");
 
   return (
     <div className="space-y-6">
@@ -25,6 +26,16 @@ export default function PayrollContent({ userId }: IPayrollContentProps) {
           }`}
         >
           Payroll Components
+        </button>
+        <button
+          onClick={() => setActiveSubTab("adjustments")}
+          className={`px-6 py-3 text-sm font-medium transition-colors relative ${
+            activeSubTab === "adjustments"
+              ? "text-primary border-b-2 border-primary"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Adjustments
         </button>
         <button
           onClick={() => setActiveSubTab("payslip")}
@@ -42,6 +53,9 @@ export default function PayrollContent({ userId }: IPayrollContentProps) {
         {activeSubTab === "payslip" && <PaySlipContent userId={userId} />}
         {activeSubTab === "components" && (
           <EmployeePayrollComponent userId={userId} />
+        )}
+        {activeSubTab === "adjustments" && (
+          <EmployeePayslipAdjustment userId={userId} />
         )}
       </div>
     </div>

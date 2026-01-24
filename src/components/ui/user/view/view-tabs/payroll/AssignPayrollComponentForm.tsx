@@ -7,7 +7,6 @@ import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
-import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import {
   assignPayrollComponentSchema,
