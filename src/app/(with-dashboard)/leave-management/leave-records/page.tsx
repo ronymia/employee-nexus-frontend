@@ -212,52 +212,6 @@ export default function LeaveRecordsPage() {
   const [selectedLeave, setSelectedLeave] = useState<ILeave | null>(null);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
-  // ==================== LOCAL STATE ====================
-  const [columns, setColumns] = useState<TableColumnType[]>([
-    {
-      key: "1",
-      header: "Employee",
-      accessorKey: "customEmployeeName",
-      show: true,
-    },
-    {
-      key: "2",
-      header: "Leave Details",
-      accessorKey: "customLeaveRecord",
-      show: true,
-    },
-    {
-      key: "3",
-      header: "Leave Type",
-      accessorKey: "customLeaveType",
-      show: true,
-    },
-    {
-      key: "3",
-      header: "Duration",
-      accessorKey: "customDuration",
-      show: true,
-    },
-    {
-      key: "4",
-      header: "Leave Period",
-      accessorKey: "customLeavePeriod",
-      show: true,
-    },
-    {
-      key: "5",
-      header: "Leave Hours",
-      accessorKey: "customTotalHours",
-      show: true,
-    },
-    {
-      key: "6",
-      header: "Status",
-      accessorKey: "customStatus",
-      show: true,
-    },
-  ]);
-
   // POPUP STATE MANAGEMENT
   const { popupOption, setPopupOption } = usePopupOption();
 
@@ -473,6 +427,51 @@ export default function LeaveRecordsPage() {
     },
   ];
 
+  // ==================== LOCAL STATE ====================
+  const [columns, setColumns] = useState<TableColumnType[]>([
+    {
+      key: "1",
+      header: "Employee",
+      accessorKey: "customEmployeeName",
+      show: true,
+    },
+    {
+      key: "2",
+      header: "Leave Details",
+      accessorKey: "customLeaveRecord",
+      show: true,
+    },
+    {
+      key: "3",
+      header: "Leave Type",
+      accessorKey: "customLeaveType",
+      show: true,
+    },
+    {
+      key: "3",
+      header: "Duration",
+      accessorKey: "customDuration",
+      show: true,
+    },
+    {
+      key: "4",
+      header: "Leave Period",
+      accessorKey: "customLeavePeriod",
+      show: true,
+    },
+    {
+      key: "5",
+      header: "Leave Hours",
+      accessorKey: "customTotalHours",
+      show: true,
+    },
+    {
+      key: "6",
+      header: "Status",
+      accessorKey: "customStatus",
+      show: true,
+    },
+  ]);
   // ==================== RENDER ====================
   return (
     <div className="space-y-6">

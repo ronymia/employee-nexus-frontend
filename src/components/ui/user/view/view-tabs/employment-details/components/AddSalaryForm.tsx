@@ -1,15 +1,19 @@
 "use client";
 
 // ==================== IMPORTS ====================
-import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { FiX } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+
+// ==================== CUSTOM FORM IMPORTS ====================
+import CustomForm from "@/components/form/CustomForm";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomInputField from "@/components/form/input/CustomInputField";
+import CustomSelect from "@/components/form/input/CustomSelect";
+import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 
 // ==================== DAYJS CONFIG ====================
 dayjs.extend(utc);
@@ -46,36 +50,26 @@ export default function AddSalaryForm({
   onClose,
   onSuccess,
 }: IAddSalaryFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assignSalary, assignSalaryState] = useMutation(ASSIGN_EMPLOYEE_SALARY);
 
-  const [assignSalary] = useMutation(ASSIGN_EMPLOYEE_SALARY);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IAddSalaryForm>({
-    resolver: zodResolver(addSalarySchema),
-    defaultValues: {
-      salaryAmount: currentSalary?.salaryAmount?.toString() || "",
-      salaryType: currentSalary?.salaryType || "MONTHLY",
-      startDate: dayjs().format("DD-MM-YYYY"),
-      reason: "",
-      remarks: "",
-    },
-  });
+  const defaultValues = {
+    salaryAmount: currentSalary?.salaryAmount?.toString() || "",
+    salaryType: currentSalary?.salaryType || "MONTHLY",
+    startDate: dayjs().format("DD-MM-YYYY"),
+    reason: "",
+    remarks: "",
+  };
 
   // ==================== HANDLERS ====================
   const onSubmit = async (data: IAddSalaryForm) => {
-    setIsSubmitting(true);
     try {
       const { data: response, error } = await assignSalary({
         variables: {
-          assignEmployeeSalaryInput: {
+          createEmployeeSalaryInput: {
             userId,
             salaryAmount: Number(data.salaryAmount),
             salaryType: data.salaryType,
-            startDate: dayjs.utc(data.startDate, "DD-MM-YYYY").toDate(),
+            startDate: dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString(),
             reason: data.reason,
             remarks: data.remarks,
           },
@@ -96,8 +90,6 @@ export default function AddSalaryForm({
     } catch (error: any) {
       console.error("Error updating salary:", error);
       toast.error(error.message || "Failed to update salary");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -119,7 +111,12 @@ export default function AddSalaryForm({
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <CustomForm
+          submitHandler={onSubmit}
+          defaultValues={defaultValues}
+          resolver={addSalarySchema}
+          className="p-6 space-y-4"
+        >
           {/* CURRENT SALARY INFO */}
           {currentSalary && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -132,80 +129,63 @@ export default function AddSalaryForm({
 
           {/* SALARY AMOUNT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Salary Amount <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              {...register("salaryAmount")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomInputField
+              name="salaryAmount"
+              label="Salary Amount"
               placeholder="e.g., 50000"
+              required={true}
+              type="number"
+              dataAuto="salary-amount"
             />
-            {errors.salaryAmount && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.salaryAmount.message}
-              </p>
-            )}
           </div>
 
           {/* SALARY TYPE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Salary Type <span className="text-red-500">*</span>
-            </label>
-            <select
-              {...register("salaryType")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="HOURLY">Hourly</option>
-              <option value="DAILY">Daily</option>
-              <option value="WEEKLY">Weekly</option>
-              <option value="MONTHLY">Monthly</option>
-              <option value="YEARLY">Yearly</option>
-            </select>
+            <CustomSelect
+              name="salaryType"
+              label="Salary Type"
+              placeholder="Select Salary Type"
+              required={true}
+              dataAuto="salary-type"
+              options={[
+                { label: "Hourly", value: "HOURLY" },
+                { label: "Daily", value: "DAILY" },
+                { label: "Weekly", value: "WEEKLY" },
+                { label: "Monthly", value: "MONTHLY" },
+                { label: "Yearly", value: "YEARLY" },
+              ]}
+              isLoading={false}
+            />
           </div>
 
           {/* START DATE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Effective From <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("startDate")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomDatePicker
+              name="startDate"
+              label="Effective From"
+              dataAuto="effective-from-date"
+              required={true}
               placeholder="DD-MM-YYYY"
             />
-            {errors.startDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.startDate.message}
-              </p>
-            )}
           </div>
 
           {/* REASON */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reason
-            </label>
-            <textarea
-              {...register("reason")}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomTextareaField
+              name="reason"
+              label="Reason"
               placeholder="e.g., Annual increment, Promotion, Performance bonus"
+              rows={2}
             />
           </div>
 
           {/* REMARKS */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Remarks
-            </label>
-            <textarea
-              {...register("remarks")}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomTextareaField
+              name="remarks"
+              label="Remarks"
               placeholder="Optional notes..."
+              rows={2}
             />
           </div>
 
@@ -220,17 +200,17 @@ export default function AddSalaryForm({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={assignSalaryState.loading}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting
+              {assignSalaryState.loading
                 ? "Saving..."
                 : currentSalary
                   ? "Update Salary"
                   : "Add Salary"}
             </button>
           </div>
-        </form>
+        </CustomForm>
       </div>
     </div>
   );

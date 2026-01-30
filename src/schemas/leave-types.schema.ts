@@ -11,7 +11,7 @@ export const leaveTypeSchema = z.object({
   leaveMinutes: z.coerce
     .number({ error: "Leave minutes must be a number" })
     .min(1, { error: "Leave minutes must be at least 1" }),
-  leaveRolloverType: z.enum(["NONE", "CARRY_OVER", "CARRY_FORWARD"], {
+  leaveRolloverType: z.enum(["NONE", "PARTIAL_ROLLOVER", "FULL_ROLLOVER"], {
     error: "Invalid Leave Rollover Type",
   }),
   carryOverLimit: z.coerce

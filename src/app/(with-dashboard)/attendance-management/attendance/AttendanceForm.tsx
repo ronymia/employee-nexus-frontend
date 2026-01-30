@@ -25,6 +25,7 @@ import {
   CREATE_ATTENDANCE,
   UPDATE_ATTENDANCE,
   GET_ATTENDANCES,
+  ATTENDANCE_OVERVIEW,
 } from "@/graphql/attendance.api";
 import { GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE } from "@/graphql/employee-work-schedule.api";
 import { GET_EMPLOYEE_CALENDAR } from "@/graphql/employee-calendar.api";
@@ -412,12 +413,18 @@ export default function AttendanceForm({
   // ==================== MUTATIONS ====================
   const [createAttendance] = useMutation(CREATE_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: ATTENDANCE_OVERVIEW },
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+    ],
   });
 
   const [updateAttendance] = useMutation(UPDATE_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: ATTENDANCE_OVERVIEW },
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+    ],
   });
 
   // ==================== FORM SUBMISSION ====================

@@ -1,15 +1,18 @@
 "use client";
 
 // ==================== IMPORTS ====================
-import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { FiX } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+
+// ==================== CUSTOM FORM IMPORTS ====================
+import CustomForm from "@/components/form/CustomForm";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomSelect from "@/components/form/input/CustomSelect";
+import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 
 // ==================== DAYJS CONFIG ====================
 dayjs.extend(utc);
@@ -47,32 +50,24 @@ export default function AssignWorkScheduleForm({
   onClose,
   onSuccess,
 }: IAssignWorkScheduleFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // ==================== QUERIES ====================
   const { data: schedulesData } = useQuery<{
     workSchedules: { data: IWorkSchedule[] };
   }>(GET_WORK_SCHEDULES);
   const schedules = schedulesData?.workSchedules?.data || [];
 
-  const [assignSchedule] = useMutation(ASSIGN_EMPLOYEE_WORK_SCHEDULE);
+  const [assignSchedule, assignScheduleState] = useMutation(
+    ASSIGN_EMPLOYEE_WORK_SCHEDULE,
+  );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IAssignScheduleForm>({
-    resolver: zodResolver(assignScheduleSchema),
-    defaultValues: {
-      workScheduleId: "",
-      startDate: dayjs().format("DD-MM-YYYY"),
-      notes: "",
-    },
-  });
+  const defaultValues = {
+    workScheduleId: "",
+    startDate: dayjs().format("DD-MM-YYYY"),
+    notes: "",
+  };
 
   // ==================== HANDLERS ====================
   const onSubmit = async (data: IAssignScheduleForm) => {
-    setIsSubmitting(true);
     try {
       const { data: response, error } = await assignSchedule({
         variables: {
@@ -96,10 +91,15 @@ export default function AssignWorkScheduleForm({
     } catch (error: any) {
       console.error("Error assigning schedule:", error);
       toast.error(error.message || "Failed to assign schedule");
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const scheduleOptions = schedules
+    .filter((schedule: any) => schedule.id !== currentSchedule?.workScheduleId)
+    .map((schedule: any) => ({
+      label: `${schedule.name} - ${schedule.scheduleType}`,
+      value: schedule.id,
+    }));
 
   // ==================== RENDER ====================
   return (
@@ -119,7 +119,12 @@ export default function AssignWorkScheduleForm({
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <CustomForm
+          submitHandler={onSubmit}
+          defaultValues={defaultValues}
+          resolver={assignScheduleSchema}
+          className="p-6 space-y-4"
+        >
           {/* CURRENT SCHEDULE */}
           {currentSchedule && (
             <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
@@ -134,60 +139,35 @@ export default function AssignWorkScheduleForm({
 
           {/* WORK SCHEDULE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Work Schedule <span className="text-red-500">*</span>
-            </label>
-            <select
-              {...register("workScheduleId")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="">Select schedule</option>
-              {schedules
-                .filter(
-                  (schedule: any) =>
-                    schedule.id !== currentSchedule?.workScheduleId,
-                )
-                .map((schedule: any) => (
-                  <option key={schedule.id} value={schedule.id}>
-                    {schedule.name} - {schedule.scheduleType}
-                  </option>
-                ))}
-            </select>
-            {errors.workScheduleId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.workScheduleId.message}
-              </p>
-            )}
+            <CustomSelect
+              name="workScheduleId"
+              label="Work Schedule"
+              placeholder="Select schedule"
+              required={true}
+              dataAuto="work-schedule"
+              options={scheduleOptions}
+              isLoading={false}
+            />
           </div>
 
           {/* START DATE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Effective From <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("startDate")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomDatePicker
+              name="startDate"
+              label="Effective From"
+              dataAuto="effective-from-date"
+              required={true}
               placeholder="DD-MM-YYYY"
             />
-            {errors.startDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.startDate.message}
-              </p>
-            )}
           </div>
 
           {/* NOTES */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes
-            </label>
-            <textarea
-              {...register("notes")}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomTextareaField
+              name="notes"
+              label="Notes"
               placeholder="Optional notes about this schedule assignment..."
+              rows={3}
             />
           </div>
 
@@ -202,13 +182,13 @@ export default function AssignWorkScheduleForm({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={assignScheduleState.loading}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Assigning..." : "Assign Schedule"}
+              {assignScheduleState.loading ? "Assigning..." : "Assign Schedule"}
             </button>
           </div>
-        </form>
+        </CustomForm>
       </div>
     </div>
   );

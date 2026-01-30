@@ -49,30 +49,25 @@ export default function LeaveTypesForm({
 
   // HANDLER FOR FORM SUBMISSION
   const handleOnSubmit = async (formValues: ILeaveTypeFormData) => {
-    // Ensure leaveMinutes is a number
-    if (formValues.leaveMinutes !== undefined) {
-      formValues.leaveMinutes = Number(formValues.leaveMinutes);
-    }
-
-    // Ensure carryOverLimit is a number if provided
-    if (formValues.carryOverLimit !== undefined) {
-      formValues.carryOverLimit = Number(formValues.carryOverLimit);
-    }
+    const variables = {
+      ...formValues,
+      leaveMinutes: Number(formValues.leaveMinutes),
+      carryOverLimit: formValues.carryOverLimit
+        ? Number(formValues.carryOverLimit)
+        : null,
+      leaveRolloverType: formValues.leaveRolloverType || "NONE",
+    };
 
     if (data?.id) {
-      formValues["id"] = Number(data.id);
       await updateLeaveType({
         variables: {
-          ...formValues,
-          leaveRolloverType: formValues.leaveRolloverType || "NONE",
+          id: Number(data.id),
+          ...variables,
         },
       });
     } else {
       await createLeaveType({
-        variables: {
-          ...formValues,
-          leaveRolloverType: formValues.leaveRolloverType || "NONE",
-        },
+        variables,
       });
     }
     handleClosePopup?.();
@@ -80,9 +75,10 @@ export default function LeaveTypesForm({
 
   const defaultValues = {
     name: data?.name || "",
-    leaveType: data?.leaveType || "",
+    leaveType: data?.leaveType || "PAID",
     leaveMinutes: data?.leaveMinutes || 0,
-    leaveRolloverType: data?.leaveRolloverType || "",
+    leaveRolloverType: data?.leaveRolloverType || "NONE",
+    carryOverLimit: data?.carryOverLimit || 0,
     employmentStatuses:
       data?.employmentStatuses?.map((status) => Number(status.id)) || [],
   };
@@ -117,9 +113,9 @@ export default function LeaveTypesForm({
         ]}
       />
 
-      {/* LEAVE HOURS */}
+      {/* LEAVE MINUTES */}
       <CustomInputField
-        name="leaveHours"
+        name="leaveMinutes"
         label="Leave Minutes"
         type="number"
         required

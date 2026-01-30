@@ -12,7 +12,13 @@ import LeaveTypeSelect from "@/components/input-fields/LeaveTypeSelect";
 import { useFormContext, useWatch } from "react-hook-form";
 import { ILeave, LeaveDuration } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CREATE_LEAVE, UPDATE_LEAVE, LEAVE_BALANCE } from "@/graphql/leave.api";
+import {
+  CREATE_LEAVE,
+  UPDATE_LEAVE,
+  LEAVE_BALANCE,
+  LEAVE_OVERVIEW,
+  GET_LEAVES,
+} from "@/graphql/leave.api";
 import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -452,8 +458,20 @@ export default function LeaveForm({
   const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // ==================== GRAPHQL MUTATIONS ====================
-  const [createLeave] = useMutation(CREATE_LEAVE);
-  const [updateLeave] = useMutation(UPDATE_LEAVE);
+  const [createLeave] = useMutation(CREATE_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
+  });
+  const [updateLeave] = useMutation(UPDATE_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
+  });
 
   // ==================== HELPER FUNCTIONS ====================
   // UPLOAD ATTACHMENTS
@@ -482,31 +500,6 @@ export default function LeaveForm({
     });
 
     return Promise.all(uploadPromises);
-  };
-
-  // CALCULATE TOTAL HOURS
-  const calculateTotalHours = (
-    startDate: string,
-    endDate: string | undefined,
-    duration: LeaveDuration,
-  ): number => {
-    if (duration === LeaveDuration.HALF_DAY) {
-      return 4;
-    }
-
-    if (duration === LeaveDuration.SINGLE_DAY) {
-      return 8;
-    }
-
-    // MULTI_DAY - calculate days between dates
-    if (duration === LeaveDuration.MULTI_DAY && endDate) {
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
-      const days = end.diff(start, "day") + 1; // Include both start and end date
-      return days * 8;
-    }
-
-    return 8; // Default to single day
   };
 
   // ==================== FORM SUBMISSION ====================
@@ -597,7 +590,11 @@ export default function LeaveForm({
 
   // ==================== RENDER ====================
   return (
-    <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
+    <CustomForm
+      submitHandler={handleSubmit}
+      defaultValues={defaultValues}
+      className={`flex flex-col gap-4`}
+    >
       <LeaveFormFields actionType={actionType} />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>

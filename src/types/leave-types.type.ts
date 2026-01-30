@@ -12,6 +12,15 @@ export interface ILeaveType {
   updatedAt?: string;
 }
 
+export interface ILeaveTypeArrayResponse {
+  leaveTypes: {
+    message: string;
+    statusCode: number;
+    success: boolean;
+    data: ILeaveType[];
+  };
+}
+
 export interface ILeaveTypeEmploymentStatus {
   id: number;
   name: string;

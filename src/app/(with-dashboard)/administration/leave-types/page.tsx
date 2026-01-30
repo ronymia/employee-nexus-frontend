@@ -11,7 +11,12 @@ import {
 import { DELETE_LEAVE_TYPE, GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, ILeaveType } from "@/types";
+import {
+  TableActionType,
+  TableColumnType,
+  ILeaveType,
+  ILeaveTypeArrayResponse,
+} from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -23,14 +28,7 @@ export default function LeaveTypesPage() {
   // CREATE NEW LEAVE TYPE
   const { popupOption, setPopupOption, createNewLeaveType } = usePopupOption();
   // GET LEAVE TYPES
-  const { data, loading } = useQuery<{
-    leaveTypes: {
-      message: string;
-      statusCode: number;
-      success: boolean;
-      data: ILeaveType[];
-    };
-  }>(GET_LEAVE_TYPES, {});
+  const { data, loading } = useQuery<ILeaveTypeArrayResponse>(GET_LEAVE_TYPES);
 
   // DELETE LEAVE TYPE
   const [deleteLeaveType, deleteResult] = useMutation(DELETE_LEAVE_TYPE, {

@@ -14,7 +14,7 @@ import {
   PiGlobe,
   PiTrash,
   PiPencilSimple,
-  PiCalendar
+  PiCalendar,
 } from "react-icons/pi";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -31,6 +31,7 @@ import {
   IHoliday,
   HolidayType,
   IHolidayOverviewResponse,
+  IHolidayArrayResponse,
 } from "@/types/holiday.type";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { Permissions } from "@/constants/permissions.constant";
@@ -259,11 +260,8 @@ export default function HolidaysPage() {
 
   // ==================== GRAPHQL QUERIES ====================
   // FETCH HOLIDAYS
-  const { data, loading, refetch } = useQuery<{
-    holidays: {
-      data: IHoliday[];
-    };
-  }>(GET_HOLIDAYS);
+  const { data, loading, refetch } =
+    useQuery<IHolidayArrayResponse>(GET_HOLIDAYS);
 
   const holidays = data?.holidays?.data || [];
 

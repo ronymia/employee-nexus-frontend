@@ -7,14 +7,12 @@ import CustomTable from "@/components/table/CustomTable";
 import { TableColumnType } from "@/types";
 import {
   IAttendance,
-  IAttendanceOverview,
   IAttendanceOverviewResponse,
 } from "@/types/attendance.type";
 import {
   PiCheckCircle,
   PiXCircle,
   PiWarning,
-  PiMinus,
   PiPlusCircle,
   PiTrash,
   PiPencilSimple,
@@ -173,7 +171,6 @@ function AttendanceOverview() {
 // ==================== MAIN COMPONENT ====================
 
 export default function AttendancePage() {
-  // ==================== PERMISSIONS ====================
   // ==================== PERMISSIONS ====================
   const { hasPermission } = usePermissionGuard();
   const { confirm } = useConfirmation();

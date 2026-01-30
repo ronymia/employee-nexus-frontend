@@ -1,9 +1,10 @@
+import { IEmployeeDetails } from "./employee.type";
 import { IUser } from "./user.type";
 
 export interface IProjectMember {
   id: number;
   userId: number;
-  user: IUser;
+  employee: IEmployeeDetails;
   role?: string;
   joinedAt?: string;
 }
@@ -44,11 +45,20 @@ export interface IUserProjectMember {
   updatedAt: string;
 }
 
-export interface IProjectInput {
-  name: string;
-  description?: string;
-  cover: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
+export interface IUserProjectMemberArrayResponse {
+  projectMembers: {
+    data: IUserProjectMember[];
+  };
+}
+
+export interface IProjectResponse {
+  projectById: {
+    data: IProject;
+  };
+}
+
+export interface IProjectArrayResponse {
+  projects: {
+    data: IProject[];
+  };
 }

@@ -9,7 +9,12 @@ import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import { useMutation } from "@apollo/client/react";
-import { CREATE_HOLIDAY, UPDATE_HOLIDAY } from "@/graphql/holiday.api";
+import {
+  CREATE_HOLIDAY,
+  GET_HOLIDAYS,
+  HOLIDAY_OVERVIEW,
+  UPDATE_HOLIDAY,
+} from "@/graphql/holiday.api";
 import { IHoliday, HolidayType } from "@/types/holiday.type";
 import dayjs from "dayjs";
 import { showToast } from "@/components/ui/CustomToast";
@@ -135,10 +140,16 @@ export default function HolidayForm({
 }: IHolidayFormProps) {
   // ==================== GRAPHQL MUTATIONS ====================
   // CREATE HOLIDAY
-  const [createHoliday, createResult] = useMutation(CREATE_HOLIDAY);
+  const [createHoliday, createResult] = useMutation(CREATE_HOLIDAY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: HOLIDAY_OVERVIEW }, { query: GET_HOLIDAYS }],
+  });
 
   // UPDATE HOLIDAY
-  const [updateHoliday, updateResult] = useMutation(UPDATE_HOLIDAY);
+  const [updateHoliday, updateResult] = useMutation(UPDATE_HOLIDAY, {
+    awaitRefetchQueries: true,
+    refetchQueries: [{ query: HOLIDAY_OVERVIEW }, { query: GET_HOLIDAYS }],
+  });
 
   // ==================== HOLIDAY TYPE OPTIONS ====================
   const holidayTypeOptions = [
@@ -211,7 +222,11 @@ export default function HolidayForm({
 
   // ==================== RENDER ====================
   return (
-    <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
+    <CustomForm
+      submitHandler={handleSubmit}
+      defaultValues={defaultValues}
+      className={`flex flex-col gap-4`}
+    >
       <div className="space-y-4">
         {/* BASIC INFO */}
         <BasicInfoSection holidayTypeOptions={holidayTypeOptions} />

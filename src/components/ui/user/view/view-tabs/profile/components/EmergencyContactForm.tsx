@@ -30,15 +30,16 @@ export default function EmergencyContactForm({
           variables: { id: Number(employee?.id) },
         },
       ],
-    }
+    },
   );
+  // console.log({ employee });
   const handleSubmit = async (data: any) => {
     try {
       const result = await updateEmergencyContact({
         variables: {
           updateEmergencyContactInput: {
             ...data,
-            userId: Number(employee?.profile?.userId),
+            userId: Number(employee?.id),
           },
         },
         fetchPolicy: "no-cache",
@@ -47,7 +48,7 @@ export default function EmergencyContactForm({
       if (result.data) {
         showToast.success(
           "Updated!",
-          "Emergency contact has been updated successfully"
+          "Emergency contact has been updated successfully",
         );
         onClose();
       }
@@ -55,7 +56,7 @@ export default function EmergencyContactForm({
       console.error("Error updating emergency contact:", error);
       showToast.error(
         "Error",
-        error.message || "Failed to update emergency contact"
+        error.message || "Failed to update emergency contact",
       );
       throw error;
     }
@@ -64,7 +65,7 @@ export default function EmergencyContactForm({
   const defaultValues = {
     name: employee?.profile?.emergencyContact?.name || "",
     phone: employee?.profile?.emergencyContact?.phone || "",
-    // relation: employee?.profile?.emergencyContact?.relation || "",
+    relation: employee?.profile?.emergencyContact?.relation || "",
   };
 
   return (
@@ -91,9 +92,9 @@ export default function EmergencyContactForm({
               placeholder="Enter phone number"
               required={false}
             />
-            {/* <div className="md:col-span-2">
+            <div className="md:col-span-2">
               <RelationSelect name="relation" label="Relation" required />
-            </div> */}
+            </div>
           </div>
         </div>
 

@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { PROJECT_ROLE_OPTIONS } from "@/constants/project.constant";
 
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);
@@ -92,27 +93,10 @@ export default function ProjectMemberForm({
       value: project.id.toString(),
     })) || [];
 
-  const roleOptions = [
-    { label: "Project Manager", value: "Project Manager" },
-    { label: "Team Lead", value: "Team Lead" },
-    { label: "Developer", value: "Developer" },
-    { label: "Senior Developer", value: "Senior Developer" },
-    { label: "Junior Developer", value: "Junior Developer" },
-    { label: "Frontend Developer", value: "Frontend Developer" },
-    { label: "Backend Developer", value: "Backend Developer" },
-    { label: "Full Stack Developer", value: "Full Stack Developer" },
-    { label: "UI/UX Designer", value: "UI/UX Designer" },
-    { label: "QA Engineer", value: "QA Engineer" },
-    { label: "DevOps Engineer", value: "DevOps Engineer" },
-    { label: "Business Analyst", value: "Business Analyst" },
-    { label: "Scrum Master", value: "Scrum Master" },
-    { label: "Product Owner", value: "Product Owner" },
-  ];
-
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
       <div className="space-y-4">
-        {/* Project Selection */}
+        {/* Project Information */}
         <div className="border border-primary/20 rounded-lg p-4">
           <h4 className="text-base font-semibold mb-3 text-primary">
             Project Information
@@ -150,7 +134,7 @@ export default function ProjectMemberForm({
               placeholder="Select role in this project"
               required={false}
               isLoading={false}
-              options={roleOptions}
+              options={PROJECT_ROLE_OPTIONS}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <CustomDatePicker

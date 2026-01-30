@@ -40,11 +40,13 @@ export const GET_PROJECT_BY_ID = gql`
         projectMembers {
           id
           userId
-          user {
-            id
-            email
-            profile {
-              fullName
+          employee {
+            user {
+              id
+              email
+              profile {
+                fullName
+              }
             }
           }
           role

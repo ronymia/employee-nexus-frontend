@@ -1,15 +1,19 @@
 "use client";
 
 // ==================== IMPORTS ====================
-import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { FiX } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+
+// ==================== CUSTOM FORM IMPORTS ====================
+import CustomForm from "@/components/form/CustomForm";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomInputField from "@/components/form/input/CustomInputField";
+import CustomSelect from "@/components/form/input/CustomSelect";
+import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 
 // ==================== DAYJS CONFIG ====================
 dayjs.extend(utc);
@@ -44,33 +48,25 @@ export default function AddSecondaryDepartmentForm({
   onClose,
   onSuccess,
 }: IAddSecondaryDepartmentFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // ==================== QUERIES ====================
   const { data: departmentsData } = useQuery<{
     departments: { data: IDepartment[] };
   }>(GET_DEPARTMENTS);
   const departments = departmentsData?.departments?.data || [];
 
-  const [assignDepartment] = useMutation(ASSIGN_EMPLOYEE_DEPARTMENT);
+  const [assignDepartment, assignDepartmentState] = useMutation(
+    ASSIGN_EMPLOYEE_DEPARTMENT,
+  );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IAddSecondaryDepartmentForm>({
-    resolver: zodResolver(addSecondaryDepartmentSchema),
-    defaultValues: {
-      departmentId: "",
-      roleInDept: "",
-      startDate: dayjs().format("DD-MM-YYYY"),
-      remarks: "",
-    },
-  });
+  const defaultValues = {
+    departmentId: "",
+    roleInDept: "",
+    startDate: dayjs().format("DD-MM-YYYY"),
+    remarks: "",
+  };
 
   // ==================== HANDLERS ====================
   const onSubmit = async (data: IAddSecondaryDepartmentForm) => {
-    setIsSubmitting(true);
     try {
       const { data: response, error } = await assignDepartment({
         variables: {
@@ -95,10 +91,15 @@ export default function AddSecondaryDepartmentForm({
     } catch (error: any) {
       console.error("Error assigning department:", error);
       toast.error(error.message || "Failed to assign department");
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const departmentOptions = departments
+    .filter((dept: any) => !currentDepartmentIds.includes(dept.id))
+    .map((dept: any) => ({
+      label: dept.name,
+      value: dept.id,
+    }));
 
   // ==================== RENDER ====================
   return (
@@ -118,7 +119,12 @@ export default function AddSecondaryDepartmentForm({
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <CustomForm
+          submitHandler={onSubmit}
+          defaultValues={defaultValues}
+          resolver={addSecondaryDepartmentSchema}
+          className="p-6 space-y-4"
+        >
           {/* INFO ALERT */}
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-700">
@@ -129,75 +135,47 @@ export default function AddSecondaryDepartmentForm({
 
           {/* DEPARTMENT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Department <span className="text-red-500">*</span>
-            </label>
-            <select
-              {...register("departmentId")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="">Select department</option>
-              {departments
-                .filter((dept: any) => !currentDepartmentIds.includes(dept.id))
-                .map((dept: any) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-            </select>
-            {errors.departmentId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.departmentId.message}
-              </p>
-            )}
+            <CustomSelect
+              name="departmentId"
+              label="Department"
+              placeholder="Select department"
+              required={true}
+              dataAuto="department"
+              options={departmentOptions}
+              isLoading={false}
+            />
           </div>
 
           {/* ROLE IN DEPARTMENT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role in Department <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("roleInDept")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomInputField
+              name="roleInDept"
+              label="Role in Department"
               placeholder="e.g., Technical Advisor, Consultant, Member"
+              required={true}
+              type="text"
+              dataAuto="role-in-dept"
             />
-            {errors.roleInDept && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.roleInDept.message}
-              </p>
-            )}
           </div>
 
           {/* START DATE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("startDate")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomDatePicker
+              name="startDate"
+              label="Start Date"
+              dataAuto="start-date"
+              required={true}
               placeholder="DD-MM-YYYY"
             />
-            {errors.startDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.startDate.message}
-              </p>
-            )}
           </div>
 
           {/* REMARKS */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Remarks
-            </label>
-            <textarea
-              {...register("remarks")}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomTextareaField
+              name="remarks"
+              label="Remarks"
               placeholder="Optional notes..."
+              rows={3}
             />
           </div>
 
@@ -212,13 +190,13 @@ export default function AddSecondaryDepartmentForm({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={assignDepartmentState.loading}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Adding..." : "Add Department"}
+              {assignDepartmentState.loading ? "Adding..." : "Add Department"}
             </button>
           </div>
-        </form>
+        </CustomForm>
       </div>
     </div>
   );

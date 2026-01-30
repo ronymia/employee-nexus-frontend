@@ -1,15 +1,19 @@
 "use client";
 
 // ==================== IMPORTS ====================
-import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { FiX } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+
+// ==================== CUSTOM FORM IMPORTS ====================
+import CustomForm from "@/components/form/CustomForm";
+import CustomDatePicker from "@/components/form/input/CustomDatePicker";
+import CustomInputField from "@/components/form/input/CustomInputField";
+import CustomSelect from "@/components/form/input/CustomSelect";
+import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 
 // ==================== DAYJS CONFIG ====================
 dayjs.extend(utc);
@@ -50,38 +54,35 @@ export default function TransferDepartmentForm({
   onClose,
   onSuccess,
 }: ITransferDepartmentFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // ==================== QUERIES ====================
   const { data: departmentsData } = useQuery<{
     departments: { data: IDepartment[] };
   }>(GET_DEPARTMENTS);
   const departments = departmentsData?.departments?.data || [];
 
-  const [updateDepartment] = useMutation(UPDATE_EMPLOYEE_DEPARTMENT);
-  const [assignDepartment] = useMutation(ASSIGN_EMPLOYEE_DEPARTMENT);
+  const [updateDepartment, updateDepartmentState] = useMutation(
+    UPDATE_EMPLOYEE_DEPARTMENT,
+  );
+  const [assignDepartment, assignDepartmentState] = useMutation(
+    ASSIGN_EMPLOYEE_DEPARTMENT,
+  );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ITransferDepartmentForm>({
-    resolver: zodResolver(transferDepartmentSchema),
-    defaultValues: {
-      newDepartmentId: "",
-      roleInDept: currentDepartment.roleInDept || "",
-      startDate: dayjs().format("DD-MM-YYYY"),
-      reason: "",
-      remarks: "",
-    },
-  });
+  const defaultValues = {
+    newDepartmentId: "",
+    roleInDept: currentDepartment.roleInDept || "",
+    startDate: dayjs().format("DD-MM-YYYY"),
+    reason: "",
+    remarks: "",
+  };
 
   // ==================== HANDLERS ====================
   const onSubmit = async (data: ITransferDepartmentForm) => {
-    setIsSubmitting(true);
     try {
       // Step 1: End-date current department
-      const endDate = dayjs.utc().subtract(1, "day").toDate();
+      const endDate = dayjs
+        .utc(data.startDate, "DD-MM-YYYY")
+        .subtract(1, "day")
+        .toDate();
 
       await updateDepartment({
         variables: {
@@ -119,17 +120,25 @@ export default function TransferDepartmentForm({
     } catch (error: any) {
       console.error("Error transferring department:", error);
       toast.error(error.message || "Failed to transfer department");
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const departmentOptions = departments
+    .filter((dept: any) => dept.id !== currentDepartment.departmentId)
+    .map((dept: any) => ({
+      label: dept.name,
+      value: dept.id,
+    }));
+
+  const isSubmitting =
+    updateDepartmentState.loading || assignDepartmentState.loading;
 
   // ==================== RENDER ====================
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         {/* HEADER */}
-        <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-gray-200 z-10">
           <h2 className="text-xl font-semibold text-gray-900">
             Transfer Department
           </h2>
@@ -142,7 +151,12 @@ export default function TransferDepartmentForm({
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <CustomForm
+          submitHandler={onSubmit}
+          defaultValues={defaultValues}
+          resolver={transferDepartmentSchema}
+          className="p-6 space-y-4"
+        >
           {/* CURRENT DEPARTMENT (READ ONLY) */}
           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <p className="text-sm font-medium text-orange-900 mb-1">
@@ -158,90 +172,57 @@ export default function TransferDepartmentForm({
 
           {/* NEW DEPARTMENT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Transfer To Department <span className="text-red-500">*</span>
-            </label>
-            <select
-              {...register("newDepartmentId")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="">Select department</option>
-              {departments
-                .filter(
-                  (dept: any) => dept.id !== currentDepartment.departmentId,
-                )
-                .map((dept: any) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-            </select>
-            {errors.newDepartmentId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.newDepartmentId.message}
-              </p>
-            )}
+            <CustomSelect
+              name="newDepartmentId"
+              label="Transfer To Department"
+              placeholder="Select department"
+              required={true}
+              dataAuto="new-department"
+              options={departmentOptions}
+              isLoading={false}
+            />
           </div>
 
           {/* ROLE IN NEW DEPARTMENT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role in New Department <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("roleInDept")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomInputField
+              name="roleInDept"
+              label="Role in New Department"
               placeholder="e.g., Team Lead, Manager, Member"
+              required={true}
+              type="text"
+              dataAuto="role-in-dept"
             />
-            {errors.roleInDept && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.roleInDept.message}
-              </p>
-            )}
           </div>
 
           {/* START DATE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Transfer Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("startDate")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomDatePicker
+              name="startDate"
+              label="Transfer Date"
+              dataAuto="transfer-date"
+              required={true}
               placeholder="DD-MM-YYYY"
             />
-            {errors.startDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.startDate.message}
-              </p>
-            )}
           </div>
 
           {/* REASON */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Transfer
-            </label>
-            <textarea
-              {...register("reason")}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomTextareaField
+              name="reason"
+              label="Reason for Transfer"
               placeholder="e.g., Promotion, Restructuring, Employee Request"
+              rows={2}
             />
           </div>
 
           {/* REMARKS */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Remarks
-            </label>
-            <textarea
-              {...register("remarks")}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            <CustomTextareaField
+              name="remarks"
+              label="Remarks"
               placeholder="Optional notes..."
+              rows={2}
             />
           </div>
 
@@ -262,7 +243,7 @@ export default function TransferDepartmentForm({
               {isSubmitting ? "Transferring..." : "Transfer Department"}
             </button>
           </div>
-        </form>
+        </CustomForm>
       </div>
     </div>
   );

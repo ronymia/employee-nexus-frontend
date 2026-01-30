@@ -35,7 +35,7 @@ export default function CustomForm({
     formState: { errors },
   } = methods;
 
-  console.log({ errors });
+  // console.log({ errors });
 
   const onSubmit = async (data: any) => {
     //

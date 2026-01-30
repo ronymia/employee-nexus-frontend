@@ -25,11 +25,11 @@ import { IUser } from "@/types";
 import EmploymentDetailsContent from "./view-tabs/employment-details/EmploymentDetailsContent";
 import PayrollContent from "./view-tabs/payroll/PayrollContent";
 
-interface UserViewProps {
+interface IUserViewProps {
   userId: number;
 }
 
-export default function UserView({ userId }: UserViewProps) {
+export default function UserView({ userId }: IUserViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(
@@ -72,7 +72,7 @@ export default function UserView({ userId }: UserViewProps) {
     );
   }
 
-  console.log(data);
+  // console.log(data);
   const employee = data?.employeeById?.data;
 
   // Dummy data for testing UI

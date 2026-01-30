@@ -25,7 +25,7 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
     data: null,
     title: "",
   });
-
+  console.log({ employee });
   // CHECK IF EMPLOYEE DATA IS AVAILABLE
   if (!employee) {
     return (
@@ -211,7 +211,7 @@ export default function ProfileContent({ employee }: IProfileContentProps) {
               Relationship
             </label>
             <p className="text-base font-semibold text-base-content">
-              {employee.profile?.emergencyContact?.relationship || "-"}
+              {employee.profile?.emergencyContact?.relation || "-"}
             </p>
           </div>
         </div>

@@ -161,6 +161,7 @@ function OverviewTab({
     getEmploymentDetails: { data: { [key: string]: any } };
   }>(GET_EMPLOYMENT_DETAILS, { variables: { id: userId } });
 
+  console.log({ employmentData });
   // Fetch active items only
   const {
     data: activeSalaryData,
