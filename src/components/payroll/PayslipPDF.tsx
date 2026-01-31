@@ -165,57 +165,82 @@ const styles = StyleSheet.create({
 });
 
 export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
+  const comps = (item as any).payrollComponents || item.components || [];
+  const adjs = (item as any).payrollAdjustments || item.adjustments || [];
+
   // Calculate earnings breakdown
   const earningsBreakdown =
-    item.components
-      ?.filter((c) => c.component?.componentType === "EARNING")
-      .map((c) => ({
-        label: c.component?.name || "Unknown",
-        amount: c.amount,
+    comps
+      ?.filter(
+        (c: any) =>
+          (c.payrollComponent || c.component)?.componentType === "EARNING",
+      )
+      .map((c: any) => ({
+        label: (c.payrollComponent || c.component)?.name || "Unknown",
+        amount: c.value || c.amount,
       })) || [];
 
   // Calculate deductions breakdown
   const deductionsBreakdown =
-    item.components
-      ?.filter((c) => c.component?.componentType === "DEDUCTION")
-      .map((c) => ({
-        label: c.component?.name || "Unknown",
-        amount: c.amount,
+    comps
+      ?.filter(
+        (c: any) =>
+          (c.payrollComponent || c.component)?.componentType === "DEDUCTION",
+      )
+      .map((c: any) => ({
+        label: (c.payrollComponent || c.component)?.name || "Unknown",
+        amount: c.value || c.amount,
       })) || [];
 
   const totalEarnings = earningsBreakdown.reduce(
-    (sum, e) => sum + e.amount,
+    (sum: number, e: any) => sum + e.amount,
     item.basicSalary,
   );
   const totalDeductions = deductionsBreakdown.reduce(
-    (sum, d) => sum + d.amount,
+    (sum: number, d: any) => sum + d.amount,
     0,
   );
 
   // Calculate adjustments
-  // Earnings: bonus, reimbursement
-  // Deductions: penalty, advance_deduction
-  const adjustmentsEarnings = (item.adjustments || [])
-    .filter((adj) => adj.type === "bonus" || adj.type === "reimbursement")
-    .map((adj) => ({
-      label: adj.description,
-      amount: adj.amount,
+  const adjustmentsEarnings = adjs
+    .filter(
+      (adj: any) =>
+        adj.payrollComponent?.componentType === "EARNING" ||
+        adj.type === "bonus" ||
+        adj.type === "reimbursement",
+    )
+    .map((adj: any) => ({
+      label:
+        adj.payrollComponent?.name ||
+        adj.remarks ||
+        adj.description ||
+        adj.type?.replace("_", " ").toUpperCase(),
+      amount: adj.value || adj.amount,
     }));
 
-  const adjustmentsDeductions = (item.adjustments || [])
-    .filter((adj) => adj.type === "penalty" || adj.type === "advance_deduction")
-    .map((adj) => ({
-      label: adj.description,
-      amount: adj.amount,
+  const adjustmentsDeductions = adjs
+    .filter(
+      (adj: any) =>
+        adj.payrollComponent?.componentType === "DEDUCTION" ||
+        adj.type === "penalty" ||
+        adj.type === "advance_deduction",
+    )
+    .map((adj: any) => ({
+      label:
+        adj.payrollComponent?.name ||
+        adj.remarks ||
+        adj.description ||
+        adj.type?.replace("_", " ").toUpperCase(),
+      amount: adj.value || adj.amount,
     }));
 
   const totalAdjustmentsEarnings = adjustmentsEarnings.reduce(
-    (sum, item) => sum + item.amount,
+    (sum: number, adj: any) => sum + adj.amount,
     0,
   );
 
   const totalAdjustmentsDeductions = adjustmentsDeductions.reduce(
-    (sum, item) => sum + item.amount,
+    (sum: number, adj: any) => sum + adj.amount,
     0,
   );
 
@@ -320,7 +345,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
                 ${item.basicSalary.toFixed(2)}
               </Text>
             </View>
-            {earningsBreakdown.map((earning, index) => (
+            {earningsBreakdown.map((earning: any, index: number) => (
               <View key={index} style={styles.lineItem}>
                 <Text style={styles.lineItemLabel}>{earning.label}</Text>
                 <Text style={styles.lineItemAmount}>
@@ -342,7 +367,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
                     Adjustments (Additions)
                   </Text>
                 </View>
-                {adjustmentsEarnings.map((adj, index) => (
+                {adjustmentsEarnings.map((adj: any, index: number) => (
                   <View key={`adj-earn-${index}`} style={styles.lineItem}>
                     <Text style={[styles.lineItemLabel, { color: "#22c55e" }]}>
                       {adj.label}
@@ -368,7 +393,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
             <Text style={styles.columnTitle}>Deductions</Text>
             {deductionsBreakdown.length > 0 ? (
               <>
-                {deductionsBreakdown.map((deduction, index) => (
+                {deductionsBreakdown.map((deduction: any, index: number) => (
                   <View key={index} style={styles.lineItem}>
                     <Text style={styles.lineItemLabel}>{deduction.label}</Text>
                     <Text style={styles.lineItemAmount}>
@@ -397,7 +422,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
                     Adjustments (Deductions)
                   </Text>
                 </View>
-                {adjustmentsDeductions.map((adj, index) => (
+                {adjustmentsDeductions.map((adj: any, index: number) => (
                   <View key={`adj-ded-${index}`} style={styles.lineItem}>
                     <Text style={[styles.lineItemLabel, { color: "#ef4444" }]}>
                       {adj.label}

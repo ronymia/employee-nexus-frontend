@@ -2,19 +2,17 @@
 
 import CustomForm from "@/components/form/CustomForm";
 import FormActionButton from "@/components/form/FormActionButton";
-import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
-import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import { IPayrollItem, IPayrollComponent, IUser } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import {
   CREATE_PAYROLL_ITEM,
-  UPDATE_PAYROLL_ITEM,
+  PREVIEW_PAYROLL_ITEM,
 } from "@/graphql/payroll-item.api";
 import { GET_PAYROLL_COMPONENTS } from "@/graphql/payroll-component.api";
 import { GET_EMPLOYEES } from "@/graphql/employee.api";
-import { useState, useEffect, useRef } from "react";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
 
 interface PayrollItemFormProps {
   item?: IPayrollItem & { payrollCycleId?: number };
@@ -29,10 +27,16 @@ export default function PayrollItemForm({
   onClose,
   refetch,
 }: PayrollItemFormProps) {
+  const [previewData, setPreviewData] = useState<any>(null);
   const [isPending, setIsPending] = useState(false);
 
-  const [createItem] = useMutation(CREATE_PAYROLL_ITEM);
-  const [updateItem] = useMutation(UPDATE_PAYROLL_ITEM);
+  const [createPayrollItem, { loading: createLoading }] = useMutation<any, any>(
+    CREATE_PAYROLL_ITEM,
+  );
+  const [payrollItemPreview, { loading: previewLoading }] = useMutation<
+    any,
+    any
+  >(PREVIEW_PAYROLL_ITEM);
 
   // Fetch employees
   const { data: employeesData } = useQuery<{
@@ -54,64 +58,19 @@ export default function PayrollItemForm({
   const handleSubmit = async (data: any) => {
     try {
       setIsPending(true);
+      const res = await createPayrollItem({
+        variables: {
+          userId: Number(data.userId),
+          payrollCycleId: Number(item?.payrollCycleId),
+        },
+      });
 
-      // Calculate totals
-      const componentsData = data.components || [];
-      const adjustmentsData = data.adjustments || [];
-
-      const input = {
-        payrollCycleId: item?.payrollCycleId || data.payrollCycleId,
-        userId: Number(data.userId),
-        basicSalary: Number(data.basicSalary),
-        workingDays: Number(data.workingDays),
-        presentDays: Number(data.presentDays),
-        absentDays: Number(data.absentDays),
-        leaveDays: Number(data.leaveDays),
-        overtimeHours: data.overtimeHours
-          ? Number(data.overtimeHours)
-          : undefined,
-        paymentMethod: data.paymentMethod || undefined,
-        bankAccount: data.bankAccount || undefined,
-        notes: data.notes || undefined,
-        components: componentsData.map((c: any) => ({
-          componentId: Number(c.componentId),
-          amount: Number(c.amount),
-          calculationBase: c.calculationBase
-            ? Number(c.calculationBase)
-            : undefined,
-          notes: c.notes || undefined,
-        })),
-        adjustments: adjustmentsData.map((a: any) => ({
-          type: a.type,
-          description: a.description,
-          amount: Number(a.amount),
-          isRecurring: a.isRecurring || false,
-          notes: a.notes || undefined,
-        })),
-      };
-
-      if (actionType === "create") {
-        await createItem({
-          variables: {
-            createPayrollItemInput: input,
-          },
-        });
-      } else {
-        const { payrollCycleId, userId, ...rest } = input;
-        await updateItem({
-          variables: {
-            updatePayrollItemInput: {
-              ...rest,
-              id: Number(item?.id),
-            },
-          },
-        });
+      if (res.data?.createPayrollItem?.success) {
+        refetch?.();
+        onClose();
       }
-
-      refetch?.();
-      onClose();
     } catch (error) {
-      console.error("Error submitting payroll item:", error);
+      console.error("Error creating payroll item:", error);
     } finally {
       setIsPending(false);
     }
@@ -155,535 +114,338 @@ export default function PayrollItemForm({
         employees={employees}
         components={components}
         actionType={actionType}
+        payrollItemPreview={payrollItemPreview}
+        previewData={previewData}
+        setPreviewData={setPreviewData}
+        previewLoading={previewLoading}
+        payrollCycleId={Number(item?.payrollCycleId)}
+        item={item}
       />
-      <FormActionButton isPending={isPending} cancelHandler={onClose} />
+      <FormActionButton
+        isPending={isPending || createLoading}
+        cancelHandler={onClose}
+      />
     </CustomForm>
   );
 }
 
 function PayrollItemFormFields({
   employees,
-  components,
   actionType,
+  payrollItemPreview,
+  previewData,
+  setPreviewData,
+  previewLoading,
+  payrollCycleId,
+  item,
 }: {
   employees: IUser[];
   components: IPayrollComponent[];
   actionType: "create" | "update";
+  payrollItemPreview: any;
+  previewData: any;
+  setPreviewData: (data: any) => void;
+  previewLoading: boolean;
+  payrollCycleId: number;
+  item?: IPayrollItem;
 }) {
-  const { control, setValue, watch } = useFormContext();
+  const { watch } = useFormContext();
 
   const employeeOptions = employees.map((emp) => ({
     label: emp.profile?.fullName || emp.email,
     value: emp.id.toString(),
   }));
 
-  const paymentMethodOptions = [
-    { label: "Bank Transfer", value: "bank_transfer" },
-    { label: "Cash", value: "cash" },
-    { label: "Cheque", value: "cheque" },
-  ];
+  const userId = watch("userId");
+  const displayData = previewData || (actionType === "update" ? item : null);
 
-  // Watch for changes to auto-calculate
-  // const basicSalary = useWatch({
-  //   control,
-  //   name: "basicSalary",
-  //   defaultValue: 0,
-  // });
-  const workingDays = useWatch({
-    control,
-    name: "workingDays",
-    defaultValue: 30,
-  });
-  const presentDays = useWatch({
-    control,
-    name: "presentDays",
-    defaultValue: 0,
-  });
-  // const absentDays = useWatch({ control, name: "absentDays", defaultValue: 0 });
-  const leaveDays = useWatch({ control, name: "leaveDays", defaultValue: 0 });
-
-  // Auto-calculate absent and leave days
+  // Fetch preview when userId changes
   useEffect(() => {
-    const calculatedAbsent = workingDays - presentDays - leaveDays;
-    if (calculatedAbsent >= 0) {
-      setValue("absentDays", calculatedAbsent);
-    }
-  }, [workingDays, presentDays, leaveDays, setValue]);
+    const fetchPreview = async () => {
+      if (userId && actionType === "create") {
+        try {
+          const res = await payrollItemPreview({
+            variables: {
+              userId: Number(userId),
+              payrollCycleId: payrollCycleId,
+            },
+          });
+          if (res.data?.previewPayrollItem?.success) {
+            setPreviewData(res.data.previewPayrollItem.data);
+          }
+        } catch (error) {
+          console.error("Error fetching preview:", error);
+        }
+      } else {
+        setPreviewData(null);
+      }
+    };
 
-  // Auto-calculate overtime hours
-  // useEffect(() => {
-  //   const calculatedOvertime = basicSalary * 0.5;
-  //   if (calculatedOvertime >= 0) {
-  //     setValue("overtimeHours", calculatedOvertime);
-  //   }
-  // }, [basicSalary, setValue]);
-
-  // ADD BASIC SALARY
-  useEffect(() => {
-    const selectedEmployee = employees.find(
-      (e) => e.id.toString() === watch("userId"),
-    );
-
-    if (selectedEmployee && selectedEmployee.employee) {
-      setValue("basicSalary", 0);
-    }
-  }, [watch("userId")]);
+    fetchPreview();
+  }, [userId, actionType, payrollCycleId, payrollItemPreview, setPreviewData]);
 
   return (
     <div className="space-y-4">
-      {/* Employee Information */}
+      {/* Employee Selection */}
       <div className="border border-primary/20 rounded-lg p-4">
         <h4 className="text-base font-semibold mb-3 text-primary">
-          Employee Information
+          Select Employee
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <CustomSelect
             dataAuto="userId"
             name="userId"
             label="Employee"
-            placeholder="Select Employee"
+            placeholder="Select Employee to generate payroll preview"
             required={true}
             options={employeeOptions}
             isLoading={false}
             disabled={actionType === "update"}
           />
-          <CustomInputField
-            dataAuto="basicSalary"
-            name="basicSalary"
-            label="Basic Salary"
-            placeholder="Enter basic salary"
-            required={true}
-            type="number"
-            // step="0.01"
-            readOnly={true}
-          />
         </div>
       </div>
 
-      {/* Attendance Information */}
-      <div className="border border-primary/20 rounded-lg p-4">
-        <h4 className="text-base font-semibold mb-3 text-primary">
-          Attendance Information
+      {/* Preview Section */}
+      <div className="border border-primary/20 rounded-lg p-4 min-h-[200px] flex flex-col">
+        <h4 className="text-base font-semibold mb-4 text-primary flex items-center justify-between">
+          Payroll Preview
+          {previewLoading && (
+            <span className="loading loading-spinner loading-sm text-primary"></span>
+          )}
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <CustomInputField
-            dataAuto="workingDays"
-            name="workingDays"
-            label="Working Days"
-            placeholder="30"
-            required={true}
-            type="number"
-          />
-          <CustomInputField
-            dataAuto="presentDays"
-            name="presentDays"
-            label="Present Days"
-            placeholder="28"
-            required={true}
-            type="number"
-            // step="0.5"
-          />
-          <CustomInputField
-            dataAuto="leaveDays"
-            name="leaveDays"
-            label="Leave Days"
-            placeholder="2"
-            required={true}
-            type="number"
-            // step="0.5"
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <CustomInputField
-            dataAuto="absentDays"
-            name="absentDays"
-            label="Absent Days (Auto-calculated)"
-            placeholder="0"
-            required={true}
-            type="number"
-            // step="0.5"
-            disabled={true}
-          />
-          <CustomInputField
-            dataAuto="overtimeHours"
-            name="overtimeHours"
-            label="Overtime Hours"
-            placeholder="0"
-            required={false}
-            type="number"
-            // step="0.5"
-          />
-        </div>
-      </div>
 
-      {/* Payment Information */}
-      <div className="border border-primary/20 rounded-lg p-4">
-        <h4 className="text-base font-semibold mb-3 text-primary">
-          Payment Information
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomSelect
-            dataAuto="paymentMethod"
-            name="paymentMethod"
-            label="Payment Method"
-            placeholder="Select payment method"
-            required={false}
-            options={paymentMethodOptions}
-            isLoading={false}
-          />
-          <CustomInputField
-            dataAuto="bankAccount"
-            name="bankAccount"
-            label="Bank Account"
-            placeholder="Account number"
-            required={false}
-          />
-        </div>
-      </div>
-
-      {/* Components Section */}
-      <PayrollComponentsSection components={components} />
-
-      {/* Adjustments Section */}
-      <PayslipAdjustmentsSection />
-
-      {/* Notes */}
-      <div className="border border-primary/20 rounded-lg p-4">
-        <h4 className="text-base font-semibold mb-3 text-primary">
-          Additional Information
-        </h4>
-        <CustomTextareaField
-          dataAuto="notes"
-          name="notes"
-          label="Notes"
-          placeholder="Add any additional notes..."
-          required={false}
-          rows={3}
-        />
-      </div>
-    </div>
-  );
-}
-
-// Components Section Component
-function PayrollComponentsSection({
-  components,
-}: {
-  components: IPayrollComponent[];
-}) {
-  const { control, setValue } = useFormContext();
-  const prevComponentIdsRef = useRef<string[]>([]);
-
-  const basicSalary = useWatch({
-    control,
-    name: "basicSalary",
-    defaultValue: 0,
-  });
-
-  // Watch the components array from react-hook-form
-  const componentsFormValue = useWatch({
-    control,
-    name: "components",
-    defaultValue: [],
-  });
-
-  // Initialize prevComponentIdsRef with existing componentIds on mount
-  // useEffect(() => {
-  //   if (prevComponentIdsRef.current.length === 0 && componentsFormValue && componentsFormValue.length > 0) {
-  //     prevComponentIdsRef.current = componentsFormValue.map((comp: any) => comp.componentId || "");
-  //   }
-  // }, []);
-
-  // Auto-calculate amounts when component is selected (detect componentId changes)
-  useEffect(() => {
-    if (!componentsFormValue || componentsFormValue.length === 0) {
-      prevComponentIdsRef.current = [];
-      return;
-    }
-
-    const currentComponentIds = componentsFormValue.map(
-      (comp: any) => comp.componentId || "",
-    );
-    const prevComponentIds = prevComponentIdsRef.current;
-
-    const updatedComponents = componentsFormValue.map(
-      (comp: any, index: number) => {
-        if (!comp.componentId) return comp;
-
-        const component = components.find(
-          (c) => c.id === Number(comp.componentId),
-        );
-        if (!component) return comp;
-
-        // Check if this component was just selected (componentId changed)
-        const isNewlySelected =
-          currentComponentIds[index] !== prevComponentIds[index];
-
-        // Only auto-calculate if component was just selected
-        if (isNewlySelected) {
-          let calculatedAmount = 0;
-
-          // Auto-calculate based on component type
-          if (component.calculationType === "PERCENTAGE_OF_BASIC") {
-            calculatedAmount = (basicSalary * component.defaultValue!) / 100;
-          } else if (component.calculationType === "FIXED_AMOUNT") {
-            calculatedAmount = component.defaultValue || 0;
-          }
-
-          return {
-            ...comp,
-            amount: calculatedAmount,
-            calculationBase: basicSalary,
-            component: component,
-          };
-        }
-
-        // Component already selected, don't recalculate (allow manual editing)
-        // But update component reference if not set
-        if (!comp.component) {
-          return {
-            ...comp,
-            component: component,
-          };
-        }
-
-        return comp;
-      },
-    );
-
-    // Check if there are actual changes before updating
-    const hasChanges = componentsFormValue.some((comp: any, index: number) => {
-      return JSON.stringify(comp) !== JSON.stringify(updatedComponents[index]);
-    });
-
-    if (hasChanges) {
-      setValue("components", updatedComponents, { shouldValidate: false });
-    }
-
-    // Update the ref with current componentIds
-    prevComponentIdsRef.current = currentComponentIds;
-  }, [componentsFormValue, basicSalary, components, setValue]);
-
-  const addComponent = () => {
-    const currentComponents = componentsFormValue || [];
-    const newComponent = {
-      componentId: "",
-      amount: 0,
-      calculationBase: basicSalary,
-      notes: "",
-    };
-    setValue("components", [...currentComponents, newComponent]);
-  };
-
-  const removeComponent = (index: number) => {
-    const currentComponents = componentsFormValue || [];
-    const newComponents = currentComponents.filter(
-      (_: any, i: number) => i !== index,
-    );
-    setValue("components", newComponents);
-  };
-
-  const componentOptions = components.map((c) => ({
-    label: `${c.name} (${c.code})`,
-    value: c.id.toString(),
-  }));
-
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="text-base font-semibold text-primary">
-          Payroll Components
-        </h4>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline"
-          onClick={addComponent}
-        >
-          Add Component
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        {componentsFormValue && componentsFormValue.length > 0 ? (
-          componentsFormValue.map((_: any, index: number) => (
-            <div key={index} className="border rounded p-3 bg-base-200">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
-                <CustomSelect
-                  dataAuto={`component-${index}`}
-                  name={`components.${index}.componentId`}
-                  label="Component"
-                  placeholder="Select component"
-                  required={true}
-                  options={componentOptions}
-                  isLoading={false}
-                />
-                <CustomInputField
-                  dataAuto={`amount-${index}`}
-                  name={`components.${index}.amount`}
-                  label="Amount"
-                  placeholder="0.00"
-                  required={true}
-                  type="number"
-                />
-                <CustomInputField
-                  dataAuto={`base-${index}`}
-                  name={`components.${index}.calculationBase`}
-                  label="Base Amount"
-                  placeholder="0.00"
-                  required={false}
-                  type="number"
-                  readOnly={true}
-                />
-                <CustomInputField
-                  dataAuto={`notes-${index}`}
-                  name={`components.${index}.notes`}
-                  label="Notes"
-                  placeholder="Optional notes"
-                  required={false}
-                />
-                <button
-                  type="button"
-                  className="btn btn-sm btn-error self-center"
-                  onClick={() => removeComponent(index)}
-                >
-                  Remove
-                </button>
+        {previewLoading ? (
+          <div className="flex-1 flex flex-col gap-4 animate-pulse">
+            <div className="h-20 bg-base-200 rounded-lg w-full"></div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="h-16 bg-base-200 rounded-lg"></div>
+              <div className="h-16 bg-base-200 rounded-lg"></div>
+              <div className="h-16 bg-base-200 rounded-lg"></div>
+            </div>
+          </div>
+        ) : displayData ? (
+          <div className="space-y-6">
+            {/* Summary Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-3 bg-base-200 rounded-lg">
+                <p className="text-xs text-base-content/60 uppercase font-bold tracking-wider mb-1">
+                  Basic Salary
+                </p>
+                <p className="text-lg font-black">
+                  {displayData.basicSalary?.toLocaleString() || "0"}
+                </p>
+              </div>
+              <div className="p-3 bg-success/10 rounded-lg border border-success/20">
+                <p className="text-xs text-success uppercase font-bold tracking-wider mb-1">
+                  Gross Pay
+                </p>
+                <p className="text-lg font-black text-success">
+                  {displayData.grossPay?.toLocaleString() || "0"}
+                </p>
+              </div>
+              <div className="p-3 bg-error/10 rounded-lg border border-error/20">
+                <p className="text-xs text-error uppercase font-bold tracking-wider mb-1">
+                  Deductions
+                </p>
+                <p className="text-lg font-black text-error">
+                  {displayData.totalDeductions?.toLocaleString() || "0"}
+                </p>
+              </div>
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20 shadow-md">
+                <p className="text-xs text-primary uppercase font-bold tracking-wider mb-1">
+                  Net Pay
+                </p>
+                <p className="text-xl font-black text-primary">
+                  {displayData.netPay?.toLocaleString() || "0"}
+                </p>
               </div>
             </div>
-          ))
-        ) : (
-          <div className="text-center text-base-content/70 py-4">
-            No components added yet. Click "Add Component" to get started.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
-// Adjustments Section Component
-function PayslipAdjustmentsSection() {
-  const [adjustmentList, setAdjustmentList] = useState<any[]>([]);
+            {/* Attendance & Time */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-2 border-t border-base-content/5">
+              <div className="text-center">
+                <p className="text-[10px] text-base-content/40 uppercase font-bold">
+                  Working Days
+                </p>
+                <p className="font-bold">{displayData.workingDays || 0}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] text-base-content/40 uppercase font-bold">
+                  Present
+                </p>
+                <p className="font-bold text-success">
+                  {displayData.presentDays || 0}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] text-base-content/40 uppercase font-bold">
+                  Absent
+                </p>
+                <p className="font-bold text-error">
+                  {displayData.absentDays || 0}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] text-base-content/40 uppercase font-bold">
+                  Leave
+                </p>
+                <p className="font-bold text-warning">
+                  {displayData.leaveDays || 0}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] text-base-content/40 uppercase font-bold">
+                  Overtime (Min)
+                </p>
+                <p className="font-bold">
+                  {displayData.overtimeMinutes ||
+                    displayData.overtimeHours ||
+                    0}
+                </p>
+              </div>
+            </div>
 
-  const addAdjustment = () => {
-    setAdjustmentList([
-      ...adjustmentList,
-      {
-        type: "bonus",
-        description: "",
-        amount: 0,
-        isRecurring: false,
-        notes: "",
-      },
-    ]);
-  };
+            {/* Components & Adjustments */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-base-content/5">
+              {/* Recurring Components */}
+              <div className="space-y-3">
+                <h5 className="text-sm font-bold flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary"></span>
+                  Recurring Components
+                </h5>
+                <div className="bg-base-200/50 rounded-lg p-3 space-y-2 max-h-[200px] overflow-y-auto border border-base-content/5">
+                  {(() => {
+                    const comps =
+                      displayData.payrollComponents ||
+                      displayData.components ||
+                      [];
+                    return comps.length > 0 ? (
+                      comps.map((pc: any, idx: number) => {
+                        const component = pc.payrollComponent || pc.component;
+                        const val = pc.value || pc.amount || 0;
+                        return (
+                          <div
+                            key={idx}
+                            className="flex justify-between items-center text-sm border-b border-base-content/5 pb-1 last:border-0 hover:bg-base-300/30 transition-colors px-1"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-base-content/70 font-medium">
+                                {component?.name}
+                              </span>
+                              <span className="text-[10px] text-base-content/40 uppercase font-bold">
+                                {component?.code}
+                              </span>
+                            </div>
+                            <span
+                              className={`font-mono font-bold ${component?.componentType === "EARNING" ? "text-success" : "text-error"}`}
+                            >
+                              {component?.componentType === "EARNING"
+                                ? "+"
+                                : "-"}
+                              {val.toLocaleString()}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-xs text-base-content/40 italic py-4 text-center">
+                        No recurring components
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
 
-  const removeAdjustment = (index: number) => {
-    const newList = adjustmentList.filter((_, i) => i !== index);
-    setAdjustmentList(newList);
-  };
+              {/* Variable Adjustments */}
+              <div className="space-y-3">
+                <h5 className="text-sm font-bold flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-secondary"></span>
+                  Variable Adjustments (Selected Period)
+                </h5>
+                <div className="bg-base-200/50 rounded-lg p-3 space-y-2 max-h-[200px] overflow-y-auto border border-base-content/5">
+                  {(() => {
+                    const adjs =
+                      displayData.payrollAdjustments ||
+                      displayData.adjustments ||
+                      [];
+                    return adjs.length > 0 ? (
+                      adjs.map((pa: any, idx: number) => {
+                        const component = pa.payrollComponent || null;
+                        const val = pa.value || pa.amount || 0;
+                        const desc = pa.remarks || pa.description || "";
+                        const name =
+                          component?.name ||
+                          pa.type?.replace("_", " ").toUpperCase() ||
+                          "Adjustment";
 
-  // const updateAdjustment = (index: number, field: string, value: any) => {
-  //   const newList = [...adjustmentList];
-  //   newList[index] = { ...newList[index], [field]: value };
-  //   setAdjustmentList(newList);
-  // };
-
-  const adjustmentTypes = [
-    { label: "Bonus", value: "bonus" },
-    { label: "Penalty", value: "penalty" },
-    { label: "Reimbursement", value: "reimbursement" },
-    { label: "Advance Deduction", value: "advance_deduction" },
-  ];
-
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="text-base font-semibold text-primary">
-          Payslip Adjustments
-        </h4>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline"
-          onClick={addAdjustment}
-        >
-          Add Adjustment
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        {adjustmentList.map((_, index) => (
-          <div key={index} className="border rounded p-3 bg-base-200">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
-              <CustomSelect
-                dataAuto={`adj-type-${index}`}
-                name={`adjustments.${index}.type`}
-                label="Type"
-                placeholder="Select type"
-                required={true}
-                options={adjustmentTypes}
-                isLoading={false}
-                // value={adj.type}
-                // onChange={(value) => updateAdjustment(index, "type", value)}
-              />
-              <CustomInputField
-                dataAuto={`adj-desc-${index}`}
-                name={`adjustments.${index}.description`}
-                label="Description"
-                placeholder="Description"
-                required={true}
-                // value={adj.description}
-                // onChange={(e) =>
-                //   updateAdjustment(index, "description", e.target.value)
-                // }
-              />
-              <CustomInputField
-                dataAuto={`adj-amount-${index}`}
-                name={`adjustments.${index}.amount`}
-                label="Amount"
-                placeholder="0.00"
-                required={true}
-                type="number"
-                // step="0.01"
-                // value={adj.amount}
-                // onChange={(e) =>
-                //   updateAdjustment(index, "amount", e.target.value)
-                // }
-              />
-              {/* <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Recurring</span>
-                </label>
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  checked={adj.isRecurring}
-                  onChange={(e) =>
-                    updateAdjustment(index, "isRecurring", e.target.checked)
-                  }
-                />
-              </div> */}
-              <CustomInputField
-                dataAuto={`adj-notes-${index}`}
-                name={`adjustments.${index}.notes`}
-                label="Notes"
-                placeholder="Optional notes"
-                required={true}
-                // value={adj.notes}
-                // onChange={(e) =>
-                //   updateAdjustment(index, "notes", e.target.value)
-                // }
-              />
-              <button
-                type="button"
-                className="btn btn-sm btn-error self-center"
-                onClick={() => removeAdjustment(index)}
-              >
-                Remove
-              </button>
+                        return (
+                          <div
+                            key={idx}
+                            className="flex justify-between items-center text-sm border-b border-base-content/5 pb-1 last:border-0 hover:bg-base-300/30 transition-colors px-1"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-base-content/70 font-medium">
+                                {name}
+                              </span>
+                              {desc && (
+                                <span className="text-[10px] text-base-content/40 truncate max-w-[140px] italic">
+                                  {desc}
+                                </span>
+                              )}
+                            </div>
+                            <span
+                              className={`font-mono font-bold ${component?.componentType === "EARNING" || !["penalty", "advance_deduction"].includes(pa.type) ? "text-success" : "text-error"}`}
+                            >
+                              {component?.componentType === "EARNING" ||
+                              !["penalty", "advance_deduction"].includes(
+                                pa.type,
+                              )
+                                ? "+"
+                                : "-"}
+                              {val.toLocaleString()}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-xs text-base-content/40 italic py-4 text-center">
+                        No adjustments this period
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
-        ))}
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-base-200/30 rounded-xl border-2 border-dashed border-base-content/10">
+            <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mb-4 text-primary opacity-50">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <h5 className="font-bold text-base-content/70">
+              No Employee Selected
+            </h5>
+            <p className="text-sm text-base-content/40 mt-1 max-w-[280px]">
+              Select an employee from the list above to calculate and preview
+              their payroll data.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
