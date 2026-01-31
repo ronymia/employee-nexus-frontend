@@ -425,7 +425,6 @@ export default function AttendanceRecord({
                   totalMinutes={attendance.totalMinutes || 0}
                   overtimeMinutes={attendance.overtimeMinutes || 0}
                   scheduleMinutes={attendance.scheduleMinutes || 0}
-                  scheduleMinutes={attendance.scheduleMinutes || 0}
                   status={attendance.status}
                   type={attendance.type || "regular"}
                 />

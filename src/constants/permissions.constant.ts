@@ -14,10 +14,6 @@ export enum PermissionResource {
   SUBSCRIPTION_PLAN = "Subscription Plan",
   EMPLOYMENT_STATUS = "Employment Status",
   DESIGNATION = "Designation",
-  JOB_TYPE = "Job Type",
-  JOB_PLATFORM = "Job Platform",
-  RECRUITMENT_PROCESS = "Recruitment Process",
-  ONBOARDING_PROCESS = "Onboarding Process",
   WORK_SITE = "Work Site",
   WORK_SCHEDULE = "Work Schedule",
   DEPARTMENT = "Department",
@@ -95,30 +91,6 @@ export const Permissions = {
   DesignationRead: `${PermissionResource.DESIGNATION}:${PermissionAction.READ}`,
   DesignationUpdate: `${PermissionResource.DESIGNATION}:${PermissionAction.UPDATE}`,
   DesignationDelete: `${PermissionResource.DESIGNATION}:${PermissionAction.DELETE}`,
-
-  // Job Type Permissions
-  JobTypeCreate: `${PermissionResource.JOB_TYPE}:${PermissionAction.CREATE}`,
-  JobTypeRead: `${PermissionResource.JOB_TYPE}:${PermissionAction.READ}`,
-  JobTypeUpdate: `${PermissionResource.JOB_TYPE}:${PermissionAction.UPDATE}`,
-  JobTypeDelete: `${PermissionResource.JOB_TYPE}:${PermissionAction.DELETE}`,
-
-  // Job Platform Permissions
-  JobPlatformCreate: `${PermissionResource.JOB_PLATFORM}:${PermissionAction.CREATE}`,
-  JobPlatformRead: `${PermissionResource.JOB_PLATFORM}:${PermissionAction.READ}`,
-  JobPlatformUpdate: `${PermissionResource.JOB_PLATFORM}:${PermissionAction.UPDATE}`,
-  JobPlatformDelete: `${PermissionResource.JOB_PLATFORM}:${PermissionAction.DELETE}`,
-
-  // Recruitment Process Permissions
-  RecruitmentProcessCreate: `${PermissionResource.RECRUITMENT_PROCESS}:${PermissionAction.CREATE}`,
-  RecruitmentProcessRead: `${PermissionResource.RECRUITMENT_PROCESS}:${PermissionAction.READ}`,
-  RecruitmentProcessUpdate: `${PermissionResource.RECRUITMENT_PROCESS}:${PermissionAction.UPDATE}`,
-  RecruitmentProcessDelete: `${PermissionResource.RECRUITMENT_PROCESS}:${PermissionAction.DELETE}`,
-
-  // Onboarding Process Permissions
-  OnboardingProcessCreate: `${PermissionResource.ONBOARDING_PROCESS}:${PermissionAction.CREATE}`,
-  OnboardingProcessRead: `${PermissionResource.ONBOARDING_PROCESS}:${PermissionAction.READ}`,
-  OnboardingProcessUpdate: `${PermissionResource.ONBOARDING_PROCESS}:${PermissionAction.UPDATE}`,
-  OnboardingProcessDelete: `${PermissionResource.ONBOARDING_PROCESS}:${PermissionAction.DELETE}`,
 
   // Work Site Permissions
   WorkSiteCreate: `${PermissionResource.WORK_SITE}:${PermissionAction.CREATE}`,

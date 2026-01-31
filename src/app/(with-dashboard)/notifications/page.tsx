@@ -119,8 +119,6 @@ export default function NotificationsPage() {
         return "⏰";
       case NotificationType.PAYROLL:
         return "💰";
-      case NotificationType.RECRUITMENT:
-        return "👥";
       case NotificationType.PROJECT:
         return "📊";
       case NotificationType.DOCUMENT:
@@ -279,7 +277,7 @@ export default function NotificationsPage() {
                         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                           <span
                             className={`badge badge-xs sm:badge-sm ${getPriorityColor(
-                              notification.priority
+                              notification.priority,
                             )}`}
                           >
                             {notification.priority}

@@ -3,11 +3,7 @@ type IAction_TYPE = "create" | "update" | "delete" | "view";
 type IForm_NAME =
   | ""
   | "SubscriptionPlanForm"
-  | "job_type"
-  | "recruitment_process"
-  | "onboarding_process"
   | "work_site"
-  | "job_platforms"
   | "designation"
   | "employment_status"
   | "leave_type"

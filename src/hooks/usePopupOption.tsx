@@ -23,42 +23,6 @@ export default function usePopupOption() {
     });
   };
 
-  // CREATE NEW JOB TYPE
-  const createNewJobType = () => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "create",
-      form: "job_type",
-      data: null,
-      title: "Create Job Type",
-    });
-  };
-
-  // CREATE NEW RECRUITMENT PROCESS
-  const createNewRecruitmentProcess = () => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "create",
-      form: "recruitment_process",
-      data: null,
-      title: "Create Recruitment Process",
-    });
-  };
-
-  // CREATE NEW ONBOARDING PROCESS
-  const createNewOnboardingProcess = () => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "create",
-      form: "onboarding_process",
-      data: null,
-      title: "Create Onboarding Process",
-    });
-  };
-
   // CREATE NEW WORK SITE
   const createNewWorkSite = () => {
     setPopupOption({
@@ -71,17 +35,6 @@ export default function usePopupOption() {
     });
   };
 
-  // CREATE NEW JOB TYPE
-  const createNewJobPlatforms = () => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: true,
-      actionType: "create",
-      form: "job_platforms",
-      data: null,
-      title: "Create Job Platforms",
-    });
-  };
   // CREATE NEW DESIGNATION
   const createNewDesignation = () => {
     setPopupOption({
@@ -134,11 +87,7 @@ export default function usePopupOption() {
     popupOption,
     setPopupOption,
     createNewSubscriptionPlan,
-    createNewJobType,
-    createNewRecruitmentProcess,
-    createNewOnboardingProcess,
     createNewWorkSite,
-    createNewJobPlatforms,
     createNewDesignation,
     createNewEmploymentStatus,
     createNewLeaveType,
