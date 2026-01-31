@@ -19,14 +19,14 @@ const appStore = create<IAppState>()(
         permissions: state.permissions,
         modules: state.modules,
       }),
-      onRehydrateStorage: () => (state, error) => {
+      onRehydrateStorage: () => (state) => {
         if (state) {
           // ✅ trigger re-render properly
           state.setHydrated(true);
         }
       },
-    }
-  )
+    },
+  ),
 );
 
 export default appStore;

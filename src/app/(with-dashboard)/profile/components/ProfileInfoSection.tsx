@@ -13,8 +13,10 @@ import { GenderRadio, MaritalStatusRadio } from "@/components/input-fields";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import { IUser } from "@/types";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 interface ProfileInfoSectionProps {
   user: IUser;
@@ -48,7 +50,9 @@ export default function ProfileInfoSection({
             ...profileData,
             userId: Number(user?.profile?.userId),
             profilePicture: user?.profile?.profilePicture || "",
-            dateOfBirth: dayjs(profileData.dateOfBirth, "DD-MM-YYYY").toDate(),
+            dateOfBirth: dayjs
+              .utc(profileData.dateOfBirth, "DD-MM-YYYY")
+              .toDate(),
           },
         },
         fetchPolicy: "no-cache",

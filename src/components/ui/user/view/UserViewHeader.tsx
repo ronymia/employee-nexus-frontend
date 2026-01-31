@@ -2,22 +2,11 @@
 
 import dayjs from "dayjs";
 import ImageUploader from "../../uploader/ImageUploader";
-import WorkScheduleCompactChart from "@/components/charts/WorkScheduleCompactChart";
-
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { IUser } from "@/types";
+dayjs.extend(customParseFormat);
 interface ProfileHeaderProps {
-  employee?: {
-    fullName: string;
-    employmentType: string;
-    designation: string;
-    employeeId: string;
-    joiningDate: string;
-    phone: string;
-    email: string;
-    dateOfBirth: string;
-    department: string;
-    gender: string;
-    profileImage?: string;
-  };
+  user: IUser;
   // workSchedule?: {
   //   today: {
   //     scheduled: number;
@@ -41,53 +30,55 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({
-  employee,
+  user,
 }: // workSchedule,
 ProfileHeaderProps) {
+  console.log({ user });
+
   // Default mock data
-  const defaultEmployee = {
-    fullName: "Mr Saadman Galib",
-    employmentType: "Full-Time",
-    designation: "Frontend Developer",
-    employeeId: "WS-0010",
-    joiningDate: "07 Jul 2025",
-    updatedAt: "02 October, 2025",
-    phone: "01741082804",
-    email: "saadmangalib@gmail.com",
-    dateOfBirth: "07 Jul 2011",
-    department: "Frontend Developer",
-    gender: "Male",
-  };
+  // const defaultEmployee = {
+  //   fullName: "Mr Saadman Galib",
+  //   employmentType: "Full-Time",
+  //   designation: "Frontend Developer",
+  //   employeeId: "WS-0010",
+  //   joiningDate: "07 Jul 2025",
+  //   updatedAt: "02 October, 2025",
+  //   phone: "01741082804",
+  //   email: "saadmangalib@gmail.com",
+  //   dateOfBirth: "07 Jul 2011",
+  //   department: "Frontend Developer",
+  //   gender: "Male",
+  // };
 
-  const defaultWorkSchedule = {
-    today: { scheduled: 7.98, worked: 6.5, overtime: 0, leave: 0 },
-    week: { scheduled: 47.88, worked: 40, overtime: 2, leave: 0 },
-    month: { scheduled: 207.48, worked: 180, overtime: 5, leave: 8 },
-  };
+  // const defaultWorkSchedule = {
+  //   today: { scheduled: 7.98, worked: 6.5, overtime: 0, leave: 0 },
+  //   week: { scheduled: 47.88, worked: 40, overtime: 2, leave: 0 },
+  //   month: { scheduled: 207.48, worked: 180, overtime: 5, leave: 8 },
+  // };
 
-  const emp = employee || defaultEmployee;
-  const schedule = defaultWorkSchedule;
+  const emp = user;
+  // const schedule = defaultWorkSchedule;
 
-  const chartData = [
-    {
-      period: "Today",
-      worked: schedule.today.worked,
-      overtime: schedule.today.overtime,
-      leave: schedule.today.leave,
-    },
-    {
-      period: "Week",
-      worked: schedule.week.worked,
-      overtime: schedule.week.overtime,
-      leave: schedule.week.leave,
-    },
-    {
-      period: "Month",
-      worked: schedule.month.worked,
-      overtime: schedule.month.overtime,
-      leave: schedule.month.leave,
-    },
-  ];
+  // const chartData = [
+  //   {
+  //     period: "Today",
+  //     worked: schedule.today.worked,
+  //     overtime: schedule.today.overtime,
+  //     leave: schedule.today.leave,
+  //   },
+  //   {
+  //     period: "Week",
+  //     worked: schedule.week.worked,
+  //     overtime: schedule.week.overtime,
+  //     leave: schedule.week.leave,
+  //   },
+  //   {
+  //     period: "Month",
+  //     worked: schedule.month.worked,
+  //     overtime: schedule.month.overtime,
+  //     leave: schedule.month.leave,
+  //   },
+  // ];
 
   return (
     <div className="p-3 bg-white">
@@ -102,19 +93,21 @@ ProfileHeaderProps) {
                 <ImageUploader
                   name={`Profile`}
                   type="circular"
-                  defaultImage={employee?.profileImage || ""}
+                  defaultImage={user?.profile?.profilePicture || ""}
                   handleGetImage={() => {}}
                   isLoading={false}
                 />
               </div>
               <div className="text-center lg:text-left">
                 <h2 className="text-xl md:text-2xl font-bold text-base-300 mb-1">
-                  {emp.fullName}
+                  {emp?.profile?.fullName}
                 </h2>
                 <p className="text-sm text-base-300/80 font-medium">
-                  {emp.designation}
+                  {emp?.employee?.designation?.name}
                 </p>
-                <p className="text-xs text-base-300/70">{emp.employmentType}</p>
+                <p className="text-xs text-base-300/70">
+                  {emp?.employee?.employmentStatus?.name}
+                </p>
               </div>
             </div>
 
@@ -126,7 +119,7 @@ ProfileHeaderProps) {
                     Employee ID
                   </label>
                   <p className="text-sm font-semibold text-base-300">
-                    {emp.employeeId}
+                    {emp?.employee?.employeeId}
                   </p>
                 </div>
                 <div>
@@ -134,7 +127,7 @@ ProfileHeaderProps) {
                     Phone
                   </label>
                   <p className="text-sm font-semibold text-base-300">
-                    {emp.phone}
+                    {emp?.profile?.phone}
                   </p>
                 </div>
                 <div>
@@ -142,10 +135,10 @@ ProfileHeaderProps) {
                     Email
                   </label>
                   <a
-                    href={`mailto:${emp.email}`}
+                    href={`mailto:${emp?.email}`}
                     className="text-sm font-semibold text-base-300 hover:underline block truncate"
                   >
-                    {emp.email}
+                    {emp?.email}
                   </a>
                 </div>
               </div>
@@ -156,9 +149,7 @@ ProfileHeaderProps) {
                     Date of Birth
                   </label>
                   <p className="text-sm font-semibold text-base-300">
-                    {dayjs(emp.dateOfBirth, "DD-MM-YYYY").format(
-                      "DD MMM, YYYY"
-                    )}
+                    {dayjs(emp?.profile?.dateOfBirth).format("DD MMM, YYYY")}
                   </p>
                 </div>
                 <div>
@@ -166,7 +157,7 @@ ProfileHeaderProps) {
                     Department
                   </label>
                   <p className="text-sm font-semibold text-base-300">
-                    {emp.department}
+                    {emp?.employee?.department?.name}
                   </p>
                 </div>
                 <div>
@@ -174,7 +165,7 @@ ProfileHeaderProps) {
                     Gender
                   </label>
                   <p className="text-sm font-semibold text-base-300">
-                    {emp.gender}
+                    {emp?.profile?.gender}
                   </p>
                 </div>
               </div>
@@ -184,7 +175,7 @@ ProfileHeaderProps) {
                   Joined At
                 </label>
                 <p className="text-sm font-semibold text-base-300">
-                  {dayjs(emp.joiningDate).format("DD MMM, YYYY")}
+                  {dayjs(emp?.employee?.joiningDate).format("DD MMM, YYYY")}
                 </p>
               </div>
             </div>

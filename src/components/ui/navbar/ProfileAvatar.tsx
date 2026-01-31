@@ -25,11 +25,7 @@ export default function ProfileAvatar() {
               </small>
             </div>
 
-            <CustomUserAvatar
-              size={11}
-              imageURL=""
-              name={user?.profile?.fullName}
-            />
+            <CustomUserAvatar imageURL="" name={user?.profile?.fullName} />
           </>
         </div>
         <ul

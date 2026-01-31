@@ -1,23 +1,5 @@
 "use client";
 
-// export default function PaySlipContent() {
-//   return (
-//     <div className="bg-base-100 rounded-lg p-6 shadow-sm">
-//       <div className="flex flex-col items-center justify-center py-12">
-//         <PiReceipt className="text-6xl text-base-content/30 mb-4" />
-//         <h3 className="text-lg font-semibold mb-2 text-base-content">
-//           Pay Slip Information
-//         </h3>
-//         <p className="text-base-content/60 text-center">
-//           No pay slip records found!
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
-
-"use client";
-
 import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { GET_ALL_PAYSLIPS } from "@/graphql";
@@ -29,7 +11,6 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayslipWrapper from "@/components/payroll/PayslipWrapper";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import useAppStore from "@/hooks/useAppStore";
 
 interface PayslipCardProps {
   item: IPayrollItem;
@@ -234,7 +215,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
 
               {/* Adjustments - Earnings */}
               {(item.adjustments?.filter(
-                (adj) => adj.type === "bonus" || adj.type === "reimbursement"
+                (adj) => adj.type === "bonus" || adj.type === "reimbursement",
               ).length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-green-200">
                   <p className="text-xs font-semibold text-green-600 mb-2">
@@ -243,7 +224,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
                   {item.adjustments
                     ?.filter(
                       (adj) =>
-                        adj.type === "bonus" || adj.type === "reimbursement"
+                        adj.type === "bonus" || adj.type === "reimbursement",
                     )
                     .map((adj, idx) => (
                       <div key={idx} className="flex justify-between text-sm">
@@ -283,7 +264,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
               {/* Adjustments - Deductions */}
               {(item.adjustments?.filter(
                 (adj) =>
-                  adj.type === "penalty" || adj.type === "advance_deduction"
+                  adj.type === "penalty" || adj.type === "advance_deduction",
               ).length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-red-200">
                   <p className="text-xs font-semibold text-red-600 mb-2">
@@ -293,7 +274,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
                     ?.filter(
                       (adj) =>
                         adj.type === "penalty" ||
-                        adj.type === "advance_deduction"
+                        adj.type === "advance_deduction",
                     )
                     .map((adj, idx) => (
                       <div key={idx} className="flex justify-between text-sm">
@@ -316,8 +297,8 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
                 item.status === "PAID"
                   ? "badge-success"
                   : item.status === "APPROVED"
-                  ? "badge-info"
-                  : "badge-warning"
+                    ? "badge-info"
+                    : "badge-warning"
               } badge-sm`}
             >
               {item.status}
@@ -345,286 +326,286 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
 };
 
 // Dummy data for UI preview
-const dummyPayslips: any[] = [
-  {
-    id: 1,
-    userId: 1,
-    payrollCycleId: 1,
-    basicSalary: 30000,
-    grossPay: 67500,
-    totalDeductions: 5500,
-    netPay: 62000,
-    status: "PAID",
-    paymentMethod: "BANK_TRANSFER",
-    transactionRef: "TXN202502001",
-    paidAt: "2022-02-28T10:30:00Z",
-    createdAt: "2022-02-28T10:00:00Z",
-    user: {
-      id: 1,
-      profile: {
-        fullName: "John Doe",
-      },
-      employee: {
-        employeeId: "EMP001",
-        department: {
-          name: "Engineering",
-        },
-        designation: {
-          name: "Senior Developer",
-        },
-      },
-    },
-    payrollCycle: {
-      periodStart: "2022-02-01",
-      periodEnd: "2022-02-28",
-      paymentDate: "2022-03-05",
-    },
-    components: [
-      {
-        id: 1,
-        amount: 2980,
-        component: {
-          name: "Leave Encashment",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 2,
-        amount: 15000,
-        component: {
-          name: "HRA",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 3,
-        amount: 10000,
-        component: {
-          name: "Other Allowance",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 4,
-        amount: 9520,
-        component: {
-          name: "SPL Allowance",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 5,
-        amount: 3000,
-        component: {
-          name: "Employee PF Contribution",
-          componentType: "DEDUCTION",
-        },
-      },
-      {
-        id: 6,
-        amount: 1000,
-        component: {
-          name: "Income Tax",
-          componentType: "DEDUCTION",
-        },
-      },
-      {
-        id: 7,
-        amount: 1500,
-        component: {
-          name: "Insurance",
-          componentType: "DEDUCTION",
-        },
-      },
-    ],
-    adjustments: [
-      {
-        id: 1,
-        payrollItemId: 1,
-        type: "bonus",
-        description: "Project Completion Bonus",
-        amount: 8000,
-        isRecurring: false,
-        createdBy: 1,
-        notes: "Milestone achievement",
-        createdAt: "2022-02-25T10:00:00Z",
-        updatedAt: "2022-02-25T10:00:00Z",
-      },
-    ],
-  },
-  {
-    id: 2,
-    userId: 1,
-    payrollCycleId: 2,
-    basicSalary: 30000,
-    grossPay: 65000,
-    totalDeductions: 4800,
-    netPay: 60200,
-    status: "APPROVED",
-    paymentMethod: "BANK_TRANSFER",
-    transactionRef: null,
-    paidAt: null,
-    createdAt: "2022-03-28T10:00:00Z",
-    user: {
-      id: 1,
-      profile: {
-        fullName: "John Doe",
-      },
-      employee: {
-        employeeId: "EMP001",
-        department: {
-          name: "Engineering",
-        },
-        designation: {
-          name: "Senior Developer",
-        },
-      },
-    },
-    payrollCycle: {
-      periodStart: "2022-03-01",
-      periodEnd: "2022-03-31",
-      paymentDate: "2022-04-05",
-    },
-    components: [
-      {
-        id: 8,
-        amount: 15000,
-        component: {
-          name: "HRA",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 9,
-        amount: 10000,
-        component: {
-          name: "Transport Allowance",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 10,
-        amount: 10000,
-        component: {
-          name: "Performance Bonus",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 11,
-        amount: 2800,
-        component: {
-          name: "Employee PF Contribution",
-          componentType: "DEDUCTION",
-        },
-      },
-      {
-        id: 12,
-        amount: 2000,
-        component: {
-          name: "Income Tax",
-          componentType: "DEDUCTION",
-        },
-      },
-    ],
-  },
-  {
-    id: 3,
-    userId: 1,
-    payrollCycleId: 3,
-    basicSalary: 30000,
-    grossPay: 68500,
-    totalDeductions: 6200,
-    netPay: 62300,
-    status: "PENDING",
-    paymentMethod: "BANK_TRANSFER",
-    transactionRef: null,
-    paidAt: null,
-    createdAt: "2022-04-28T10:00:00Z",
-    user: {
-      id: 1,
-      profile: {
-        fullName: "John Doe",
-      },
-      employee: {
-        employeeId: "EMP001",
-        department: {
-          name: "Engineering",
-        },
-        designation: {
-          name: "Senior Developer",
-        },
-      },
-    },
-    payrollCycle: {
-      periodStart: "2022-04-01",
-      periodEnd: "2022-04-30",
-      paymentDate: "2022-05-05",
-    },
-    components: [
-      {
-        id: 13,
-        amount: 3500,
-        component: {
-          name: "Overtime Pay",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 14,
-        amount: 15000,
-        component: {
-          name: "HRA",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 15,
-        amount: 10000,
-        component: {
-          name: "Medical Allowance",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 16,
-        amount: 10000,
-        component: {
-          name: "Special Allowance",
-          componentType: "EARNING",
-        },
-      },
-      {
-        id: 17,
-        amount: 3200,
-        component: {
-          name: "Employee PF Contribution",
-          componentType: "DEDUCTION",
-        },
-      },
-      {
-        id: 18,
-        amount: 1500,
-        component: {
-          name: "Income Tax",
-          componentType: "DEDUCTION",
-        },
-      },
-      {
-        id: 19,
-        amount: 1500,
-        component: {
-          name: "Professional Tax",
-          componentType: "DEDUCTION",
-        },
-      },
-    ],
-  },
-];
+// const dummyPayslips: any[] = [
+//   {
+//     id: 1,
+//     userId: 1,
+//     payrollCycleId: 1,
+//     basicSalary: 30000,
+//     grossPay: 67500,
+//     totalDeductions: 5500,
+//     netPay: 62000,
+//     status: "PAID",
+//     paymentMethod: "BANK_TRANSFER",
+//     transactionRef: "TXN202502001",
+//     paidAt: "2022-02-28T10:30:00Z",
+//     createdAt: "2022-02-28T10:00:00Z",
+//     user: {
+//       id: 1,
+//       profile: {
+//         fullName: "John Doe",
+//       },
+//       employee: {
+//         employeeId: "EMP001",
+//         department: {
+//           name: "Engineering",
+//         },
+//         designation: {
+//           name: "Senior Developer",
+//         },
+//       },
+//     },
+//     payrollCycle: {
+//       periodStart: "2022-02-01",
+//       periodEnd: "2022-02-28",
+//       paymentDate: "2022-03-05",
+//     },
+//     components: [
+//       {
+//         id: 1,
+//         amount: 2980,
+//         component: {
+//           name: "Leave Encashment",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 2,
+//         amount: 15000,
+//         component: {
+//           name: "HRA",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 3,
+//         amount: 10000,
+//         component: {
+//           name: "Other Allowance",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 4,
+//         amount: 9520,
+//         component: {
+//           name: "SPL Allowance",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 5,
+//         amount: 3000,
+//         component: {
+//           name: "Employee PF Contribution",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//       {
+//         id: 6,
+//         amount: 1000,
+//         component: {
+//           name: "Income Tax",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//       {
+//         id: 7,
+//         amount: 1500,
+//         component: {
+//           name: "Insurance",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//     ],
+//     adjustments: [
+//       {
+//         id: 1,
+//         payrollItemId: 1,
+//         type: "bonus",
+//         description: "Project Completion Bonus",
+//         amount: 8000,
+//         isRecurring: false,
+//         createdBy: 1,
+//         notes: "Milestone achievement",
+//         createdAt: "2022-02-25T10:00:00Z",
+//         updatedAt: "2022-02-25T10:00:00Z",
+//       },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     userId: 1,
+//     payrollCycleId: 2,
+//     basicSalary: 30000,
+//     grossPay: 65000,
+//     totalDeductions: 4800,
+//     netPay: 60200,
+//     status: "APPROVED",
+//     paymentMethod: "BANK_TRANSFER",
+//     transactionRef: null,
+//     paidAt: null,
+//     createdAt: "2022-03-28T10:00:00Z",
+//     user: {
+//       id: 1,
+//       profile: {
+//         fullName: "John Doe",
+//       },
+//       employee: {
+//         employeeId: "EMP001",
+//         department: {
+//           name: "Engineering",
+//         },
+//         designation: {
+//           name: "Senior Developer",
+//         },
+//       },
+//     },
+//     payrollCycle: {
+//       periodStart: "2022-03-01",
+//       periodEnd: "2022-03-31",
+//       paymentDate: "2022-04-05",
+//     },
+//     components: [
+//       {
+//         id: 8,
+//         amount: 15000,
+//         component: {
+//           name: "HRA",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 9,
+//         amount: 10000,
+//         component: {
+//           name: "Transport Allowance",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 10,
+//         amount: 10000,
+//         component: {
+//           name: "Performance Bonus",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 11,
+//         amount: 2800,
+//         component: {
+//           name: "Employee PF Contribution",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//       {
+//         id: 12,
+//         amount: 2000,
+//         component: {
+//           name: "Income Tax",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     userId: 1,
+//     payrollCycleId: 3,
+//     basicSalary: 30000,
+//     grossPay: 68500,
+//     totalDeductions: 6200,
+//     netPay: 62300,
+//     status: "PENDING",
+//     paymentMethod: "BANK_TRANSFER",
+//     transactionRef: null,
+//     paidAt: null,
+//     createdAt: "2022-04-28T10:00:00Z",
+//     user: {
+//       id: 1,
+//       profile: {
+//         fullName: "John Doe",
+//       },
+//       employee: {
+//         employeeId: "EMP001",
+//         department: {
+//           name: "Engineering",
+//         },
+//         designation: {
+//           name: "Senior Developer",
+//         },
+//       },
+//     },
+//     payrollCycle: {
+//       periodStart: "2022-04-01",
+//       periodEnd: "2022-04-30",
+//       paymentDate: "2022-05-05",
+//     },
+//     components: [
+//       {
+//         id: 13,
+//         amount: 3500,
+//         component: {
+//           name: "Overtime Pay",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 14,
+//         amount: 15000,
+//         component: {
+//           name: "HRA",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 15,
+//         amount: 10000,
+//         component: {
+//           name: "Medical Allowance",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 16,
+//         amount: 10000,
+//         component: {
+//           name: "Special Allowance",
+//           componentType: "EARNING",
+//         },
+//       },
+//       {
+//         id: 17,
+//         amount: 3200,
+//         component: {
+//           name: "Employee PF Contribution",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//       {
+//         id: 18,
+//         amount: 1500,
+//         component: {
+//           name: "Income Tax",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//       {
+//         id: 19,
+//         amount: 1500,
+//         component: {
+//           name: "Professional Tax",
+//           componentType: "DEDUCTION",
+//         },
+//       },
+//     ],
+//   },
+// ];
 
 export default function PaySlipContent({ userId }: { userId: number }) {
   const { popupOption, setPopupOption } = usePopupOption();
-  const [selectedYear, setSelectedYear] = useState(moment().year());
+  const [selectedYear] = useState(moment().year());
 
   const { data, loading } = useQuery<{
     payrollItems: {
@@ -649,7 +630,7 @@ export default function PaySlipContent({ userId }: { userId: number }) {
       actionType: "view",
       data: item,
       title: `Payslip - ${moment(item.payrollCycle?.periodEnd).format(
-        "MMMM YYYY"
+        "MMMM YYYY",
       )}`,
     });
   };
@@ -657,10 +638,6 @@ export default function PaySlipContent({ userId }: { userId: number }) {
   if (loading) {
     return <CustomLoading />;
   }
-
-  // Generate year options (current year and 2 previous years)
-  const currentYear = moment().year();
-  const yearOptions = [currentYear, currentYear - 1, currentYear - 2];
 
   return (
     <div className="min-h-screen bg-gray-50">

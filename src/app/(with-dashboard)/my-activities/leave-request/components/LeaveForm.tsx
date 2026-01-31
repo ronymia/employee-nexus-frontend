@@ -10,7 +10,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { ILeave, LeaveDuration } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
-import { CREATE_LEAVE, LEAVE_REQUEST, UPDATE_LEAVE } from "@/graphql/leave.api";
+import { LEAVE_REQUEST, UPDATE_LEAVE } from "@/graphql/leave.api";
 import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -53,7 +53,7 @@ export default function LeaveForm({
             Authorization: `Bearer ${token}`,
           },
           body: formData,
-        }
+        },
       );
 
       if (!response.ok) {
@@ -71,7 +71,7 @@ export default function LeaveForm({
   const calculateTotalHours = (
     startDate: string,
     endDate: string | undefined,
-    duration: LeaveDuration
+    duration: LeaveDuration,
   ): number => {
     if (duration === LeaveDuration.HALF_DAY) {
       return 4;
@@ -111,7 +111,7 @@ export default function LeaveForm({
       const totalHours = calculateTotalHours(
         data.startDate,
         data.endDate,
-        data.leaveDuration
+        data.leaveDuration,
       );
 
       // Format dates to ISO 8601
@@ -173,13 +173,13 @@ export default function LeaveForm({
 
   return (
     <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
-      <LeaveFormFields actionType={actionType} />
+      <LeaveFormFields />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
 
-function LeaveFormFields({ actionType }: { actionType: "create" | "update" }) {
+function LeaveFormFields() {
   const { control } = useFormContext();
   const leaveDuration = useWatch({
     control,
@@ -196,7 +196,7 @@ function LeaveFormFields({ actionType }: { actionType: "create" | "update" }) {
     (type) => ({
       label: type.name,
       value: type.id,
-    })
+    }),
   );
 
   const durationOptions = [

@@ -1,11 +1,9 @@
 export default function CustomUserAvatar({
   name = "John Doe",
   imageURL,
-  size = 11,
 }: {
   name?: string;
   imageURL?: string;
-  size?: number;
 }) {
   const initials = name
     .split(" ")

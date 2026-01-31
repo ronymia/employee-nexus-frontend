@@ -3,8 +3,6 @@
 import useAppStore from "@/stores/appStore";
 import OwnerDashboard from "./owner/OwnerDashboard";
 import EmployeeDashboard from "./employee/EmployeeDashboard";
-import { underConstructionImage } from "@/assets";
-import Image from "next/image";
 
 export default function DashboardContainer() {
   const { user } = useAppStore((state) => state);

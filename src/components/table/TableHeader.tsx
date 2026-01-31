@@ -56,7 +56,7 @@ export default function TableHeader({
   const handleSort = (fieldName: string) => {
     // FIND SORT DIRECTION
     const sortDirection = columns.find(
-      (col) => col.accessorKey === fieldName
+      (col) => col.accessorKey === fieldName,
     )?.sortDirection;
 
     if (!sortDirection) return;
@@ -70,8 +70,8 @@ export default function TableHeader({
               sortDirection:
                 sortDirection === "ascending" ? "descending" : "ascending",
             }
-          : col
-      )
+          : col,
+      ),
     );
 
     // UPDATE DATA
@@ -97,8 +97,9 @@ export default function TableHeader({
     if (selectedFilters.length > 0) {
       setDataSource((prevData) =>
         prevData.filter(
-          (item) => item[fieldName] && selectedFilters.includes(item[fieldName])
-        )
+          (item) =>
+            item[fieldName] && selectedFilters.includes(item[fieldName]),
+        ),
       );
     }
   };
@@ -110,14 +111,14 @@ export default function TableHeader({
     setDataSource(originalDataSource);
   };
   return (
-    <thead className={`h-16 sticky -top-3 bg-base-300 z-1 overflow-auto`}>
+    <thead className={`h-16 sticky -top-3 bg-base-300 z-auto overflow-auto`}>
       {/* Main Header Row */}
       <tr className={``}>
         {columns?.map((col, index) => {
           // FILTERS ITEMS
           const filteredItems = filterableHeader(col?.accessorKey)?.filter(
             (item) =>
-              String(item).toLowerCase().includes(searchTerms.toLowerCase())
+              String(item).toLowerCase().includes(searchTerms.toLowerCase()),
           );
           return (
             <th

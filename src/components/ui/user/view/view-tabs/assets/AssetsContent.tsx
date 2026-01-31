@@ -1,36 +1,43 @@
 "use client";
 
 import { useState } from "react";
+
 import { IPopupOption } from "@/types";
 import { IAssetAssignment } from "@/types/assets.type";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import {
-  PiPencilSimple,
-  PiTrash,
   PiPackage,
   PiPlus,
   PiCalendar,
   PiUser,
   PiBarcode,
-  PiCheckCircle,
-  PiClock,
-  PiXCircle,
+  PiArrowBendUpLeft,
 } from "react-icons/pi";
+import AssetStatusBadge from "@/components/ui/AssetStatusBadge";
 import AssetAssignmentForm from "./components/AssetAssignmentForm";
-import moment from "moment";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_USER_ASSET_ASSIGNMENTS, RETURN_ASSET } from "@/graphql/asset.api";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
+import useConfirmation from "@/hooks/useConfirmation";
 
-interface AssetsContentProps {
+// ==================== INTERFACES ====================
+interface IAssetsContentProps {
   userId: number;
 }
 
-export default function AssetsContent({ userId }: AssetsContentProps) {
+// ==================== MAIN COMPONENT ====================
+export default function AssetsContent({ userId }: IAssetsContentProps) {
   const { hasPermission } = usePermissionGuard();
+
+  // ==================== STATE ====================
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -40,28 +47,37 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
     title: "",
   });
 
-  // Query to get asset assignments
+  // ==================== API QUERIES ====================
   const { data, loading } = useQuery(GET_USER_ASSET_ASSIGNMENTS, {
     variables: { userId },
   });
 
-  // Return asset mutation
   const [returnAsset, { loading: returningAsset }] = useMutation(RETURN_ASSET, {
     awaitRefetchQueries: true,
     refetchQueries: [
       { query: GET_USER_ASSET_ASSIGNMENTS, variables: { userId } },
     ],
-    // onCompleted: () => {
-    //   refetch();
-    // },
   });
 
+  // ==================== DELETE CONFIRMATION ====================
+  const { confirm } = useConfirmation();
+
+  // ==================== DATA ====================
   const assetAssignments: IAssetAssignment[] =
     (data as any)?.userAssetAssignments?.data || [];
 
+  const assignedAssets = assetAssignments.filter(
+    (assignment) => assignment.status === "assigned" && !assignment.returnedAt,
+  );
+
+  const returnedAssets = assetAssignments.filter(
+    (assignment) => assignment.status === "returned" || assignment.returnedAt,
+  );
+
+  // ==================== HANDLERS ====================
   const handleOpenForm = (
     actionType: "create" | "update",
-    assignment?: IAssetAssignment
+    assignment?: IAssetAssignment,
   ) => {
     setPopupOption({
       open: true,
@@ -85,103 +101,38 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
     });
   };
 
-  const handleReturn = async (assetId: number) => {
-    // console.log(assetId);
-    try {
-      await returnAsset({
-        variables: {
-          returnAssetInput: {
-            assetId: assetId,
+  const handleReturn = async (assignment: IAssetAssignment) => {
+    const asset = assignment.asset;
+    if (!asset) return;
+
+    await confirm({
+      title: "Return Asset",
+      itemName: asset.name,
+      itemDescription: `Code: ${asset.code} | Assigned: ${dayjs(assignment.assignedAt).format("MMM DD, YYYY")}`,
+      icon: "info",
+      confirmButtonColor: "#3b82f6",
+      confirmButtonText: "Yes, return it!",
+      successTitle: "Asset Returned!",
+      successMessage: "Asset has been returned successfully",
+      onConfirm: async () => {
+        const res = await returnAsset({
+          variables: {
+            returnAssetInput: {
+              assetId: asset.id,
+            },
           },
-        },
-      });
-    } catch (error) {
-      console.error("Error returning asset:", error);
-    }
+        });
+
+        if (!res?.data) {
+          throw new Error("Failed to return asset");
+        }
+      },
+    });
   };
 
-  // Group assets by status
-  const assignedAssets = assetAssignments.filter(
-    (assignment) => assignment.status === "assigned" && !assignment.returnedAt
-  );
-  const returnedAssets = assetAssignments.filter(
-    (assignment) => assignment.status === "returned" || assignment.returnedAt
-  );
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "assigned":
-        return "badge-success";
-      case "returned":
-        return "badge-info";
-      case "damaged":
-        return "badge-warning";
-      case "lost":
-        return "badge-error";
-      default:
-        return "badge-ghost";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "assigned":
-        return <PiCheckCircle size={16} />;
-      case "returned":
-        return <PiClock size={16} />;
-      case "damaged":
-      case "lost":
-        return <PiXCircle size={16} />;
-      default:
-        return <PiPackage size={16} />;
-    }
-  };
-
-  if (loading) {
-    return <CustomLoading />;
-  }
-
-  if (!assetAssignments || assetAssignments.length === 0) {
-    return (
-      <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20">
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <PiPackage size={64} className="text-base-content/30" />
-          <p className="text-base-content/60 text-center">
-            No assets assigned yet
-          </p>
-          {hasPermission(Permissions.AssetUpdate) ? (
-            <button
-              onClick={() => handleOpenForm("create")}
-              className="btn btn-primary btn-sm gap-2"
-            >
-              <PiPlus size={18} />
-              Assign Asset
-            </button>
-          ) : null}
-        </div>
-
-        {/* Popup Modal */}
-        <CustomPopup
-          popupOption={popupOption}
-          setPopupOption={setPopupOption}
-          customWidth="60%"
-        >
-          {popupOption.form === "assetAssignment" && (
-            <AssetAssignmentForm
-              userId={userId}
-              assetAssignment={popupOption.data}
-              actionType={popupOption.actionType as "create" | "update"}
-              onClose={handleCloseForm}
-            />
-          )}
-        </CustomPopup>
-      </div>
-    );
-  }
-
+  // ==================== RENDER FUNCTIONS ====================
   const renderAssetCard = (assignment: IAssetAssignment) => {
     const asset = assignment.asset;
-    console.log({ assignment });
     if (!asset) return null;
 
     const isAssigned =
@@ -217,38 +168,16 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
           </div>
         )}
 
-        <div className="p-5 relative">
-          {/* Action Buttons */}
-          {hasPermission(Permissions.AssetUpdate) ? (
-            <div className="absolute top-3 right-3 flex gap-2">
-              {isAssigned && (
-                <button
-                  onClick={() => handleReturn(assignment.asset?.id!)}
-                  className="btn btn-xs btn-ghost btn-circle text-info hover:bg-info/10"
-                  title="Return Asset"
-                >
-                  <PiClock size={16} />
-                </button>
-              )}
-            </div>
-          ) : null}
-
+        <div className="p-5">
           {/* Asset Details */}
-          <div className="space-y-3 pr-24">
+          <div className="space-y-3">
             {/* Asset Name and Status */}
             <div>
               <h4 className="text-lg font-semibold text-primary">
                 {asset.name}
               </h4>
               <div className="flex items-center gap-2 mt-1">
-                <span
-                  className={`badge badge-sm ${getStatusBadgeClass(
-                    assignment.status
-                  )} gap-1`}
-                >
-                  {getStatusIcon(assignment.status)}
-                  {assignment.status.toUpperCase()}
-                </span>
+                <AssetStatusBadge status={assignment.status} />
               </div>
             </div>
 
@@ -273,7 +202,7 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
               <PiCalendar size={16} />
               <span>
                 Assigned on:{" "}
-                {moment(assignment.assignedAt).format("MMM DD, YYYY")}
+                {dayjs(assignment.assignedAt).format("MMM DD, YYYY")}
               </span>
             </div>
 
@@ -283,7 +212,7 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
                 <PiCalendar size={16} />
                 <span>
                   Returned on:{" "}
-                  {moment(assignment.returnedAt).format("MMM DD, YYYY")}
+                  {dayjs(assignment.returnedAt).format("MMM DD, YYYY")}
                 </span>
               </div>
             )}
@@ -301,19 +230,77 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
             )}
 
             {/* Note */}
-            {asset.note && (
+            {assignment.note && (
               <div className="pt-2 border-t border-base-300">
                 <p className="text-xs text-base-content/60 italic">
-                  Note: {asset.note}
+                  Note: {assignment.note}
                 </p>
               </div>
             )}
           </div>
+
+          {/* Action Button - Footer */}
+          {hasPermission(Permissions.AssetUpdate) && isAssigned && (
+            <div className="mt-4 pt-4 border-t border-base-300">
+              <button
+                onClick={() => handleReturn(assignment)}
+                disabled={returningAsset}
+                className="btn btn-sm btn-info w-full gap-2"
+              >
+                <PiArrowBendUpLeft size={18} />
+                Return Asset
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
   };
 
+  // ==================== COMPONENT STATES ====================
+  if (loading) {
+    return <CustomLoading />;
+  }
+
+  if (!assetAssignments || assetAssignments.length === 0) {
+    return (
+      <div className="bg-base-100 rounded-lg p-6 shadow-sm border border-primary/20">
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <PiPackage size={64} className="text-base-content/30" />
+          <p className="text-base-content/60 text-center">
+            No assets assigned yet
+          </p>
+          {hasPermission(Permissions.AssetUpdate) && (
+            <button
+              onClick={() => handleOpenForm("create")}
+              className="btn btn-primary btn-sm gap-2"
+            >
+              <PiPlus size={18} />
+              Assign Asset
+            </button>
+          )}
+        </div>
+
+        {/* Popup Modal */}
+        <CustomPopup
+          popupOption={popupOption}
+          setPopupOption={setPopupOption}
+          customWidth="60%"
+        >
+          {popupOption.form === "assetAssignment" && (
+            <AssetAssignmentForm
+              userId={userId}
+              assetAssignment={popupOption.data}
+              actionType={popupOption.actionType as "create" | "update"}
+              onClose={handleCloseForm}
+            />
+          )}
+        </CustomPopup>
+      </div>
+    );
+  }
+
+  // ==================== RENDER ====================
   return (
     <div className="space-y-6">
       {/* Header with Assign Button */}
@@ -327,7 +314,7 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
             | Returned: {returnedAssets.length}
           </p>
         </div>
-        {hasPermission(Permissions.AssetUpdate) ? (
+        {hasPermission(Permissions.AssetUpdate) && (
           <button
             onClick={() => handleOpenForm("create")}
             className="btn btn-primary btn-sm gap-2"
@@ -335,7 +322,7 @@ export default function AssetsContent({ userId }: AssetsContentProps) {
             <PiPlus size={18} />
             Assign Asset
           </button>
-        ) : null}
+        )}
       </div>
 
       {/* Currently Assigned Assets */}

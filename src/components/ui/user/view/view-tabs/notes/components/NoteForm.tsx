@@ -13,23 +13,25 @@ import {
   GET_NOTES_BY_USER_ID,
 } from "@/graphql/note.api";
 import { INote } from "@/types";
-import useAppStore from "@/hooks/useAppStore";
+import { showToast } from "@/components/ui/CustomToast";
 
-interface NoteFormProps {
+// ==================== INTERFACES ====================
+interface INoteFormProps {
   userId: number;
   note?: INote;
   actionType: "create" | "update";
   onClose: () => void;
 }
 
+// ==================== COMPONENT ====================
+
 export default function NoteForm({
   userId,
   note,
   actionType,
   onClose,
-}: NoteFormProps) {
-  const currentUser = useAppStore((state) => state.user);
-
+}: INoteFormProps) {
+  // ==================== API MUTATIONS ====================
   const [createNote, createResult] = useMutation(CREATE_NOTE, {
     awaitRefetchQueries: true,
     refetchQueries: [{ query: GET_NOTES_BY_USER_ID, variables: { userId } }],
@@ -40,6 +42,7 @@ export default function NoteForm({
     refetchQueries: [{ query: GET_NOTES_BY_USER_ID, variables: { userId } }],
   });
 
+  // ==================== HANDLERS ====================
   const handleSubmit = async (data: any) => {
     try {
       const noteData = {
@@ -50,7 +53,7 @@ export default function NoteForm({
       };
 
       if (actionType === "create") {
-        await createNote({
+        const result = await createNote({
           variables: {
             createNoteInput: {
               ...noteData,
@@ -58,8 +61,15 @@ export default function NoteForm({
             },
           },
         });
+
+        if (result?.data) {
+          showToast.success(
+            "Note Created!",
+            "Note has been created successfully",
+          );
+        }
       } else {
-        await updateNote({
+        const result = await updateNote({
           variables: {
             updateNoteInput: {
               ...noteData,
@@ -68,13 +78,25 @@ export default function NoteForm({
             },
           },
         });
+
+        if (result?.data) {
+          showToast.success(
+            "Note Updated!",
+            "Note has been updated successfully",
+          );
+        }
       }
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting note:", error);
+      showToast.error(
+        actionType === "create" ? "Creation Failed" : "Update Failed",
+        error?.message || `Failed to ${actionType} note. Please try again.`,
+      );
     }
   };
 
+  // ==================== FORM CONFIG ====================
   const defaultValues = {
     title: note?.title || "",
     content: note?.content || "",

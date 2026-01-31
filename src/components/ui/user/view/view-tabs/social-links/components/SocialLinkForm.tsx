@@ -18,30 +18,30 @@ import {
 } from "@/graphql/social-links.api";
 import { ISocialLinks } from "@/types";
 
-interface SocialLinkFormProps {
-  profileId: number;
+interface ISocialLinkFormProps {
+  userId: number;
   socialLinks?: ISocialLinks;
   actionType: "create" | "update";
   onClose: () => void;
 }
 
 export default function SocialLinkForm({
-  profileId,
+  userId,
   socialLinks,
   actionType,
   onClose,
-}: SocialLinkFormProps) {
+}: ISocialLinkFormProps) {
   const [createSocialLinks, createResult] = useMutation(CREATE_SOCIAL_LINKS, {
     awaitRefetchQueries: true,
     refetchQueries: [
-      { query: GET_SOCIAL_LINKS_BY_PROFILE_ID, variables: { profileId } },
+      { query: GET_SOCIAL_LINKS_BY_PROFILE_ID, variables: { userId } },
     ],
   });
 
   const [updateSocialLinks, updateResult] = useMutation(UPDATE_SOCIAL_LINKS, {
     awaitRefetchQueries: true,
     refetchQueries: [
-      { query: GET_SOCIAL_LINKS_BY_PROFILE_ID, variables: { profileId } },
+      { query: GET_SOCIAL_LINKS_BY_PROFILE_ID, variables: { userId } },
     ],
   });
 
@@ -60,7 +60,7 @@ export default function SocialLinkForm({
           variables: {
             createSocialLinkInput: {
               ...socialLinksData,
-              profileId: Number(profileId),
+              userId: Number(userId),
             },
           },
         });
@@ -69,7 +69,7 @@ export default function SocialLinkForm({
           variables: {
             updateSocialLinkInput: {
               ...socialLinksData,
-              profileId: Number(profileId),
+              userId: Number(userId),
             },
           },
         });

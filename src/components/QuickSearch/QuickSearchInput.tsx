@@ -1,10 +1,6 @@
 import { LuSearch } from "react-icons/lu";
 
 export default function QuickSearchSearchInput() {
-  const { setIsQuickSearchOpen } = {
-    setIsQuickSearchOpen: () => {},
-  };
-
   return (
     <div className={`relative`}>
       <input

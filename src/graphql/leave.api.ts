@@ -15,11 +15,11 @@ export const GET_LEAVES = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         reviewedAt
         reviewedBy
-        rejectionReason
+        remarks
         attachments
         notes
         createdAt
@@ -63,11 +63,11 @@ export const GET_LEAVE_BY_ID = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         reviewedAt
         reviewedBy
-        rejectionReason
+        remarks
         attachments
         notes
         createdAt
@@ -111,7 +111,7 @@ export const LEAVE_REQUEST = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         attachments
         notes
@@ -136,7 +136,7 @@ export const CREATE_LEAVE = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         attachments
         notes
@@ -162,7 +162,7 @@ export const UPDATE_LEAVE = gql`
         leaveDuration
         startDate
         endDate
-        totalHours
+        totalMinutes
         status
         attachments
         notes
@@ -189,8 +189,8 @@ export const DELETE_LEAVE = gql`
 
 // APPROVE LEAVE
 export const APPROVE_LEAVE = gql`
-  mutation ApproveLeave($leaveId: Int!) {
-    approveLeave(leaveId: $leaveId) {
+  mutation ApproveLeave($approveLeaveInput: ApproveLeaveInput!) {
+    approveLeave(approveLeaveInput: $approveLeaveInput) {
       message
       statusCode
       success
@@ -205,8 +205,8 @@ export const APPROVE_LEAVE = gql`
 
 // REJECT LEAVE
 export const REJECT_LEAVE = gql`
-  mutation RejectLeave($leaveId: Int!) {
-    rejectLeave(leaveId: $leaveId) {
+  mutation RejectLeave($rejectLeaveInput: RejectLeaveInput!) {
+    rejectLeave(rejectLeaveInput: $rejectLeaveInput) {
       message
       statusCode
       success
@@ -214,6 +214,27 @@ export const REJECT_LEAVE = gql`
         id
         status
         updatedAt
+      }
+    }
+  }
+`;
+
+// LEAVE OVERVIEW
+export const LEAVE_OVERVIEW = gql`
+  query LeaveOverview {
+    leaveOverview {
+      success
+      statusCode
+      message
+      data {
+        total
+        pending
+        approved
+        rejected
+        cancelled
+        singleDay
+        multiDay
+        halfDay
       }
     }
   }

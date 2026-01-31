@@ -14,6 +14,7 @@ import {
   PiGlobe,
   PiTrash,
   PiPencilSimple,
+  PiCalendar,
 } from "react-icons/pi";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -21,51 +22,27 @@ import CustomPopup from "@/components/modal/CustomPopup";
 import HolidayForm from "./HolidayForm";
 import usePopupOption from "@/hooks/usePopupOption";
 import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
-import { GET_HOLIDAYS, DELETE_HOLIDAY } from "@/graphql/holiday.api";
-import { IHoliday, HolidayType } from "@/types/holiday.type";
+import {
+  GET_HOLIDAYS,
+  DELETE_HOLIDAY,
+  HOLIDAY_OVERVIEW,
+} from "@/graphql/holiday.api";
+import {
+  IHoliday,
+  HolidayType,
+  IHolidayOverviewResponse,
+  IHolidayArrayResponse,
+} from "@/types/holiday.type";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import PageHeader from "@/components/ui/PageHeader";
+import OverviewCard from "@/components/card/OverviewCard";
+import { motion } from "motion/react";
 
 dayjs.extend(isSameOrAfter);
 
 // ==================== SUB-COMPONENTS ====================
-
-// STATS CARD
-interface IStatsCardProps {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  color: "primary" | "success" | "info" | "warning";
-}
-
-function StatsCard({ label, value, icon: Icon, color }: IStatsCardProps) {
-  const colorClasses = {
-    primary: "bg-primary/10 border-primary/20 text-primary",
-    success: "bg-success/10 border-success/20 text-success",
-    info: "bg-info/10 border-info/20 text-info",
-    warning: "bg-warning/10 border-warning/20 text-warning",
-  };
-
-  return (
-    <div className={`${colorClasses[color]} border rounded-lg p-4`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-base-content/60">{label}</p>
-          <p
-            className={`text-2xl font-bold ${
-              colorClasses[color].split(" ")[2]
-            }`}
-          >
-            {value}
-          </p>
-        </div>
-        <Icon size={32} className={colorClasses[color].split(" ")[2]} />
-      </div>
-    </div>
-  );
-}
 
 // HOLIDAY TYPE BADGE
 function getHolidayTypeBadge(type: HolidayType) {
@@ -133,6 +110,109 @@ function getRecurringBadge(isRecurring: boolean) {
   );
 }
 
+function HolidayOverview() {
+  const { data, loading, error } =
+    useQuery<IHolidayOverviewResponse>(HOLIDAY_OVERVIEW);
+
+  const summary = data?.holidayOverview?.data;
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="alert alert-error mb-6"
+      >
+        <PiXCircle size={24} />
+        <span>Failed to load holiday summary</span>
+      </motion.div>
+    );
+  }
+
+  const stats = [
+    {
+      title: "Total Holidays",
+      value: summary?.total || 0,
+      Icon: PiCalendarBlank,
+      bgColor: "bg-primary/10",
+      decorationColor: "bg-primary/20",
+      iconColor: "text-primary",
+      subText: "This Year",
+      description: "Total holidays configured for the current year.",
+    },
+    {
+      title: "Paid Holidays",
+      value: summary?.paid || 0,
+      Icon: PiCurrencyDollar,
+      bgColor: "bg-success/10",
+      decorationColor: "bg-success/20",
+      iconColor: "text-success",
+      subText: `out of ${summary?.total}`,
+      description: "Holidays that are marked as paid leaves.",
+    },
+    {
+      title: "Recurring",
+      value: summary?.recurring || 0,
+      Icon: PiCheckCircle,
+      bgColor: "bg-info/10",
+      decorationColor: "bg-info/20",
+      iconColor: "text-info",
+      subText: `out of ${summary?.total}`,
+      description: "Holidays that repeat every year.",
+    },
+    {
+      title: "Public Holidays",
+      value: summary?.public || 0,
+      Icon: PiGlobe,
+      bgColor: "bg-warning/10",
+      decorationColor: "bg-warning/20",
+      iconColor: "text-warning",
+      subText: `out of ${summary?.total}`,
+      description: "National or public holidays.",
+    },
+    {
+      title: "Religious",
+      value: summary?.religious || 0,
+      Icon: PiCalendar,
+      bgColor: "bg-[#edebff]",
+      decorationColor: "bg-[#d0c9ff]",
+      iconColor: "text-[#5b4eb1]",
+      subText: `out of ${summary?.total}`,
+      description: "Religious observances.",
+    },
+    {
+      title: "Company",
+      value: summary?.companySpecific || 0,
+      Icon: PiPlusCircle,
+      bgColor: "bg-base-200",
+      decorationColor: "bg-base-300",
+      iconColor: "text-base-content/60",
+      subText: `out of ${summary?.total}`,
+      description: "Company specific holidays.",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <OverviewCard
+            stat={stat}
+            handler={undefined}
+            isLoading={loading}
+            position={stats.length - 1 === index ? "right" : "left"}
+          />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 // ==================== MAIN COMPONENT ====================
 export default function HolidaysPage() {
   // ==================== PERMISSIONS ====================
@@ -180,11 +260,8 @@ export default function HolidaysPage() {
 
   // ==================== GRAPHQL QUERIES ====================
   // FETCH HOLIDAYS
-  const { data, loading, refetch } = useQuery<{
-    holidays: {
-      data: IHoliday[];
-    };
-  }>(GET_HOLIDAYS);
+  const { data, loading, refetch } =
+    useQuery<IHolidayArrayResponse>(GET_HOLIDAYS);
 
   const holidays = data?.holidays?.data || [];
 
@@ -192,17 +269,8 @@ export default function HolidaysPage() {
   // DELETE HOLIDAY
   const [deleteHoliday] = useMutation(DELETE_HOLIDAY, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_HOLIDAYS }],
+    refetchQueries: [{ query: GET_HOLIDAYS }, { query: HOLIDAY_OVERVIEW }],
   });
-
-  // ==================== CALCULATE STATS ====================
-  const stats = {
-    total: holidays.length,
-    paid: holidays.filter((h) => h.isPaid).length,
-    recurring: holidays.filter((h) => h.isRecurring).length,
-    upcoming: holidays.filter((h) => dayjs(h.startDate).isAfter(dayjs()))
-      .length,
-  };
 
   // ==================== HANDLERS ====================
   // DELETE HANDLER
@@ -214,7 +282,7 @@ export default function HolidaysPage() {
         holiday.startDate === holiday.endDate
           ? dayjs(holiday.startDate).format("MMM DD, YYYY")
           : `${dayjs(holiday.startDate).format("MMM DD, YYYY")} - ${dayjs(
-              holiday.endDate
+              holiday.endDate,
             ).format("MMM DD, YYYY")}`
       }`,
       confirmButtonText: "Yes, delete it!",
@@ -274,33 +342,8 @@ export default function HolidaysPage() {
         subtitle="Manage company holidays and observances"
       />
 
-      {/* STATS CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <StatsCard
-          label="Total Holidays"
-          value={stats.total}
-          icon={PiCalendarBlank}
-          color="primary"
-        />
-        <StatsCard
-          label="Paid Holidays"
-          value={stats.paid}
-          icon={PiCurrencyDollar}
-          color="success"
-        />
-        <StatsCard
-          label="Recurring"
-          value={stats.recurring}
-          icon={PiCheckCircle}
-          color="info"
-        />
-        <StatsCard
-          label="Upcoming"
-          value={stats.upcoming}
-          icon={PiCalendarBlank}
-          color="warning"
-        />
-      </div>
+      {/* HOLIDAY OVERVIEW */}
+      <HolidayOverview />
 
       {/* HOLIDAY TABLE */}
       <CustomTable
@@ -315,7 +358,7 @@ export default function HolidaysPage() {
             row.startDate === row.endDate
               ? dayjs(row.startDate).format("MMM DD, YYYY")
               : `${dayjs(row.startDate).format("MMM DD, YYYY")} - ${dayjs(
-                  row.endDate
+                  row.endDate,
                 ).format("MMM DD, YYYY")}`,
           customType: getHolidayTypeBadge(row.holidayType),
           customIsPaid: getPaidBadge(row.isPaid),

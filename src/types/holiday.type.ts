@@ -31,7 +31,7 @@ export interface IHoliday {
   updatedAt: string;
 }
 
-export interface ICreateHolidayInput {
+export interface IHolidayResponse {
   name: string;
   description?: string;
   startDate: string;
@@ -42,12 +42,25 @@ export interface ICreateHolidayInput {
   businessId?: number;
 }
 
-export interface IUpdateHolidayInput {
-  name?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  isRecurring?: boolean;
-  isPaid?: boolean;
-  holidayType?: HolidayType;
+export interface IHolidayArrayResponse {
+  holidays: {
+    data: IHoliday[];
+  };
+}
+
+export interface IHolidayOverview {
+  total: number;
+  public: number;
+  religious: number;
+  companySpecific: number;
+  regional: number;
+  recurring: number;
+  paid: number;
+  unpaid: number;
+}
+
+export interface IHolidayOverviewResponse {
+  holidayOverview: {
+    data: IHolidayOverview;
+  };
 }

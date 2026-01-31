@@ -2,7 +2,6 @@ import { FiUsers } from "react-icons/fi";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 import { RiAdminLine } from "react-icons/ri";
 import { MdManageAccounts, MdTrendingUp } from "react-icons/md";
-import { AiOutlineCheckCircle, AiOutlineCloseCircle } from "react-icons/ai";
 
 // ==================== INSIGHTS CARD COMPONENT ====================
 interface InsightCardProps {
@@ -152,8 +151,8 @@ export default function PersonnelInsights({
       </div>
 
       {/* SECONDARY METRICS ROW */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 mt-4 md:mt-5">
-        {/* ACTIVE USERS */}
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 mt-4 md:mt-5">
+        ACTIVE USERS
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -176,7 +175,7 @@ export default function PersonnelInsights({
           </div>
         </div>
 
-        {/* INACTIVE USERS */}
+        INACTIVE USERS
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -198,7 +197,7 @@ export default function PersonnelInsights({
             )}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

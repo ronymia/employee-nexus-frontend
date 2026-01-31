@@ -32,10 +32,10 @@ export default function CustomForm({
 
   const {
     handleSubmit,
-    formState: { errors },
+    // formState: { errors },
   } = methods;
 
-  console.log({ errors });
+  // console.log({ errors });
 
   const onSubmit = async (data: any) => {
     //

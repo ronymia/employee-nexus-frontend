@@ -5,14 +5,13 @@ import { IPopupOption } from "@/types";
 import { IUserProjectMember } from "@/types/project.type";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
-import FormModal from "@/components/form/FormModal";
 import {
-  PiPencilSimple,
   PiTrash,
   PiFolderOpen,
   PiPlus,
   PiCalendar,
   PiUsers,
+  PiPencilSimple,
 } from "react-icons/pi";
 import ProjectMemberForm from "./components/ProjectMemberForm";
 import { useQuery, useMutation } from "@apollo/client/react";
@@ -23,13 +22,18 @@ import {
 import moment from "moment";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import { Permissions } from "@/constants/permissions.constant";
+import useDeleteConfirmation from "@/hooks/useDeleteConfirmation";
 
-interface ProjectsContentProps {
+interface IProjectsContentProps {
   userId: number;
 }
 
-export default function ProjectsContent({ userId }: ProjectsContentProps) {
+export default function ProjectsContent({ userId }: IProjectsContentProps) {
+  // ==================== HOOKS ====================
   const { hasPermission } = usePermissionGuard();
+  const deleteConfirmation = useDeleteConfirmation();
+
+  // ==================== LOCAL STATE ====================
   const [popupOption, setPopupOption] = useState<IPopupOption>({
     open: false,
     closeOnDocumentClick: true,
@@ -67,7 +71,7 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
   const projectMembers = data?.userProjects?.data || [];
   const handleOpenForm = (
     actionType: "create" | "update",
-    member?: IUserProjectMember
+    member?: IUserProjectMember,
   ) => {
     setPopupOption({
       open: true,
@@ -93,35 +97,41 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
     });
   };
 
+  // ==================== DELETE HANDLER ====================
   const handleDelete = async (member: IUserProjectMember) => {
-    try {
-      await unassignProjectMember({
-        variables: {
-          unassignProjectMemberInput: {
-            projectId: member.projectId,
-            userId: member.userId,
+    await deleteConfirmation.confirm({
+      title: "Remove from Project",
+      itemName: member.project.name,
+      itemDescription: `Role: ${member.role || "Member"}`,
+      confirmButtonText: "Remove from Project",
+      successMessage: "Successfully removed from project",
+      onDelete: async () => {
+        await unassignProjectMember({
+          variables: {
+            unassignProjectMemberInput: {
+              projectId: member.projectId,
+              userId: member.userId,
+            },
           },
-        },
-      });
-    } catch (error) {
-      console.error("Error unassigning project member:", error);
-    }
+        });
+      },
+    });
   };
 
   // Group projects by status
   const activeProjects = projectMembers.filter(
     (member) =>
       member.project.status === "ACTIVE" ||
-      member.project.status === "IN_PROGRESS"
+      member.project.status === "IN_PROGRESS",
   );
   const completedProjects = projectMembers.filter(
-    (member) => member.project.status === "COMPLETED"
+    (member) => member.project.status === "COMPLETED",
   );
   const otherProjects = projectMembers.filter(
     (member) =>
       member.project.status !== "ACTIVE" &&
       member.project.status !== "IN_PROGRESS" &&
-      member.project.status !== "COMPLETED"
+      member.project.status !== "COMPLETED",
   );
 
   const getStatusBadgeClass = (status: string) => {
@@ -208,8 +218,20 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
 
         <div className="p-5 relative">
           {/* Action Buttons */}
-          <div className="absolute top-3 right-3">
-            {hasPermission(Permissions.ProjectMemberDelete) ? (
+          <div className="absolute top-3 right-3 flex gap-2">
+            {/* EDIT BUTTON */}
+            {hasPermission(Permissions.ProjectMemberUpdate) && (
+              <button
+                onClick={() => handleOpenForm("update", member)}
+                className="btn btn-xs btn-ghost btn-circle text-primary hover:bg-primary/10"
+                title="Update Role"
+              >
+                <PiPencilSimple size={16} />
+              </button>
+            )}
+
+            {/* DELETE BUTTON */}
+            {hasPermission(Permissions.ProjectMemberDelete) && (
               <button
                 onClick={() => handleDelete(member)}
                 className="btn btn-xs btn-ghost btn-circle text-error hover:bg-error/10"
@@ -217,7 +239,7 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
               >
                 <PiTrash size={16} />
               </button>
-            ) : null}
+            )}
           </div>
 
           {/* Project Details */}
@@ -229,7 +251,7 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
               </h4>
               <span
                 className={`badge badge-sm ${getStatusBadgeClass(
-                  project.status
+                  project.status,
                 )}`}
               >
                 {project.status.replace(/_/g, " ")}
@@ -273,8 +295,8 @@ export default function ProjectsContent({ userId }: ProjectsContentProps) {
                   {isOngoing
                     ? "Present"
                     : project.endDate
-                    ? moment(project.endDate).format("MMM DD, YYYY")
-                    : "N/A"}
+                      ? moment(project.endDate).format("MMM DD, YYYY")
+                      : "N/A"}
                 </span>
               </div>
             )}

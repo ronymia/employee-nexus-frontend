@@ -8,16 +8,13 @@ import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import ToggleSwitch from "@/components/form/input/ToggleSwitch";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useQuery, useMutation } from "@apollo/client/react";
+import { GET_WORK_SCHEDULES } from "@/graphql/work-schedules.api";
 import {
-  GET_WORK_SCHEDULES,
-  CREATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
-  UPDATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
-  GET_USER_SCHEDULE_ASSIGNMENTS,
-} from "@/graphql/work-schedules.api";
-import {
-  IWorkSchedule,
-  IScheduleAssignment,
-} from "@/types/work-schedules.type";
+  ASSIGN_EMPLOYEE_WORK_SCHEDULE,
+  GET_EMPLOYEE_WORK_SCHEDULE,
+} from "@/graphql/employee-work-schedule.api";
+import { IWorkSchedule } from "@/types/work-schedules.type";
+import { IEmployeeWorkSchedule } from "@/types/employee-work-schedule.type";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
@@ -25,9 +22,9 @@ import { useState } from "react";
 
 dayjs.extend(customParseFormat);
 
-interface ScheduleAssignmentFormProps {
+interface IScheduleAssignmentFormProps {
   userId: number;
-  assignment?: IScheduleAssignment;
+  assignment?: IEmployeeWorkSchedule;
   actionType: "create" | "update";
   onClose: () => void;
 }
@@ -37,7 +34,7 @@ export default function ScheduleAssignmentForm({
   assignment,
   actionType,
   onClose,
-}: ScheduleAssignmentFormProps) {
+}: IScheduleAssignmentFormProps) {
   const [isPending, setIsPending] = useState(false);
 
   // Query to get all work schedules
@@ -47,66 +44,31 @@ export default function ScheduleAssignmentForm({
     };
   }>(GET_WORK_SCHEDULES);
 
-  // Create mutation
-  const [createScheduleAssignment] = useMutation(
-    CREATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
-    {
-      awaitRefetchQueries: true,
-      refetchQueries: [
-        { query: GET_USER_SCHEDULE_ASSIGNMENTS, variables: { userId } },
-      ],
-    }
-  );
-
-  // Update mutation
-  const [updateScheduleAssignment] = useMutation(
-    UPDATE_EMPLOYEE_SCHEDULE_ASSIGNMENT,
-    {
-      awaitRefetchQueries: true,
-      refetchQueries: [
-        { query: GET_USER_SCHEDULE_ASSIGNMENTS, variables: { userId } },
-      ],
-    }
-  );
+  // Assign mutation
+  const [assignSchedule] = useMutation(ASSIGN_EMPLOYEE_WORK_SCHEDULE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_EMPLOYEE_WORK_SCHEDULE, variables: { userId } },
+    ],
+  });
 
   const handleSubmit = async (data: any) => {
     try {
       setIsPending(true);
 
       const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
-      const endDate = data.isCurrent
-        ? null
-        : data.endDate
-        ? dayjs(data.endDate, "DD-MM-YYYY").toISOString()
-        : null;
 
-      if (actionType === "create") {
-        await createScheduleAssignment({
-          variables: {
-            createEmployeeScheduleAssignmentInput: {
-              userId,
-              workScheduleId: parseInt(data.workScheduleId),
-              startDate,
-              endDate,
-              isActive: data.isActive ?? true,
-              notes: data.notes || null,
-            },
+      await assignSchedule({
+        variables: {
+          assignEmployeeScheduleInput: {
+            userId,
+            workScheduleId: parseInt(data.workScheduleId),
+            startDate,
+            assignedBy: userId, // TODO: Use actual logged-in user ID
+            notes: data.notes || null,
           },
-        });
-      } else {
-        await updateScheduleAssignment({
-          variables: {
-            id: assignment?.id,
-            updateEmployeeScheduleAssignmentInput: {
-              workScheduleId: parseInt(data.workScheduleId),
-              startDate,
-              endDate,
-              isActive: data.isActive,
-              notes: data.notes || null,
-            },
-          },
-        });
-      }
+        },
+      });
 
       onClose();
     } catch (error) {

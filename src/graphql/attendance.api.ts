@@ -14,7 +14,19 @@ export const GET_ATTENDANCES = gql`
         totalMinutes
         breakMinutes
         scheduleMinutes
+        overtimeMinutes
         status
+        type
+        reviewedAt
+        reviewedBy
+        reviewer {
+          id
+          email
+          profile {
+            fullName
+          }
+        }
+        remarks
         createdAt
         updatedAt
         user {
@@ -204,8 +216,8 @@ export const DELETE_ATTENDANCE = gql`
 
 // APPROVE ATTENDANCE
 export const APPROVE_ATTENDANCE = gql`
-  mutation ApproveAttendance($attendanceId: Int!) {
-    approveAttendance(attendanceId: $attendanceId) {
+  mutation ApproveAttendance($approveAttendanceInput: ApproveAttendanceInput!) {
+    approveAttendance(approveAttendanceInput: $approveAttendanceInput) {
       message
       statusCode
       success
@@ -220,8 +232,8 @@ export const APPROVE_ATTENDANCE = gql`
 
 // REJECT ATTENDANCE
 export const REJECT_ATTENDANCE = gql`
-  mutation RejectAttendance($attendanceId: Int!) {
-    rejectAttendance(attendanceId: $attendanceId) {
+  mutation RejectAttendance($rejectAttendanceInput: RejectAttendanceInput!) {
+    rejectAttendance(rejectAttendanceInput: $rejectAttendanceInput) {
       message
       statusCode
       success
@@ -252,9 +264,30 @@ export const ATTENDANCE_SUMMARY = gql`
       data {
         pending
         approved
+        rejected
         absent
         late
         halfDay
+      }
+    }
+  }
+`;
+
+// ==================== ATTENDANCE OVERVIEW ====================
+export const ATTENDANCE_OVERVIEW = gql`
+  query AttendanceOverview {
+    attendanceOverview {
+      success
+      statusCode
+      message
+      data {
+        total
+        pending
+        approved
+        rejected
+        absent
+        late
+        partial
       }
     }
   }

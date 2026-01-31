@@ -15,7 +15,12 @@ import {
 } from "@/graphql/education-history.api";
 import { IEducationHistory } from "@/types";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 import { showToast } from "@/components/ui/CustomToast";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 interface IEducationFormProps {
   userId: number;
@@ -59,9 +64,9 @@ export default function EducationForm({
       // PREPARE DATE FIELDS
       const processedData = {
         ...data,
-        startDate: dayjs(data.startDate, "DD-MM-YYYY").toDate(),
+        startDate: dayjs.utc(data.startDate, "DD-MM-YYYY").toDate(),
         endDate: data.endDate
-          ? dayjs(data.endDate, "DD-MM-YYYY").toDate()
+          ? dayjs.utc(data.endDate, "DD-MM-YYYY").toDate()
           : null,
       };
 

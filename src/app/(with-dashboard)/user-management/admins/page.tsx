@@ -192,10 +192,7 @@ export default function AdminsPage() {
             customUserProfile: (
               <UserProfileCell
                 name={row?.profile?.fullName || "N/A"}
-                designation={
-                  row?.employee?.designations?.at(0)?.designation?.name ||
-                  undefined
-                }
+                designation={row?.employee?.designation?.name || undefined}
                 imageUrl={row?.profile?.profilePicture || undefined}
               />
             ),
@@ -241,14 +238,14 @@ export default function AdminsPage() {
                     .includes("full")
                     ? "badge-success"
                     : row?.employee?.employmentStatus?.name
-                        .toLowerCase()
-                        .includes("part")
-                    ? "badge-warning"
-                    : row?.employee?.employmentStatus?.name
-                        .toLowerCase()
-                        .includes("contract")
-                    ? "badge-info"
-                    : "badge-secondary"
+                          .toLowerCase()
+                          .includes("part")
+                      ? "badge-warning"
+                      : row?.employee?.employmentStatus?.name
+                            .toLowerCase()
+                            .includes("contract")
+                        ? "badge-info"
+                        : "badge-secondary"
                 }`}
               >
                 {row?.employee?.employmentStatus?.name}

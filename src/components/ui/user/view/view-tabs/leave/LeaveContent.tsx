@@ -82,18 +82,18 @@ export default function LeaveContent({ userId }: LeaveContentProps) {
 
   const leaves = leavesData?.leaves?.data || [];
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return <PiCheckCircle size={20} className="text-success" />;
-      case "rejected":
-        return <PiXCircle size={20} className="text-error" />;
-      case "pending":
-        return <PiWarning size={20} className="text-warning" />;
-      default:
-        return <PiAirplaneTilt size={20} className="text-base-content/60" />;
-    }
-  };
+  // const getStatusIcon = (status: string) => {
+  //   switch (status.toLowerCase()) {
+  //     case "approved":
+  //       return <PiCheckCircle size={20} className="text-success" />;
+  //     case "rejected":
+  //       return <PiXCircle size={20} className="text-error" />;
+  //     case "pending":
+  //       return <PiWarning size={20} className="text-warning" />;
+  //     default:
+  //       return <PiAirplaneTilt size={20} className="text-base-content/60" />;
+  //   }
+  // };
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -338,9 +338,9 @@ export default function LeaveContent({ userId }: LeaveContentProps) {
                           <p className="text-base-content/80">
                             {leave.endDate
                               ? `${moment(leave.startDate).format(
-                                  "MMM DD"
+                                  "MMM DD",
                                 )} - ${moment(leave.endDate).format(
-                                  "MMM DD, YYYY"
+                                  "MMM DD, YYYY",
                                 )}`
                               : moment(leave.startDate).format("MMM DD, YYYY")}
                           </p>
@@ -397,9 +397,9 @@ export default function LeaveContent({ userId }: LeaveContentProps) {
                 <p className="text-sm text-base-content/60 mt-1">
                   {selectedLeave.endDate
                     ? `${moment(selectedLeave.startDate).format(
-                        "MMMM DD"
+                        "MMMM DD",
                       )} - ${moment(selectedLeave.endDate).format(
-                        "MMMM DD, YYYY"
+                        "MMMM DD, YYYY",
                       )}`
                     : moment(selectedLeave.startDate).format("MMMM DD, YYYY")}
                 </p>
@@ -492,7 +492,7 @@ export default function LeaveContent({ userId }: LeaveContentProps) {
                         </p>
                         <p className="text-sm text-base-content/80">
                           {moment(selectedLeave.reviewedAt).format(
-                            "MMMM DD, YYYY hh:mm A"
+                            "MMMM DD, YYYY hh:mm A",
                           )}
                         </p>
                       </div>
@@ -559,7 +559,7 @@ export default function LeaveContent({ userId }: LeaveContentProps) {
                     </p>
                     <p className="text-sm text-base-content/80">
                       {moment(selectedLeave.createdAt).format(
-                        "MMMM DD, YYYY hh:mm A"
+                        "MMMM DD, YYYY hh:mm A",
                       )}
                     </p>
                   </div>
@@ -569,7 +569,7 @@ export default function LeaveContent({ userId }: LeaveContentProps) {
                     </p>
                     <p className="text-sm text-base-content/80">
                       {moment(selectedLeave.updatedAt).format(
-                        "MMMM DD, YYYY hh:mm A"
+                        "MMMM DD, YYYY hh:mm A",
                       )}
                     </p>
                   </div>

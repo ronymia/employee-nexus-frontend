@@ -17,7 +17,12 @@ import {
 } from "@/graphql/job-history.api";
 import { IJobHistory } from "@/types";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
 import { showToast } from "@/components/ui/CustomToast";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 // ==================== INTERFACES ====================
 interface IExperienceFormProps {
@@ -60,9 +65,9 @@ export default function ExperienceForm({
       // PREPARE DATE FIELDS
       const processedData = {
         ...jobData,
-        startDate: dayjs(data.startDate, "DD-MM-YYYY").toDate(),
+        startDate: dayjs.utc(data.startDate, "DD-MM-YYYY").toDate(),
         endDate: data.endDate
-          ? dayjs(data.endDate, "DD-MM-YYYY").toDate()
+          ? dayjs.utc(data.endDate, "DD-MM-YYYY").toDate()
           : null,
       };
 

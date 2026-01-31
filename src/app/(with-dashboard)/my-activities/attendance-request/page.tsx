@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
 import { TableColumnType } from "@/types";
 import { IAttendance } from "@/types/attendance.type";
@@ -12,10 +12,8 @@ import {
   PiMinus,
   PiAirplaneTilt,
   PiPlusCircle,
-  PiTrash,
-  PiPencilSimple,
 } from "react-icons/pi";
-import { GET_ATTENDANCES, DELETE_ATTENDANCE } from "@/graphql/attendance.api";
+import { GET_ATTENDANCES } from "@/graphql/attendance.api";
 import moment from "moment";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
@@ -49,63 +47,18 @@ export default function AttendanceRequestPage() {
     skip: !user?.id,
   });
 
-  // Delete attendance mutation
-  const [deleteAttendance] = useMutation(DELETE_ATTENDANCE, {
-    awaitRefetchQueries: true,
-    refetchQueries: [
-      {
-        query: GET_ATTENDANCES,
-        variables: { query: { userId: Number(user?.id) } },
-      },
-    ],
-    onCompleted: () => {
-      setPopupOption({ ...popupOption, open: false });
-    },
-  });
-
   const attendances = attendancesData?.attendances?.data || [];
   const loading = attendancesLoading;
 
-  const handleDelete = (attendance: IAttendance) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: false,
-      actionType: "delete",
-      form: "attendance",
-      data: { id: attendance.id },
-      title: "Delete Attendance Request",
-      deleteHandler: async () => {
-        try {
-          await deleteAttendance({
-            variables: { id: attendance.id },
-          });
-        } catch (error) {
-          console.error("Error deleting attendance:", error);
-        }
-      },
-    });
-  };
-
-  const handleEdit = (attendance: IAttendance) => {
-    setPopupOption({
-      open: true,
-      closeOnDocumentClick: false,
-      actionType: "update",
-      form: "attendance",
-      data: attendance,
-      title: "Update Attendance Request",
-    });
-  };
-
   // Calculate stats
   const presentCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "present"
+    (a) => a.status.toLowerCase() === "present",
   ).length;
   const absentCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "absent"
+    (a) => a.status.toLowerCase() === "absent",
   ).length;
   const pendingCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "pending"
+    (a) => a.status.toLowerCase() === "pending",
   ).length;
 
   const getStatusBadge = (status: string) => {
@@ -262,26 +215,7 @@ export default function AttendanceRequestPage() {
       {/* Attendance Table */}
       <CustomTable
         isLoading={loading}
-        actions={
-          [
-            //   {
-            //     name: "Edit",
-            //     type: "button" as const,
-            //     Icon: PiPencilSimple,
-            //     handler: (row: any) => handleEdit(row),
-            //     permissions: [],
-            //     disabledOn: [],
-            //   },
-            //   {
-            //     name: "Delete",
-            //     type: "button" as const,
-            //     Icon: PiTrash,
-            //     handler: (row: any) => handleDelete(row),
-            //     permissions: [],
-            //     disabledOn: [],
-            //   },
-          ]
-        }
+        actions={[]}
         columns={columns}
         setColumns={setColumns}
         dataSource={attendances.map((row) => ({
@@ -293,14 +227,14 @@ export default function AttendanceRequestPage() {
           customPunchOut: row.punchRecords?.[row.punchRecords.length - 1]
             ?.punchOut
             ? moment(
-                row.punchRecords[row.punchRecords.length - 1].punchOut
+                row.punchRecords[row.punchRecords.length - 1].punchOut,
               ).format("hh:mm A")
             : "--:--",
-          customTotalHours: row.totalHours
-            ? `${row.totalHours.toFixed(2)}h`
+          customTotalHours: row.totalMinutes
+            ? `${(row.totalMinutes / 60).toFixed(2)}h`
             : "0h",
-          customBreakHours: row.breakHours
-            ? `${row.breakHours.toFixed(2)}h`
+          customBreakHours: row.breakMinutes
+            ? `${(row.breakMinutes / 60).toFixed(2)}h`
             : "0h",
           customStatus: getStatusBadge(row.status),
           customLocation: row.punchRecords?.[0]?.workSite?.name || "N/A",

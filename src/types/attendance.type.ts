@@ -34,10 +34,31 @@ export interface IAttendance {
   scheduleMinutes: number;
   totalMinutes: number;
   breakMinutes: number;
-  status: string;
+  overtimeMinutes: number;
+  status: "pending" | "approved" | "rejected" | "absent";
+  type: "regular" | "late" | "partial";
+  reviewedAt?: Date;
+  reviewedBy?: number;
+  reviewer?: IUser;
+  remarks?: string;
   punchRecords: IAttendancePunch[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IAttendanceOverview {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  absent: number;
+  late: number;
+  partial: number;
+}
+export interface IAttendanceOverviewResponse {
+  attendanceOverview: {
+    data: IAttendanceOverview;
+  };
 }
 
 // export interface ICreateAttendancePunchInput {
@@ -75,6 +96,7 @@ export interface IAttendance {
 //   totalHours?: number;
 //   breakHours?: number;
 //   status?: string;
+//   punchRecords: ICreateAttendancePunchInput[];
 // }
 
 export interface IGetAttendancesInput {

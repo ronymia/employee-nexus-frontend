@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import CustomLoading from "@/components/loader/CustomLoading";
 import { IPayrollItem } from "@/types";
@@ -37,8 +36,8 @@ interface PayslipCardProps {
 }
 
 const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
-  const earnings = item.grossPay;
-  const deductions = item.totalDeductions;
+  // const earnings = item.grossPay;
+  // const deductions = item.totalDeductions;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
@@ -67,8 +66,8 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
             item.status === "PAID"
               ? "badge-success"
               : item.status === "APPROVED"
-              ? "badge-info"
-              : "badge-warning"
+                ? "badge-info"
+                : "badge-warning"
           }`}
         >
           {item.status}
@@ -121,7 +120,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
               ))}
           </div>
           {(item.adjustments?.filter(
-            (adj) => adj.type === "bonus" || adj.type === "reimbursement"
+            (adj) => adj.type === "bonus" || adj.type === "reimbursement",
           ).length ?? 0) > 0 && (
             <div className="mt-2 pt-2 border-t border-green-200">
               <p className="text-xs font-semibold text-green-600 mb-1">
@@ -129,7 +128,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
               </p>
               {item.adjustments
                 ?.filter(
-                  (adj) => adj.type === "bonus" || adj.type === "reimbursement"
+                  (adj) => adj.type === "bonus" || adj.type === "reimbursement",
                 )
                 .slice(0, 2)
                 .map((adj, idx) => (
@@ -162,7 +161,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
               ))}
           </div>
           {(item.adjustments?.filter(
-            (adj) => adj.type === "penalty" || adj.type === "advance_deduction"
+            (adj) => adj.type === "penalty" || adj.type === "advance_deduction",
           ).length ?? 0) > 0 && (
             <div className="mt-2 pt-2 border-t border-red-200">
               <p className="text-xs font-semibold text-red-600 mb-1">
@@ -171,7 +170,7 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
               {item.adjustments
                 ?.filter(
                   (adj) =>
-                    adj.type === "penalty" || adj.type === "advance_deduction"
+                    adj.type === "penalty" || adj.type === "advance_deduction",
                 )
                 .slice(0, 2)
                 .map((adj, idx) => (
@@ -716,15 +715,13 @@ const dummyPayslips: any[] = [
 
 export default function AllPayslipsPage() {
   const { popupOption, setPopupOption } = usePopupOption();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [filters, setFilters] = useState({
-    status: "",
-    month: "",
-    year: moment().year(),
-  });
+  // const [filters, setFilters] = useState({
+  //   status: "",
+  //   month: "",
+  //   year: moment().year(),
+  // });
 
-  const { data, loading, refetch } = useQuery<{
+  const { data, loading } = useQuery<{
     payrollItems: {
       data: IPayrollItem[];
     };
@@ -737,21 +734,14 @@ export default function AllPayslipsPage() {
 
   // Use dummy data instead of API data
   const payslips = data?.payrollItems?.data || dummyPayslips;
-  const pagination = {
-    total: data?.payrollItems?.data.length,
-    page: 1,
-    pageSize: 20,
-  };
 
   // Calculate summary statistics
   const totalGrossPay = payslips.reduce((sum, item) => sum + item.grossPay, 0);
   const totalDeductions = payslips.reduce(
     (sum, item) => sum + item.totalDeductions,
-    0
+    0,
   );
   const totalNetPay = payslips.reduce((sum, item) => sum + item.netPay, 0);
-  const averageGrossPay =
-    payslips.length > 0 ? totalGrossPay / payslips.length : 0;
 
   // Chart data for overview
   const summaryData = [
@@ -793,7 +783,7 @@ export default function AllPayslipsPage() {
       actionType: "view",
       data: item,
       title: `Payslip - ${item.user?.profile?.fullName} - ${moment(
-        item.payrollCycle?.periodEnd
+        item.payrollCycle?.periodEnd,
       ).format("MMMM YYYY")}`,
     });
   };
@@ -802,13 +792,13 @@ export default function AllPayslipsPage() {
     return <CustomLoading />;
   }
 
-  const currentYear = moment().year();
-  const yearOptions = [
-    currentYear,
-    currentYear - 1,
-    currentYear - 2,
-    currentYear - 3,
-  ];
+  // const currentYear = moment().year();
+  // const yearOptions = [
+  //   currentYear,
+  //   currentYear - 1,
+  //   currentYear - 2,
+  //   currentYear - 3,
+  // ];
 
   return (
     <div className="p-6">
@@ -979,7 +969,7 @@ export default function AllPayslipsPage() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {pieChartData.map((entry, index) => (
+                  {pieChartData.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

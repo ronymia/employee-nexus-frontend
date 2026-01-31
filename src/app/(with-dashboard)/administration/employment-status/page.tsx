@@ -20,7 +20,6 @@ import { TableActionType, TableColumnType, IEmploymentStatus } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
-import Swal from "sweetalert2";
 
 export default function EmploymentStatusesPage() {
   // PERMISSIONS

@@ -7,54 +7,23 @@ import {
   IRecentAttendance,
   IAvailableLeave,
   IUpcomingLeaveEmployee,
-  ILeaveHistory,
   IRecentTask,
   INotificationItem,
 } from "@/types";
-import CustomLoading from "@/components/loader/CustomLoading";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import {
   HiOutlineUser,
   HiOutlineCalendar,
-  HiOutlineClock,
   HiOutlineCurrencyDollar,
   HiOutlineClipboardList,
   HiOutlineBell,
   HiOutlineCheckCircle,
-  HiOutlineXCircle,
 } from "react-icons/hi";
-import { HiOutlineEnvelope, HiOutlinePhone } from "react-icons/hi2";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
-
-const COLORS = {
-  primary: "#10b981",
-  secondary: "#3b82f6",
-  success: "#22c55e",
-  warning: "#f59e0b",
-  error: "#ef4444",
-  info: "#06b6d4",
-  purple: "#a855f7",
-  pink: "#ec4899",
-};
 
 // Mock/Dummy Data for Employee Dashboard
 const MOCK_EMPLOYEE_DASHBOARD_DATA: IEmployeeDashboardResponse = {
@@ -257,14 +226,15 @@ const MOCK_EMPLOYEE_DASHBOARD_DATA: IEmployeeDashboardResponse = {
 };
 
 export default function EmployeeDashboard() {
-  const { data, loading, error } = useQuery<{
+  const { data } = useQuery<{
     employeeDashboard: IEmployeeDashboardResponse;
   }>(EMPLOYEE_DASHBOARD, {
     // skip: true, // Skip query to use mock data
   });
 
   // Use mock data for development
-  const dashboardData = data?.employeeDashboard?.data;
+  const dashboardData =
+    data?.employeeDashboard?.data || MOCK_EMPLOYEE_DASHBOARD_DATA.data;
 
   if (!dashboardData) {
     return (
@@ -451,7 +421,7 @@ export default function EmployeeDashboard() {
                     </span>
                   </div>
                 </div>
-              )
+              ),
             )}
           </div>
 
@@ -480,7 +450,7 @@ export default function EmployeeDashboard() {
                       {leave.status}
                     </span>
                   </div>
-                )
+                ),
               )}
             </div>
           )}
@@ -513,8 +483,8 @@ export default function EmployeeDashboard() {
                           record.status === "PRESENT"
                             ? "badge-success"
                             : record.status === "LATE"
-                            ? "badge-warning"
-                            : "badge-error"
+                              ? "badge-warning"
+                              : "badge-error"
                         }`}
                       >
                         {record.status}
@@ -523,7 +493,7 @@ export default function EmployeeDashboard() {
                     <td>{record.checkInTime}</td>
                     <td>{record.checkOutTime}</td>
                   </tr>
-                )
+                ),
               )}
             </tbody>
           </table>
@@ -592,10 +562,10 @@ export default function EmployeeDashboard() {
                           task.priority === "URGENT"
                             ? "badge-error"
                             : task.priority === "HIGH"
-                            ? "badge-warning"
-                            : task.priority === "MEDIUM"
-                            ? "badge-info"
-                            : "badge-ghost"
+                              ? "badge-warning"
+                              : task.priority === "MEDIUM"
+                                ? "badge-info"
+                                : "badge-ghost"
                         }`}
                       >
                         {task.priority}
@@ -605,8 +575,8 @@ export default function EmployeeDashboard() {
                           task.status === "IN_PROGRESS"
                             ? "badge-warning"
                             : task.status === "OVERDUE"
-                            ? "badge-error"
-                            : "badge-ghost"
+                              ? "badge-error"
+                              : "badge-ghost"
                         }`}
                       >
                         {task.status}
@@ -664,7 +634,7 @@ export default function EmployeeDashboard() {
               <div className="text-xs text-base-content/70">
                 Paid on{" "}
                 {dayjs(payrollSummary.lastPayment.paidDate).format(
-                  "MMM DD, YYYY"
+                  "MMM DD, YYYY",
                 )}
               </div>
             </div>
@@ -687,7 +657,7 @@ export default function EmployeeDashboard() {
                 <div className="text-lg font-bold text-error">
                   $
                   {(payrollSummary.yearToDate.totalDeductions / 1000).toFixed(
-                    0
+                    0,
                   )}
                   K
                 </div>
@@ -730,10 +700,10 @@ export default function EmployeeDashboard() {
                     notification.type === "leave"
                       ? "bg-blue-100 text-blue-600"
                       : notification.type === "task"
-                      ? "bg-purple-100 text-purple-600"
-                      : notification.type === "payroll"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-yellow-100 text-yellow-600"
+                        ? "bg-purple-100 text-purple-600"
+                        : notification.type === "payroll"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-yellow-100 text-yellow-600"
                   }`}
                 >
                   {notification.type === "leave" ? (
@@ -758,7 +728,7 @@ export default function EmployeeDashboard() {
                   <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
                 )}
               </div>
-            )
+            ),
           )}
         </div>
       </div>

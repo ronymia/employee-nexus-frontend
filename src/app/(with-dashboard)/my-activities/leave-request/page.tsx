@@ -88,7 +88,7 @@ export default function LeaveRequestPage() {
   const leaves = leavesData?.leaves?.data || [];
 
   // Delete mutation
-  const [deleteLeave, { loading: deleting }] = useMutation(DELETE_LEAVE, {
+  const [deleteLeave] = useMutation(DELETE_LEAVE, {
     awaitRefetchQueries: true,
     refetchQueries: [
       { query: GET_LEAVES, variables: { query: { userId: Number(user?.id) } } },
@@ -224,7 +224,7 @@ export default function LeaveRequestPage() {
             <div>
               <p className="text-xs text-base-content/60">Total Hours</p>
               <p className="text-2xl font-bold text-primary">
-                {leaves.reduce((sum, l) => sum + l.totalHours, 0)}h
+                {leaves.reduce((sum, l) => sum + l.totalMinutes, 0)}h
               </p>
             </div>
             <PiClock size={32} className="text-primary" />
@@ -265,10 +265,10 @@ export default function LeaveRequestPage() {
             customDuration: getDurationLabel(row.leaveDuration),
             customLeavePeriod: row.endDate
               ? `${moment(row.startDate).format("MMM DD, YYYY")} - ${moment(
-                  row.endDate
+                  row.endDate,
                 ).format("MMM DD, YYYY")}`
               : moment(row.startDate).format("MMM DD, YYYY"),
-            customTotalHours: `${row.totalHours}h`,
+            customTotalHours: `${row.totalMinutes / 60}h`,
             customStatus: getStatusBadge(row.status),
           }))}
           searchConfig={{

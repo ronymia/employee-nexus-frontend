@@ -1,20 +1,15 @@
 // "use client";
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AppStoreProvider } from "@/providers/AppStoreProvider";
 import ApolloClientProvider from "@/providers/ApolloClientProvider";
 import GoogleMapAPIProvider from "@/providers/GoogleMapAPIProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -30,9 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="light">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} antialiased`}>
         <AppStoreProvider>
           <ApolloClientProvider>
             <GoogleMapAPIProvider>

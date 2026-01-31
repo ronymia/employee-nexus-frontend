@@ -4,7 +4,6 @@ import { useQuery } from "@apollo/client/react";
 import { OWNER_DASHBOARD } from "@/graphql";
 import {
   IOwnerDashboardResponse,
-  ILeaveTypeCount,
   IRecentProject,
   IRecentActivity,
   IUpcomingLeave,
@@ -15,8 +14,6 @@ import CustomLoading from "@/components/loader/CustomLoading";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -33,11 +30,7 @@ import {
   HiOutlineCurrencyDollar,
   HiOutlineCalendar,
 } from "react-icons/hi";
-import {
-  HiOutlineUserGroup,
-  HiOutlineChartBar,
-  HiOutlineBell,
-} from "react-icons/hi2";
+import { HiOutlineUserGroup, HiOutlineBell } from "react-icons/hi2";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -285,7 +278,7 @@ const MOCK_DASHBOARD_DATA: IOwnerDashboardResponse = {
 };
 
 export default function OwnerDashboard() {
-  const { data, loading, error } = useQuery<{
+  const { data, loading } = useQuery<{
     ownerDashboard: IOwnerDashboardResponse;
   }>(OWNER_DASHBOARD, {
     // Skip query for now to use mock data
@@ -360,10 +353,10 @@ export default function OwnerDashboard() {
         <StatCard
           title="Monthly Payroll"
           value={`$${(businessOverview.totalMonthlyPayroll / 1000).toFixed(
-            1
+            1,
           )}K`}
           subtitle={`$${(businessOverview.pendingPayrollAmount / 1000).toFixed(
-            1
+            1,
           )}K Pending`}
           icon={<HiOutlineCurrencyDollar className="text-3xl" />}
           gradient="from-orange-500 to-yellow-400"
@@ -552,14 +545,12 @@ export default function OwnerDashboard() {
                     outerRadius={80}
                     label={(entry: any) => `${entry.leaveType}: ${entry.count}`}
                   >
-                    {leaveStats.thisMonth.byType.map(
-                      (entry: ILeaveTypeCount, index: number) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={PIE_COLORS[index % PIE_COLORS.length]}
-                        />
-                      )
-                    )}
+                    {leaveStats.thisMonth.byType.map((_, index: number) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={PIE_COLORS[index % PIE_COLORS.length]}
+                      />
+                    ))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -590,7 +581,7 @@ export default function OwnerDashboard() {
               <div className="text-sm opacity-90">
                 Payment Date:{" "}
                 {dayjs(payrollSummary.currentCycle.paymentDate).format(
-                  "MMM DD, YYYY"
+                  "MMM DD, YYYY",
                 )}
               </div>
               <div className="text-xs opacity-75 mt-2">
@@ -631,7 +622,7 @@ export default function OwnerDashboard() {
             <div className="text-xs text-base-content/70">
               Avg Monthly: $
               {(payrollSummary.yearToDate.averageMonthlyPayroll / 1000).toFixed(
-                1
+                1,
               )}
               K
             </div>
@@ -699,14 +690,14 @@ export default function OwnerDashboard() {
                         project.status === "ACTIVE"
                           ? "badge-success"
                           : project.status === "COMPLETED"
-                          ? "badge-info"
-                          : "badge-warning"
+                            ? "badge-info"
+                            : "badge-warning"
                       }`}
                     >
                       {project.status}
                     </span>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -736,10 +727,10 @@ export default function OwnerDashboard() {
                       activity.type === "leave"
                         ? "bg-blue-100 text-blue-600"
                         : activity.type === "attendance"
-                        ? "bg-green-100 text-green-600"
-                        : activity.type === "payroll"
-                        ? "bg-purple-100 text-purple-600"
-                        : "bg-gray-100 text-gray-600"
+                          ? "bg-green-100 text-green-600"
+                          : activity.type === "payroll"
+                            ? "bg-purple-100 text-purple-600"
+                            : "bg-gray-100 text-gray-600"
                     }`}
                   >
                     {activity.type === "leave" ? (
@@ -761,7 +752,7 @@ export default function OwnerDashboard() {
                     </p>
                   </div>
                 </div>
-              )
+              ),
             )}
           </div>
         </div>
@@ -805,7 +796,7 @@ export default function OwnerDashboard() {
                         </td>
                       </tr>
                     );
-                  }
+                  },
                 )}
               </tbody>
             </table>

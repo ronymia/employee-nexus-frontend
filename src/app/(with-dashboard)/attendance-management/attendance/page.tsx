@@ -5,12 +5,14 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
 import { TableColumnType } from "@/types";
-import { IAttendance } from "@/types/attendance.type";
+import {
+  IAttendance,
+  IAttendanceOverviewResponse,
+} from "@/types/attendance.type";
 import {
   PiCheckCircle,
   PiXCircle,
   PiWarning,
-  PiMinus,
   PiPlusCircle,
   PiTrash,
   PiPencilSimple,
@@ -24,238 +26,46 @@ import {
   DELETE_ATTENDANCE,
   APPROVE_ATTENDANCE,
   REJECT_ATTENDANCE,
+  ATTENDANCE_OVERVIEW,
 } from "@/graphql/attendance.api";
 import dayjs from "dayjs";
 import CustomPopup from "@/components/modal/CustomPopup";
-import AttendanceForm from "./components/AttendanceForm";
+import AttendanceForm from "./AttendanceForm";
 import AttendanceRecord from "./components/AttendanceRecord";
 import usePopupOption from "@/hooks/usePopupOption";
+import useConfirmation from "@/hooks/useConfirmation";
 import { Permissions } from "@/constants/permissions.constant";
 import usePermissionGuard from "@/guards/usePermissionGuard";
-import { ATTENDANCE_SUMMARY } from "@/graphql/attendance.api";
 import { PiClockAfternoon } from "react-icons/pi";
-import { IconType } from "react-icons";
 import { motion } from "motion/react";
 import PageHeader from "@/components/ui/PageHeader";
-import FormModal from "@/components/form/FormModal";
-import { showToast } from "@/components/ui/CustomToast";
+
 import { minutesToHoursAndMinutes } from "@/utils/time.utils";
+import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";
 
 // ==================== SUB-COMPONENTS ====================
 
-// STATS CARD COMPONENT
-interface IStatsCardProps {
-  icon: IconType;
-  label: string;
-  count: number;
-  color: "primary" | "success" | "warning" | "error" | "info";
-  index: number;
-}
-
-function StatsCard({
-  icon: Icon,
-  label,
-  count,
-  color,
-  index,
-}: IStatsCardProps) {
-  const colorClasses = {
-    primary: {
-      bg: "bg-linear-to-br from-primary/10 via-primary/5 to-transparent",
-      border: "border-primary/30 hover:border-primary/50",
-      iconBg: "bg-primary/20",
-      icon: "text-primary",
-      text: "text-primary",
-      glow: "shadow-primary/20",
-    },
-    success: {
-      bg: "bg-linear-to-br from-success/10 via-success/5 to-transparent",
-      border: "border-success/30 hover:border-success/50",
-      iconBg: "bg-success/20",
-      icon: "text-success",
-      text: "text-success",
-      glow: "shadow-success/20",
-    },
-    warning: {
-      bg: "bg-linear-to-br from-warning/10 via-warning/5 to-transparent",
-      border: "border-warning/30 hover:border-warning/50",
-      iconBg: "bg-warning/20",
-      icon: "text-warning",
-      text: "text-warning",
-      glow: "shadow-warning/20",
-    },
-    error: {
-      bg: "bg-linear-to-br from-error/10 via-error/5 to-transparent",
-      border: "border-error/30 hover:border-error/50",
-      iconBg: "bg-error/20",
-      icon: "text-error",
-      text: "text-error",
-      glow: "shadow-error/20",
-    },
-    info: {
-      bg: "bg-linear-to-br from-info/10 via-info/5 to-transparent",
-      border: "border-info/30 hover:border-info/50",
-      iconBg: "bg-info/20",
-      icon: "text-info",
-      text: "text-info",
-      glow: "shadow-info/20",
-    },
-  };
-
-  const colors = colorClasses[color];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        duration: 0.5,
-        delay: index * 0.08,
-        ease: [0.4, 0, 0.2, 1],
-      }}
-      whileHover={{
-        y: -6,
-        scale: 1.03,
-        transition: { duration: 0.2 },
-      }}
-      className={`
-        relative overflow-hidden
-        border ${colors.border} ${colors.bg}
-        rounded-xl p-5
-        backdrop-blur-sm
-        transition-all duration-300
-        hover:shadow-lg ${colors.glow}
-        group cursor-pointer
-      `}
-    >
-      {/* BACKGROUND SHIMMER */}
-      <motion.div
-        className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent"
-        initial={{ x: "-100%" }}
-        animate={{ x: "100%" }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "linear",
-          delay: index * 0.2,
-        }}
-      />
-
-      {/* CONTENT */}
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{
-              delay: index * 0.08 + 0.2,
-              duration: 0.6,
-              type: "spring",
-              stiffness: 200,
-            }}
-            className={`${colors.iconBg} ${colors.icon} p-3 rounded-lg group-hover:scale-110 transition-transform duration-300`}
-          >
-            <Icon size={24} className="drop-shadow-sm" />
-          </motion.div>
-
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{
-              delay: index * 0.08 + 0.3,
-              duration: 0.5,
-              type: "spring",
-            }}
-            className={`text-4xl font-bold ${colors.text} drop-shadow-sm`}
-          >
-            <motion.span
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08 + 0.4 }}
-            >
-              {count}
-            </motion.span>
-          </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.08 + 0.5 }}
-          className="flex items-center gap-2"
-        >
-          <p className="text-sm font-semibold text-base-content/80 uppercase tracking-wide">
-            {label}
-          </p>
-          <motion.div
-            className={`h-1 flex-1 ${colors.iconBg} rounded-full`}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: index * 0.08 + 0.6, duration: 0.4 }}
-            style={{ transformOrigin: "left" }}
-          />
-        </motion.div>
-      </div>
-
-      {/* BOTTOM ACCENT */}
-      <motion.div
-        className={`absolute bottom-0 left-0 right-0 h-1 ${colors.iconBg}`}
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ delay: index * 0.08 + 0.7, duration: 0.5 }}
-        style={{ transformOrigin: "left" }}
-      />
-    </motion.div>
-  );
-}
-
 // ATTENDANCE STATS COMPONENT
-interface IAttendanceStatsProps {
-  startDate?: string;
-  endDate?: string;
-  userId?: number;
-}
+import OverviewCard from "@/components/card/OverviewCard";
 
-function AttendanceStats({
-  startDate = undefined,
-  endDate = undefined,
-  userId = undefined,
-}: IAttendanceStatsProps) {
-  const { data, loading, error } = useQuery<{
-    attendanceSummary: {
-      data: {
-        pending: number;
-        approved: number;
-        absent: number;
-        late: number;
-        halfDay: number;
-      };
-    };
-  }>(ATTENDANCE_SUMMARY, {
-    variables: { startDate, endDate, userId },
-  });
+function AttendanceOverview() {
+  const { data, loading, error } =
+    useQuery<IAttendanceOverviewResponse>(ATTENDANCE_OVERVIEW);
 
-  const summary = data?.attendanceSummary?.data;
-  console.log({ summary });
+  const summary = data?.attendanceOverview?.data;
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="border border-base-300 rounded-lg p-4 bg-base-200/50 animate-pulse"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-base-300 rounded-lg"></div>
-              <div className="w-12 h-8 bg-base-300 rounded"></div>
-            </div>
-            <div className="w-20 h-4 bg-base-300 rounded"></div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+  //       {[...Array(5)].map((_, i) => (
+  //         <div
+  //           key={i}
+  //           className="border border-base-300 rounded-[32px] h-44 p-6 bg-base-200/50 animate-pulse"
+  //         />
+  //       ))}
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
@@ -272,57 +82,100 @@ function AttendanceStats({
 
   const stats = [
     {
-      icon: PiClock,
-      label: "Pending",
-      count: summary?.pending || 0,
-      color: "warning" as const,
+      title: "Pending",
+      value: summary?.pending || 0,
+      Icon: PiClock,
+      bgColor: "bg-[#fff7d6]",
+      decorationColor: "bg-[#ffeea3]",
+      iconColor: "text-[#b08800]",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance entries submitted by employees but not yet reviewed or approved by a manager.",
     },
     {
-      icon: PiCheckCircle,
-      label: "Approved",
-      count: summary?.approved || 0,
-      color: "success" as const,
+      title: "Approved",
+      value: summary?.approved || 0,
+      Icon: PiCheckCircle,
+      bgColor: "bg-[#e3f9eb]",
+      decorationColor: "bg-[#bcf0cf]",
+      iconColor: "text-[#1f8c54]",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance records that have been verified and approved, and are considered valid for payroll.",
     },
     {
-      icon: PiXCircle,
-      label: "Absent",
-      count: summary?.absent || 0,
-      color: "error" as const,
+      title: "Absent",
+      value: summary?.absent || 0,
+      Icon: PiXCircle,
+      bgColor: "bg-[#ffe3e3]",
+      decorationColor: "bg-[#ffc2c2]",
+      iconColor: "text-[#c92a2a]",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Days where employees did not check in and no valid attendance was recorded.",
     },
     {
-      icon: PiWarning,
-      label: "Late",
-      count: summary?.late || 0,
-      color: "info" as const,
+      title: "Rejected",
+      value: summary?.rejected || 0,
+      Icon: PiXCircle,
+      bgColor: "bg-[#ffe3e3]",
+      decorationColor: "bg-[#ffc2c2]",
+      iconColor: "text-[#c92a2a]",
+      subText: `out of ${summary?.total}`,
+      description: "Attendance records that have been rejected by a manager.",
     },
     {
-      icon: PiClockAfternoon,
-      label: "Half Day",
-      count: summary?.halfDay || 0,
-      color: "primary" as const,
+      title: "Late",
+      value: summary?.late || 0,
+      Icon: PiWarning,
+      bgColor: "bg-[#e0f2ff]",
+      decorationColor: "bg-[#bae0ff]",
+      iconColor: "text-[#1a7bc7]",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance records where the employee checked in after the allowed time threshold.",
+    },
+    {
+      title: "Half Day",
+      value: summary?.partial || 0,
+      Icon: PiClockAfternoon,
+      bgColor: "bg-[#edebff]",
+      decorationColor: "bg-[#d0c9ff]",
+      iconColor: "text-[#5b4eb1]",
+      subText: `out of ${summary?.total}`,
+      description:
+        "Attendance marked as partial working hours, below the required full-day duration.",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
       {stats.map((stat, index) => (
-        <StatsCard key={stat.label} {...stat} index={index} />
+        <motion.div
+          key={stat.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <OverviewCard
+            stat={stat}
+            handler={undefined}
+            isLoading={loading}
+            position={stats.length - 1 === index ? "right" : "left"}
+          />
+        </motion.div>
       ))}
     </div>
   );
 }
-
 // ==================== MAIN COMPONENT ====================
 
 export default function AttendancePage() {
   // ==================== PERMISSIONS ====================
   const { hasPermission } = usePermissionGuard();
+  const { confirm } = useConfirmation();
 
   // ==================== LOCAL STATE ====================
-  const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
-  );
-
   // POPUP STATE MANAGEMENT
   const { popupOption, setPopupOption } = usePopupOption();
 
@@ -351,7 +204,10 @@ export default function AttendancePage() {
   // DELETE ATTENDANCE
   const [deleteAttendance] = useMutation(DELETE_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+      { query: ATTENDANCE_OVERVIEW },
+    ],
     onCompleted: () => {
       setPopupOption({ ...popupOption, open: false });
     },
@@ -360,13 +216,19 @@ export default function AttendancePage() {
   // APPROVE ATTENDANCE
   const [approveAttendance] = useMutation(APPROVE_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+      { query: ATTENDANCE_OVERVIEW },
+    ],
   });
 
   // REJECT ATTENDANCE
   const [rejectAttendance] = useMutation(REJECT_ATTENDANCE, {
     awaitRefetchQueries: true,
-    refetchQueries: [{ query: GET_ATTENDANCES, variables: { query: {} } }],
+    refetchQueries: [
+      { query: GET_ATTENDANCES, variables: { query: {} } },
+      { query: ATTENDANCE_OVERVIEW },
+    ],
   });
 
   // ==================== DATA PREPARATION ====================
@@ -376,16 +238,31 @@ export default function AttendancePage() {
   // ==================== HANDLERS ====================
   // DELETE HANDLER
   const handleDelete = async (attendance: IAttendance) => {
-    try {
-      const res = await deleteAttendance({
-        variables: { id: Number(attendance.id) },
-      });
-      if (res?.data) {
-        showToast.success("Deleted!", "Attendance deleted successfully");
-      }
-    } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to delete attendance");
-    }
+    // Format details for confirmation
+    const name = attendance.user?.profile?.fullName || "Employee";
+    const date = dayjs(attendance.date).format("MMM DD, YYYY");
+    const totalTime = attendance.overtimeMinutes
+      ? `${minutesToHoursAndMinutes(attendance.totalMinutes)} (${minutesToHoursAndMinutes(attendance.overtimeMinutes)})`
+      : minutesToHoursAndMinutes(attendance.totalMinutes);
+
+    await confirm({
+      title: "Delete Attendance",
+      message: `Do you want to delete <strong>${name} - ${date}</strong>?${
+        `Total Worked: ${totalTime}. This action cannot be undone.`
+          ? `<br/><small style="color: rgba(0,0,0,0.6);">${`Total Worked: ${totalTime}. This action cannot be undone.`}</small>`
+          : ""
+      }`,
+      confirmButtonText: "Delete Record",
+      confirmButtonColor: "#ef4444",
+      icon: "warning",
+      successTitle: "Deleted!",
+      successMessage: "Attendance deleted successfully",
+      onConfirm: async () => {
+        await deleteAttendance({
+          variables: { id: Number(attendance.id) },
+        });
+      },
+    });
   };
 
   // UPDATE HANDLER
@@ -402,30 +279,76 @@ export default function AttendancePage() {
 
   // APPROVE HANDLER
   const handleApprove = async (attendance: IAttendance) => {
-    try {
-      const res = await approveAttendance({
-        variables: { attendanceId: Number(attendance.id) },
-      });
-      if (res?.data) {
-        showToast.success("Approved!", "Attendance approved successfully");
-      }
-    } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to approve attendance");
-    }
+    // Format details for confirmation
+    const name = attendance.user?.profile?.fullName || "Employee";
+    const date = dayjs(attendance.date).format("MMM DD, YYYY");
+    const totalTime = minutesToHoursAndMinutes(attendance.totalMinutes);
+    const scheduleTime = minutesToHoursAndMinutes(attendance.scheduleMinutes);
+
+    await confirm({
+      title: "Approve Attendance?",
+      // We leave message undefined to prioritize itemName/itemDescription layout
+      message: undefined,
+      itemName: `${name} - ${date}`,
+      itemDescription: `Total: ${totalTime} | Scheduled: ${scheduleTime}`,
+      icon: "question",
+      confirmButtonText: "Yes, Approve",
+      confirmButtonColor: "#10b981", // success color
+      input: "textarea",
+      inputPlaceholder: "Enter approval remarks...",
+      inputRequired: attendance.status === "rejected" ? true : false,
+      onConfirm: async (remarks) => {
+        const res = await approveAttendance({
+          variables: {
+            approveAttendanceInput: {
+              attendanceId: Number(attendance.id),
+              remarks,
+            },
+          },
+        });
+        if (res?.data) {
+          // Success handled by hook
+        }
+      },
+      successTitle: "Approved!",
+      successMessage: "Attendance approved successfully",
+    });
   };
 
   // REJECT HANDLER
   const handleReject = async (attendance: IAttendance) => {
-    try {
-      const res = await rejectAttendance({
-        variables: { attendanceId: Number(attendance.id) },
-      });
-      if (res?.data) {
-        showToast.success("Rejected!", "Attendance rejected successfully");
-      }
-    } catch (error: any) {
-      showToast.error("Error", error.message || "Failed to reject attendance");
-    }
+    // Format details for confirmation
+    const name = attendance.user?.profile?.fullName || "Employee";
+    const date = dayjs(attendance.date).format("MMM DD, YYYY");
+    const totalTime = minutesToHoursAndMinutes(attendance.totalMinutes);
+
+    await confirm({
+      title: "Reject Attendance?",
+      message: undefined,
+      itemName: `${name} - ${date}`,
+      itemDescription: `Total Worked: ${totalTime}. This action cannot be undone.`,
+      icon: "warning",
+      confirmButtonText: "Yes, Reject",
+      confirmButtonColor: "#ef4444", // error color
+      input: "textarea",
+      inputPlaceholder: "Enter reason for rejection...",
+      inputRequired: true,
+      onConfirm: async (remarks) => {
+        const res = await rejectAttendance({
+          variables: {
+            rejectAttendanceInput: {
+              attendanceId: Number(attendance.id),
+              remarks,
+            },
+          },
+        });
+        if (res?.data) {
+          // Success handled by hook
+        }
+      },
+      successTitle: "Rejected!",
+      successMessage: "Attendance rejected successfully",
+    });
   };
 
   // VIEW RECORD HANDLER
@@ -435,62 +358,6 @@ export default function AttendancePage() {
   };
 
   // ==================== HELPER FUNCTIONS ====================
-  // STATUS BADGE
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return (
-          <span className="badge badge-success gap-1">
-            <PiCheckCircle size={14} />
-            Approved
-          </span>
-        );
-      case "rejected":
-        return (
-          <span className="badge badge-error gap-1">
-            <PiXCircle size={14} />
-            Rejected
-          </span>
-        );
-      case "pending":
-        return (
-          <span className="badge badge-warning gap-1">
-            <PiWarning size={14} />
-            Pending
-          </span>
-        );
-      case "present":
-        return (
-          <span className="badge badge-success gap-1">
-            <PiCheckCircle size={14} />
-            Present
-          </span>
-        );
-      case "absent":
-        return (
-          <span className="badge badge-error gap-1">
-            <PiXCircle size={14} />
-            Absent
-          </span>
-        );
-      case "late":
-        return (
-          <span className="badge badge-warning gap-1">
-            <PiWarning size={14} />
-            Late
-          </span>
-        );
-      case "half_day":
-        return (
-          <span className="badge badge-info gap-1">
-            <PiMinus size={14} />
-            Half Day
-          </span>
-        );
-      default:
-        return <span className="badge badge-ghost">{status}</span>;
-    }
-  };
 
   // ==================== TABLE CONFIGURATION ====================
   // COLUMNS
@@ -521,18 +388,12 @@ export default function AttendancePage() {
     },
     {
       key: "4",
-      header: "Total",
+      header: "Total Worked",
       accessorKey: "customTotalMinutes",
       show: true,
     },
     {
       key: "5",
-      header: "Break",
-      accessorKey: "customBreakMinutes",
-      show: true,
-    },
-    {
-      key: "6",
       header: "Status",
       accessorKey: "customStatus",
       show: true,
@@ -578,16 +439,7 @@ export default function AttendancePage() {
       name: "Delete",
       type: "button" as const,
       Icon: PiTrash,
-      handler: (row: IAttendance) => {
-        setPopupOption({
-          open: true,
-          closeOnDocumentClick: true,
-          actionType: "delete",
-          form: "attendance",
-          deleteHandler: () => handleDelete(row),
-          title: "Delete Attendance",
-        });
-      },
+      handler: (row: IAttendance) => handleDelete(row),
       permissions: [Permissions.AttendanceDelete],
       disabledOn: [],
     },
@@ -601,8 +453,8 @@ export default function AttendancePage() {
         subtitle={`Track and manage employee attendance records`}
       />
 
-      {/* ATTENDANCE SUMMARY STATS */}
-      <AttendanceStats />
+      {/* ATTENDANCE OVERVIEW */}
+      <AttendanceOverview />
 
       {/* Attendance Table */}
       <CustomTable
@@ -624,13 +476,14 @@ export default function AttendancePage() {
           ),
           customEmployeeName: row.user?.profile?.fullName || "N/A",
           customDate: dayjs(row.date).format("MMM DD, YYYY"),
-          customStatus: getStatusBadge(row.status),
+          customStatus: <AttendanceStatusBadge status={row.status} />,
           customScheduleMinutes:
             minutesToHoursAndMinutes(row.scheduleMinutes) || "N/A",
-          customTotalMinutes:
-            minutesToHoursAndMinutes(row.totalMinutes) || "N/A",
-          customBreakMinutes:
-            minutesToHoursAndMinutes(row.breakMinutes) || "N/A",
+          customTotalMinutes: row.overtimeMinutes
+            ? `${minutesToHoursAndMinutes(row.totalMinutes)} (${minutesToHoursAndMinutes(row.overtimeMinutes)} overtime)`
+            : minutesToHoursAndMinutes(row.totalMinutes) || "N/A",
+          customType:
+            row.type.charAt(0).toUpperCase() + row.type.slice(1) || "N/A",
         }))}
         searchConfig={{
           searchable: false,
@@ -683,10 +536,6 @@ export default function AttendancePage() {
             />
           )}
         </CustomPopup>
-      )}
-
-      {popupOption.actionType === "delete" && (
-        <FormModal popupOption={popupOption} setPopupOption={setPopupOption} />
       )}
 
       {/* Attendance Record Modal */}

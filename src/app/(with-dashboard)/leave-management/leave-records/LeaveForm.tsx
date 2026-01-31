@@ -12,7 +12,13 @@ import LeaveTypeSelect from "@/components/input-fields/LeaveTypeSelect";
 import { useFormContext, useWatch } from "react-hook-form";
 import { ILeave, LeaveDuration } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CREATE_LEAVE, UPDATE_LEAVE, LEAVE_BALANCE } from "@/graphql/leave.api";
+import {
+  CREATE_LEAVE,
+  UPDATE_LEAVE,
+  LEAVE_BALANCE,
+  LEAVE_OVERVIEW,
+  GET_LEAVES,
+} from "@/graphql/leave.api";
 import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -20,8 +26,10 @@ import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "motion/react";
 import { PiCheck, PiClock } from "react-icons/pi";
 import { showToast } from "@/components/ui/CustomToast";
+import dayjsUTC from "dayjs/plugin/utc";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(dayjsUTC);
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface ILeaveFormProps {
@@ -176,8 +184,8 @@ function LeaveBalanceDisplay({
                   usagePercentage > 80
                     ? "bg-error/20 text-error border border-error/30"
                     : usagePercentage > 50
-                    ? "bg-warning/20 text-warning border border-warning/30"
-                    : "bg-success/20 text-success border border-success/30"
+                      ? "bg-warning/20 text-warning border border-warning/30"
+                      : "bg-success/20 text-success border border-success/30"
                 }`}
               >
                 {usagePercentage}% Used
@@ -273,8 +281,8 @@ function LeaveBalanceDisplay({
                     usagePercentage > 80
                       ? "bg-linear-to-r from-error to-error/70"
                       : usagePercentage > 50
-                      ? "bg-linear-to-r from-warning to-warning/70"
-                      : "bg-linear-to-r from-success to-success/70"
+                        ? "bg-linear-to-r from-warning to-warning/70"
+                        : "bg-linear-to-r from-success to-success/70"
                   }`}
                 />
               </div>
@@ -450,8 +458,20 @@ export default function LeaveForm({
   const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // ==================== GRAPHQL MUTATIONS ====================
-  const [createLeave] = useMutation(CREATE_LEAVE);
-  const [updateLeave] = useMutation(UPDATE_LEAVE);
+  const [createLeave] = useMutation(CREATE_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
+  });
+  const [updateLeave] = useMutation(UPDATE_LEAVE, {
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      { query: GET_LEAVES, variables: { query: {} } },
+      { query: LEAVE_OVERVIEW },
+    ],
+  });
 
   // ==================== HELPER FUNCTIONS ====================
   // UPLOAD ATTACHMENTS
@@ -468,7 +488,7 @@ export default function LeaveForm({
             Authorization: `Bearer ${token}`,
           },
           body: formData,
-        }
+        },
       );
 
       if (!response.ok) {
@@ -480,31 +500,6 @@ export default function LeaveForm({
     });
 
     return Promise.all(uploadPromises);
-  };
-
-  // CALCULATE TOTAL HOURS
-  const calculateTotalHours = (
-    startDate: string,
-    endDate: string | undefined,
-    duration: LeaveDuration
-  ): number => {
-    if (duration === LeaveDuration.HALF_DAY) {
-      return 4;
-    }
-
-    if (duration === LeaveDuration.SINGLE_DAY) {
-      return 8;
-    }
-
-    // MULTI_DAY - calculate days between dates
-    if (duration === LeaveDuration.MULTI_DAY && endDate) {
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
-      const days = end.diff(start, "day") + 1; // Include both start and end date
-      return days * 8;
-    }
-
-    return 8; // Default to single day
   };
 
   // ==================== FORM SUBMISSION ====================
@@ -521,18 +516,11 @@ export default function LeaveForm({
         }
       }
 
-      // CALCULATE TOTAL HOURS
-      const totalHours = calculateTotalHours(
-        data.startDate,
-        data.endDate,
-        data.leaveDuration
-      );
-
       // FORMAT DATES TO ISO 8601
-      const startDate = dayjs(data.startDate, "DD-MM-YYYY").toISOString();
+      const startDate = dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString();
       const endDate =
         data.endDate && data.leaveDuration === LeaveDuration.MULTI_DAY
-          ? dayjs(data.endDate, "DD-MM-YYYY").toISOString()
+          ? dayjs.utc(data.endDate, "DD-MM-YYYY").toISOString()
           : undefined;
 
       // PREPARE INPUT
@@ -543,7 +531,6 @@ export default function LeaveForm({
         leaveDuration: data.leaveDuration,
         startDate,
         endDate,
-        totalHours,
         attachments:
           attachmentPaths.length > 0
             ? JSON.stringify(attachmentPaths)
@@ -560,7 +547,7 @@ export default function LeaveForm({
         });
         showToast.success(
           "Created!",
-          "Leave request has been created successfully"
+          "Leave request has been created successfully",
         );
       } else {
         await updateLeave({
@@ -570,7 +557,7 @@ export default function LeaveForm({
         });
         showToast.success(
           "Updated!",
-          "Leave request has been updated successfully"
+          "Leave request has been updated successfully",
         );
       }
 
@@ -580,7 +567,7 @@ export default function LeaveForm({
       console.error("Error submitting leave:", error);
       showToast.error(
         "Error",
-        error.message || `Failed to ${actionType} leave request`
+        error.message || `Failed to ${actionType} leave request`,
       );
     } finally {
       setIsPending(false);
@@ -603,7 +590,11 @@ export default function LeaveForm({
 
   // ==================== RENDER ====================
   return (
-    <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
+    <CustomForm
+      submitHandler={handleSubmit}
+      defaultValues={defaultValues}
+      className={`flex flex-col gap-4`}
+    >
       <LeaveFormFields actionType={actionType} />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>

@@ -8,38 +8,15 @@ import React from "react";
 import CustomPopup from "../modal/CustomPopup";
 import CustomLoading from "../loader/CustomLoading";
 
-import type { Variants } from "motion/react";
 import SubscriptionPlanForm from "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm";
-import JobTypeForm from "@/app/(with-dashboard)/recruitment/job-types/JobTypesForm";
-import RecruitmentProcessForm from "@/app/(with-dashboard)/recruitment/recruitment-processes/RecruitmentProcessesForm";
-import OnboardingProcessForm from "@/app/(with-dashboard)/recruitment/onboarding-processes/OnboardingProcessesForm";
 import WorkSiteForm from "@/app/(with-dashboard)/administration/work-sites/WorkSitesForm";
 import DesignationForm from "@/app/(with-dashboard)/administration/designations/DesignationForm";
-import JobPlatformsForm from "@/app/(with-dashboard)/recruitment/job-platforms/JobPlatformsForm";
 import EmploymentStatusForm from "@/app/(with-dashboard)/administration/employment-status/EmploymentStatusForm";
 import LeaveTypesForm from "@/app/(with-dashboard)/administration/leave-types/LeaveTypesForm";
 import DepartmentsForm from "@/app/(with-dashboard)/administration/departments/DepartmentsForm";
 import AssetTypeForm from "@/app/(with-dashboard)/asset-management/asset-types/AssetTypesForm";
 import AssetsForm from "@/app/(with-dashboard)/asset-management/assets/AssetsForm";
 import ProjectsForm from "@/app/(with-dashboard)/projects/ProjectsForm";
-
-const popupVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 150,
-      damping: 15,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.9,
-    transition: { duration: 0.2, ease: "easeInOut" },
-  },
-};
 
 export default function FormModal({
   popupOption,
@@ -73,33 +50,6 @@ export default function FormModal({
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <SubscriptionPlanForm
-              handleClosePopup={handleClosePopup}
-              data={popupOption.data}
-            />
-          </React.Suspense>
-        );
-      } else if (popupOption?.form === "job_type") {
-        return (
-          <React.Suspense fallback={<CustomLoading />}>
-            <JobTypeForm
-              handleClosePopup={handleClosePopup}
-              data={popupOption.data}
-            />
-          </React.Suspense>
-        );
-      } else if (popupOption?.form === "recruitment_process") {
-        return (
-          <React.Suspense fallback={<CustomLoading />}>
-            <RecruitmentProcessForm
-              handleClosePopup={handleClosePopup}
-              data={popupOption.data}
-            />
-          </React.Suspense>
-        );
-      } else if (popupOption?.form === "onboarding_process") {
-        return (
-          <React.Suspense fallback={<CustomLoading />}>
-            <OnboardingProcessForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />
@@ -172,15 +122,6 @@ export default function FormModal({
         return (
           <React.Suspense fallback={<CustomLoading />}>
             <DepartmentsForm
-              handleClosePopup={handleClosePopup}
-              data={popupOption.data}
-            />
-          </React.Suspense>
-        );
-      } else if (popupOption?.form === "job_platforms") {
-        return (
-          <React.Suspense fallback={<CustomLoading />}>
-            <JobPlatformsForm
               handleClosePopup={handleClosePopup}
               data={popupOption.data}
             />

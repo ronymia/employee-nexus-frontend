@@ -28,7 +28,7 @@ export default function CustomFileUploader({
   accept = ".png,.jpg,.jpeg,.pdf",
   labelClassName = "",
   wrapperClassName = "",
-  multiple = false,
+  // multiple = false,
 }: ICustomFileUploaderProps) {
   const {
     control,

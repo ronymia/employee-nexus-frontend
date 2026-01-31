@@ -8,7 +8,6 @@ import CustomDateTimeInput from "@/components/form/input/CustomDateTimeInput";
 import { IAttendance } from "@/types/attendance.type";
 import { useMutation } from "@apollo/client/react";
 import {
-  CREATE_ATTENDANCE,
   UPDATE_ATTENDANCE,
   GET_ATTENDANCES,
   ATTENDANCE_REQUEST,
@@ -16,8 +15,9 @@ import {
 import moment from "moment";
 import { useState } from "react";
 import dayjs from "dayjs";
-import { WorkSiteSelect, ProjectSelect } from "@/components/input-fields";
 import useAppStore from "@/hooks/useAppStore";
+import EmployeeWorkSiteSelect from "@/components/input-fields/EmployeeWorkSiteSelect";
+import EmployeeProjectSelect from "@/components/input-fields/EmployeeProjectSelect";
 
 interface AttendanceFormProps {
   attendance?: IAttendance;
@@ -71,7 +71,7 @@ export default function AttendanceForm({
       if (punchOutTime) {
         const totalMinutes = moment(punchOutTime).diff(
           moment(punchInTime),
-          "minutes"
+          "minutes",
         );
         workHours = totalMinutes / 60;
         breakHours = 0; // Can be adjusted based on break tracking
@@ -155,8 +155,6 @@ export default function AttendanceForm({
     }
   };
 
-  console.log({ attendance });
-
   const defaultValues = {
     date: attendance?.date
       ? dayjs(attendance.date).format("DD-MM-YYYY")
@@ -185,6 +183,7 @@ function AttendanceFormFields({
 }: {
   actionType: "create" | "update";
 }) {
+  const user = useAppStore((state) => state.user);
   return (
     <div className="space-y-4">
       {/* Date Information */}
@@ -211,8 +210,20 @@ function AttendanceFormFields({
           Assignment Details
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ProjectSelect name="projectId" required={true} />
-          <WorkSiteSelect name="workSiteId" required={true} />
+          <EmployeeProjectSelect
+            name="projectId"
+            required={true}
+            query={{
+              userId: Number(user?.id),
+            }}
+          />
+          <EmployeeWorkSiteSelect
+            name="workSiteId"
+            required={true}
+            query={{
+              userId: Number(user?.id),
+            }}
+          />
         </div>
       </div>
 

@@ -52,9 +52,9 @@ export default function EmployeesPage() {
   });
 
   // ==================== HANDLER: EDIT EMPLOYEE ====================
-  const handleEdit = (row: IUser) => {
-    router.push(`/user-management/employees/${row.id}/update`);
-  };
+  // const handleEdit = (row: IUser) => {
+  //   router.push(`/user-management/employees/${row.id}/update`);
+  // };
 
   // ==================== HANDLER: DELETE EMPLOYEE ====================
   const handleDelete = async (row: IUser) => {
@@ -190,10 +190,7 @@ export default function EmployeesPage() {
             customUserProfile: (
               <UserProfileCell
                 name={row?.profile?.fullName || "N/A"}
-                designation={
-                  row?.employee?.designations?.at(0)?.designation?.name ||
-                  undefined
-                }
+                designation={row?.employee?.designation?.name || undefined}
                 imageUrl={row?.profile?.profilePicture || undefined}
               />
             ),
@@ -239,14 +236,14 @@ export default function EmployeesPage() {
                     .includes("full")
                     ? "badge-success"
                     : row?.employee?.employmentStatus?.name
-                        .toLowerCase()
-                        .includes("part")
-                    ? "badge-warning"
-                    : row?.employee?.employmentStatus?.name
-                        .toLowerCase()
-                        .includes("contract")
-                    ? "badge-info"
-                    : "badge-secondary"
+                          .toLowerCase()
+                          .includes("part")
+                      ? "badge-warning"
+                      : row?.employee?.employmentStatus?.name
+                            .toLowerCase()
+                            .includes("contract")
+                        ? "badge-info"
+                        : "badge-secondary"
                 }`}
               >
                 {row?.employee?.employmentStatus?.name}
