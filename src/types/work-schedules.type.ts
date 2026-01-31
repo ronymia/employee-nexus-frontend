@@ -29,3 +29,15 @@ export interface IWorkSchedule {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface IWorkScheduleArrayResponse {
+  workSchedules: {
+    data: IWorkSchedule[];
+  };
+}
+
+export interface IWorkScheduleResponse {
+  workSchedule: {
+    data: IWorkSchedule;
+  };
+}

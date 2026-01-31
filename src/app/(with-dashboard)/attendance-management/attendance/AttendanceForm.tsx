@@ -478,12 +478,6 @@ export default function AttendanceForm({
         // DD-MM-YYYY → UTC date at midnight
         const utcDate = dayjs.utc(formValues.date, "DD-MM-YYYY").toDate();
 
-        console.log({
-          date: formValues.date,
-          parseDate: utcDate,
-          iso: utcDate.toISOString(),
-        });
-
         await createAttendance({
           variables: {
             createAttendanceInput: {
@@ -509,7 +503,6 @@ export default function AttendanceForm({
 
       onClose();
     } catch (error) {
-      console.log("Error submitting attendance:", error);
       throw error;
     } finally {
       setIsPending(false);

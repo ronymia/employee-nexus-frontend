@@ -46,7 +46,7 @@ export default function BasicInfoFields({
         weekendDates.push({
           date: current.format("DD-MM-YYYY"),
           title: "Weekend (Can mark as overtime)",
-          className: "bg-blue-100 border-2 border-blue-400",
+          className: "bg-purple-100 border-2 border-purple-400 text-purple-500",
           disabled: false,
         });
       }
@@ -94,7 +94,7 @@ export default function BasicInfoFields({
                 date: dayjs(att.date).format("DD-MM-YYYY"),
                 title: `Attendance already exists: ${att.status}`,
                 className:
-                  "bg-red-200 border-2 border-red-600 text-black opacity-100",
+                  "bg-green-100 border-2 border-green-500 text-green-700 disabled:opacity-100",
               }),
             ) || []
           }
@@ -141,7 +141,7 @@ export default function BasicInfoFields({
                         dates.push({
                           date: current.format("DD-MM-YYYY"),
                           title: `Holiday: ${holiday.name} (Can mark as overtime)`,
-                          className: "bg-purple-100 border-2 border-purple-400",
+                          className: "bg-green-100 border-2 border-green-400",
                           disabled: false,
                         });
                         current = current.add(1, "day");

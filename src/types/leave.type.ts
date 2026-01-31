@@ -39,6 +39,17 @@ export interface ILeave {
   updatedAt: string;
 }
 
+export interface ILeaveResponse {
+  leaveById: {
+    data: ILeave;
+  };
+}
+export interface ILeaveArrayResponse {
+  leaves: {
+    data: ILeave[];
+  };
+}
+
 export interface ILeaveOverview {
   total: number;
   pending: number;
@@ -56,15 +67,19 @@ export interface ILeaveOverviewResponse {
   };
 }
 
-export interface ICreateLeaveInput {
+export interface ILeaveBalanceData {
   leaveTypeId: number;
-  leaveYear: number;
-  leaveDuration: LeaveDuration;
-  startDate: string;
-  endDate?: string;
-  totalHours: number;
-  attachments?: string;
-  notes?: string;
+  leaveTypeName: string;
+  year: number;
+  allocatedMinutes: number;
+  usedMinutes: number;
+  remainingMinutes: number;
+}
+
+export interface ILeaveBalanceResponse {
+  leaveBalance: {
+    data: ILeaveBalanceData;
+  };
 }
 
 export interface IUpdateLeaveInput {

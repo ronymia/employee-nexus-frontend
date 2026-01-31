@@ -1,7 +1,12 @@
 "use client";
 
 import { PiPlusCircle } from "react-icons/pi";
-import type { IWorkSchedule, TableActionType, TableColumnType } from "@/types";
+import type {
+  IWorkSchedule,
+  IWorkScheduleArrayResponse,
+  TableActionType,
+  TableColumnType,
+} from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Fragment, useMemo, useState } from "react";
 import CustomTable from "@/components/table/CustomTable";
@@ -30,11 +35,8 @@ export default function WorkSchedules() {
   const { popupOption, setPopupOption } = usePopupOption();
 
   // GET WORK SCHEDULES
-  const { data, loading } = useQuery<{
-    workSchedules: {
-      data: IWorkSchedule[];
-    };
-  }>(GET_WORK_SCHEDULES);
+  const { data, loading } =
+    useQuery<IWorkScheduleArrayResponse>(GET_WORK_SCHEDULES);
 
   // DELETE WORK SCHEDULE
   const [deleteWorkSchedule, deleteResult] = useMutation(DELETE_WORK_SCHEDULE, {
@@ -61,7 +63,7 @@ export default function WorkSchedules() {
     } catch (error: any) {
       showToast.error(
         "Error",
-        error.message || "Failed to delete work schedule"
+        error.message || "Failed to delete work schedule",
       );
     }
   };

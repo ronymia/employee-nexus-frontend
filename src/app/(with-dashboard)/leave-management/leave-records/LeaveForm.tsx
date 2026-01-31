@@ -10,7 +10,14 @@ import CustomFileUploader from "@/components/form/input/CustomFileUploader";
 import EmployeeSelect from "@/components/input-fields/EmployeeSelect";
 import LeaveTypeSelect from "@/components/input-fields/LeaveTypeSelect";
 import { useFormContext, useWatch } from "react-hook-form";
-import { ILeave, LeaveDuration } from "@/types";
+import {
+  ILeave,
+  ILeaveBalanceData,
+  ILeaveBalanceResponse,
+  IWorkSchedule,
+  LeaveDuration,
+} from "@/types";
+import { minutesToHoursAndMinutes } from "@/utils/time.utils";
 import { useMutation, useQuery } from "@apollo/client/react";
 import {
   CREATE_LEAVE,
@@ -24,12 +31,21 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "motion/react";
-import { PiCheck, PiClock } from "react-icons/pi";
+import {
+  PiClock,
+  PiCalendarBold,
+  PiChartPieSliceBold,
+  PiHandPalmBold,
+} from "react-icons/pi";
 import { showToast } from "@/components/ui/CustomToast";
 import dayjsUTC from "dayjs/plugin/utc";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { GET_EMPLOYEE_CALENDAR } from "@/graphql/employee-calendar.api";
+import { GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE } from "@/graphql/employee-work-schedule.api";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(dayjsUTC);
+dayjs.extend(isSameOrBefore);
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface ILeaveFormProps {
@@ -37,15 +53,6 @@ interface ILeaveFormProps {
   actionType: "create" | "update";
   onClose: () => void;
   refetch?: () => void;
-}
-
-interface ILeaveBalanceData {
-  leaveTypeId: number;
-  leaveTypeName: string;
-  year: number;
-  allocatedHours: number;
-  usedHours: number;
-  remainingHours: number;
 }
 
 // ==================== SUB-COMPONENTS ====================
@@ -106,6 +113,102 @@ function BasicInfoSection({
   );
 }
 
+// RADIAL PROGRESS COMPONENT (Refined)
+function RadialProgress({
+  percentage,
+  size = 140,
+  strokeWidth = 12,
+}: {
+  percentage: number;
+  size?: number;
+  strokeWidth?: number;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  const colorClass =
+    percentage > 80
+      ? "text-error"
+      : percentage > 50
+        ? "text-warning"
+        : "text-success";
+
+  return (
+    <div className="relative flex items-center justify-center p-2">
+      <svg
+        width={size}
+        height={size}
+        className="transform -rotate-90 relative z-10"
+      >
+        <defs>
+          <linearGradient
+            id="progressGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop
+              offset="0%"
+              className="stop-color-current"
+              style={{ stopOpacity: 1 }}
+            />
+            <stop
+              offset="100%"
+              className="stop-color-current"
+              style={{ stopOpacity: 0.8 }}
+            />
+          </linearGradient>
+        </defs>
+
+        {/* Main Background Circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          className="text-base-content/5"
+        />
+
+        {/* Progress Circle */}
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="url(#progressGradient)"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 2, ease: [0.34, 1.56, 0.64, 1] }}
+          strokeLinecap="round"
+          className={colorClass}
+        />
+      </svg>
+
+      <div className="absolute flex flex-col items-center justify-center z-20">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="flex flex-col items-center"
+        >
+          <span className="text-3xl font-black tracking-tighter tabular-nums leading-none">
+            {percentage}%
+          </span>
+          <span className="text-[9px] uppercase tracking-[0.2em] opacity-40 font-black mt-1">
+            Utilization
+          </span>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
 // LEAVE BALANCE DISPLAY
 interface ILeaveBalanceDisplayProps {
   shouldFetchBalance: boolean;
@@ -122,7 +225,9 @@ function LeaveBalanceDisplay({
 
   // CALCULATE USAGE PERCENTAGE
   const usagePercentage = leaveBalance
-    ? Math.round((leaveBalance.usedHours / leaveBalance.allocatedHours) * 100)
+    ? Math.round(
+        (leaveBalance.usedMinutes / leaveBalance.allocatedMinutes) * 100,
+      )
     : 0;
 
   return (
@@ -131,162 +236,116 @@ function LeaveBalanceDisplay({
         initial={{ opacity: 0, height: 0 }}
         animate={{ opacity: 1, height: "auto" }}
         exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       >
         {balanceLoading ? (
-          <div className="border border-info/20 rounded-xl p-6 bg-linear-to-br from-info/5 to-transparent">
-            <div className="flex items-center gap-3">
-              <div className="loading loading-spinner loading-md text-info"></div>
-              <div>
-                <p className="text-sm font-semibold text-base-content">
-                  Fetching Leave Balance
-                </p>
-                <p className="text-xs text-base-content/60 mt-0.5">
-                  Please wait...
-                </p>
+          <div className="relative overflow-hidden border border-base-content/5 rounded-3xl p-6 bg-base-100 shadow-lg">
+            <div className="flex items-center gap-6">
+              <div className="relative shrink-0">
+                <div className="w-16 h-16 rounded-full border-4 border-base-content/5 border-t-primary animate-spin" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-base-content/5 rounded-lg animate-pulse" />
+                <div className="h-4 w-32 bg-base-content/5 rounded-md animate-pulse" />
               </div>
             </div>
           </div>
         ) : leaveBalance ? (
           <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="border border-success/30 rounded-xl p-6 bg-linear-to-br from-success/10 via-success/5 to-transparent shadow-lg shadow-success/10"
+            initial={{ scale: 0.98, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="group relative overflow-hidden border border-base-content/5 rounded-3xl p-6 md:p-8 bg-base-100 shadow-xl"
           >
-            {/* HEADER */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="flex items-center justify-between mb-6"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
-                  <PiCheck size={24} className="text-success" />
+            <div className="relative flex flex-col md:flex-row items-center gap-8 lg:gap-12">
+              {/* LEFT COLUMN: VISUAL INDICATOR */}
+              <div className="flex flex-col items-center justify-center shrink-0">
+                <div className="relative p-1.5 rounded-3xl bg-base-200 border border-base-content/5 shadow-inner transition-transform duration-500">
+                  <RadialProgress
+                    percentage={usagePercentage}
+                    size={120}
+                    strokeWidth={10}
+                  />
                 </div>
-                <div>
-                  <h4 className="text-lg font-bold text-success">
-                    Leave Balance
-                  </h4>
-                  <p className="text-xs text-base-content/60">
-                    {leaveBalance.leaveTypeName} - {leaveBalance.year}
-                  </p>
-                </div>
-              </div>
 
-              {/* USAGE BADGE */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, type: "spring" }}
-                className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  usagePercentage > 80
-                    ? "bg-error/20 text-error border border-error/30"
-                    : usagePercentage > 50
-                      ? "bg-warning/20 text-warning border border-warning/30"
-                      : "bg-success/20 text-success border border-success/30"
-                }`}
-              >
-                {usagePercentage}% Used
-              </motion.div>
-            </motion.div>
-
-            {/* STATS GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {/* ALLOCATED */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-base-100/70 backdrop-blur-sm rounded-lg p-4 border border-success/20"
-              >
-                <p className="text-xs text-base-content/60 mb-2 font-medium uppercase tracking-wide">
-                  Allocated
-                </p>
-                <motion.p
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.3, type: "spring" }}
-                  className="text-3xl font-bold text-success mb-1"
-                >
-                  {leaveBalance.allocatedHours}h
-                </motion.p>
-                <p className="text-xs text-base-content/50">Total available</p>
-              </motion.div>
-
-              {/* USED */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-base-100/70 backdrop-blur-sm rounded-lg p-4 border border-warning/20"
-              >
-                <p className="text-xs text-base-content/60 mb-2 font-medium uppercase tracking-wide">
-                  Used
-                </p>
-                <motion.p
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.4, type: "spring" }}
-                  className="text-3xl font-bold text-warning mb-1"
-                >
-                  {leaveBalance.usedHours}h
-                </motion.p>
-                <p className="text-xs text-base-content/50">Already taken</p>
-              </motion.div>
-
-              {/* REMAINING */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-base-100/70 backdrop-blur-sm rounded-lg p-4 border border-info/20"
-              >
-                <p className="text-xs text-base-content/60 mb-2 font-medium uppercase tracking-wide">
-                  Remaining
-                </p>
-                <motion.p
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5, type: "spring" }}
-                  className="text-3xl font-bold text-info mb-1"
-                >
-                  {leaveBalance.remainingHours}h
-                </motion.p>
-                <p className="text-xs text-base-content/50">Available to use</p>
-              </motion.div>
-            </div>
-
-            {/* PROGRESS BAR */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-base-content/70">
-                  Usage Progress
-                </span>
-                <span className="text-xs font-bold text-base-content">
-                  {leaveBalance.usedHours} / {leaveBalance.allocatedHours} hours
-                </span>
-              </div>
-              <div className="w-full bg-base-200 rounded-full h-3 overflow-hidden">
+                {/* DYNAMIC STATUS BADGE */}
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${usagePercentage}%` }}
-                  transition={{ delay: 0.7, duration: 1, ease: "easeOut" }}
-                  className={`h-full rounded-full ${
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className={`mt-3 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm ${
                     usagePercentage > 80
-                      ? "bg-linear-to-r from-error to-error/70"
+                      ? "bg-error/10 text-error border-error/20"
                       : usagePercentage > 50
-                        ? "bg-linear-to-r from-warning to-warning/70"
-                        : "bg-linear-to-r from-success to-success/70"
+                        ? "bg-warning/10 text-warning border-warning/20"
+                        : "bg-success/10 text-success border-success/20"
                   }`}
-                />
+                >
+                  {usagePercentage > 80
+                    ? "Full"
+                    : usagePercentage > 50
+                      ? "Low"
+                      : "Optimal"}
+                </motion.div>
               </div>
-            </motion.div>
+
+              {/* RIGHT COLUMN: DATA BENTO BOX */}
+              <div className="flex-1 flex flex-col justify-center gap-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-base-200 border border-base-content/5 mb-2 transition-colors">
+                      <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                      <span className="text-[9px] font-bold text-base-content/40 uppercase tracking-[0.15em]">
+                        {leaveBalance.year} QUOTA
+                      </span>
+                    </div>
+                    <h4 className="text-2xl font-black tracking-tighter text-base-content leading-none">
+                      {leaveBalance.leaveTypeName}
+                    </h4>
+                  </div>
+                </div>
+
+                {/* BENTO STAT TILES */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  {/* ALLOCATED */}
+                  <div className="sm:col-span-1 group/tile relative p-4 rounded-2xl bg-base-200/50 border border-base-content/5 hover:bg-base-200 transition-all duration-300 shadow-sm text-base-content">
+                    <span className="text-[9px] font-black text-base-content/20 uppercase tracking-widest block mb-1">
+                      Total
+                    </span>
+                    <p className="text-lg font-black tracking-tight tabular-nums">
+                      {minutesToHoursAndMinutes(leaveBalance.allocatedMinutes)}
+                    </p>
+                  </div>
+
+                  {/* USED */}
+                  <div className="sm:col-span-1 group/tile p-4 rounded-2xl bg-base-200/50 border border-base-content/5 hover:bg-base-200 transition-all duration-300 shadow-sm text-base-content">
+                    <span className="text-[9px] font-black text-base-content/20 uppercase tracking-widest block mb-1">
+                      Used
+                    </span>
+                    <p className="text-lg font-black tracking-tight tabular-nums font-mono">
+                      {minutesToHoursAndMinutes(leaveBalance.usedMinutes)}
+                    </p>
+                  </div>
+
+                  {/* REMAINING */}
+                  <div className="sm:col-span-2 group/tile relative overflow-hidden p-4 rounded-2xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all duration-300 shadow-sm">
+                    <div className="flex items-center justify-between gap-4 relative z-10">
+                      <div>
+                        <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] block mb-0.5">
+                          Available
+                        </span>
+                        <p className="text-3xl font-black tracking-tighter text-primary tabular-nums font-mono leading-none">
+                          {minutesToHoursAndMinutes(
+                            leaveBalance.remainingMinutes,
+                          )}
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover/tile:scale-110 transition-all">
+                        <PiHandPalmBold size={20} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         ) : null}
       </motion.div>
@@ -376,12 +435,44 @@ function SelectionPrompt() {
   );
 }
 
+// ==================== ANIMATIONS ====================
+// Loader component for shimmer effect
+function ShimmerLoader() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="relative w-full h-full overflow-hidden rounded-xl bg-base-200"
+    >
+      <motion.div
+        className="absolute top-0 left-0 h-full w-full bg-linear-to-r from-transparent via-white/10 to-transparent"
+        animate={{
+          x: ["-100%", "200%"],
+        }}
+        transition={{
+          duration: 1.5,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "loop",
+        }}
+      />
+    </motion.div>
+  );
+}
+
 // DATE SECTION
 interface IDateSectionProps {
   leaveDuration: LeaveDuration;
+  specialDates: {
+    title: string;
+    className: string;
+    date: string;
+    disabled: boolean;
+  }[];
 }
 
-function DateSection({ leaveDuration }: IDateSectionProps) {
+function DateSection({ leaveDuration, specialDates }: IDateSectionProps) {
   return (
     <div className="border border-primary/20 rounded-lg p-4">
       <h4 className="text-base font-semibold mb-3 text-primary">
@@ -394,6 +485,7 @@ function DateSection({ leaveDuration }: IDateSectionProps) {
           label="Start Date"
           placeholder="Select Start Date"
           required={true}
+          specialDates={specialDates}
         />
         {leaveDuration === LeaveDuration.MULTI_DAY && (
           <CustomDatePicker
@@ -402,6 +494,7 @@ function DateSection({ leaveDuration }: IDateSectionProps) {
             label="End Date"
             placeholder="Select End Date"
             required={true}
+            specialDates={specialDates}
           />
         )}
       </div>
@@ -595,14 +688,20 @@ export default function LeaveForm({
       defaultValues={defaultValues}
       className={`flex flex-col gap-4`}
     >
-      <LeaveFormFields actionType={actionType} />
+      <LeaveFormFields actionType={actionType} leave={leave} />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
 
 // ==================== FORM FIELDS COMPONENT ====================
-function LeaveFormFields({ actionType }: { actionType: "create" | "update" }) {
+function LeaveFormFields({
+  actionType,
+  leave,
+}: {
+  actionType: "create" | "update";
+  leave?: ILeave;
+}) {
   // ==================== FORM CONTEXT ====================
   const { control, watch } = useFormContext();
 
@@ -621,20 +720,136 @@ function LeaveFormFields({ actionType }: { actionType: "create" | "update" }) {
   const shouldFetchBalance =
     userId && leaveTypeId && leaveYear && actionType === "create";
 
-  const { data: balanceData, loading: balanceLoading } = useQuery<{
-    leaveBalance: {
-      data: ILeaveBalanceData;
-    };
-  }>(LEAVE_BALANCE, {
-    variables: {
-      leaveTypeId: Number(leaveTypeId),
-      userId: Number(userId),
-      year: Number(leaveYear),
-    },
-    skip: !shouldFetchBalance,
-  });
+  const { data: balanceData, loading: balanceLoading } =
+    useQuery<ILeaveBalanceResponse>(LEAVE_BALANCE, {
+      variables: {
+        leaveTypeId: Number(leaveTypeId),
+        userId: Number(userId),
+        year: Number(leaveYear),
+      },
+      skip: !shouldFetchBalance,
+    });
 
   const leaveBalance = balanceData?.leaveBalance?.data;
+
+  // ==================== CALENDAR DATA INTERFACE ====================
+  interface IEmployeeCalendarData {
+    employeeCalendar: {
+      data: {
+        attendances: {
+          date: string;
+          status: string;
+        }[];
+        holidays: {
+          startDate: string;
+          name: string;
+        }[];
+        leaves: {
+          id: number;
+          startDate: string;
+          endDate?: string;
+          status: string;
+        }[];
+      };
+    };
+  }
+
+  // ==================== CALENDAR QUERY ====================
+  const { data: calendarData } = useQuery<IEmployeeCalendarData>(
+    GET_EMPLOYEE_CALENDAR,
+    {
+      variables: {
+        query: {
+          userId: Number(userId),
+          year: Number(leaveYear),
+        },
+      },
+      skip: !userId || !leaveYear,
+    },
+  );
+
+  // ==================== WORK SCHEDULE QUERY ====================
+  const { data: scheduleData } = useQuery<{
+    getActiveWorkSchedule: {
+      data: {
+        workSchedule: IWorkSchedule;
+      };
+    };
+  }>(GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE, {
+    variables: { userId: Number(userId) },
+    skip: !userId,
+  });
+
+  const workSchedule = scheduleData?.getActiveWorkSchedule?.data?.workSchedule;
+
+  // PROCESS CALENDAR DATA INTO SPECIAL DATES
+  const getWeekendDates = () => {
+    if (!workSchedule?.schedules || !leaveYear) return [];
+
+    const weekendDays = workSchedule.schedules
+      .filter((schedule: any) => schedule.isWeekend)
+      .map((schedule: any) => schedule.dayOfWeek);
+
+    if (weekendDays.length === 0) return [];
+
+    const startOfYear = dayjs().year(Number(leaveYear)).startOf("year");
+    const endOfYear = dayjs().year(Number(leaveYear)).endOf("year");
+    const weekendDates = [];
+
+    let current = startOfYear;
+    while (current.isBefore(endOfYear) || current.isSame(endOfYear, "day")) {
+      if (weekendDays.includes(current.day())) {
+        weekendDates.push({
+          date: current.format("DD-MM-YYYY"),
+          title: "Weekend",
+          className: "bg-purple-100 text-purple-500 border-2 border-purple-500",
+          disabled: false,
+        });
+      }
+      current = current.add(1, "day");
+    }
+
+    return weekendDates;
+  };
+
+  const specialDates = [
+    ...getWeekendDates(),
+    ...(calendarData?.employeeCalendar?.data?.attendances?.map((att: any) => ({
+      date: dayjs(att.date).format("DD-MM-YYYY"),
+      title: `Attendance: ${att.status}`,
+      className: "bg-green-100 text-green-500 border-2 border-green-500",
+      disabled: true,
+    })) || []),
+    ...(calendarData?.employeeCalendar?.data?.holidays?.map((hol: any) => ({
+      date: dayjs(hol.startDate).format("DD-MM-YYYY"),
+      title: `Holiday: ${hol.name}`,
+      className: "bg-purple-100 text-purple-500 border-2 border-purple-500",
+      disabled: true,
+    })) || []),
+    ...(calendarData?.employeeCalendar?.data?.leaves?.flatMap((l: any) => {
+      const dates = [];
+      let current = dayjs(l.startDate);
+      const end = l.endDate ? dayjs(l.endDate) : current;
+
+      while (current.isSameOrBefore(end, "day")) {
+        // ONLY DISABLE IF IT'S NOT THE CURRENT LEAVE BEING UPDATED
+        if (leave?.id && Number(leave.id) === Number(l.id)) {
+          // skip
+        } else {
+          dates.push({
+            date: current.format("DD-MM-YYYY"),
+            title: `Existing Leave: ${l.status}`,
+            className:
+              "bg-red-500/10 text-red-500 border-2 border-red-500 font-bold",
+            disabled: true,
+          });
+        }
+        current = current.add(1, "day");
+      }
+      return dates;
+    }) || []),
+  ];
+
   const showRestOfForm =
     actionType === "update" || (shouldFetchBalance && !balanceLoading);
 
@@ -679,7 +894,10 @@ function LeaveFormFields({ actionType }: { actionType: "create" | "update" }) {
           className="space-y-4"
         >
           {/* DATE SECTION */}
-          <DateSection leaveDuration={leaveDuration} />
+          <DateSection
+            leaveDuration={leaveDuration}
+            specialDates={specialDates}
+          />
 
           {/* ATTACHMENTS */}
           <AttachmentsSection />

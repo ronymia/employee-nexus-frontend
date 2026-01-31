@@ -335,16 +335,22 @@ export default function CustomDatePicker({
             disableAfterDate &&
             day.isAfter(dayjs(disableAfterDate, formatDate));
 
+          // MATCH SPECIAL DATE
+          const matchedSpecialDate = specialDates?.find((specialDate) =>
+            day.isSame(dayjs(specialDate.date, formatDate), "day"),
+          );
+
           // DISABLE DATES
           const isDisabled =
             disabledDates?.some((disabledDate) =>
               day.isSame(dayjs(disabledDate.date, formatDate), "day"),
             ) ||
-            specialDates?.some(
-              (specialDate) =>
-                !!specialDate.disabled &&
-                day.isSame(dayjs(specialDate.date, formatDate), "day"),
-            );
+            (matchedSpecialDate?.disabled ?? false);
+
+          // SHOULD APPLY OPACITY (Only for non-special disabled dates)
+          const shouldApplyOpacity =
+            (isDisabled || !!isDisabledBefore || !!isDisabledAfter) &&
+            !matchedSpecialDate;
 
           // BUTTON CLASS
           let buttonClass = "w-10 h-10 rounded-md ";
@@ -392,9 +398,11 @@ export default function CustomDatePicker({
                 // CLOSE CALENDAR
                 setCalendarVisible(false);
               }}
-              className={`disabled:cursor-not-allowed disabled:border disabled:border-solid disabled:border-gray disabled:opacity-20 ${
-                small ? "h-7 w-7" : "md:h-10 md:w-10 h-7 w-7"
-              }
+              className={`disabled:cursor-not-allowed ${
+                shouldApplyOpacity
+                  ? "disabled:border disabled:border-solid disabled:border-gray disabled:opacity-20"
+                  : ""
+              } ${small ? "h-7 w-7" : "md:h-10 md:w-10 h-7 w-7"}
                   ${
                     disabledDates?.find(
                       (d) =>
