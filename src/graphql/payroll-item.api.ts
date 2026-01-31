@@ -28,30 +28,22 @@ export const GET_PAYROLL_ITEMS = gql`
             employeeId
             nidNumber
             joiningDate
-            salaryPerMonth
-            workingDaysPerWeek
-            workingHoursPerWeek
-            designationId
             designation {
               id
               name
             }
-            employmentStatusId
             employmentStatus {
               id
               name
             }
-            departmentId
             department {
               id
               name
             }
-            workSiteId
             workSite {
               id
               name
             }
-            workScheduleId
             workSchedule {
               id
               name
@@ -81,22 +73,22 @@ export const GET_PAYROLL_ITEMS = gql`
             website
           }
         }
-        basicSalary
-        grossPay
-        totalDeductions
-        netPay
-        workingDays
-        presentDays
-        absentDays
-        leaveDays
-        overtimeHours
-        status
-        paymentMethod
-        bankAccount
-        transactionRef
-        paidAt
-        notes
-        components {
+        # basicSalary
+        # grossPay
+        # totalDeductions
+        # netPay
+        # workingDays
+        # presentDays
+        # absentDays
+        # leaveDays
+        # overtimeHours
+        # status
+        # paymentMethod
+        # bankAccount
+        # transactionRef
+        # paidAt
+        # notes
+        payrollComponents {
           id
           payrollItemId
           componentId

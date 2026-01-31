@@ -53,24 +53,15 @@ export interface IPayrollCycle {
   updatedAt: string;
 }
 
-export interface ICreatePayrollCycleInput {
-  name: string;
-  frequency: PayrollFrequency;
-  periodStart: string;
-  periodEnd: string;
-  paymentDate: string;
-  notes?: string;
-  businessId?: number;
+export interface IPayrollCycleArrayResponse {
+  payrollCycles: {
+    data: IPayrollCycle[];
+  };
 }
-
-export interface IUpdatePayrollCycleInput {
-  name?: string;
-  frequency?: PayrollFrequency;
-  periodStart?: string;
-  periodEnd?: string;
-  paymentDate?: string;
-  status?: PayrollCycleStatus;
-  notes?: string;
+export interface IPayrollCycleResponse {
+  payrollCycleById: {
+    data: IPayrollCycle;
+  };
 }
 
 // Payroll Item

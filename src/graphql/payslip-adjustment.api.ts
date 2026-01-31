@@ -126,6 +126,7 @@ export const REJECT_PAYSLIP_ADJUSTMENT = gql`
         id
         status
         reviewedBy
+        appliedMonth
         reviewedByUser {
           id
           email
@@ -166,6 +167,8 @@ export const GET_PAYSLIP_ADJUSTMENTS = gql`
         value
         status
         requestedBy
+        appliedMonth
+        notes
         requestedByUser {
           id
           email
@@ -216,6 +219,7 @@ export const GET_PAYSLIP_ADJUSTMENT_BY_ID = gql`
         remarks
         value
         status
+        appliedMonth
         requestedBy
         requestedByUser {
           id

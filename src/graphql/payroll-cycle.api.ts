@@ -57,31 +57,31 @@ export const GET_PAYROLL_CYCLE_BY_ID = gql`
         processedAt
         notes
         businessId
-        payrollItems {
-          id
-          userId
-          user {
-            id
-            email
-            profile {
-              fullName
-            }
-          }
-          basicSalary
-          grossPay
-          totalDeductions
-          netPay
-          status
-          components {
-            # componentItems
-            amount
-            calculationBase
-            notes
-          }
-          adjustments {
-            type
-          }
-        }
+        # payrollItems {
+        #   id
+        #   userId
+        #   user {
+        #     id
+        #     email
+        #     profile {
+        #       fullName
+        #     }
+        #   }
+        #   basicSalary
+        #   grossPay
+        #   totalDeductions
+        #   netPay
+        #   status
+        #   components {
+        #     # componentItems
+        #     amount
+        #     calculationBase
+        #     notes
+        #   }
+        #   adjustments {
+        #     type
+        #   }
+        # }
         createdAt
         updatedAt
       }

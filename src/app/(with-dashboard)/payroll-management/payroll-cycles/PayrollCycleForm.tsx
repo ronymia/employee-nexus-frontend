@@ -12,13 +12,15 @@ import {
   CREATE_PAYROLL_CYCLE,
   UPDATE_PAYROLL_CYCLE,
 } from "@/graphql/payroll-cycle.api";
-import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
+import { IPayrollCycleFormData, payrollCycleSchema } from "@/schemas";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
-interface PayrollCycleFormProps {
+interface IPayrollCycleFormProps {
   cycle?: IPayrollCycle;
   actionType: "create" | "update";
   onClose: () => void;
@@ -30,19 +32,19 @@ export default function PayrollCycleForm({
   actionType,
   onClose,
   refetch,
-}: PayrollCycleFormProps) {
-  const [isPending, setIsPending] = useState(false);
+}: IPayrollCycleFormProps) {
+  const [createCycle, createResult] = useMutation(CREATE_PAYROLL_CYCLE);
+  const [updateCycle, updateResult] = useMutation(UPDATE_PAYROLL_CYCLE);
 
-  const [createCycle] = useMutation(CREATE_PAYROLL_CYCLE);
-  const [updateCycle] = useMutation(UPDATE_PAYROLL_CYCLE);
-
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: IPayrollCycleFormData) => {
     try {
-      setIsPending(true);
-
-      const periodStart = dayjs(data.periodStart, "DD-MM-YYYY").toISOString();
-      const periodEnd = dayjs(data.periodEnd, "DD-MM-YYYY").toISOString();
-      const paymentDate = dayjs(data.paymentDate, "DD-MM-YYYY").toISOString();
+      const periodStart = dayjs
+        .utc(data.periodStart, "DD-MM-YYYY")
+        .toISOString();
+      const periodEnd = dayjs.utc(data.periodEnd, "DD-MM-YYYY").toISOString();
+      const paymentDate = dayjs
+        .utc(data.paymentDate, "DD-MM-YYYY")
+        .toISOString();
 
       const input = {
         name: data.name,
@@ -71,9 +73,7 @@ export default function PayrollCycleForm({
       refetch?.();
       onClose();
     } catch (error) {
-      console.error("Error submitting cycle:", error);
-    } finally {
-      setIsPending(false);
+      throw error;
     }
   };
 
@@ -93,9 +93,17 @@ export default function PayrollCycleForm({
   };
 
   return (
-    <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
+    <CustomForm
+      submitHandler={handleSubmit}
+      defaultValues={defaultValues}
+      resolver={payrollCycleSchema}
+      className={`flex flex-col gap-4`}
+    >
       <PayrollCycleFormFields />
-      <FormActionButton isPending={isPending} cancelHandler={onClose} />
+      <FormActionButton
+        isPending={createResult.loading || updateResult.loading}
+        cancelHandler={onClose}
+      />
     </CustomForm>
   );
 }

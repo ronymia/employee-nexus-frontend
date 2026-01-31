@@ -16,3 +16,4 @@ export * from "./asset-type.schema";
 export * from "./asset.schema";
 export * from "./project.schema";
 export * from "./employee.schema";
+export * from "./payrollCycle.schema";

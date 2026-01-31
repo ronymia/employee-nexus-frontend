@@ -160,6 +160,7 @@ export default function EmployeePayslipAdjustment({
         }),
       permissions: [Permissions.PayrollAdjustmentUpdate],
       disabledOn: [
+        { accessorKey: "status", value: "APPLIED" },
         { accessorKey: "status", value: "APPROVED" },
         { accessorKey: "status", value: "REJECTED" },
       ],
@@ -171,7 +172,8 @@ export default function EmployeePayslipAdjustment({
       handler: handleApprove,
       permissions: [Permissions.PayrollAdjustmentApprove],
       disabledOn: [
-        { accessorKey: "status", value: "APPROVED" },
+        { accessorKey: "status", value: "APPLIED" },
+        // { accessorKey: "status", value: "APPROVED" },
         { accessorKey: "status", value: "REJECTED" },
       ],
     },
@@ -182,8 +184,9 @@ export default function EmployeePayslipAdjustment({
       handler: handleReject,
       permissions: [Permissions.PayrollAdjustmentApprove],
       disabledOn: [
+        { accessorKey: "status", value: "APPLIED" },
         { accessorKey: "status", value: "APPROVED" },
-        { accessorKey: "status", value: "REJECTED" },
+        // { accessorKey: "status", value: "REJECTED" },
       ],
     },
   ];

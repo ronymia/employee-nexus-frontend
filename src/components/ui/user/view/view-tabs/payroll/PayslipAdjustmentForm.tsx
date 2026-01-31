@@ -7,7 +7,10 @@ import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
-import { payslipAdjustmentSchema } from "@/schemas/payslip-adjustment.schema";
+import {
+  IPayslipAdjustmentFormData,
+  payslipAdjustmentSchema,
+} from "@/schemas/payslip-adjustment.schema";
 import {
   CREATE_PAYSLIP_ADJUSTMENT,
   UPDATE_PAYSLIP_ADJUSTMENT,
@@ -71,9 +74,7 @@ function FormFields({
           label="Applied Month"
           dataAuto="adjustment-applied-month"
           placeholder="Select month"
-          formatDate="MM-YYYY"
-          pick="month"
-          required={false}
+          required={true}
         />
       </div>
 
@@ -160,7 +161,7 @@ export default function PayslipAdjustmentForm({
   const activeComponents = componentsData?.payrollComponents?.data || [];
 
   // ==================== HANDLERS ====================
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: IPayslipAdjustmentFormData) => {
     try {
       const formattedData = {
         ...formData,
@@ -168,7 +169,7 @@ export default function PayslipAdjustmentForm({
         payrollComponentId: Number(formData.payrollComponentId),
         value: Number(formData.value),
         appliedMonth: formData.appliedMonth
-          ? dayjs(formData.appliedMonth, "DD-MM-YYYY").format("YYYY-MM-DD")
+          ? dayjs.utc(formData.appliedMonth, "DD-MM-YYYY").toISOString()
           : null,
       };
 
@@ -195,14 +196,14 @@ export default function PayslipAdjustmentForm({
 
   const defaultValues = {
     payrollComponentId: initialData?.payrollComponentId || "",
-    value: initialData?.value || 0,
+    value: String(initialData?.value) || 0,
     remarks: initialData?.remarks || "",
     appliedMonth: initialData?.appliedMonth
       ? dayjs(initialData.appliedMonth).format("DD-MM-YYYY")
       : "",
     notes: initialData?.notes || "",
   };
-
+  console.log({ defaultValues });
   // ==================== RENDER ====================
   if (componentsLoading)
     return (

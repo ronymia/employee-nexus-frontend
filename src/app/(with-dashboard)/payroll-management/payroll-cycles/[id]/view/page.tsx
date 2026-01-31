@@ -10,6 +10,7 @@ import {
   IPayrollItem,
   IPayrollCycle,
   PayrollItemStatus,
+  IPayrollCycleResponse,
 } from "@/types";
 import {
   PiPlusCircle,
@@ -56,11 +57,7 @@ export default function PayrollCycleDetailPage() {
     data: cycleData,
     loading: cycleLoading,
     refetch: refetchCycle,
-  } = useQuery<{
-    payrollCycleById: {
-      data: IPayrollCycle;
-    };
-  }>(GET_PAYROLL_CYCLE_BY_ID, {
+  } = useQuery<IPayrollCycleResponse>(GET_PAYROLL_CYCLE_BY_ID, {
     variables: { id: Number(cycleId) },
   });
 
