@@ -5,7 +5,7 @@ import FormActionButton from "@/components/form/FormActionButton";
 import CustomInputField from "@/components/form/input/CustomInputField";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
-import { IPayrollItem, IPayrollComponent, ComponentType, IUser } from "@/types";
+import { IPayrollItem, IPayrollComponent, IUser } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import {
   CREATE_PAYROLL_ITEM,
@@ -58,21 +58,6 @@ export default function PayrollItemForm({
       // Calculate totals
       const componentsData = data.components || [];
       const adjustmentsData = data.adjustments || [];
-
-      const grossPay = componentsData
-        .filter((c: any) => c.componentType === ComponentType.EARNING)
-        .reduce((sum: number, c: any) => sum + (c.amount || 0), 0);
-
-      const totalDeductions = componentsData
-        .filter((c: any) => c.componentType === ComponentType.DEDUCTION)
-        .reduce((sum: number, c: any) => sum + (c.amount || 0), 0);
-
-      const adjustmentsTotal = adjustmentsData.reduce(
-        (sum: number, a: any) => sum + (a.amount || 0),
-        0,
-      );
-
-      const netPay = grossPay - totalDeductions + adjustmentsTotal;
 
       const input = {
         payrollCycleId: item?.payrollCycleId || data.payrollCycleId,
@@ -199,11 +184,11 @@ function PayrollItemFormFields({
   ];
 
   // Watch for changes to auto-calculate
-  const basicSalary = useWatch({
-    control,
-    name: "basicSalary",
-    defaultValue: 0,
-  });
+  // const basicSalary = useWatch({
+  //   control,
+  //   name: "basicSalary",
+  //   defaultValue: 0,
+  // });
   const workingDays = useWatch({
     control,
     name: "workingDays",
@@ -214,7 +199,7 @@ function PayrollItemFormFields({
     name: "presentDays",
     defaultValue: 0,
   });
-  const absentDays = useWatch({ control, name: "absentDays", defaultValue: 0 });
+  // const absentDays = useWatch({ control, name: "absentDays", defaultValue: 0 });
   const leaveDays = useWatch({ control, name: "leaveDays", defaultValue: 0 });
 
   // Auto-calculate absent and leave days
@@ -240,7 +225,7 @@ function PayrollItemFormFields({
     );
 
     if (selectedEmployee && selectedEmployee.employee) {
-      setValue("basicSalary", selectedEmployee.employee.salaryPerMonth || 0);
+      setValue("basicSalary", 0);
     }
   }, [watch("userId")]);
 
@@ -520,7 +505,7 @@ function PayrollComponentsSection({
 
       <div className="space-y-3">
         {componentsFormValue && componentsFormValue.length > 0 ? (
-          componentsFormValue.map((comp: any, index: number) => (
+          componentsFormValue.map((_: any, index: number) => (
             <div key={index} className="border rounded p-3 bg-base-200">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
                 <CustomSelect
@@ -598,11 +583,11 @@ function PayslipAdjustmentsSection() {
     setAdjustmentList(newList);
   };
 
-  const updateAdjustment = (index: number, field: string, value: any) => {
-    const newList = [...adjustmentList];
-    newList[index] = { ...newList[index], [field]: value };
-    setAdjustmentList(newList);
-  };
+  // const updateAdjustment = (index: number, field: string, value: any) => {
+  //   const newList = [...adjustmentList];
+  //   newList[index] = { ...newList[index], [field]: value };
+  //   setAdjustmentList(newList);
+  // };
 
   const adjustmentTypes = [
     { label: "Bonus", value: "bonus" },
@@ -627,7 +612,7 @@ function PayslipAdjustmentsSection() {
       </div>
 
       <div className="space-y-3">
-        {adjustmentList.map((adj, index) => (
+        {adjustmentList.map((_, index) => (
           <div key={index} className="border rounded p-3 bg-base-200">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
               <CustomSelect

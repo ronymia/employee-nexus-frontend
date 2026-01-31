@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { PiX, PiCalendar, PiUser, PiBriefcase, PiClock } from "react-icons/pi";
+import { PiX, PiCalendar, PiUser, PiBriefcase } from "react-icons/pi";
 import dayjs from "dayjs";
 import { ILeave, LeaveDuration } from "@/types";
 import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";

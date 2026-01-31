@@ -4,6 +4,7 @@ import { IEmploymentStatus } from "./employment-status.type";
 import { IWorkSite } from "./work-sites.type";
 import { IWorkSchedule } from "./work-schedules.type";
 import { IUser } from "./user.type";
+import { IEmployeeSalary } from "./employee-salary.type";
 // import { IEmployeeDepartment } from "./employee-department.type";
 // import { IEmployeeDesignation } from "./employee-designation.type";
 // import { IEmployeeEmploymentStatus } from "./employee-employment-status.type";
@@ -15,7 +16,6 @@ export interface IEmployeeDetails {
   user: IUser;
   employeeId?: string;
   joiningDate: string;
-  // salaryPerMonth?: number;
   nidNumber?: string;
   // departments: IEmployeeDepartment[];
   // designations: IEmployeeDesignation[];
@@ -27,6 +27,7 @@ export interface IEmployeeDetails {
   employmentStatus: IEmploymentStatus;
   workSchedule: IWorkSchedule;
   workSites: IWorkSite[];
+  salary: IEmployeeSalary;
 }
 
 export interface IEmergencyContact {

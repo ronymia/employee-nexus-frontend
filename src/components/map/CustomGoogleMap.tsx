@@ -22,7 +22,6 @@ export default function CustomGoogleMap({
 }: ICustomGoogleMapProps) {
   // Default center (Dhaka, Bangladesh)
   const defaultCenter = { lat: 23.8103, lng: 90.4125 };
-  const center = location || defaultCenter;
 
   const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
     if (e.latLng && onLocationChange) {

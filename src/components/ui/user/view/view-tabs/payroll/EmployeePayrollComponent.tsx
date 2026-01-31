@@ -158,33 +158,31 @@ export default function EmployeePayrollComponent({
     ...item,
     customName: (
       <div className="flex flex-col">
-        <span className="font-semibold">{item.component.name}</span>
+        <span className="font-semibold">{item.payrollComponent.name}</span>
         <span className="text-xs text-gray-500">
-          <CalculationTypeLabel type={item.component.calculationType} />
+          <CalculationTypeLabel type={item.payrollComponent.calculationType} />
         </span>
       </div>
     ),
     customCode: (
       <code className="text-xs bg-gray-100 px-1 rounded">
-        {item.component.code}
+        {item.payrollComponent.code}
       </code>
     ),
     customType: (
       <PayrollComponentTypeBadge
-        type={item.component.componentType}
+        type={item.payrollComponent.componentType}
         size="sm"
       />
     ),
     customValue: (
       <div className="flex flex-col">
         <span className="font-bold text-primary">
-          {formatComponentValue(item.value, item.component.calculationType)}
+          {formatComponentValue(
+            item.value,
+            item.payrollComponent.calculationType,
+          )}
         </span>
-        {item.isOverride && (
-          <span className="text-[10px] text-warning font-semibold uppercase">
-            Override
-          </span>
-        )}
       </div>
     ),
     customValidity: (
@@ -197,8 +195,8 @@ export default function EmployeePayrollComponent({
     ),
     customDetails: (
       <PayrollComponentProperties
-        isTaxable={item.component.isTaxable}
-        isStatutory={item.component.isStatutory}
+        isTaxable={item.payrollComponent.isTaxable}
+        isStatutory={item.payrollComponent.isStatutory}
         size="sm"
       />
     ),
@@ -208,13 +206,15 @@ export default function EmployeePayrollComponent({
     ...item,
     customName: (
       <div className="flex flex-col">
-        <span className="font-medium">{item.component.name}</span>
-        <span className="text-[10px] text-gray-400">{item.component.code}</span>
+        <span className="font-medium">{item.payrollComponent.name}</span>
+        <span className="text-[10px] text-gray-400">
+          {item.payrollComponent.code}
+        </span>
       </div>
     ),
     customValue: formatComponentValue(
       item.value,
-      item.component.calculationType,
+      item.payrollComponent.calculationType,
     ),
     customPeriod: (
       <span className="text-xs">
@@ -230,13 +230,14 @@ export default function EmployeePayrollComponent({
         </span>
       </div>
     ),
-    customStatus: item.isActive ? (
-      <span className="text-success flex items-center gap-1 text-xs">
-        <PiCheckCircle /> Active
-      </span>
-    ) : (
-      <span className="text-gray-400 text-xs">Inactive</span>
-    ),
+    customStatus:
+      item.effectiveTo !== null ? (
+        <span className="text-success flex items-center gap-1 text-xs">
+          <PiCheckCircle /> Active
+        </span>
+      ) : (
+        <span className="text-gray-400 text-xs">Inactive</span>
+      ),
   }));
 
   // ==================== RENDER ====================

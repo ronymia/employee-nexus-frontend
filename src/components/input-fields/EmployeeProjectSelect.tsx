@@ -1,7 +1,7 @@
-import { GET_PROJECTS, GET_USER_PROJECTS } from "@/graphql/project.api";
+import { GET_USER_PROJECTS } from "@/graphql/project.api";
 import CustomSelect from "@/components/form/input/CustomSelect";
 import { useQuery } from "@apollo/client/react";
-import { IProject, IUserProjectMember } from "@/types/project.type";
+import { IUserProjectMember } from "@/types/project.type";
 
 interface IProjectSelectProps {
   name: string;

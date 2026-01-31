@@ -43,23 +43,26 @@ export default function EmploymentDetailsSection({
           label="Employment Status"
           value={employee?.employmentStatus?.name}
         />
-        <InfoItem label="Work Site" value={employee?.workSite?.name} />
+        <InfoItem
+          label="Work Sites"
+          value={employee?.workSites?.map((site) => site.name).join(", ")}
+        />
         <InfoItem label="Work Schedule" value={employee?.workSchedule?.name} />
         <InfoItem label="NID Number" value={employee?.nidNumber} />
-        <InfoItem
+        {/* <InfoItem
           label="Working Days/Week"
           value={employee?.workingDaysPerWeek?.toString()}
-        />
-        <InfoItem
+        /> */}
+        {/* <InfoItem
           label="Working Hours/Week"
           value={employee?.workingHoursPerWeek?.toString()}
-        />
-        <InfoItem label="Rota Type" value={employee?.rotaType} />
+        /> */}
+        {/* <InfoItem label="Rota Type" value={employee?.rotaType} /> */}
         <InfoItem
           label="Salary/Month"
           value={
-            employee?.salaryPerMonth
-              ? `$${employee.salaryPerMonth.toLocaleString()}`
+            employee?.salary?.salaryAmount
+              ? `$${employee.salary.salaryAmount.toLocaleString()}`
               : "N/A"
           }
         />

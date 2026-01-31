@@ -17,7 +17,6 @@ import usePopupOption from "@/hooks/usePopupOption";
 import FormModal from "@/components/form/FormModal";
 import { Permissions } from "@/constants/permissions.constant";
 import StatusBadge from "@/components/ui/StatusBadge";
-import Swal from "sweetalert2";
 import { getCurrencySymbol } from "@/utils/currency.utils";
 
 export default function AllSubscriptionPlan() {
@@ -34,7 +33,7 @@ export default function AllSubscriptionPlan() {
     {
       awaitRefetchQueries: true,
       refetchQueries: [{ query: GET_SUBSCRIPTION_PLANS }],
-    }
+    },
   );
   // console.log({ data });
 
@@ -140,33 +139,6 @@ export default function AllSubscriptionPlan() {
   ];
 
   const currency = "";
-
-  // Modal for adding a new subscription plan
-  const handleStatusToggle = (row: ISubscriptionPlan) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: `Do you want to change the status of "${row.name}" to ${
-        row.status === "ACTIVE" ? "Inactive" : "Active"
-      }?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, change it!",
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        // TODO: Implement API call to update status
-        console.log("Toggle status for:", row.id, row.status);
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return true;
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire("Updated!", "The status has been updated.", "success");
-      }
-    });
-  };
 
   return (
     <>

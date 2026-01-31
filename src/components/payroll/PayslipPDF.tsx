@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  PDFDownloadLink,
-  PDFViewer,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { IPayrollItem } from "@/types";
 import moment from "moment";
 
@@ -193,11 +185,11 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
 
   const totalEarnings = earningsBreakdown.reduce(
     (sum, e) => sum + e.amount,
-    item.basicSalary
+    item.basicSalary,
   );
   const totalDeductions = deductionsBreakdown.reduce(
     (sum, d) => sum + d.amount,
-    0
+    0,
   );
 
   // Calculate adjustments
@@ -219,12 +211,12 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
 
   const totalAdjustmentsEarnings = adjustmentsEarnings.reduce(
     (sum, item) => sum + item.amount,
-    0
+    0,
   );
 
   const totalAdjustmentsDeductions = adjustmentsDeductions.reduce(
     (sum, item) => sum + item.amount,
-    0
+    0,
   );
 
   const getStatusStyle = () => {
@@ -299,7 +291,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
               <Text style={styles.infoLabel}>Payment Date:</Text>
               <Text style={styles.infoValue}>
                 {moment(
-                  (item as any).paymentDate || item.payrollCycle?.paymentDate
+                  (item as any).paymentDate || item.payrollCycle?.paymentDate,
                 ).format("MMM DD, YYYY")}
               </Text>
             </View>

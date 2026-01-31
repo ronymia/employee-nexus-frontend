@@ -45,7 +45,7 @@ function FormFields({
   isEdit: boolean;
 }) {
   const { watch, setValue } = useFormContext<IAssignPayrollComponentFormData>();
-  const selectedComponentId = watch("componentId");
+  const selectedComponentId = watch("payrollComponentId");
 
   useEffect(() => {
     if (selectedComponentId && !isEdit) {
@@ -67,11 +67,11 @@ function FormFields({
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CustomSelect
-          name="componentId"
-          label="Select Component"
+          name="payrollComponentId"
+          label="Select Payroll Component"
           placeholder="Choose a payroll component"
           options={componentOptions}
-          dataAuto="component-select"
+          dataAuto="payroll-component-select"
           required={true}
           isLoading={false}
           disabled={isEdit}
@@ -204,7 +204,7 @@ export default function AssignPayrollComponentForm({
             updateEmployeePayrollComponentInput: {
               ...data,
               id: initialData.id,
-              componentId: Number(data.componentId),
+              payrollComponentId: Number(data.payrollComponentId),
               userId: Number(userId),
               effectiveFrom: data.effectiveFrom
                 ? dayjs.utc(data.effectiveFrom, "DD-MM-YYYY").toISOString()
@@ -221,7 +221,7 @@ export default function AssignPayrollComponentForm({
             assignEmployeePayrollComponentInput: {
               ...data,
               userId: Number(userId),
-              componentId: Number(data.componentId),
+              payrollComponentId: Number(data.payrollComponentId),
               effectiveFrom: data.effectiveFrom
                 ? dayjs.utc(data.effectiveFrom, "DD-MM-YYYY").toISOString()
                 : null,
@@ -238,9 +238,8 @@ export default function AssignPayrollComponentForm({
   };
 
   const defaultValues = {
-    componentId: initialData?.componentId || "",
+    payrollComponentId: initialData?.payrollComponentId || "",
     value: initialData?.value || 0,
-    isOverride: initialData?.isOverride || false,
     effectiveFrom: initialData?.effectiveFrom
       ? dayjs(initialData.effectiveFrom).format("DD-MM-YYYY")
       : "",

@@ -5,7 +5,7 @@ export interface IProjectMember {
   id: number;
   userId: number;
   employee: IEmployeeDetails;
-  role?: string;
+  role: string;
   joinedAt?: string;
 }
 

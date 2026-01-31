@@ -283,8 +283,6 @@ export default function CustomDatePicker({
       currentDay = currentDay.clone().add(1, "day");
     }
 
-    const today = dayjs();
-
     // This gives how many empty boxes to insert at the beginning
     const emptyDivs = (startOfMonth.day() - startOfWeekDay + 7) % 7;
 

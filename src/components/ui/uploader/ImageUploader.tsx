@@ -18,7 +18,7 @@ export default function ImageUploader({
   defaultImage,
   isLoading = false,
   handleGetImage,
-  size = "128px",
+  // size = "128px",
 }: IImageUploadProps) {
   const [image, setImage] = useState<string | null>(null);
 

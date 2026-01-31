@@ -5,7 +5,6 @@ import { IPopupOption } from "@/types";
 import CustomPopup from "@/components/modal/CustomPopup";
 import CustomLoading from "@/components/loader/CustomLoading";
 import {
-  PiPencilSimple,
   PiTrash,
   PiCalendarBlank,
   PiPlus,

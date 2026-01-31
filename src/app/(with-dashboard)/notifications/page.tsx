@@ -31,9 +31,8 @@ export default function NotificationsPage() {
     priority: "ALL",
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 20;
 
-  const { data, loading, refetch } = useQuery<{
+  const { data, loading } = useQuery<{
     notifications: {
       data: INotification[];
       meta: IMeta;

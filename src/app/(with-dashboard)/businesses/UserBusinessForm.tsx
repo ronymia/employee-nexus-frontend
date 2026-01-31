@@ -49,7 +49,7 @@ const sectionVariants = {
 };
 
 // ==================== MAIN COMPONENT ====================
-export default function UserBusinessForm({ id = undefined }: { id?: number }) {
+export default function UserBusinessForm() {
   const router = useRouter();
 
   // ==================== GRAPHQL QUERIES ====================
@@ -80,7 +80,7 @@ export default function UserBusinessForm({ id = undefined }: { id?: number }) {
       if (businessInput.registrationDate) {
         businessInput.registrationDate = dayjs(
           businessInput.registrationDate,
-          "DD-MM-YYYY"
+          "DD-MM-YYYY",
         ).toDate() as any;
       }
 
@@ -88,7 +88,7 @@ export default function UserBusinessForm({ id = undefined }: { id?: number }) {
       if (userInput.dateOfBirth) {
         userInput.dateOfBirth = dayjs(
           userInput.dateOfBirth,
-          "DD-MM-YYYY"
+          "DD-MM-YYYY",
         ).toDate() as any;
       }
 
@@ -99,7 +99,7 @@ export default function UserBusinessForm({ id = undefined }: { id?: number }) {
       if (subscription.endDate) {
         subscription.endDate = dayjs(
           subscription.endDate,
-          "DD-MM-YYYY"
+          "DD-MM-YYYY",
         ).toDate() as any;
       }
 
@@ -136,38 +136,38 @@ export default function UserBusinessForm({ id = undefined }: { id?: number }) {
     })) || [];
 
   // ==================== DEFAULT VALUES ====================
-  const defaultValues: IUserRegisterWithBusiness = {
-    user: {
-      fullName: "",
-      email: "",
-      password: "",
-      phone: "",
-      dateOfBirth: "",
-      maritalStatus: "SINGLE",
-      address: "",
-      city: "",
-      country: "",
-      postcode: "",
-      gender: "MALE",
-    },
-    business: {
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      country: "",
-      postcode: "",
-      registrationDate: dayjs().format("DD-MM-YYYY"),
-      subscription: {
-        subscriptionPlanId: 1,
-        startDate: undefined,
-        endDate: undefined,
-        trialEndDate: undefined,
-        numberOfEmployeesAllowed: 100,
-      },
-    },
-  };
+  // const defaultValues: IUserRegisterWithBusiness = {
+  //   user: {
+  //     fullName: "",
+  //     email: "",
+  //     password: "",
+  //     phone: "",
+  //     dateOfBirth: "",
+  //     maritalStatus: "SINGLE",
+  //     address: "",
+  //     city: "",
+  //     country: "",
+  //     postcode: "",
+  //     gender: "MALE",
+  //   },
+  //   business: {
+  //     name: "",
+  //     email: "",
+  //     phone: "",
+  //     address: "",
+  //     city: "",
+  //     country: "",
+  //     postcode: "",
+  //     registrationDate: dayjs().format("DD-MM-YYYY"),
+  //     subscription: {
+  //       subscriptionPlanId: 1,
+  //       startDate: undefined,
+  //       endDate: undefined,
+  //       trialEndDate: undefined,
+  //       numberOfEmployeesAllowed: 100,
+  //     },
+  //   },
+  // };
 
   // ==================== LOADING STATE ====================
   if (loading) {

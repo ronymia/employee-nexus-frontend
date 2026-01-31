@@ -6,7 +6,7 @@ import {
   PiInfoFill,
   PiX,
 } from "react-icons/pi";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 
 type ToastType = "success" | "error" | "warning" | "info";
 
@@ -57,7 +57,7 @@ const CustomToast = ({ t, type, message, description }: CustomToastProps) => {
       exit={{ opacity: 0, y: -20, scale: 0.9 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={`max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-primary-content ring-opacity-5 border-l-4 ${ToastBorderColor(
-        type
+        type,
       )}`}
     >
       <div className="flex-1 w-0 p-4">

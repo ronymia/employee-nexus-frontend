@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import FieldLabel from "./components/FieldLabel";
 import FieldError from "./components/FieldError";
@@ -71,7 +71,7 @@ export default function CustomAddressAutocomplete({
             "address_components",
             "name",
           ],
-        }
+        },
       );
 
       autocompleteRef.current.addListener("place_changed", () => {

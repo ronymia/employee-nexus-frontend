@@ -8,7 +8,6 @@ import React from "react";
 import CustomPopup from "../modal/CustomPopup";
 import CustomLoading from "../loader/CustomLoading";
 
-import type { Variants } from "motion/react";
 import SubscriptionPlanForm from "@/app/(with-dashboard)/subscription-plans/SubscriptionPlanForm";
 import WorkSiteForm from "@/app/(with-dashboard)/administration/work-sites/WorkSitesForm";
 import DesignationForm from "@/app/(with-dashboard)/administration/designations/DesignationForm";
@@ -18,24 +17,6 @@ import DepartmentsForm from "@/app/(with-dashboard)/administration/departments/D
 import AssetTypeForm from "@/app/(with-dashboard)/asset-management/asset-types/AssetTypesForm";
 import AssetsForm from "@/app/(with-dashboard)/asset-management/assets/AssetsForm";
 import ProjectsForm from "@/app/(with-dashboard)/projects/ProjectsForm";
-
-const popupVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 150,
-      damping: 15,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.9,
-    transition: { duration: 0.2, ease: "easeInOut" },
-  },
-};
 
 export default function FormModal({
   popupOption,

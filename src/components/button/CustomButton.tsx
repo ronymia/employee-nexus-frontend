@@ -24,7 +24,7 @@ export default function CustomButton({
   htmlType = "button",
   className = ``,
   clickHandler = () => {},
-  variant = "primary",
+  // variant = "primary",
   buttonType,
   disabled = false,
   isLoading = false,

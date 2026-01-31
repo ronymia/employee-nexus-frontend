@@ -32,7 +32,7 @@ export default function CustomPasswordField({
   label,
   required = false,
   disabled = false,
-  readOnly = false,
+  // readOnly = false,
   wrapperClassName = "",
   fieldClassName = "",
   labelClassName = "",
