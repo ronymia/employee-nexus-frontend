@@ -165,77 +165,53 @@ const styles = StyleSheet.create({
 });
 
 export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
-  const comps = (item as any).payrollComponents || item.components || [];
-  const adjs = (item as any).payrollAdjustments || item.adjustments || [];
+  const comps = item.payrollItemComponents || [];
+  const adjs = item.payslipAdjustments || [];
 
   // Calculate earnings breakdown
   const earningsBreakdown =
     comps
-      ?.filter(
-        (c: any) =>
-          (c.payrollComponent || c.component)?.componentType === "EARNING",
-      )
-      .map((c: any) => ({
-        label: (c.payrollComponent || c.component)?.name || "Unknown",
-        amount: c.value || c.amount,
+      ?.filter((c) => c.payrollComponent?.componentType === "EARNING")
+      .map((c) => ({
+        label: c.payrollComponent?.name || "Unknown",
+        amount: c.value,
       })) || [];
 
   // Calculate deductions breakdown
   const deductionsBreakdown =
     comps
-      ?.filter(
-        (c: any) =>
-          (c.payrollComponent || c.component)?.componentType === "DEDUCTION",
-      )
-      .map((c: any) => ({
-        label: (c.payrollComponent || c.component)?.name || "Unknown",
-        amount: c.value || c.amount,
+      ?.filter((c) => c.payrollComponent?.componentType === "DEDUCTION")
+      .map((c) => ({
+        label: c.payrollComponent?.name || "Unknown",
+        amount: c.value,
       })) || [];
 
   const totalEarnings = earningsBreakdown.reduce(
-    (sum: number, e: any) => sum + e.amount,
+    (sum, e) => sum + e.amount,
     item.basicSalary,
   );
   const totalDeductions = deductionsBreakdown.reduce(
-    (sum: number, d: any) => sum + d.amount,
+    (sum, d) => sum + d.amount,
     0,
   );
 
   // Calculate adjustments
   const adjustmentsEarnings = adjs
-    .filter(
-      (adj: any) =>
-        adj.payrollComponent?.componentType === "EARNING" ||
-        adj.type === "bonus" ||
-        adj.type === "reimbursement",
-    )
-    .map((adj: any) => ({
-      label:
-        adj.payrollComponent?.name ||
-        adj.remarks ||
-        adj.description ||
-        adj.type?.replace("_", " ").toUpperCase(),
-      amount: adj.value || adj.amount,
+    .filter((adj) => adj.payrollComponent?.componentType === "EARNING")
+    .map((adj) => ({
+      label: adj.payrollComponent?.name || "Unknown",
+      amount: adj.value,
     }));
 
   const adjustmentsDeductions = adjs
-    .filter(
-      (adj: any) =>
-        adj.payrollComponent?.componentType === "DEDUCTION" ||
-        adj.type === "penalty" ||
-        adj.type === "advance_deduction",
-    )
-    .map((adj: any) => ({
-      label:
-        adj.payrollComponent?.name ||
-        adj.remarks ||
-        adj.description ||
-        adj.type?.replace("_", " ").toUpperCase(),
-      amount: adj.value || adj.amount,
+    .filter((adj) => adj.payrollComponent?.componentType === "DEDUCTION")
+    .map((adj) => ({
+      label: adj.payrollComponent?.name || "Unknown",
+      amount: adj.value,
     }));
 
   const totalAdjustmentsEarnings = adjustmentsEarnings.reduce(
-    (sum: number, adj: any) => sum + adj.amount,
+    (sum, adj) => sum + adj.amount,
     0,
   );
 
@@ -286,19 +262,19 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Employee ID:</Text>
               <Text style={styles.infoValue}>
-                {(item.user as any)?.employee?.employeeId || "N/A"}
+                {item.user?.employee?.employeeId || "N/A"}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Department:</Text>
               <Text style={styles.infoValue}>
-                {(item.user as any)?.employee?.department?.name || "N/A"}
+                {item.user?.employee?.department?.name || "N/A"}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Designation:</Text>
               <Text style={styles.infoValue}>
-                {(item.user as any)?.employee?.designation?.name || "N/A"}
+                {item.user?.employee?.designation?.name || "N/A"}
               </Text>
             </View>
           </View>
@@ -315,9 +291,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Payment Date:</Text>
               <Text style={styles.infoValue}>
-                {moment(
-                  (item as any).paymentDate || item.payrollCycle?.paymentDate,
-                ).format("MMM DD, YYYY")}
+                {moment(item.paidAt).format("MMM DD, YYYY")}
               </Text>
             </View>
             <View style={styles.infoRow}>

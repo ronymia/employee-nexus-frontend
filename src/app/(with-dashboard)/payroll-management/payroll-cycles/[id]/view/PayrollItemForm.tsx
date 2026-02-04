@@ -84,26 +84,26 @@ export default function PayrollItemForm({
     presentDays: item?.presentDays || "",
     absentDays: item?.absentDays || "",
     leaveDays: item?.leaveDays || "",
-    overtimeHours: item?.overtimeHours || "",
+    overtimeMinutes: item?.overtimeMinutes || "",
     paymentMethod: item?.paymentMethod || "bank_transfer",
     bankAccount: item?.bankAccount || "",
     notes: item?.notes || "",
-    components:
-      item?.components?.map((c) => ({
-        componentId: String(c.componentId),
-        component: c.component,
-        amount: c.amount,
-        calculationBase: c.calculationBase,
-        notes: c.notes,
-      })) || [],
-    adjustments:
-      item?.adjustments?.map((a) => ({
-        type: a.type,
-        description: a.description,
-        amount: a.amount,
-        isRecurring: a.isRecurring,
-        notes: a.notes,
-      })) || [],
+    // components:
+    //   item?.components?.map((c) => ({
+    //     componentId: String(c.componentId),
+    //     component: c.component,
+    //     amount: c.amount,
+    //     calculationBase: c.calculationBase,
+    //     notes: c.notes,
+    //   })) || [],
+    // adjustments:
+    //   item?.adjustments?.map((a) => ({
+    //     type: a.type,
+    //     description: a.description,
+    //     amount: a.amount,
+    //     isRecurring: a.isRecurring,
+    //     notes: a.notes,
+    //   })) || [],
   };
 
   console.log({ defaultValues });

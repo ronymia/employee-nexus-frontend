@@ -31,12 +31,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  PiClock,
-  PiCalendarBold,
-  PiChartPieSliceBold,
-  PiHandPalmBold,
-} from "react-icons/pi";
+import { PiClock, PiHandPalmBold } from "react-icons/pi";
 import { showToast } from "@/components/ui/CustomToast";
 import dayjsUTC from "dayjs/plugin/utc";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -437,29 +432,29 @@ function SelectionPrompt() {
 
 // ==================== ANIMATIONS ====================
 // Loader component for shimmer effect
-function ShimmerLoader() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="relative w-full h-full overflow-hidden rounded-xl bg-base-200"
-    >
-      <motion.div
-        className="absolute top-0 left-0 h-full w-full bg-linear-to-r from-transparent via-white/10 to-transparent"
-        animate={{
-          x: ["-100%", "200%"],
-        }}
-        transition={{
-          duration: 1.5,
-          ease: "easeInOut",
-          repeat: Infinity,
-          repeatType: "loop",
-        }}
-      />
-    </motion.div>
-  );
-}
+// function ShimmerLoader() {
+//   return (
+//     <motion.div
+//       initial={{ opacity: 0 }}
+//       animate={{ opacity: 1 }}
+//       transition={{ duration: 0.5 }}
+//       className="relative w-full h-full overflow-hidden rounded-xl bg-base-200"
+//     >
+//       <motion.div
+//         className="absolute top-0 left-0 h-full w-full bg-linear-to-r from-transparent via-white/10 to-transparent"
+//         animate={{
+//           x: ["-100%", "200%"],
+//         }}
+//         transition={{
+//           duration: 1.5,
+//           ease: "easeInOut",
+//           repeat: Infinity,
+//           repeatType: "loop",
+//         }}
+//       />
+//     </motion.div>
+//   );
+// }
 
 // DATE SECTION
 interface IDateSectionProps {

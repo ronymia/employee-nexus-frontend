@@ -46,13 +46,10 @@ import PayrollItemStatusBadge from "@/components/ui/payroll/PayrollItemStatusBad
 import { motion } from "motion/react";
 import OverviewCard from "@/components/card/OverviewCard";
 import {
-  PiClockAfternoon,
-  PiXCircle,
-  PiWarning,
   PiListChecks,
   PiHandCoins,
   PiTrendUp,
-  PiWallet,
+  PiWallet
 } from "react-icons/pi";
 
 export default function PayrollCycleDetailPage() {
