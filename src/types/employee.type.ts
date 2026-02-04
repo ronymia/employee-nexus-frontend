@@ -5,6 +5,8 @@ import { IWorkSite } from "./work-sites.type";
 import { IWorkSchedule } from "./work-schedules.type";
 import { IUser } from "./user.type";
 import { IEmployeeSalary } from "./employee-salary.type";
+import { IEmployeePayrollComponent } from "./employee-payroll-component.type";
+import { IPayslipAdjustment } from "./payslip-adjustment.type";
 // import { IEmployeeDepartment } from "./employee-department.type";
 // import { IEmployeeDesignation } from "./employee-designation.type";
 // import { IEmployeeEmploymentStatus } from "./employee-employment-status.type";
@@ -28,6 +30,8 @@ export interface IEmployeeDetails {
   workSchedule: IWorkSchedule;
   workSites: IWorkSite[];
   salary: IEmployeeSalary;
+  employeePayrollComponents: IEmployeePayrollComponent[];
+  employeePayslipAdjustments: IPayslipAdjustment[];
 }
 
 export interface IEmergencyContact {

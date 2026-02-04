@@ -251,9 +251,9 @@ export const LEAVE_BALANCE = gql`
         leaveTypeId
         leaveTypeName
         year
-        allocatedHours
-        usedHours
-        remainingHours
+        allocatedMinutes
+        usedMinutes
+        remainingMinutes
       }
     }
   }

@@ -9,6 +9,7 @@ import {
   IPayrollCycle,
   PayrollCycleStatus,
   PayrollFrequency,
+  IPayrollCycleArrayResponse,
 } from "@/types";
 import { PiPlusCircle, PiTrash, PiEye } from "react-icons/pi";
 import {
@@ -37,11 +38,7 @@ export default function PayrollCyclesPage() {
     data: cyclesData,
     loading,
     refetch,
-  } = useQuery<{
-    payrollCycles: {
-      data: IPayrollCycle[];
-    };
-  }>(GET_PAYROLL_CYCLES, {
+  } = useQuery<IPayrollCycleArrayResponse>(GET_PAYROLL_CYCLES, {
     variables: {
       query: {},
     },

@@ -19,7 +19,11 @@ import {
   EMPLOYEE_PAYROLL_COMPONENTS_HISTORY,
 } from "@/graphql/employee-payroll-components.api";
 import { GET_PAYROLL_COMPONENTS } from "@/graphql/payroll-component.api";
-import { IEmployeePayrollComponent, IPayrollComponent } from "@/types";
+import {
+  IEmployeePayrollComponent,
+  IPayrollComponent,
+  IPayrollComponentArrayResponse,
+} from "@/types";
 import { useFormContext } from "react-hook-form";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
@@ -185,13 +189,10 @@ export default function AssignPayrollComponentForm({
   });
 
   // ==================== API Query: Components ====================
-  const { data: componentsData, loading: componentsLoading } = useQuery<{
-    payrollComponents: {
-      data: IPayrollComponent[];
-    };
-  }>(GET_PAYROLL_COMPONENTS, {
-    variables: { query: { status: "ACTIVE" } },
-  });
+  const { data: componentsData, loading: componentsLoading } =
+    useQuery<IPayrollComponentArrayResponse>(GET_PAYROLL_COMPONENTS, {
+      variables: { query: { status: "ACTIVE" } },
+    });
 
   const activeComponents = componentsData?.payrollComponents?.data || [];
 

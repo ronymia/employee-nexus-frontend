@@ -93,16 +93,40 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
                 ৳{item.basicSalary.toLocaleString()}
               </span>
             </div>
-            {item.components
-              ?.filter((c) => c.component?.componentType === "EARNING")
+            {item.payrollItemComponents
+              ?.filter((c) => c.payrollComponent?.componentType === "EARNING")
               .map((comp, idx) => (
                 <div key={idx} className="flex justify-between text-sm">
-                  <span className="text-gray-600">{comp.component?.name}</span>
+                  <span className="text-gray-600">
+                    {comp.payrollComponent?.name}
+                  </span>
                   <span className="font-medium">
-                    ৳{comp.amount.toLocaleString()}
+                    ৳{comp.value.toLocaleString()}
                   </span>
                 </div>
               ))}
+            {/* Adjustments - Earnings */}
+            {(item.payslipAdjustments?.filter(
+              (adj) =>
+                adj.status === "APPROVED" &&
+                adj.payrollComponent?.componentType === "EARNING",
+            ).length ?? 0) > 0 && (
+              <div className="mt-3 pt-3 border-t border-green-200">
+                <p className="text-xs font-semibold text-green-600 mb-2">
+                  Adjustments
+                </p>
+                {item.payslipAdjustments?.map((adj, idx) => (
+                  <div key={idx} className="flex justify-between text-sm">
+                    <span className="text-green-600">
+                      {adj.payrollComponent?.name}
+                    </span>
+                    <span className="font-medium text-green-600">
+                      +৳{adj.value.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -112,16 +136,40 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
             Deductions
           </h4>
           <div className="space-y-2">
-            {item.components
-              ?.filter((c) => c.component?.componentType === "DEDUCTION")
+            {item.payrollItemComponents
+              ?.filter((c) => c.payrollComponent?.componentType === "DEDUCTION")
               .map((comp, idx) => (
                 <div key={idx} className="flex justify-between text-sm">
-                  <span className="text-gray-600">{comp.component?.name}</span>
+                  <span className="text-gray-600">
+                    {comp.payrollComponent?.name}
+                  </span>
                   <span className="font-medium">
-                    ৳{comp.amount.toLocaleString()}
+                    ৳{comp.value.toLocaleString()}
                   </span>
                 </div>
               ))}
+            {/* Adjustments - Deductions */}
+            {(item.payslipAdjustments?.filter(
+              (adj) =>
+                adj.status === "APPROVED" &&
+                adj.payrollComponent?.componentType === "DEDUCTION",
+            ).length ?? 0) > 0 && (
+              <div className="mt-3 pt-3 border-t border-red-200">
+                <p className="text-xs font-semibold text-red-600 mb-2">
+                  Adjustments
+                </p>
+                {item.payslipAdjustments?.map((adj, idx) => (
+                  <div key={idx} className="flex justify-between text-sm">
+                    <span className="text-red-600">
+                      {adj.payrollComponent?.name}
+                    </span>
+                    <span className="font-medium text-red-600">
+                      -৳{adj.value.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {/* <div className="flex flex-col gap-1">
@@ -201,42 +249,39 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
                   ৳{item.basicSalary.toLocaleString()}
                 </span>
               </div>
-              {item.components
-                ?.filter((c) => c.component?.componentType === "EARNING")
+              {item.payrollItemComponents
+                ?.filter((c) => c.payrollComponent?.componentType === "EARNING")
                 .map((comp, idx) => (
                   <div key={idx} className="flex justify-between text-sm">
                     <span className="text-gray-600">
-                      {comp.component?.name}
+                      {comp.payrollComponent?.name}
                     </span>
                     <span className="font-medium">
-                      ৳{comp.amount.toLocaleString()}
+                      ৳{comp.value.toLocaleString()}
                     </span>
                   </div>
                 ))}
 
               {/* Adjustments - Earnings */}
-              {(item.adjustments?.filter(
-                (adj) => adj.type === "bonus" || adj.type === "reimbursement",
+              {(item.payslipAdjustments?.filter(
+                (adj) =>
+                  adj.status === "APPROVED" &&
+                  adj.payrollComponent?.componentType === "EARNING",
               ).length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-green-200">
                   <p className="text-xs font-semibold text-green-600 mb-2">
                     Adjustments
                   </p>
-                  {item.adjustments
-                    ?.filter(
-                      (adj) =>
-                        adj.type === "bonus" || adj.type === "reimbursement",
-                    )
-                    .map((adj, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-green-600">
-                          {adj.description}
-                        </span>
-                        <span className="font-medium text-green-600">
-                          +৳{adj.amount.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                  {item.payslipAdjustments?.map((adj, idx) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span className="text-green-600">
+                        {adj.payrollComponent?.name}
+                      </span>
+                      <span className="font-medium text-green-600">
+                        +৳{adj.value.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -249,42 +294,41 @@ const PayslipCard = ({ item, onViewPayslip }: PayslipCardProps) => {
               Deductions: ৳{deductions.toLocaleString()}
             </h4>
             <div className="space-y-2">
-              {item.components
-                ?.filter((c) => c.component?.componentType === "DEDUCTION")
+              {item.payrollItemComponents
+                ?.filter(
+                  (c) => c.payrollComponent?.componentType === "DEDUCTION",
+                )
                 .map((comp, idx) => (
                   <div key={idx} className="flex justify-between text-sm">
                     <span className="text-gray-600">
-                      {comp.component?.name}
+                      {comp.payrollComponent?.name}
                     </span>
                     <span className="font-medium">
-                      ৳{comp.amount.toLocaleString()}
+                      ৳{comp.value.toLocaleString()}
                     </span>
                   </div>
                 ))}
 
               {/* Adjustments - Deductions */}
-              {(item.adjustments?.filter(
+              {(item.payslipAdjustments?.filter(
                 (adj) =>
-                  adj.type === "penalty" || adj.type === "advance_deduction",
+                  adj.status === "APPROVED" &&
+                  adj.payrollComponent?.componentType === "DEDUCTION",
               ).length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-red-200">
                   <p className="text-xs font-semibold text-red-600 mb-2">
                     Adjustments
                   </p>
-                  {item.adjustments
-                    ?.filter(
-                      (adj) =>
-                        adj.type === "penalty" ||
-                        adj.type === "advance_deduction",
-                    )
-                    .map((adj, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-red-600">{adj.description}</span>
-                        <span className="font-medium text-red-600">
-                          -৳{adj.amount.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                  {item.payslipAdjustments?.map((adj, idx) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span className="text-red-600">
+                        {adj.payrollComponent?.name}
+                      </span>
+                      <span className="font-medium text-red-600">
+                        -৳{adj.value.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

@@ -33,6 +33,18 @@ export interface IPayrollComponent {
   updatedAt: string;
 }
 
+export interface IPayrollComponentResponse {
+  payrollComponentById: {
+    data: IPayrollComponent;
+  };
+}
+
+export interface IPayrollComponentArrayResponse {
+  payrollComponents: {
+    data: IPayrollComponent[];
+  };
+}
+
 export interface IPayrollComponentOverview {
   total: number;
   earning: number;

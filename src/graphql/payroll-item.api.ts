@@ -11,6 +11,41 @@ export const GET_PAYROLL_ITEMS = gql`
         id
         payrollCycleId
         userId
+        payrollItemComponents {
+          id
+          value
+          componentType
+          calculationType
+          calculatedAmount
+          payrollItemId
+          payrollComponentId
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
+        }
+        payslipAdjustments {
+          id
+          payrollItemId
+          value
+          payrollComponentId
+          appliedMonth
+          status
+          notes
+          reviewedAt
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
+        }
         user {
           id
           email
@@ -23,40 +58,30 @@ export const GET_PAYROLL_ITEMS = gql`
             name
           }
           employee {
-            id
             userId
             employeeId
             nidNumber
             joiningDate
-            salaryPerMonth
-            workingDaysPerWeek
-            workingHoursPerWeek
-            designationId
             designation {
               id
               name
             }
-            employmentStatusId
             employmentStatus {
               id
               name
             }
-            departmentId
             department {
               id
               name
             }
-            workSiteId
-            workSite {
-              id
-              name
-            }
-            workScheduleId
+            # workSite {
+            #   id
+            #   name
+            # }
             workSchedule {
               id
               name
             }
-            rotaType
             createdAt
             updatedAt
           }
@@ -66,18 +91,13 @@ export const GET_PAYROLL_ITEMS = gql`
             createdAt
             email
             id
-            lat
-            lng
             name
-            numberOfEmployeesAllowed
             phone
             country
             postcode
             registrationDate
             status
-            subscriptionPlanId
             updatedAt
-            userId
             website
           }
         }
@@ -89,37 +109,43 @@ export const GET_PAYROLL_ITEMS = gql`
         presentDays
         absentDays
         leaveDays
-        overtimeHours
+        overtimeMinutes
         status
         paymentMethod
         bankAccount
         transactionRef
         paidAt
         notes
-        components {
-          id
-          payrollItemId
-          componentId
-          component {
-            id
-            name
-            code
-            componentType
-          }
-          amount
-          calculationBase
-          notes
-        }
-        adjustments {
-          id
-          payrollItemId
-          type
-          description
-          amount
-          isRecurring
-          createdBy
-          notes
-        }
+        # payrollComponents {
+        #   id
+        #   payrollItemId
+        #   componentId
+        #   component {
+        #     id
+        #     name
+        #     code
+        #     componentType
+        #   }
+        #   amount
+        #   calculationBase
+        #   notes
+        # }
+        # adjustments {
+        #   id
+        #   payrollItemId
+        #   type
+        #   description
+        #   amount
+        #   isRecurring
+        #   createdBy
+        #   notes
+        #   payrollComponent {
+        #     name
+        #     code
+        #     componentType
+        #     calculationType
+        #   }
+        # }
         createdAt
         updatedAt
       }
@@ -162,7 +188,7 @@ export const GET_PAYROLL_ITEM_BY_ID = gql`
         presentDays
         absentDays
         leaveDays
-        overtimeHours
+        overtimeMinutes
         status
         paymentMethod
         bankAccount
@@ -192,6 +218,12 @@ export const GET_PAYROLL_ITEM_BY_ID = gql`
           createdBy
           notes
           createdAt
+          payrollComponent {
+            name
+            code
+            componentType
+            calculationType
+          }
         }
         createdAt
         updatedAt
@@ -202,22 +234,47 @@ export const GET_PAYROLL_ITEM_BY_ID = gql`
 
 // CREATE PAYROLL ITEM
 export const CREATE_PAYROLL_ITEM = gql`
-  mutation CreatePayrollItem($createPayrollItemInput: CreatePayrollItemInput!) {
-    createPayrollItem(createPayrollItemInput: $createPayrollItemInput) {
-      success
-      statusCode
+  mutation CreatePayrollItem($userId: Int!, $payrollCycleId: Int!) {
+    createPayrollItem(userId: $userId, payrollCycleId: $payrollCycleId) {
       message
-      # data {
-      # id
-      # payrollCycleId
-      # userId
-      # basicSalary
-      # grossPay
-      # totalDeductions
-      # netPay
-      # status
-      # createdAt
-      # }
+      statusCode
+      success
+      data {
+        payrollCycleId
+        userId
+        basicSalary
+        grossPay
+        totalDeductions
+        netPay
+        workingDays
+        presentDays
+        absentDays
+        leaveDays
+        overtimeMinutes
+        payrollComponents {
+          payrollComponentId
+          value
+          effectiveFrom
+          effectiveTo
+          assignedBy
+          payrollComponent {
+            name
+            code
+            componentType
+            calculationType
+          }
+          notes
+        }
+        payrollAdjustments {
+          value
+          payrollComponent {
+            name
+            code
+            componentType
+            calculationType
+          }
+        }
+      }
     }
   }
 `;
@@ -273,15 +330,9 @@ export const APPROVE_PAYROLL_ITEM = gql`
 // MARK PAYROLL ITEM AS PAID
 export const MARK_PAYROLL_ITEM_PAID = gql`
   mutation MarkPayrollItemAsPaid(
-    $id: Int!
-    $paymentMethod: String!
-    $transactionRef: String!
+    $payrollItemAsPaidInput: PayrollItemAsPaidInput!
   ) {
-    markPayrollItemAsPaid(
-      id: $id
-      paymentMethod: $paymentMethod
-      transactionRef: $transactionRef
-    ) {
+    markPayrollItemAsPaid(payrollItemAsPaidInput: $payrollItemAsPaidInput) {
       message
       statusCode
       success
@@ -290,6 +341,80 @@ export const MARK_PAYROLL_ITEM_PAID = gql`
         status
         transactionRef
         paidAt
+      }
+    }
+  }
+`;
+
+// PREVIEW PAYROLL ITEM
+export const PREVIEW_PAYROLL_ITEM = gql`
+  mutation PreviewPayrollItem($userId: Int!, $payrollCycleId: Int!) {
+    previewPayrollItem(userId: $userId, payrollCycleId: $payrollCycleId) {
+      message
+      statusCode
+      success
+      data {
+        payrollCycleId
+        userId
+        basicSalary
+        grossPay
+        totalDeductions
+        netPay
+        workingDays
+        presentDays
+        absentDays
+        leaveDays
+        overtimeMinutes
+        payrollComponents {
+          userId
+          payrollComponentId
+          value
+          effectiveFrom
+          effectiveTo
+          assignedBy
+          assignedByUser {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+          payrollComponent {
+            name
+            code
+            componentType
+            calculationType
+          }
+          notes
+        }
+        payrollAdjustments {
+          value
+          remarks
+          status
+          requestedBy
+          reviewedBy
+          reviewedAt
+          requestedByUser {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+          reviewedByUser {
+            id
+            email
+            profile {
+              fullName
+            }
+          }
+          payrollComponent {
+            name
+            code
+            componentType
+            calculationType
+          }
+        }
       }
     }
   }

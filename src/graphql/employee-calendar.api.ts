@@ -56,3 +56,19 @@ export const GET_EMPLOYEE_CALENDAR = gql`
     }
   }
 `;
+// interface IEmployeeCalendarData {
+//   employeeCalendar: {
+//     data: {
+//       joiningDate:Date;
+//       registrationDate:Date;
+//       attendances: {
+//         date: string;
+//         status: string;
+//       }[];
+//       holidays: {
+//         startDate: string;
+//         name: string;
+//       }[];
+//     };
+//   };
+// }

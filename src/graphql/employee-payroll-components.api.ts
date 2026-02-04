@@ -18,7 +18,6 @@ export const ASSIGN_PAYROLL_COMPONENT = gql`
         # isActive
         effectiveFrom
         effectiveTo
-        isOverride
         notes
       }
     }

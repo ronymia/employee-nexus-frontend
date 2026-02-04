@@ -165,22 +165,25 @@ const styles = StyleSheet.create({
 });
 
 export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
+  const comps = item.payrollItemComponents || [];
+  const adjs = item.payslipAdjustments || [];
+
   // Calculate earnings breakdown
   const earningsBreakdown =
-    item.components
-      ?.filter((c) => c.component?.componentType === "EARNING")
+    comps
+      ?.filter((c) => c.payrollComponent?.componentType === "EARNING")
       .map((c) => ({
-        label: c.component?.name || "Unknown",
-        amount: c.amount,
+        label: c.payrollComponent?.name || "Unknown",
+        amount: c.value,
       })) || [];
 
   // Calculate deductions breakdown
   const deductionsBreakdown =
-    item.components
-      ?.filter((c) => c.component?.componentType === "DEDUCTION")
+    comps
+      ?.filter((c) => c.payrollComponent?.componentType === "DEDUCTION")
       .map((c) => ({
-        label: c.component?.name || "Unknown",
-        amount: c.amount,
+        label: c.payrollComponent?.name || "Unknown",
+        amount: c.value,
       })) || [];
 
   const totalEarnings = earningsBreakdown.reduce(
@@ -193,29 +196,27 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
   );
 
   // Calculate adjustments
-  // Earnings: bonus, reimbursement
-  // Deductions: penalty, advance_deduction
-  const adjustmentsEarnings = (item.adjustments || [])
-    .filter((adj) => adj.type === "bonus" || adj.type === "reimbursement")
+  const adjustmentsEarnings = adjs
+    .filter((adj) => adj.payrollComponent?.componentType === "EARNING")
     .map((adj) => ({
-      label: adj.description,
-      amount: adj.amount,
+      label: adj.payrollComponent?.name || "Unknown",
+      amount: adj.value,
     }));
 
-  const adjustmentsDeductions = (item.adjustments || [])
-    .filter((adj) => adj.type === "penalty" || adj.type === "advance_deduction")
+  const adjustmentsDeductions = adjs
+    .filter((adj) => adj.payrollComponent?.componentType === "DEDUCTION")
     .map((adj) => ({
-      label: adj.description,
-      amount: adj.amount,
+      label: adj.payrollComponent?.name || "Unknown",
+      amount: adj.value,
     }));
 
   const totalAdjustmentsEarnings = adjustmentsEarnings.reduce(
-    (sum, item) => sum + item.amount,
+    (sum, adj) => sum + adj.amount,
     0,
   );
 
   const totalAdjustmentsDeductions = adjustmentsDeductions.reduce(
-    (sum, item) => sum + item.amount,
+    (sum: number, adj: any) => sum + adj.amount,
     0,
   );
 
@@ -261,19 +262,19 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Employee ID:</Text>
               <Text style={styles.infoValue}>
-                {(item.user as any)?.employee?.employeeId || "N/A"}
+                {item.user?.employee?.employeeId || "N/A"}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Department:</Text>
               <Text style={styles.infoValue}>
-                {(item.user as any)?.employee?.department?.name || "N/A"}
+                {item.user?.employee?.department?.name || "N/A"}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Designation:</Text>
               <Text style={styles.infoValue}>
-                {(item.user as any)?.employee?.designation?.name || "N/A"}
+                {item.user?.employee?.designation?.name || "N/A"}
               </Text>
             </View>
           </View>
@@ -290,9 +291,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Payment Date:</Text>
               <Text style={styles.infoValue}>
-                {moment(
-                  (item as any).paymentDate || item.payrollCycle?.paymentDate,
-                ).format("MMM DD, YYYY")}
+                {moment(item.paidAt).format("MMM DD, YYYY")}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -320,7 +319,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
                 ${item.basicSalary.toFixed(2)}
               </Text>
             </View>
-            {earningsBreakdown.map((earning, index) => (
+            {earningsBreakdown.map((earning: any, index: number) => (
               <View key={index} style={styles.lineItem}>
                 <Text style={styles.lineItemLabel}>{earning.label}</Text>
                 <Text style={styles.lineItemAmount}>
@@ -342,7 +341,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
                     Adjustments (Additions)
                   </Text>
                 </View>
-                {adjustmentsEarnings.map((adj, index) => (
+                {adjustmentsEarnings.map((adj: any, index: number) => (
                   <View key={`adj-earn-${index}`} style={styles.lineItem}>
                     <Text style={[styles.lineItemLabel, { color: "#22c55e" }]}>
                       {adj.label}
@@ -368,7 +367,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
             <Text style={styles.columnTitle}>Deductions</Text>
             {deductionsBreakdown.length > 0 ? (
               <>
-                {deductionsBreakdown.map((deduction, index) => (
+                {deductionsBreakdown.map((deduction: any, index: number) => (
                   <View key={index} style={styles.lineItem}>
                     <Text style={styles.lineItemLabel}>{deduction.label}</Text>
                     <Text style={styles.lineItemAmount}>
@@ -397,7 +396,7 @@ export const PayslipPDF = ({ item, pageSize = "A5" }: PayslipPDFProps) => {
                     Adjustments (Deductions)
                   </Text>
                 </View>
-                {adjustmentsDeductions.map((adj, index) => (
+                {adjustmentsDeductions.map((adj: any, index: number) => (
                   <View key={`adj-ded-${index}`} style={styles.lineItem}>
                     <Text style={[styles.lineItemLabel, { color: "#ef4444" }]}>
                       {adj.label}

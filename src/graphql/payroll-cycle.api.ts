@@ -57,31 +57,31 @@ export const GET_PAYROLL_CYCLE_BY_ID = gql`
         processedAt
         notes
         businessId
-        payrollItems {
-          id
-          userId
-          user {
-            id
-            email
-            profile {
-              fullName
-            }
-          }
-          basicSalary
-          grossPay
-          totalDeductions
-          netPay
-          status
-          components {
-            # componentItems
-            amount
-            calculationBase
-            notes
-          }
-          adjustments {
-            type
-          }
-        }
+        # payrollItems {
+        #   id
+        #   userId
+        #   user {
+        #     id
+        #     email
+        #     profile {
+        #       fullName
+        #     }
+        #   }
+        #   basicSalary
+        #   grossPay
+        #   totalDeductions
+        #   netPay
+        #   status
+        #   components {
+        #     # componentItems
+        #     amount
+        #     calculationBase
+        #     notes
+        #   }
+        #   adjustments {
+        #     type
+        #   }
+        # }
         createdAt
         updatedAt
       }
@@ -191,3 +191,28 @@ export const PROCESS_PAYROLL_CYCLE = gql`
   }
 `;
 // FINALIZE PAYROLL CYCLE
+
+export const APPROVE_ALL_PAYROLL_ITEMS = gql`
+  mutation ApprovePayrollItems($input: ApprovePayrollItemsInput!) {
+    approvePayrollItems(approvePayrollItemsInput: $input) {
+      success
+      statusCode
+      message
+      data {
+        id
+        name
+        status
+        payrollItems {
+          id
+          status
+          netPay
+          user {
+            profile {
+              fullName
+            }
+          }
+        }
+      }
+    }
+  }
+`;
