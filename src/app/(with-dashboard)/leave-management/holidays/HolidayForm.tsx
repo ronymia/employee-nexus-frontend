@@ -16,11 +16,12 @@ import {
   UPDATE_HOLIDAY,
 } from "@/graphql/holiday.api";
 import { IHoliday, HolidayType } from "@/types/holiday.type";
-import dayjs from "dayjs";
 import { showToast } from "@/components/ui/CustomToast";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-
-dayjs.extend(customParseFormat);
+import {
+  customFormatDate,
+  formatDateForAPI,
+  FORMAT_PRESETS,
+} from "@/utils/date-format.utils";
 
 // ==================== TYPESCRIPT INTERFACES ====================
 interface IHolidayFormProps {
@@ -162,9 +163,9 @@ export default function HolidayForm({
   // ==================== FORM SUBMISSION ====================
   const handleSubmit = async (data: any) => {
     try {
-      // FORMAT DATES TO ISO 8601
-      const startDate = dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString();
-      const endDate = dayjs.utc(data.endDate, "DD-MM-YYYY").toISOString();
+      // FORMAT DATES TO ISO 8601 (UTC)
+      const startDate = formatDateForAPI(data.startDate);
+      const endDate = formatDateForAPI(data.endDate);
 
       // PREPARE INPUT
       const input = {
@@ -210,11 +211,11 @@ export default function HolidayForm({
     name: holiday?.name || "",
     description: holiday?.description || "",
     startDate: holiday?.startDate
-      ? dayjs(holiday.startDate).format("DD-MM-YYYY")
-      : dayjs().format("DD-MM-YYYY"),
+      ? customFormatDate(holiday.startDate, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(new Date(), FORMAT_PRESETS.INPUT_DATE),
     endDate: holiday?.endDate
-      ? dayjs(holiday.endDate).format("DD-MM-YYYY")
-      : dayjs().format("DD-MM-YYYY"),
+      ? customFormatDate(holiday.endDate, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(new Date(), FORMAT_PRESETS.INPUT_DATE),
     holidayType: holiday?.holidayType || "",
     isPaid: holiday?.isPaid || false,
     isRecurring: holiday?.isRecurring || false,

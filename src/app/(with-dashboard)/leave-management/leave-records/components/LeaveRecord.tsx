@@ -2,9 +2,9 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import { PiX, PiCalendar, PiUser, PiBriefcase } from "react-icons/pi";
-import dayjs from "dayjs";
 import { ILeave, LeaveDuration } from "@/types";
 import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";
+import { customFormatDate, FORMAT_PRESETS } from "@/utils/date-format.utils";
 
 // ==================== INTERFACES ====================
 interface ILeaveRecordProps {
@@ -89,7 +89,7 @@ function ReviewInfoCard({
             <div>
               <p className="text-xs text-base-content/60">Review Date</p>
               <p className="text-sm font-semibold text-base-content">
-                {dayjs(reviewedAt).format("MMM DD, YYYY hh:mm A")}
+                {customFormatDate(reviewedAt, FORMAT_PRESETS.DISPLAY_DATETIME)}
               </p>
             </div>
           </div>
@@ -254,11 +254,11 @@ export default function LeaveRecord({
                       Leave Period
                     </p>
                     <p className="text-lg font-bold text-base-content">
-                      {dayjs(leave.startDate).format("MMM DD, YYYY")}
+                      {customFormatDate(leave.startDate)}
                       {leave.endDate && (
                         <>
                           <span className="mx-2 text-base-content/40">-</span>
-                          {dayjs(leave.endDate).format("MMM DD, YYYY")}
+                          {customFormatDate(leave.endDate)}
                         </>
                       )}
                     </p>

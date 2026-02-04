@@ -58,3 +58,40 @@ export interface IEmergencyContact {
 //   workSchedule: IWorkSchedule;
 //   workSites: IWorkSite[];
 // }
+
+export interface IEmployeeCalendarData {
+  joiningDate: Date;
+  registrationDate: Date;
+  attendances: {
+    date: string;
+    status: string;
+    totalMinutes: number;
+    breakMinutes: number;
+    overtimeMinutes: number;
+  }[];
+  leaves: {
+    startDate: Date;
+    endDate: Date;
+    status: string;
+    leaveDuration: string;
+    totalMinutes: number;
+  }[];
+  holidays: {
+    startDate: Date;
+    endDate: Date;
+    name: string;
+    description: string;
+    isPaid: boolean;
+    holidayType: string;
+    isRecurring: boolean;
+  }[];
+}
+
+export interface IEmployeeCalendarDataResponse {
+  employeeCalendar: {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: IEmployeeCalendarData;
+  };
+}

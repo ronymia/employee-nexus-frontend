@@ -24,6 +24,7 @@ export const OWNER_DASHBOARD = gql`
             late
             onLeave
             notPunchedIn
+            attendanceOnToday
           }
           thisWeek {
             averageAttendanceRate

@@ -13,12 +13,12 @@ import {
   UPDATE_PAYROLL_CYCLE,
 } from "@/graphql/payroll-cycle.api";
 import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import utc from "dayjs/plugin/utc";
 import { IPayrollCycleFormData, payrollCycleSchema } from "@/schemas";
-
-dayjs.extend(customParseFormat);
-dayjs.extend(utc);
+import {
+  customFormatDate,
+  formatDateForAPI,
+  FORMAT_PRESETS,
+} from "@/utils/date-format.utils";
 
 interface IPayrollCycleFormProps {
   cycle?: IPayrollCycle;
@@ -38,13 +38,9 @@ export default function PayrollCycleForm({
 
   const handleSubmit = async (data: IPayrollCycleFormData) => {
     try {
-      const periodStart = dayjs
-        .utc(data.periodStart, "DD-MM-YYYY")
-        .toISOString();
-      const periodEnd = dayjs.utc(data.periodEnd, "DD-MM-YYYY").toISOString();
-      const paymentDate = dayjs
-        .utc(data.paymentDate, "DD-MM-YYYY")
-        .toISOString();
+      const periodStart = formatDateForAPI(data.periodStart);
+      const periodEnd = formatDateForAPI(data.periodEnd);
+      const paymentDate = formatDateForAPI(data.paymentDate);
 
       const input = {
         name: data.name,
@@ -81,14 +77,23 @@ export default function PayrollCycleForm({
     name: cycle?.name || "",
     frequency: cycle?.frequency || PayrollFrequency.MONTHLY,
     periodStart: cycle?.periodStart
-      ? dayjs(cycle.periodStart).format("DD-MM-YYYY")
-      : dayjs().startOf("month").format("DD-MM-YYYY"),
+      ? customFormatDate(cycle.periodStart, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(
+          dayjs().startOf("month").toDate(),
+          FORMAT_PRESETS.INPUT_DATE,
+        ),
     periodEnd: cycle?.periodEnd
-      ? dayjs(cycle.periodEnd).format("DD-MM-YYYY")
-      : dayjs().endOf("month").format("DD-MM-YYYY"),
+      ? customFormatDate(cycle.periodEnd, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(
+          dayjs().endOf("month").toDate(),
+          FORMAT_PRESETS.INPUT_DATE,
+        ),
     paymentDate: cycle?.paymentDate
-      ? dayjs(cycle.paymentDate).format("DD-MM-YYYY")
-      : dayjs().endOf("month").add(5, "days").format("DD-MM-YYYY"),
+      ? customFormatDate(cycle.paymentDate, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(
+          dayjs().endOf("month").add(5, "days").toDate(),
+          FORMAT_PRESETS.INPUT_DATE,
+        ),
     notes: cycle?.notes || "",
   };
 

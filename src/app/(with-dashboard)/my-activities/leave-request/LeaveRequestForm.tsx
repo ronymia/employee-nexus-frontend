@@ -7,11 +7,8 @@ import CustomSelect from "@/components/form/input/CustomSelect";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import CustomDatePicker from "@/components/form/input/CustomDatePicker";
 import CustomFileUploader from "@/components/form/input/CustomFileUploader";
-import EmployeeSelect from "@/components/input-fields/EmployeeSelect";
-import LeaveTypeSelect from "@/components/input-fields/LeaveTypeSelect";
 import { useFormContext, useWatch } from "react-hook-form";
 import {
-  IEmployeeCalendarDataResponse,
   ILeave,
   ILeaveBalanceData,
   ILeaveBalanceResponse,
@@ -20,32 +17,25 @@ import {
 } from "@/types";
 import { minutesToHoursAndMinutes } from "@/utils/time.utils";
 import { useMutation, useQuery } from "@apollo/client/react";
+import { GET_LEAVE_TYPES } from "@/graphql/leave-types.api";
 import {
-  CREATE_LEAVE,
+  LEAVE_REQUEST,
   UPDATE_LEAVE,
   LEAVE_BALANCE,
-  LEAVE_OVERVIEW,
-  GET_LEAVES,
 } from "@/graphql/leave.api";
+import { GET_EMPLOYEE_CALENDAR } from "@/graphql/employee-calendar.api";
+import { GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE } from "@/graphql/employee-work-schedule.api";
 import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import dayjsUTC from "dayjs/plugin/utc";
+import utc from "dayjs/plugin/utc";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import {
-  customFormatDate,
-  formatDateForAPI,
-  FORMAT_PRESETS,
-} from "@/utils/date-format.utils";
 import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "motion/react";
 import { PiClock, PiHandPalmBold } from "react-icons/pi";
-import { showToast } from "@/components/ui/CustomToast";
-import { GET_EMPLOYEE_CALENDAR } from "@/graphql/employee-calendar.api";
-import { GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE } from "@/graphql/employee-work-schedule.api";
 
 dayjs.extend(customParseFormat);
-dayjs.extend(dayjsUTC);
+dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
 
 // ==================== TYPESCRIPT INTERFACES ====================
@@ -56,65 +46,13 @@ interface ILeaveFormProps {
   refetch?: () => void;
 }
 
+// ==================== CALENDAR DATA INTERFACE ====================
+// ==================== GRAPHQL QUERIES ====================
+import { IEmployeeCalendarDataResponse } from "@/types/employee.type"; // Assuming type location or standard import
+
 // ==================== SUB-COMPONENTS ====================
 
-// BASIC INFO SECTION
-interface IBasicInfoSectionProps {
-  yearOptions: { label: string; value: number }[];
-  durationOptions: { label: string; value: LeaveDuration }[];
-  actionType: "create" | "update";
-}
-
-function BasicInfoSection({
-  yearOptions,
-  durationOptions,
-  actionType,
-}: IBasicInfoSectionProps) {
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <h4 className="text-base font-semibold mb-3 text-primary">
-        Basic Information
-      </h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <EmployeeSelect
-          dataAuto="userId"
-          name="userId"
-          label="Employee"
-          placeholder="Select Employee"
-          required={true}
-          disabled={actionType === "update"}
-        />
-        <LeaveTypeSelect
-          dataAuto="leaveTypeId"
-          name="leaveTypeId"
-          label="Leave Type"
-          placeholder="Select Leave Type"
-          required={true}
-        />
-        <CustomSelect
-          dataAuto="leaveYear"
-          name="leaveYear"
-          label="Leave Year"
-          placeholder="Select Year"
-          required={true}
-          options={yearOptions}
-          isLoading={false}
-        />
-        <CustomSelect
-          dataAuto="leaveDuration"
-          name="leaveDuration"
-          label="Duration Type"
-          placeholder="Select Duration"
-          required={true}
-          options={durationOptions}
-          isLoading={false}
-        />
-      </div>
-    </div>
-  );
-}
-
-// RADIAL PROGRESS COMPONENT (Refined)
+// RADIAL PROGRESS COMPONENT
 function RadialProgress({
   percentage,
   size = 140,
@@ -262,7 +200,7 @@ function LeaveBalanceDisplay({
               <div className="flex flex-col items-center justify-center shrink-0">
                 <div className="relative p-1.5 rounded-3xl bg-base-200 border border-base-content/5 shadow-inner transition-transform duration-500">
                   <RadialProgress
-                    percentage={usagePercentage}
+                    percentage={isNaN(usagePercentage) ? 0 : usagePercentage}
                     size={120}
                     strokeWidth={10}
                   />
@@ -363,7 +301,6 @@ function SelectionPrompt() {
       transition={{ duration: 0.4 }}
       className="border border-primary/20 rounded-xl p-8 bg-linear-to-br from-primary/5 via-transparent to-transparent text-center"
     >
-      {/* ANIMATED ICON */}
       <motion.div
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
@@ -378,197 +315,43 @@ function SelectionPrompt() {
         </motion.div>
       </motion.div>
 
-      {/* TITLE */}
       <motion.h3
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         className="text-lg font-semibold text-base-content mb-3"
       >
-        Complete Required Fields
+        Select Leave Details
       </motion.h3>
 
-      {/* DESCRIPTION */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
         className="text-sm text-base-content/60 mb-6"
       >
-        Please fill in the following fields to view leave balance and continue
+        Please select a Leave Type and Year to view your balance and proceed.
       </motion.p>
-
-      {/* REQUIRED FIELDS CHECKLIST */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="inline-flex flex-col gap-2 text-left"
-      >
-        {["Employee", "Leave Type", "Year"].map((field, index) => (
-          <motion.div
-            key={field}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 + index * 0.1 }}
-            className="flex items-center gap-3 px-4 py-2 rounded-lg bg-base-100/50 border border-primary/10"
-          >
-            <div className="w-6 h-6 rounded-full border-2 border-primary/30 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-primary/50"></div>
-            </div>
-            <span className="text-sm font-medium text-base-content/70">
-              {field}
-            </span>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* PULSING INDICATOR */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 2, repeat: Infinity, delay: 0.9 }}
-        className="mt-6 text-xs text-primary font-medium"
-      >
-        ↑ Select fields above to continue
-      </motion.div>
     </motion.div>
   );
 }
 
-// ==================== ANIMATIONS ====================
-// Loader component for shimmer effect
-// function ShimmerLoader() {
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0 }}
-//       animate={{ opacity: 1 }}
-//       transition={{ duration: 0.5 }}
-//       className="relative w-full h-full overflow-hidden rounded-xl bg-base-200"
-//     >
-//       <motion.div
-//         className="absolute top-0 left-0 h-full w-full bg-linear-to-r from-transparent via-white/10 to-transparent"
-//         animate={{
-//           x: ["-100%", "200%"],
-//         }}
-//         transition={{
-//           duration: 1.5,
-//           ease: "easeInOut",
-//           repeat: Infinity,
-//           repeatType: "loop",
-//         }}
-//       />
-//     </motion.div>
-//   );
-// }
-
-// DATE SECTION
-interface IDateSectionProps {
-  leaveDuration: LeaveDuration;
-  specialDates: {
-    title: string;
-    className: string;
-    date: string;
-    disabled: boolean;
-  }[];
-}
-
-function DateSection({ leaveDuration, specialDates }: IDateSectionProps) {
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <h4 className="text-base font-semibold mb-3 text-primary">
-        Leave Period
-      </h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CustomDatePicker
-          dataAuto="startDate"
-          name="startDate"
-          label="Start Date"
-          placeholder="Select Start Date"
-          required={true}
-          specialDates={specialDates}
-        />
-        {leaveDuration === LeaveDuration.MULTI_DAY && (
-          <CustomDatePicker
-            dataAuto="endDate"
-            name="endDate"
-            label="End Date"
-            placeholder="Select End Date"
-            required={true}
-            specialDates={specialDates}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ATTACHMENTS SECTION
-function AttachmentsSection() {
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <h4 className="text-base font-semibold mb-3 text-primary">
-        Supporting Documents
-      </h4>
-      <CustomFileUploader
-        name="attachments"
-        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-        dataAuto="attachments"
-        multiple={true}
-      />
-    </div>
-  );
-}
-
-// NOTES SECTION
-function NotesSection() {
-  return (
-    <div className="border border-primary/20 rounded-lg p-4">
-      <h4 className="text-base font-semibold mb-3 text-primary">
-        Additional Information
-      </h4>
-      <CustomTextareaField
-        dataAuto="notes"
-        name="notes"
-        label="Notes"
-        placeholder="Add any additional notes or reason for leave..."
-        required={false}
-        rows={3}
-      />
-    </div>
-  );
-}
-
-// ==================== MAIN COMPONENT ====================
-export default function LeaveForm({
+// ==================== MAIN FORM COMPONENT ====================
+export default function LeaveRequestForm({
   leave,
   actionType,
   onClose,
   refetch,
 }: ILeaveFormProps) {
-  // ==================== LOCAL STATE ====================
   const [isPending, setIsPending] = useState(false);
   const token = useAppStore((state) => state.token);
+  const user = useAppStore((state) => state.user);
   const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // ==================== GRAPHQL MUTATIONS ====================
-  const [createLeave] = useMutation(CREATE_LEAVE, {
-    awaitRefetchQueries: true,
-    refetchQueries: [
-      { query: GET_LEAVES, variables: { query: {} } },
-      { query: LEAVE_OVERVIEW },
-    ],
-  });
-  const [updateLeave] = useMutation(UPDATE_LEAVE, {
-    awaitRefetchQueries: true,
-    refetchQueries: [
-      { query: GET_LEAVES, variables: { query: {} } },
-      { query: LEAVE_OVERVIEW },
-    ],
-  });
+  const [requestLeave] = useMutation(LEAVE_REQUEST);
+  const [updateLeave] = useMutation(UPDATE_LEAVE);
 
-  // ==================== HELPER FUNCTIONS ====================
-  // UPLOAD ATTACHMENTS
+  // Upload attachments function
   const uploadAttachments = async (files: File[]): Promise<string[]> => {
     const uploadPromises = files.map(async (file) => {
       const formData = new FormData();
@@ -596,30 +379,31 @@ export default function LeaveForm({
     return Promise.all(uploadPromises);
   };
 
-  // ==================== FORM SUBMISSION ====================
   const handleSubmit = async (data: any) => {
     try {
       setIsPending(true);
 
-      // HANDLE FILE UPLOAD
+      // Handle file upload
       let attachmentPaths: string[] = [];
       if (data.attachments && data.attachments instanceof File) {
         const newFiles: File[] = [data.attachments];
+
         if (newFiles.length > 0) {
           attachmentPaths = await uploadAttachments(newFiles);
         }
       }
 
-      // FORMAT DATES TO ISO 8601 (UTC)
-      const startDate = formatDateForAPI(data.startDate);
+      // Format dates to ISO 8601 UTC
+      const startDate = dayjs(data.startDate, "DD-MM-YYYY")
+        .utc(true)
+        .toISOString();
       const endDate =
         data.endDate && data.leaveDuration === LeaveDuration.MULTI_DAY
-          ? formatDateForAPI(data.endDate)
+          ? dayjs(data.endDate, "DD-MM-YYYY").utc(true).toISOString()
           : undefined;
 
-      // PREPARE INPUT
       const input = {
-        userId: Number(data.userId),
+        userId: Number(user?.id),
         leaveTypeId: Number(data.leaveTypeId),
         leaveYear: Number(data.leaveYear),
         leaveDuration: data.leaveDuration,
@@ -632,105 +416,87 @@ export default function LeaveForm({
         notes: data.notes || undefined,
       };
 
-      // CREATE OR UPDATE
       if (actionType === "create") {
-        await createLeave({
+        await requestLeave({
           variables: {
-            createLeaveInput: input,
+            requestLeaveInput: input,
           },
         });
-        showToast.success(
-          "Created!",
-          "Leave request has been created successfully",
-        );
       } else {
         await updateLeave({
           variables: {
             updateLeaveInput: { ...input, id: Number(leave?.id) },
           },
         });
-        showToast.success(
-          "Updated!",
-          "Leave request has been updated successfully",
-        );
       }
 
       refetch?.();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error submitting leave:", error);
-      showToast.error(
-        "Error",
-        error.message || `Failed to ${actionType} leave request`,
-      );
     } finally {
       setIsPending(false);
     }
   };
 
-  // ==================== DEFAULT VALUES ====================
   const defaultValues = {
-    userId: leave?.userId || "",
     leaveTypeId: leave?.leaveTypeId ? Number(leave.leaveTypeId) : "",
     leaveYear: leave?.leaveYear || new Date().getFullYear(),
     leaveDuration: leave?.leaveDuration || LeaveDuration.SINGLE_DAY,
     startDate: leave?.startDate
-      ? customFormatDate(leave.startDate, FORMAT_PRESETS.INPUT_DATE)
-      : customFormatDate(new Date(), FORMAT_PRESETS.INPUT_DATE),
-    endDate: leave?.endDate
-      ? customFormatDate(leave.endDate, FORMAT_PRESETS.INPUT_DATE)
+      ? dayjs(leave.startDate).format("DD-MM-YYYY")
       : "",
+    endDate: leave?.endDate ? dayjs(leave.endDate).format("DD-MM-YYYY") : "",
     attachments: leave?.attachments ? JSON.parse(leave.attachments)?.at(0) : [],
     notes: leave?.notes || "",
   };
 
-  // ==================== RENDER ====================
   return (
-    <CustomForm
-      submitHandler={handleSubmit}
-      defaultValues={defaultValues}
-      className={`flex flex-col gap-4`}
-    >
-      <LeaveFormFields actionType={actionType} leave={leave} />
+    <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
+      <LeaveFormFields leave={leave} />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
   );
 }
 
-// ==================== FORM FIELDS COMPONENT ====================
-function LeaveFormFields({
-  actionType,
-  leave,
-}: {
-  actionType: "create" | "update";
-  leave?: ILeave;
-}) {
-  // ==================== FORM CONTEXT ====================
-  const { control, watch } = useFormContext();
+function LeaveFormFields({ leave }: { leave?: ILeave }) {
+  const { control } = useFormContext();
+  const user = useAppStore((state) => state.user);
+  const userId = user?.id;
 
-  // WATCH REQUIRED FIELDS FOR BALANCE CHECK
-  const userId = watch("userId");
-  const leaveTypeId = watch("leaveTypeId");
-  const leaveYear = watch("leaveYear");
-
+  // WATCH FIELDS
   const leaveDuration = useWatch({
     control,
     name: "leaveDuration",
     defaultValue: LeaveDuration.SINGLE_DAY,
   });
+  const leaveTypeId = useWatch({ control, name: "leaveTypeId" });
+  const leaveYear = useWatch({ control, name: "leaveYear" });
 
-  // ==================== LEAVE BALANCE QUERY ====================
-  const shouldFetchBalance =
-    userId && leaveTypeId && leaveYear && actionType === "create";
+  const shouldFetchBalance = !!(userId && leaveTypeId && leaveYear);
 
+  // FETCH LEAVE TYPES
+  const { data: leaveTypesData } = useQuery<{
+    leaveTypes: { data: any[] };
+  }>(GET_LEAVE_TYPES);
+
+  const leaveTypeOptions = (leaveTypesData?.leaveTypes?.data || []).map(
+    (type) => ({
+      label: type.name,
+      value: type.id,
+    }),
+  );
+
+  // FETCH LEAVE BALANCE
   const { data: balanceData, loading: balanceLoading } =
     useQuery<ILeaveBalanceResponse>(LEAVE_BALANCE, {
       variables: {
-        leaveTypeId: Number(leaveTypeId),
         userId: Number(userId),
+        leaveTypeId: Number(leaveTypeId),
         year: Number(leaveYear),
       },
       skip: !shouldFetchBalance,
+      fetchPolicy: "network-only",
     });
 
   const leaveBalance = balanceData?.leaveBalance?.data;
@@ -831,9 +597,7 @@ function LeaveFormFields({
     }) || []),
   ];
 
-  const showRestOfForm =
-    actionType === "update" || (shouldFetchBalance && !balanceLoading);
-
+  // OPTIONS
   const durationOptions = [
     { label: "Single Day", value: LeaveDuration.SINGLE_DAY },
     { label: "Multi Day", value: LeaveDuration.MULTI_DAY },
@@ -846,45 +610,116 @@ function LeaveFormFields({
     value: currentYear - 1 + i,
   }));
 
-  // ==================== RENDER ====================
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* BASIC INFO */}
-      <BasicInfoSection
-        yearOptions={yearOptions}
-        durationOptions={durationOptions}
-        actionType={actionType}
-      />
-
-      {/* LEAVE BALANCE */}
-      <LeaveBalanceDisplay
-        shouldFetchBalance={shouldFetchBalance}
-        balanceLoading={balanceLoading}
-        leaveBalance={leaveBalance}
-      />
-
-      {/* CONDITIONAL PROMPT */}
-      {!showRestOfForm && actionType === "create" && <SelectionPrompt />}
-
-      {/* REST OF FORM */}
-      {showRestOfForm && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="space-y-4"
-        >
-          {/* DATE SECTION */}
-          <DateSection
-            leaveDuration={leaveDuration}
-            specialDates={specialDates}
+      <div className="border border-primary/20 rounded-lg p-4">
+        <h4 className="text-base font-semibold mb-3 text-primary">
+          Basic Information
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CustomSelect
+            dataAuto="leaveTypeId"
+            name="leaveTypeId"
+            label="Leave Type"
+            placeholder="Select Leave Type"
+            required={true}
+            options={leaveTypeOptions}
+            isLoading={false}
           />
+          <CustomSelect
+            dataAuto="leaveYear"
+            name="leaveYear"
+            label="Leave Year"
+            placeholder="Select Year"
+            required={true}
+            options={yearOptions}
+            isLoading={false}
+          />
+          <CustomSelect
+            dataAuto="leaveDuration"
+            name="leaveDuration"
+            label="Duration Type"
+            placeholder="Select Duration"
+            required={true}
+            options={durationOptions}
+            isLoading={false}
+          />
+        </div>
+      </div>
+
+      {/* LEAVE BALANCE INDICATOR OR PROMPT */}
+      {shouldFetchBalance ? (
+        <LeaveBalanceDisplay
+          shouldFetchBalance={shouldFetchBalance}
+          balanceLoading={balanceLoading}
+          leaveBalance={leaveBalance}
+        />
+      ) : (
+        <SelectionPrompt />
+      )}
+
+      {/* SHOW REST OF FORM ONLY IF BALANCE LOADED */}
+      {leaveBalance && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          {/* DATE INFO */}
+          <div className="border border-primary/20 rounded-lg p-4">
+            <h4 className="text-base font-semibold mb-3 text-primary">
+              Leave Period
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CustomDatePicker
+                dataAuto="startDate"
+                name="startDate"
+                label="Start Date"
+                placeholder="Select Start Date"
+                required={true}
+                specialDates={specialDates}
+              />
+              {leaveDuration === LeaveDuration.MULTI_DAY && (
+                <CustomDatePicker
+                  dataAuto="endDate"
+                  name="endDate"
+                  label="End Date"
+                  placeholder="Select End Date"
+                  required={true}
+                  specialDates={specialDates}
+                />
+              )}
+            </div>
+          </div>
 
           {/* ATTACHMENTS */}
-          <AttachmentsSection />
+          <div className="border border-primary/20 rounded-lg p-4">
+            <h4 className="text-base font-semibold mb-3 text-primary">
+              Supporting Documents
+            </h4>
+            <CustomFileUploader
+              name="attachments"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              dataAuto="attachments"
+              multiple={true}
+            />
+          </div>
 
           {/* NOTES */}
-          <NotesSection />
+          <div className="border border-primary/20 rounded-lg p-4">
+            <h4 className="text-base font-semibold mb-3 text-primary">
+              Additional Information
+            </h4>
+            <CustomTextareaField
+              dataAuto="notes"
+              name="notes"
+              label="Notes"
+              placeholder="Add any additional notes..."
+              required={false}
+              rows={3}
+            />
+          </div>
         </motion.div>
       )}
     </div>

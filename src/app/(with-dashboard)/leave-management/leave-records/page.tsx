@@ -147,16 +147,6 @@ function LeaveOverview() {
       description: "Leave requests that have been rejected.",
     },
     {
-      title: "Cancelled",
-      value: summary?.cancelled || 0,
-      Icon: PiXCircle,
-      bgColor: "bg-base-200",
-      decorationColor: "bg-base-300",
-      iconColor: "text-base-content/60",
-      subText: `out of ${summary?.total}`,
-      description: "Leave requests that were cancelled.",
-    },
-    {
       title: "Single Day",
       value: summary?.singleDay || 0,
       Icon: PiCalendar,

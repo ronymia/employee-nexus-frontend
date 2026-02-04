@@ -7,8 +7,6 @@ import {
   IRecentProject,
   IRecentActivity,
   IUpcomingLeave,
-  PayrollCycleStatus,
-  PayrollFrequency,
 } from "@/types";
 import CustomLoading from "@/components/loader/CustomLoading";
 import {
@@ -32,9 +30,7 @@ import {
 } from "react-icons/hi";
 import { HiOutlineUserGroup, HiOutlineBell } from "react-icons/hi2";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-
-dayjs.extend(relativeTime);
+import { customFormatDate, FORMAT_PRESETS } from "@/utils/date-format.utils";
 
 const COLORS = {
   primary: "#10b981",
@@ -56,226 +52,226 @@ const PIE_COLORS = [
 ];
 
 // Mock/Dummy Data for UI Development
-const MOCK_DASHBOARD_DATA: IOwnerDashboardResponse = {
-  success: true,
-  statusCode: 200,
-  message: "Success",
-  data: {
-    businessOverview: {
-      totalEmployees: 156,
-      activeEmployees: 142,
-      inactiveEmployees: 14,
-      totalDepartments: 8,
-      totalProjects: 24,
-      activeProjects: 18,
-      totalMonthlyPayroll: 485000,
-      pendingPayrollAmount: 32000,
-    },
-    attendanceAnalytics: {
-      today: {
-        present: 128,
-        absent: 8,
-        late: 12,
-        onLeave: 6,
-        notPunchedIn: 2,
-      },
-      thisWeek: {
-        averageAttendanceRate: 92.5,
-        totalWorkingDays: 5,
-        totalPresentDays: 4,
-      },
-      thisMonth: {
-        attendanceRate: 94.2,
-        lateArrivals: 45,
-        earlyDepartures: 12,
-      },
-      trend: [
-        {
-          date: dayjs().subtract(6, "day").format("YYYY-MM-DD"),
-          presentCount: 132,
-        },
-        {
-          date: dayjs().subtract(5, "day").format("YYYY-MM-DD"),
-          presentCount: 128,
-        },
-        {
-          date: dayjs().subtract(4, "day").format("YYYY-MM-DD"),
-          presentCount: 135,
-        },
-        {
-          date: dayjs().subtract(3, "day").format("YYYY-MM-DD"),
-          presentCount: 130,
-        },
-        {
-          date: dayjs().subtract(2, "day").format("YYYY-MM-DD"),
-          presentCount: 138,
-        },
-        {
-          date: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
-          presentCount: 140,
-        },
-        { date: dayjs().format("YYYY-MM-DD"), presentCount: 128 },
-      ],
-    },
-    leaveStats: {
-      pending: 8,
-      approved: 45,
-      rejected: 3,
-      thisMonth: {
-        total: 56,
-        byType: [
-          { leaveType: "Annual Leave", count: 22 },
-          { leaveType: "Sick Leave", count: 15 },
-          { leaveType: "Personal Leave", count: 10 },
-          { leaveType: "Maternity Leave", count: 6 },
-          { leaveType: "Emergency Leave", count: 3 },
-        ],
-      },
-      upcomingLeaves: [
-        {
-          employeeName: "Sarah Johnson",
-          leaveType: "Annual Leave",
-          startDate: dayjs().add(2, "day").format("YYYY-MM-DD"),
-          endDate: dayjs().add(6, "day").format("YYYY-MM-DD"),
-        },
-        {
-          employeeName: "Michael Chen",
-          leaveType: "Sick Leave",
-          startDate: dayjs().add(3, "day").format("YYYY-MM-DD"),
-          endDate: dayjs().add(3, "day").format("YYYY-MM-DD"),
-        },
-        {
-          employeeName: "Emily Davis",
-          leaveType: "Personal Leave",
-          startDate: dayjs().add(5, "day").format("YYYY-MM-DD"),
-          endDate: dayjs().add(7, "day").format("YYYY-MM-DD"),
-        },
-        {
-          employeeName: "James Wilson",
-          leaveType: "Annual Leave",
-          startDate: dayjs().add(7, "day").format("YYYY-MM-DD"),
-          endDate: dayjs().add(14, "day").format("YYYY-MM-DD"),
-        },
-      ],
-    },
-    payrollSummary: {
-      currentCycle: {
-        name: "December 2025 Payroll",
-        status: PayrollCycleStatus.PROCESSING,
-        periodStart: "2025-12-01",
-        periodEnd: "2025-12-31",
-        paymentDate: "2025-12-31",
-        totalEmployees: 142,
-        totalGrossPay: 485000,
-        totalDeductions: 48500,
-        totalNetPay: 436500,
-        businessId: 1,
-        id: 101,
-        frequency: PayrollFrequency.MONTHLY,
-        createdAt: "2025-12-01T10:00:00Z",
-        updatedAt: "2025-12-15T12:00:00Z",
-      },
-      yearToDate: {
-        totalPaid: 5420000,
-        averageMonthlyPayroll: 451667,
-        highestMonth: {
-          month: "December",
-          amount: 485000,
-        },
-        lowestMonth: {
-          month: "February",
-          amount: 420000,
-        },
-      },
-      pendingActions: {
-        draftCycles: 2,
-        pendingApprovals: 5,
-        pendingPayments: 3,
-      },
-    },
-    projectOverview: {
-      total: 24,
-      active: 18,
-      completed: 4,
-      onHold: 2,
-      recentProjects: [
-        {
-          name: "Mobile App Redesign",
-          status: "ACTIVE",
-          memberCount: 8,
-          startDate: "2025-11-15",
-          endDate: "2026-02-28",
-        },
-        {
-          name: "Customer Portal Enhancement",
-          status: "ACTIVE",
-          memberCount: 6,
-          startDate: "2025-12-01",
-          endDate: "2026-01-31",
-        },
-        {
-          name: "HR System Integration",
-          status: "COMPLETED",
-          memberCount: 5,
-          startDate: "2025-09-01",
-          endDate: "2025-11-30",
-        },
-        {
-          name: "Security Audit",
-          status: "ON_HOLD",
-          memberCount: 3,
-          startDate: "2025-10-15",
-          endDate: "2025-12-15",
-        },
-      ],
-    },
-    recentActivities: {
-      unreadNotifications: 12,
-      recentActivities: [
-        {
-          type: "leave",
-          message: "Sarah Johnson requested 5 days of Annual Leave",
-          timestamp: dayjs().subtract(30, "minute").toISOString(),
-        },
-        {
-          type: "attendance",
-          message: "12 employees marked as late today",
-          timestamp: dayjs().subtract(1, "hour").toISOString(),
-        },
-        {
-          type: "payroll",
-          message: "December 2025 Payroll cycle initiated",
-          timestamp: dayjs().subtract(2, "hour").toISOString(),
-        },
-        {
-          type: "leave",
-          message: "Michael Chen's Sick Leave was approved",
-          timestamp: dayjs().subtract(3, "hour").toISOString(),
-        },
-        {
-          type: "project",
-          message: "Mobile App Redesign project milestone completed",
-          timestamp: dayjs().subtract(5, "hour").toISOString(),
-        },
-        {
-          type: "attendance",
-          message: "Average attendance rate increased to 94.2%",
-          timestamp: dayjs().subtract(1, "day").toISOString(),
-        },
-        {
-          type: "payroll",
-          message: "November payroll processed successfully",
-          timestamp: dayjs().subtract(2, "day").toISOString(),
-        },
-        {
-          type: "leave",
-          message: "5 leave requests pending approval",
-          timestamp: dayjs().subtract(3, "day").toISOString(),
-        },
-      ],
-    },
-  },
-};
+// const MOCK_DASHBOARD_DATA: IOwnerDashboardResponse = {
+//   success: true,
+//   statusCode: 200,
+//   message: "Success",
+//   data: {
+//     businessOverview: {
+//       totalEmployees: 156,
+//       activeEmployees: 142,
+//       inactiveEmployees: 14,
+//       totalDepartments: 8,
+//       totalProjects: 24,
+//       activeProjects: 18,
+//       totalMonthlyPayroll: 485000,
+//       pendingPayrollAmount: 32000,
+//     },
+//     attendanceAnalytics: {
+//       today: {
+//         present: 128,
+//         absent: 8,
+//         late: 12,
+//         onLeave: 6,
+//         notPunchedIn: 2,
+//       },
+//       thisWeek: {
+//         averageAttendanceRate: 92.5,
+//         totalWorkingDays: 5,
+//         totalPresentDays: 4,
+//       },
+//       thisMonth: {
+//         attendanceRate: 94.2,
+//         lateArrivals: 45,
+//         earlyDepartures: 12,
+//       },
+//       trend: [
+//         {
+//           date: dayjs().subtract(6, "day").format("YYYY-MM-DD"),
+//           presentCount: 132,
+//         },
+//         {
+//           date: dayjs().subtract(5, "day").format("YYYY-MM-DD"),
+//           presentCount: 128,
+//         },
+//         {
+//           date: dayjs().subtract(4, "day").format("YYYY-MM-DD"),
+//           presentCount: 135,
+//         },
+//         {
+//           date: dayjs().subtract(3, "day").format("YYYY-MM-DD"),
+//           presentCount: 130,
+//         },
+//         {
+//           date: dayjs().subtract(2, "day").format("YYYY-MM-DD"),
+//           presentCount: 138,
+//         },
+//         {
+//           date: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
+//           presentCount: 140,
+//         },
+//         { date: dayjs().format("YYYY-MM-DD"), presentCount: 128 },
+//       ],
+//     },
+//     leaveStats: {
+//       pending: 8,
+//       approved: 45,
+//       rejected: 3,
+//       thisMonth: {
+//         total: 56,
+//         byType: [
+//           { leaveType: "Annual Leave", count: 22 },
+//           { leaveType: "Sick Leave", count: 15 },
+//           { leaveType: "Personal Leave", count: 10 },
+//           { leaveType: "Maternity Leave", count: 6 },
+//           { leaveType: "Emergency Leave", count: 3 },
+//         ],
+//       },
+//       upcomingLeaves: [
+//         {
+//           employeeName: "Sarah Johnson",
+//           leaveType: "Annual Leave",
+//           startDate: dayjs().add(2, "day").format("YYYY-MM-DD"),
+//           endDate: dayjs().add(6, "day").format("YYYY-MM-DD"),
+//         },
+//         {
+//           employeeName: "Michael Chen",
+//           leaveType: "Sick Leave",
+//           startDate: dayjs().add(3, "day").format("YYYY-MM-DD"),
+//           endDate: dayjs().add(3, "day").format("YYYY-MM-DD"),
+//         },
+//         {
+//           employeeName: "Emily Davis",
+//           leaveType: "Personal Leave",
+//           startDate: dayjs().add(5, "day").format("YYYY-MM-DD"),
+//           endDate: dayjs().add(7, "day").format("YYYY-MM-DD"),
+//         },
+//         {
+//           employeeName: "James Wilson",
+//           leaveType: "Annual Leave",
+//           startDate: dayjs().add(7, "day").format("YYYY-MM-DD"),
+//           endDate: dayjs().add(14, "day").format("YYYY-MM-DD"),
+//         },
+//       ],
+//     },
+//     payrollSummary: {
+//       currentCycle: {
+//         name: "December 2025 Payroll",
+//         status: PayrollCycleStatus.PROCESSING,
+//         periodStart: "2025-12-01",
+//         periodEnd: "2025-12-31",
+//         paymentDate: "2025-12-31",
+//         totalEmployees: 142,
+//         totalGrossPay: 485000,
+//         totalDeductions: 48500,
+//         totalNetPay: 436500,
+//         businessId: 1,
+//         id: 101,
+//         frequency: PayrollFrequency.MONTHLY,
+//         createdAt: "2025-12-01T10:00:00Z",
+//         updatedAt: "2025-12-15T12:00:00Z",
+//       },
+//       yearToDate: {
+//         totalPaid: 5420000,
+//         averageMonthlyPayroll: 451667,
+//         highestMonth: {
+//           month: "December",
+//           amount: 485000,
+//         },
+//         lowestMonth: {
+//           month: "February",
+//           amount: 420000,
+//         },
+//       },
+//       pendingActions: {
+//         draftCycles: 2,
+//         pendingApprovals: 5,
+//         pendingPayments: 3,
+//       },
+//     },
+//     projectOverview: {
+//       total: 24,
+//       active: 18,
+//       completed: 4,
+//       onHold: 2,
+//       recentProjects: [
+//         {
+//           name: "Mobile App Redesign",
+//           status: "ACTIVE",
+//           memberCount: 8,
+//           startDate: "2025-11-15",
+//           endDate: "2026-02-28",
+//         },
+//         {
+//           name: "Customer Portal Enhancement",
+//           status: "ACTIVE",
+//           memberCount: 6,
+//           startDate: "2025-12-01",
+//           endDate: "2026-01-31",
+//         },
+//         {
+//           name: "HR System Integration",
+//           status: "COMPLETED",
+//           memberCount: 5,
+//           startDate: "2025-09-01",
+//           endDate: "2025-11-30",
+//         },
+//         {
+//           name: "Security Audit",
+//           status: "ON_HOLD",
+//           memberCount: 3,
+//           startDate: "2025-10-15",
+//           endDate: "2025-12-15",
+//         },
+//       ],
+//     },
+//     recentActivities: {
+//       unreadNotifications: 12,
+//       recentActivities: [
+//         {
+//           type: "leave",
+//           message: "Sarah Johnson requested 5 days of Annual Leave",
+//           timestamp: dayjs().subtract(30, "minute").toISOString(),
+//         },
+//         {
+//           type: "attendance",
+//           message: "12 employees marked as late today",
+//           timestamp: dayjs().subtract(1, "hour").toISOString(),
+//         },
+//         {
+//           type: "payroll",
+//           message: "December 2025 Payroll cycle initiated",
+//           timestamp: dayjs().subtract(2, "hour").toISOString(),
+//         },
+//         {
+//           type: "leave",
+//           message: "Michael Chen's Sick Leave was approved",
+//           timestamp: dayjs().subtract(3, "hour").toISOString(),
+//         },
+//         {
+//           type: "project",
+//           message: "Mobile App Redesign project milestone completed",
+//           timestamp: dayjs().subtract(5, "hour").toISOString(),
+//         },
+//         {
+//           type: "attendance",
+//           message: "Average attendance rate increased to 94.2%",
+//           timestamp: dayjs().subtract(1, "day").toISOString(),
+//         },
+//         {
+//           type: "payroll",
+//           message: "November payroll processed successfully",
+//           timestamp: dayjs().subtract(2, "day").toISOString(),
+//         },
+//         {
+//           type: "leave",
+//           message: "5 leave requests pending approval",
+//           timestamp: dayjs().subtract(3, "day").toISOString(),
+//         },
+//       ],
+//     },
+//   },
+// };
 
 export default function OwnerDashboard() {
   const { data, loading } = useQuery<{
@@ -286,7 +282,7 @@ export default function OwnerDashboard() {
   });
 
   // Use mock data for development
-  const dashboardData = data?.ownerDashboard?.data || MOCK_DASHBOARD_DATA.data;
+  const dashboardData = data?.ownerDashboard?.data;
 
   if (!dashboardData) {
     return (
@@ -323,7 +319,8 @@ export default function OwnerDashboard() {
           </p>
         </div>
         <div className="text-sm text-base-content/70">
-          Last updated: {dayjs().format("MMM DD, YYYY HH:mm")}
+          Last updated:{" "}
+          {customFormatDate(new Date(), FORMAT_PRESETS.DISPLAY_DATETIME)}
         </div>
       </div>
 
@@ -368,7 +365,7 @@ export default function OwnerDashboard() {
         {/* Today's Attendance */}
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
           <h3 className="text-lg font-semibold text-base-content mb-4">
-            Today's Attendance
+            Today's Attendance ({attendanceAnalytics.today.attendanceOnToday})
           </h3>
           <div className="space-y-3">
             <AttendanceItem
@@ -476,12 +473,14 @@ export default function OwnerDashboard() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
-              tickFormatter={(value) => dayjs(value).format("MMM DD")}
+              tickFormatter={(value) =>
+                customFormatDate(value, FORMAT_PRESETS.SHORT_DATE)
+              }
               style={{ fontSize: "12px" }}
             />
             <YAxis style={{ fontSize: "12px" }} />
             <Tooltip
-              labelFormatter={(value) => dayjs(value).format("MMM DD, YYYY")}
+              labelFormatter={(value) => customFormatDate(value)}
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",
@@ -580,9 +579,7 @@ export default function OwnerDashboard() {
               </div>
               <div className="text-sm opacity-90">
                 Payment Date:{" "}
-                {dayjs(payrollSummary.currentCycle.paymentDate).format(
-                  "MMM DD, YYYY",
-                )}
+                {customFormatDate(payrollSummary.currentCycle.paymentDate)}
               </div>
               <div className="text-xs opacity-75 mt-2">
                 {payrollSummary.currentCycle.totalEmployees} Employees
@@ -682,7 +679,10 @@ export default function OwnerDashboard() {
                       </div>
                       <div className="text-xs text-base-content/70 mt-1">
                         {project.memberCount} members •{" "}
-                        {dayjs(project.startDate).format("MMM DD")}
+                        {customFormatDate(
+                          project.startDate,
+                          FORMAT_PRESETS.SHORT_DATE,
+                        )}
                       </div>
                     </div>
                     <span
@@ -748,7 +748,9 @@ export default function OwnerDashboard() {
                       {activity.message}
                     </p>
                     <p className="text-xs text-base-content/70 mt-1">
-                      {dayjs(activity.timestamp).fromNow()}
+                      {customFormatDate(activity.timestamp, undefined, {
+                        relative: true,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -789,8 +791,8 @@ export default function OwnerDashboard() {
                             {leave.leaveType}
                           </span>
                         </td>
-                        <td>{dayjs(leave.startDate).format("MMM DD, YYYY")}</td>
-                        <td>{dayjs(leave.endDate).format("MMM DD, YYYY")}</td>
+                        <td>{customFormatDate(leave.startDate)}</td>
+                        <td>{customFormatDate(leave.endDate)}</td>
                         <td>
                           {duration} {duration === 1 ? "day" : "days"}
                         </td>

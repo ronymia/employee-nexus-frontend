@@ -8,6 +8,12 @@ import { motion, AnimatePresence } from "motion/react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import utc from "dayjs/plugin/utc";
+import {
+  customFormatDate,
+  formatDateForAPI,
+  formatDateTimeForAPI,
+  FORMAT_PRESETS,
+} from "@/utils/date-format.utils";
 
 // ==================== COMPONENT IMPORTS ====================
 import CustomForm from "@/components/form/CustomForm";
@@ -436,10 +442,10 @@ export default function AttendanceForm({
       const processedPunchRecords = formValues.punchRecords.map(
         (record: any) => {
           const punchInTime = record.punchIn
-            ? dayjs(record.punchIn).toISOString()
+            ? formatDateTimeForAPI(record.punchIn)
             : null;
           const punchOutTime = record.punchOut
-            ? dayjs(record.punchOut).toISOString()
+            ? formatDateTimeForAPI(record.punchOut)
             : null;
 
           const punchData: any = {
@@ -474,9 +480,8 @@ export default function AttendanceForm({
       );
 
       if (actionType === "create") {
-        // Parse date in UTC to avoid timezone issues
-        // DD-MM-YYYY → UTC date at midnight
-        const utcDate = dayjs.utc(formValues.date, "DD-MM-YYYY").toDate();
+        // Parse date in DD-MM-YYYY format and convert to UTC ISO string
+        const utcDate = formatDateForAPI(formValues.date);
 
         await createAttendance({
           variables: {
@@ -513,8 +518,8 @@ export default function AttendanceForm({
   const defaultValues = {
     userId: attendance?.userId ? Number(attendance?.userId) : "",
     date: attendance?.date
-      ? dayjs(attendance.date).format("DD-MM-YYYY")
-      : dayjs().format("DD-MM-YYYY"),
+      ? customFormatDate(attendance.date, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(new Date(), FORMAT_PRESETS.INPUT_DATE),
     punchRecords:
       attendance?.punchRecords && attendance.punchRecords.length > 0
         ? attendance.punchRecords.map((record) => ({
@@ -523,10 +528,10 @@ export default function AttendanceForm({
             projectId: record.projectId ? Number(record.projectId) : "",
             workSiteId: record.workSiteId ? Number(record.workSiteId) : "",
             punchIn: record.punchIn
-              ? dayjs(record.punchIn).format("YYYY-MM-DDTHH:mm")
+              ? dayjs.utc(record.punchIn).local().format("YYYY-MM-DDTHH:mm")
               : "",
             punchOut: record.punchOut
-              ? dayjs(record.punchOut).format("YYYY-MM-DDTHH:mm")
+              ? dayjs.utc(record.punchOut).local().format("YYYY-MM-DDTHH:mm")
               : "",
             notes: record.notes || "",
           }))

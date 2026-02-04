@@ -84,19 +84,17 @@ export default function Sidebar({
       label: menuNames.my_activities,
       path: "/my-activities",
       show:
-        (hasPermission(Permissions.AttendanceCreate) &&
-          userRole === "employee") ||
-        (hasPermission(Permissions.LeaveCreate) && userRole === "employee") ||
-        userRole === "employee",
+        (hasPermission(Permissions.AttendanceCreate) ||
+          hasPermission(Permissions.LeaveCreate)) &&
+        (userRole === "employee" || userRole === "manager"),
       subMenus: [
         {
           Icon: PiClock,
           label: "Attendance Request",
           path: "/my-activities/attendance-request",
           show:
-            (hasPermission(Permissions.AttendanceCreate) &&
-              userRole === "employee") ||
-            userRole === "employee",
+            hasPermission(Permissions.AttendanceCreate) &&
+            (userRole === "employee" || userRole === "manager"),
           subMenus: [],
         },
         {
@@ -104,9 +102,8 @@ export default function Sidebar({
           label: "Leave Request",
           path: "/my-activities/leave-request",
           show:
-            (hasPermission(Permissions.LeaveCreate) &&
-              userRole === "employee") ||
-            userRole === "employee",
+            hasPermission(Permissions.LeaveCreate) &&
+            (userRole === "employee" || userRole === "manager"),
           subMenus: [],
         },
       ],

@@ -57,10 +57,10 @@ export const GET_MY_PROFILE = gql`
             id
             name
           }
-          workSite {
-            id
-            name
-          }
+          # workSite {
+          #   id
+          #   name
+          # }
           workSchedule {
             id
             name
