@@ -36,27 +36,39 @@ export const GET_MY_PAYSLIPS = gql`
           periodEnd
           paymentDate
         }
-        components {
+        payrollComponents {
           id
-          amount
-          calculationBase
-          component {
+          value
+          effectiveFrom
+          effectiveTo
+          notes
+          payrollComponentId
+          payrollComponent {
+            id
             name
+            code
             componentType
             calculationType
+            isTaxable
           }
         }
-        adjustments {
+        payrollAdjustments {
           id
           payrollItemId
-          type
-          description
-          amount
-          isRecurring
-          createdBy
+          value
+          payrollComponentId
+          appliedMonth
+          status
           notes
-          createdAt
-          updatedAt
+          reviewedAt
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
         }
       }
     }
@@ -71,76 +83,119 @@ export const GET_ALL_PAYSLIPS = gql`
       success
       data {
         id
-        payrollCycleId
         userId
+        payrollCycleId
+        payrollCycle {
+          id
+          periodStart
+          periodEnd
+          paymentDate
+          status
+        }
+        payrollItemComponents {
+          id
+          value
+          componentType
+          calculationType
+          calculatedAmount
+          payrollItemId
+          payrollComponentId
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
+        }
+        payslipAdjustments {
+          id
+          payrollItemId
+          value
+          payrollComponentId
+          appliedMonth
+          status
+          notes
+          reviewedAt
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
+        }
         user {
           id
           email
           profile {
             fullName
-            # avatar
           }
           role {
             id
             name
           }
           employee {
-            id
             userId
             employeeId
             nidNumber
             joiningDate
-            salaryPerMonth
-            workingDaysPerWeek
-            workingHoursPerWeek
-            designationId
+            # workingDaysPerWeek
+            # workingHoursPerWeek
             designation {
               id
               name
             }
-            employmentStatusId
             employmentStatus {
               id
               name
             }
-            departmentId
             department {
               id
               name
             }
-            workSiteId
-            workSite {
-              id
-              name
-            }
-            workScheduleId
             workSchedule {
               id
               name
             }
-            rotaType
+            employeePayrollComponents {
+              id
+              value
+              effectiveFrom
+              effectiveTo
+              notes
+              payrollComponentId
+              payrollComponent {
+                id
+                name
+                code
+                componentType
+                calculationType
+                isTaxable
+              }
+            }
+            # employeePayslipAdjustments {
+            #   id
+            #   payrollItemId
+            #   value
+            #   payrollComponentId
+            #   appliedMonth
+            #   status
+            #   notes
+            #   reviewedAt
+            #   payrollComponent {
+            #     id
+            #     name
+            #     code
+            #     componentType
+            #     calculationType
+            #     isTaxable
+            #   }
+            # }
             createdAt
             updatedAt
-          }
-          business {
-            address
-            city
-            createdAt
-            email
-            id
-            lat
-            lng
-            name
-            numberOfEmployeesAllowed
-            phone
-            country
-            postcode
-            registrationDate
-            status
-            subscriptionPlanId
-            updatedAt
-            userId
-            website
           }
         }
         basicSalary
@@ -151,37 +206,13 @@ export const GET_ALL_PAYSLIPS = gql`
         presentDays
         absentDays
         leaveDays
-        overtimeHours
+        overtimeMinutes
         status
         paymentMethod
         bankAccount
         transactionRef
         paidAt
         notes
-        components {
-          id
-          payrollItemId
-          componentId
-          component {
-            id
-            name
-            code
-            componentType
-          }
-          amount
-          calculationBase
-          notes
-        }
-        adjustments {
-          id
-          payrollItemId
-          type
-          description
-          amount
-          isRecurring
-          createdBy
-          notes
-        }
         createdAt
         updatedAt
       }

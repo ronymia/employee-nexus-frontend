@@ -11,6 +11,41 @@ export const GET_PAYROLL_ITEMS = gql`
         id
         payrollCycleId
         userId
+        payrollItemComponents {
+          id
+          value
+          componentType
+          calculationType
+          calculatedAmount
+          payrollItemId
+          payrollComponentId
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
+        }
+        payslipAdjustments {
+          id
+          payrollItemId
+          value
+          payrollComponentId
+          appliedMonth
+          status
+          notes
+          reviewedAt
+          payrollComponent {
+            id
+            name
+            code
+            componentType
+            calculationType
+            isTaxable
+          }
+        }
         user {
           id
           email
@@ -295,15 +330,9 @@ export const APPROVE_PAYROLL_ITEM = gql`
 // MARK PAYROLL ITEM AS PAID
 export const MARK_PAYROLL_ITEM_PAID = gql`
   mutation MarkPayrollItemAsPaid(
-    $id: Int!
-    $paymentMethod: String!
-    $transactionRef: String!
+    $payrollItemAsPaidInput: PayrollItemAsPaidInput!
   ) {
-    markPayrollItemAsPaid(
-      id: $id
-      paymentMethod: $paymentMethod
-      transactionRef: $transactionRef
-    ) {
+    markPayrollItemAsPaid(payrollItemAsPaidInput: $payrollItemAsPaidInput) {
       message
       statusCode
       success

@@ -1,6 +1,10 @@
-import { ComponentType } from "react";
-import { IPayrollComponent } from "./payroll-component.type";
 import { IUser } from "./user.type";
+import { IPayslipAdjustment } from "./payslip-adjustment.type";
+import {
+  CalculationType,
+  ComponentType,
+  IPayrollComponent,
+} from "./payroll-component.type";
 
 export enum PayrollCycleStatus {
   DRAFT = "DRAFT",
@@ -64,28 +68,15 @@ export interface IPayrollCycleResponse {
   };
 }
 
-// Payroll Item
 export interface IPayrollItemComponent {
   id: number;
   payrollItemId: number;
-  componentId: number;
-  component?: IPayrollComponent;
-  amount: number;
-  calculationBase?: number;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IPayrollItemAdjustment {
-  id: number;
-  payrollItemId: number;
-  type: string;
-  description: string;
-  amount: number;
-  isRecurring: boolean;
-  createdBy: number;
-  notes?: string;
+  payrollComponentId: number;
+  payrollComponent?: IPayrollComponent;
+  value: number;
+  componentType: ComponentType;
+  calculationType: CalculationType;
+  calculatedAmount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -104,59 +95,17 @@ export interface IPayrollItem {
   presentDays: number;
   absentDays: number;
   leaveDays: number;
-  overtimeHours?: number;
+  overtimeMinutes?: number;
   status: PayrollItemStatus;
   paymentMethod?: string;
   bankAccount?: string;
   transactionRef?: string;
   paidAt?: string;
   notes?: string;
-  components?: IPayrollItemComponent[];
-  adjustments?: IPayrollItemAdjustment[];
+  payrollItemComponents?: IPayrollItemComponent[];
+  payslipAdjustments?: IPayslipAdjustment[];
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ICreatePayrollItemInput {
-  payrollCycleId: number;
-  userId: number;
-  basicSalary: number;
-  workingDays: number;
-  presentDays: number;
-  absentDays: number;
-  leaveDays: number;
-  overtimeHours?: number;
-  paymentMethod?: string;
-  bankAccount?: string;
-  notes?: string;
-  components?: Array<{
-    componentId: number;
-    amount: number;
-    calculationBase?: number;
-    notes?: string;
-  }>;
-  adjustments?: Array<{
-    type: string;
-    description: string;
-    amount: number;
-    isRecurring?: boolean;
-    notes?: string;
-  }>;
-}
-
-export interface IUpdatePayrollItemInput {
-  basicSalary?: number;
-  workingDays?: number;
-  presentDays?: number;
-  absentDays?: number;
-  leaveDays?: number;
-  overtimeHours?: number;
-  status?: PayrollItemStatus;
-  paymentMethod?: string;
-  bankAccount?: string;
-  transactionRef?: string;
-  paidAt?: string;
-  notes?: string;
 }
 
 export interface IGetPayrollCyclesInput {

@@ -99,9 +99,8 @@ export default function useConfirmation() {
           await onConfirm(inputValue);
           return true;
         } catch (error: any) {
-          Swal.showValidationMessage(
-            `Action failed: ${error.message || "Unknown error"}`,
-          );
+          console.log({ error });
+          Swal.showValidationMessage(`${error.message || "Unknown error"}`);
           return false;
         }
       },

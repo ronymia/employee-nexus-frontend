@@ -191,3 +191,28 @@ export const PROCESS_PAYROLL_CYCLE = gql`
   }
 `;
 // FINALIZE PAYROLL CYCLE
+
+export const APPROVE_ALL_PAYROLL_ITEMS = gql`
+  mutation ApprovePayrollItems($input: ApprovePayrollItemsInput!) {
+    approvePayrollItems(approvePayrollItemsInput: $input) {
+      success
+      statusCode
+      message
+      data {
+        id
+        name
+        status
+        payrollItems {
+          id
+          status
+          netPay
+          user {
+            profile {
+              fullName
+            }
+          }
+        }
+      }
+    }
+  }
+`;

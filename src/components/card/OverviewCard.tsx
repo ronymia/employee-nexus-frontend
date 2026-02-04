@@ -131,14 +131,13 @@ export default function OverviewCard({
           >
             {isLoading ? <Typewriter text={stat.value} /> : stat.value}
           </span>
-          {/* {stat.Icon && (
-            <stat.Icon className={`${stat?.iconColor} pr-1`} size={36} />
-          )} */}
-          {/* <div
-            className={`bg-linear-to-br ${stat.gradient} p-3 rounded-lg text-white`}
-          >
-            {stat.icon}
-          </div> */}
+          {stat.Icon && (
+            <div
+              className={`p-2 rounded-lg bg-white/30 backdrop-blur-md shadow-inner border border-white/20`}
+            >
+              <stat.Icon className={stat.iconColor} size={24} />
+            </div>
+          )}
         </div>
       </div>
 
