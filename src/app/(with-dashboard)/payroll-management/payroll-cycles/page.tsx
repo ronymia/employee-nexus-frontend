@@ -16,7 +16,7 @@ import {
   GET_PAYROLL_CYCLES,
   DELETE_PAYROLL_CYCLE,
 } from "@/graphql/payroll-cycle.api";
-import dayjs from "dayjs";
+import { customFormatDate, FORMAT_PRESETS } from "@/utils/date-format.utils";
 import CustomPopup from "@/components/modal/CustomPopup";
 import usePopupOption from "@/hooks/usePopupOption";
 import PayrollCycleForm from "./PayrollCycleForm";
@@ -197,10 +197,8 @@ export default function PayrollCyclesPage() {
         dataSource={cycles.map((row) => ({
           ...row,
           customFrequency: getFrequencyLabel(row.frequency),
-          customPeriod: `${dayjs(row.periodStart).format(
-            "MMM DD",
-          )} - ${dayjs(row.periodEnd).format("MMM DD, YYYY")}`,
-          customPaymentDate: dayjs(row.paymentDate).format("MMM DD, YYYY"),
+          customPeriod: `${customFormatDate(row.periodStart, FORMAT_PRESETS.SHORT_DATE)} - ${customFormatDate(row.periodEnd)}`,
+          customPaymentDate: customFormatDate(row.paymentDate),
           customNetPay: `$${row.totalNetPay.toFixed(2)}`,
           customStatus: <PayrollCycleStatusBadge status={row.status} />,
         }))}

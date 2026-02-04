@@ -17,6 +17,7 @@ export interface IOwnerAttendanceToday {
   late: number;
   onLeave: number;
   notPunchedIn: number;
+  attendanceOnToday: number;
 }
 
 export interface IAttendanceWeek {

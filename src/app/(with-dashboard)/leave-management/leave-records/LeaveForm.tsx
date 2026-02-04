@@ -29,12 +29,17 @@ import {
 import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import dayjsUTC from "dayjs/plugin/utc";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import {
+  customFormatDate,
+  formatDateForAPI,
+  FORMAT_PRESETS,
+} from "@/utils/date-format.utils";
 import useAppStore from "@/hooks/useAppStore";
 import { motion, AnimatePresence } from "motion/react";
 import { PiClock, PiHandPalmBold } from "react-icons/pi";
 import { showToast } from "@/components/ui/CustomToast";
-import dayjsUTC from "dayjs/plugin/utc";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { GET_EMPLOYEE_CALENDAR } from "@/graphql/employee-calendar.api";
 import { GET_ACTIVE_EMPLOYEE_WORK_SCHEDULE } from "@/graphql/employee-work-schedule.api";
 
@@ -604,11 +609,11 @@ export default function LeaveForm({
         }
       }
 
-      // FORMAT DATES TO ISO 8601
-      const startDate = dayjs.utc(data.startDate, "DD-MM-YYYY").toISOString();
+      // FORMAT DATES TO ISO 8601 (UTC)
+      const startDate = formatDateForAPI(data.startDate);
       const endDate =
         data.endDate && data.leaveDuration === LeaveDuration.MULTI_DAY
-          ? dayjs.utc(data.endDate, "DD-MM-YYYY").toISOString()
+          ? formatDateForAPI(data.endDate)
           : undefined;
 
       // PREPARE INPUT
@@ -669,9 +674,11 @@ export default function LeaveForm({
     leaveYear: leave?.leaveYear || new Date().getFullYear(),
     leaveDuration: leave?.leaveDuration || LeaveDuration.SINGLE_DAY,
     startDate: leave?.startDate
-      ? dayjs(leave.startDate).format("DD-MM-YYYY")
-      : dayjs().format("DD-MM-YYYY"),
-    endDate: leave?.endDate ? dayjs(leave.endDate).format("DD-MM-YYYY") : "",
+      ? customFormatDate(leave.startDate, FORMAT_PRESETS.INPUT_DATE)
+      : customFormatDate(new Date(), FORMAT_PRESETS.INPUT_DATE),
+    endDate: leave?.endDate
+      ? customFormatDate(leave.endDate, FORMAT_PRESETS.INPUT_DATE)
+      : "",
     attachments: leave?.attachments ? JSON.parse(leave.attachments)?.at(0) : [],
     notes: leave?.notes || "",
   };

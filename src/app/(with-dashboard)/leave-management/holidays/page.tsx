@@ -18,6 +18,7 @@ import {
 } from "react-icons/pi";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { customFormatDate } from "@/utils/date-format.utils";
 import CustomPopup from "@/components/modal/CustomPopup";
 import HolidayForm from "./HolidayForm";
 import usePopupOption from "@/hooks/usePopupOption";
@@ -280,10 +281,8 @@ export default function HolidaysPage() {
       itemName: holiday.name,
       itemDescription: `Holiday Period: ${
         holiday.startDate === holiday.endDate
-          ? dayjs(holiday.startDate).format("MMM DD, YYYY")
-          : `${dayjs(holiday.startDate).format("MMM DD, YYYY")} - ${dayjs(
-              holiday.endDate,
-            ).format("MMM DD, YYYY")}`
+          ? customFormatDate(holiday.startDate)
+          : `${customFormatDate(holiday.startDate)} - ${customFormatDate(holiday.endDate)}`
       }`,
       confirmButtonText: "Yes, delete it!",
       successMessage: "Holiday deleted successfully",
@@ -356,10 +355,8 @@ export default function HolidaysPage() {
           customName: row.name,
           customHolidayPeriod:
             row.startDate === row.endDate
-              ? dayjs(row.startDate).format("MMM DD, YYYY")
-              : `${dayjs(row.startDate).format("MMM DD, YYYY")} - ${dayjs(
-                  row.endDate,
-                ).format("MMM DD, YYYY")}`,
+              ? customFormatDate(row.startDate)
+              : `${customFormatDate(row.startDate)} - ${customFormatDate(row.endDate)}`,
           customType: getHolidayTypeBadge(row.holidayType),
           customIsPaid: getPaidBadge(row.isPaid),
           customIsRecurring: getRecurringBadge(row.isRecurring),
