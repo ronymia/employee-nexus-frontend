@@ -47,8 +47,6 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
     refetchQueries: [{ query: GET_EMPLOYEES, variables: { query: {} } }],
   });
 
-  console.log({ data });
-
   // ==================== FORM SUBMISSION HANDLER ====================
   const handleOnSubmit = async (formValues: IEmployeeFormData) => {
     // CONVERT USER ROLE ID TO NUMBER
@@ -97,9 +95,6 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
         });
       } else {
         // CREATE NEW EMPLOYEE
-        console.log({
-          joiningDate: formValues["joiningDate"],
-        });
 
         const createdEmployee = await createEmployee({
           variables: {
@@ -128,7 +123,7 @@ export default function EmployeesForm({ data }: { data?: IEmployeeFormData }) {
 
         // REDIRECT TO EMPLOYEE LIST AFTER SUCCESSFUL CREATION
         if (createdEmployee.data) {
-          router.push("/user-management/employees");
+          router.push("/user-management/all-users");
         }
       }
     } catch (error) {

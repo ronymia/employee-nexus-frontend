@@ -1,5 +1,6 @@
 "use client";
 
+// ==================== EXTERNAL IMPORTS ====================
 import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import CustomTable from "@/components/table/CustomTable";
@@ -9,27 +10,132 @@ import {
   PiCheckCircle,
   PiXCircle,
   PiWarning,
-  PiMinus,
-  PiAirplaneTilt,
   PiPlusCircle,
+  PiClock,
 } from "react-icons/pi";
+import { LiaUserClockSolid } from "react-icons/lia";
 import { GET_ATTENDANCES } from "@/graphql/attendance.api";
-import moment from "moment";
+import { customFormatDate } from "@/utils/date-format.utils";
 import CustomPopup from "@/components/modal/CustomPopup";
-import CustomLoading from "@/components/loader/CustomLoading";
+import AttendanceRequestForm from "./AttendanceRequestForm";
+import AttendanceRecord from "@/app/(with-dashboard)/attendance-management/attendance/components/AttendanceRecord";
 import usePopupOption from "@/hooks/usePopupOption";
 import useAuthGuard from "@/hooks/useAuthGuard";
 import useAppStore from "@/hooks/useAppStore";
-import AttendanceForm from "./components/AttendanceForm";
+import { PiClockAfternoon } from "react-icons/pi";
+import { motion } from "motion/react";
+import PageHeader from "@/components/ui/PageHeader";
+import { minutesToHoursAndMinutes } from "@/utils/time.utils";
+import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";
+import OverviewCard from "@/components/card/OverviewCard";
+
+// ==================== SUB-COMPONENTS ====================
+
+// ATTENDANCE STATS COMPONENT
+function AttendanceOverview({ attendances }: { attendances: IAttendance[] }) {
+  // Calculate stats from attendances
+  const pending = attendances.filter((a) => a.status === "pending").length;
+  const approved = attendances.filter((a) => a.status === "approved").length;
+  const rejected = attendances.filter((a) => a.status === "rejected").length;
+  const late = attendances.filter((a) => a.type === "late").length;
+  const partial = attendances.filter((a) => a.type === "partial").length;
+  const total = attendances.length;
+
+  const stats = [
+    {
+      title: "Pending",
+      value: pending,
+      Icon: PiClock,
+      bgColor: "bg-[#fff7d6]",
+      decorationColor: "bg-[#ffeea3]",
+      iconColor: "text-[#b08800]",
+      subText: `out of ${total}`,
+      description:
+        "Attendance requests submitted but not yet reviewed or approved by a manager.",
+    },
+    {
+      title: "Approved",
+      value: approved,
+      Icon: PiCheckCircle,
+      bgColor: "bg-[#e3f9eb]",
+      decorationColor: "bg-[#bcf0cf]",
+      iconColor: "text-[#1f8c54]",
+      subText: `out of ${total}`,
+      description:
+        "Attendance requests that have been verified and approved by your manager.",
+    },
+    {
+      title: "Rejected",
+      value: rejected,
+      Icon: PiXCircle,
+      bgColor: "bg-[#ffe3e3]",
+      decorationColor: "bg-[#ffc2c2]",
+      iconColor: "text-[#c92a2a]",
+      subText: `out of ${total}`,
+      description:
+        "Attendance requests that have been rejected by your manager.",
+    },
+    {
+      title: "Late",
+      value: late,
+      Icon: PiWarning,
+      bgColor: "bg-[#e0f2ff]",
+      decorationColor: "bg-[#bae0ff]",
+      iconColor: "text-[#1a7bc7]",
+      subText: `out of ${total}`,
+      description:
+        "Attendance records where you checked in after the allowed time threshold.",
+    },
+    {
+      title: "Half Day",
+      value: partial,
+      Icon: PiClockAfternoon,
+      bgColor: "bg-[#edebff]",
+      decorationColor: "bg-[#d0c9ff]",
+      iconColor: "text-[#5b4eb1]",
+      subText: `out of ${total}`,
+      description:
+        "Attendance marked as partial working hours, below the required full-day duration.",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <OverviewCard
+            stat={stat}
+            handler={undefined}
+            isLoading={false}
+            position={stats.length - 1 === index ? "right" : "left"}
+          />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// ==================== MAIN COMPONENT ====================
 
 export default function AttendanceRequestPage() {
   useAuthGuard();
   const user = useAppStore((state) => state.user);
 
-  // Popup state management
+  // ==================== LOCAL STATE ====================
   const { popupOption, setPopupOption } = usePopupOption();
 
-  // Fetch attendances for the logged-in user
+  // ATTENDANCE RECORD MODAL STATE
+  const [selectedAttendance, setSelectedAttendance] =
+    useState<IAttendance | null>(null);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+
+  // ==================== GRAPHQL QUERIES ====================
+  // FETCH ATTENDANCES FOR THE LOGGED-IN USER
   const {
     data: attendancesData,
     loading: attendancesLoading,
@@ -47,71 +153,19 @@ export default function AttendanceRequestPage() {
     skip: !user?.id,
   });
 
+  // ==================== DATA PREPARATION ====================
   const attendances = attendancesData?.attendances?.data || [];
   const loading = attendancesLoading;
 
-  // Calculate stats
-  const presentCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "present",
-  ).length;
-  const absentCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "absent",
-  ).length;
-  const pendingCount = attendances.filter(
-    (a) => a.status.toLowerCase() === "pending",
-  ).length;
-
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "present":
-      case "approved":
-        return (
-          <span className="badge badge-success gap-1">
-            <PiCheckCircle size={14} />
-            Approved
-          </span>
-        );
-      case "absent":
-      case "rejected":
-        return (
-          <span className="badge badge-error gap-1">
-            <PiXCircle size={14} />
-            Rejected
-          </span>
-        );
-      case "pending":
-        return (
-          <span className="badge badge-warning gap-1">
-            <PiWarning size={14} />
-            Pending
-          </span>
-        );
-      case "late":
-        return (
-          <span className="badge badge-warning gap-1">
-            <PiWarning size={14} />
-            Late
-          </span>
-        );
-      case "half_day":
-        return (
-          <span className="badge badge-info gap-1">
-            <PiMinus size={14} />
-            Half Day
-          </span>
-        );
-      case "on_leave":
-        return (
-          <span className="badge badge-ghost gap-1">
-            <PiAirplaneTilt size={14} />
-            On Leave
-          </span>
-        );
-      default:
-        return <span className="badge badge-ghost">{status}</span>;
-    }
+  // ==================== HANDLERS ====================
+  // VIEW RECORD HANDLER
+  const handleViewRecord = (attendance: IAttendance) => {
+    setSelectedAttendance(attendance);
+    setIsRecordModalOpen(true);
   };
 
+  // ==================== TABLE CONFIGURATION ====================
+  // COLUMNS
   const [columns, setColumns] = useState<TableColumnType[]>([
     {
       key: "1",
@@ -121,44 +175,26 @@ export default function AttendanceRequestPage() {
     },
     {
       key: "2",
-      header: "Punch In",
-      accessorKey: "customPunchIn",
+      header: "Punch Record",
+      accessorKey: "customAttendanceRecord",
       show: true,
     },
     {
       key: "3",
-      header: "Punch Out",
-      accessorKey: "customPunchOut",
+      header: "Schedule",
+      accessorKey: "customScheduleMinutes",
       show: true,
     },
     {
       key: "4",
-      header: "Total Hours",
-      accessorKey: "customTotalHours",
+      header: "Total Worked",
+      accessorKey: "customTotalMinutes",
       show: true,
     },
     {
       key: "5",
-      header: "Break",
-      accessorKey: "customBreakHours",
-      show: true,
-    },
-    {
-      key: "6",
       header: "Status",
       accessorKey: "customStatus",
-      show: true,
-    },
-    {
-      key: "7",
-      header: "Location",
-      accessorKey: "customLocation",
-      show: true,
-    },
-    {
-      key: "8",
-      header: "Project",
-      accessorKey: "customProject",
       show: true,
     },
   ]);
@@ -166,79 +202,39 @@ export default function AttendanceRequestPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content">
-            My Attendance Requests
-          </h1>
-          <p className="text-sm text-base-content/60 mt-1">
-            Submit and track your attendance requests
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title={`My Attendance Requests`}
+        subtitle={`Submit and track your attendance requests`}
+      />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Pending</p>
-              <p className="text-2xl font-bold text-warning">{pendingCount}</p>
-            </div>
-            <PiWarning size={32} className="text-warning" />
-          </div>
-        </div>
-
-        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Approved</p>
-              <p className="text-2xl font-bold text-success">{presentCount}</p>
-            </div>
-            <PiCheckCircle size={32} className="text-success" />
-          </div>
-        </div>
-
-        <div className="bg-error/10 border border-error/20 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-base-content/60">Rejected</p>
-              <p className="text-2xl font-bold text-error">{absentCount}</p>
-            </div>
-            <PiXCircle size={32} className="text-error" />
-          </div>
-        </div>
-      </div>
-
-      {loading && <CustomLoading />}
+      {/* ATTENDANCE OVERVIEW */}
+      <AttendanceOverview attendances={attendances} />
 
       {/* Attendance Table */}
       <CustomTable
         isLoading={loading}
-        actions={[]}
+        actions={[]} // No actions for employee view
         columns={columns}
         setColumns={setColumns}
         dataSource={attendances.map((row) => ({
           ...row,
-          customDate: moment(row.date).format("MMM DD, YYYY"),
-          customPunchIn: row.punchRecords?.[0]?.punchIn
-            ? moment(row.punchRecords[0].punchIn).format("hh:mm A")
-            : "--:--",
-          customPunchOut: row.punchRecords?.[row.punchRecords.length - 1]
-            ?.punchOut
-            ? moment(
-                row.punchRecords[row.punchRecords.length - 1].punchOut,
-              ).format("hh:mm A")
-            : "--:--",
-          customTotalHours: row.totalMinutes
-            ? `${(row.totalMinutes / 60).toFixed(2)}h`
-            : "0h",
-          customBreakHours: row.breakMinutes
-            ? `${(row.breakMinutes / 60).toFixed(2)}h`
-            : "0h",
-          customStatus: getStatusBadge(row.status),
-          customLocation: row.punchRecords?.[0]?.workSite?.name || "N/A",
-          customProject: row.punchRecords?.[0]?.project?.name || "N/A",
+          customAttendanceRecord: (
+            <button
+              onClick={() => handleViewRecord(row)}
+              className="btn btn-sm btn-ghost gap-2 text-primary hover:bg-primary/10"
+              title="View Attendance Details"
+            >
+              <LiaUserClockSolid size={24} />
+              <span className="hidden sm:inline">Punch Record</span>
+            </button>
+          ),
+          customDate: customFormatDate(row.date),
+          customStatus: <AttendanceStatusBadge status={row.status} />,
+          customScheduleMinutes:
+            minutesToHoursAndMinutes(row.scheduleMinutes) || "N/A",
+          customTotalMinutes: row.overtimeMinutes
+            ? `${minutesToHoursAndMinutes(row.totalMinutes)} (${minutesToHoursAndMinutes(row.overtimeMinutes)} overtime)`
+            : minutesToHoursAndMinutes(row.totalMinutes) || "N/A",
         }))}
         searchConfig={{
           searchable: false,
@@ -269,22 +265,33 @@ export default function AttendanceRequestPage() {
       </CustomTable>
 
       {/* Attendance Form Modal */}
-      <CustomPopup popupOption={popupOption} setPopupOption={setPopupOption}>
-        {popupOption.form === "attendance" &&
-          popupOption.actionType !== "delete" && (
-            <AttendanceForm
-              attendance={popupOption.data}
-              actionType={popupOption.actionType as "create" | "update"}
-              onClose={() => {
-                setPopupOption({
-                  ...popupOption,
-                  open: false,
-                });
-                refetch();
-              }}
-            />
-          )}
+      <CustomPopup
+        customWidth="90%"
+        popupOption={popupOption}
+        setPopupOption={setPopupOption}
+      >
+        {popupOption.form === "attendance" && (
+          <AttendanceRequestForm
+            onClose={() => {
+              setPopupOption({
+                ...popupOption,
+                open: false,
+              });
+              refetch();
+            }}
+          />
+        )}
       </CustomPopup>
+
+      {/* Attendance Record Modal */}
+      <AttendanceRecord
+        attendance={selectedAttendance}
+        isOpen={isRecordModalOpen}
+        onClose={() => {
+          setIsRecordModalOpen(false);
+          setSelectedAttendance(null);
+        }}
+      />
     </div>
   );
 }

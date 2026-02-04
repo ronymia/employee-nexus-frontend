@@ -299,21 +299,10 @@ export default function NotificationsPage() {
                           <span className="text-xs">
                             {dayjs(notification.createdAt).fromNow()}
                           </span>
-                          {notification.channels.length > 0 && (
-                            <span className="flex items-center gap-1 text-xs">
-                              📡
-                              <span className="hidden sm:inline">
-                                {notification.channels.join(", ")}
-                              </span>
-                              <span className="sm:hidden">
-                                {notification.channels.length}
-                              </span>
-                            </span>
-                          )}
                         </div>
 
                         <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                          {!notification.isRead && (
+                          {!notification?.readAt && (
                             <button
                               onClick={() => handleMarkAsRead(notification.id)}
                               className="btn btn-xs btn-ghost text-primary"
@@ -323,17 +312,6 @@ export default function NotificationsPage() {
                               </span>
                               <span className="sm:hidden">✓</span>
                             </button>
-                          )}
-                          {notification.actionUrl && (
-                            <a
-                              href={notification.actionUrl}
-                              className="btn btn-xs btn-primary"
-                            >
-                              <span className="hidden sm:inline">
-                                View Details
-                              </span>
-                              <span className="sm:hidden">View</span>
-                            </a>
                           )}
                           <button
                             onClick={() => handleDelete(notification.id)}

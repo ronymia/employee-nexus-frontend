@@ -124,8 +124,8 @@ export const GET_ATTENDANCE_BY_ID = gql`
 
 // CREATE ATTENDANCE
 export const ATTENDANCE_REQUEST = gql`
-  mutation CreateAttendance($createAttendanceInput: RequestAttendanceInput!) {
-    attendanceRequest(createAttendanceInput: $createAttendanceInput) {
+  mutation RequestAttendance($requestAttendanceInput: RequestAttendanceInput!) {
+    requestAttendance(requestAttendanceInput: $requestAttendanceInput) {
       message
       statusCode
       success
@@ -133,8 +133,6 @@ export const ATTENDANCE_REQUEST = gql`
         id
         userId
         date
-        totalMinutes
-        breakMinutes
         status
         createdAt
         updatedAt
@@ -142,14 +140,13 @@ export const ATTENDANCE_REQUEST = gql`
           id
           punchIn
           punchOut
-          workMinutes
-          breakMinutes
           notes
         }
       }
     }
   }
 `;
+
 // CREATE ATTENDANCE
 export const CREATE_ATTENDANCE = gql`
   mutation CreateAttendance($createAttendanceInput: CreateAttendanceInput!) {

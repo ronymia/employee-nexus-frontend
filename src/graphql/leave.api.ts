@@ -98,8 +98,8 @@ export const GET_LEAVE_BY_ID = gql`
 
 // CREATE LEAVE
 export const LEAVE_REQUEST = gql`
-  mutation CreateLeave($createLeaveInput: RequestLeaveInput!) {
-    leaveRequest(createLeaveInput: $createLeaveInput) {
+  mutation LeaveRequest($requestLeaveInput: RequestLeaveInput!) {
+    leaveRequest(requestLeaveInput: $requestLeaveInput) {
       message
       statusCode
       success

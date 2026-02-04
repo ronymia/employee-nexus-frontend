@@ -2,7 +2,6 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import { PiX, PiCalendar, PiUser, PiBriefcase } from "react-icons/pi";
-import dayjs from "dayjs";
 import { ILeave, LeaveDuration } from "@/types";
 import AttendanceStatusBadge from "@/components/ui/AttendanceStatusBadge";
 import { customFormatDate, FORMAT_PRESETS } from "@/utils/date-format.utils";

@@ -15,15 +15,10 @@ export const GET_NOTIFICATIONS = gql`
         notificationTemplateId
         entityType
         entityId
-        actionUrl
         userId
-        isRead
         readAt
-        channels
-        sentVia
         businessId
         metadata
-        expiresAt
         createdAt
         updatedAt
       }
