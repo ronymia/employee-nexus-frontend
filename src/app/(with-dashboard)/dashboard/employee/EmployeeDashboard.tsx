@@ -25,6 +25,9 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 
+import Link from "next/link";
+import { customFormatDate, FORMAT_PRESETS } from "@/utils/date-format.utils";
+
 // Mock/Dummy Data for Employee Dashboard
 const MOCK_EMPLOYEE_DASHBOARD_DATA: IEmployeeDashboardResponse = {
   success: true,
@@ -282,7 +285,11 @@ export default function EmployeeDashboard() {
             <div className="flex items-center gap-2">
               <HiOutlineCalendar className="text-primary" />
               <span>
-                Joined {dayjs(personalInfo.joiningDate).format("MMM YYYY")}
+                Joined{" "}
+                {customFormatDate(
+                  personalInfo.joiningDate,
+                  "MMM YYYY", // Custom format or use PRESET
+                )}
               </span>
             </div>
           </div>
@@ -305,90 +312,108 @@ export default function EmployeeDashboard() {
           icon={<HiOutlineClipboardList className="text-2xl" />}
           gradient="from-blue-500 to-cyan-400"
         />
-        <QuickStatCard
-          title="Leave Balance"
-          value={leaveSummary.availableLeaves[0]?.remaining || 0}
-          subtitle={`${leaveSummary.availableLeaves[0]?.leaveType || "Annual"}`}
-          icon={<HiOutlineCalendar className="text-2xl" />}
-          gradient="from-purple-500 to-pink-400"
-        />
-        <QuickStatCard
-          title="Net Salary"
-          value={`$${(payrollSummary.currentMonth.netPay / 1000).toFixed(1)}K`}
-          subtitle={payrollSummary.currentMonth.status}
-          icon={<HiOutlineCurrencyDollar className="text-2xl" />}
-          gradient="from-orange-500 to-yellow-400"
-        />
+        <Link
+          href="/my-activities/leave-request"
+          className="block transition-transform hover:scale-[1.02]"
+        >
+          <QuickStatCard
+            title="Leave Balance"
+            value={
+              leaveSummary.availableLeaves?.reduce(
+                (acc, leave) => acc + leave.remaining,
+                0,
+              ) || 0
+            }
+            subtitle={`Annual Leave`}
+            icon={<HiOutlineCalendar className="text-2xl" />}
+            gradient="from-purple-500 to-pink-400"
+          />
+        </Link>
+        <Link
+          href="/payroll-management/payslips"
+          className="block transition-transform hover:scale-[1.02]"
+        >
+          <QuickStatCard
+            title="Net Salary"
+            value={`$${(payrollSummary.currentMonth.netPay / 1000).toFixed(1)}K`}
+            subtitle={payrollSummary.currentMonth.status}
+            icon={<HiOutlineCurrencyDollar className="text-2xl" />}
+            gradient="from-orange-500 to-yellow-400"
+          />
+        </Link>
       </div>
 
       {/* Attendance and Leave */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Today's Attendance */}
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold text-base-content mb-4">
-            Today's Attendance
-          </h3>
-          <div className="space-y-4">
-            <div className="bg-linear-to-r from-primary to-green-400 text-white rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm opacity-90">Status</span>
-                <span className="badge badge-sm bg-white text-primary">
-                  {attendanceSummary.today.status}
-                </span>
+        {/* Today's Attendance */}
+        <Link href="/my-activities/attendance-request" className="block group">
+          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 group-hover:shadow-lg transition-all">
+            <h3 className="text-lg font-semibold text-base-content mb-4 group-hover:text-primary transition-colors">
+              Today's Attendance
+            </h3>
+            <div className="space-y-4">
+              <div className="bg-linear-to-r from-primary to-green-400 text-white rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm opacity-90">Status</span>
+                  <span className="badge badge-sm bg-white text-primary">
+                    {attendanceSummary.today.status}
+                  </span>
+                </div>
+                <div className="text-3xl font-bold mb-1">
+                  {attendanceSummary.today.workingHours}
+                </div>
+                <div className="text-sm opacity-90">Working Hours Today</div>
               </div>
-              <div className="text-3xl font-bold mb-1">
-                {attendanceSummary.today.workingHours}
-              </div>
-              <div className="text-sm opacity-90">Working Hours Today</div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm text-base-content/70 mb-1">
-                  Check In
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-base-content/70 mb-1">
+                    Check In
+                  </div>
+                  <div className="text-lg font-semibold text-base-content">
+                    {attendanceSummary.today.checkInTime}
+                  </div>
                 </div>
-                <div className="text-lg font-semibold text-base-content">
-                  {attendanceSummary.today.checkInTime}
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-base-content/70 mb-1">
+                    Check Out
+                  </div>
+                  <div className="text-lg font-semibold text-base-content">
+                    {attendanceSummary.today.checkOutTime}
+                  </div>
                 </div>
               </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm text-base-content/70 mb-1">
-                  Check Out
-                </div>
-                <div className="text-lg font-semibold text-base-content">
-                  {attendanceSummary.today.checkOutTime}
-                </div>
-              </div>
-            </div>
 
-            {/* This Month Stats */}
-            <div className="pt-4 border-t">
-              <h4 className="text-sm font-semibold text-base-content mb-3">
-                This Month
-              </h4>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-success">
-                    {attendanceSummary.thisMonth.totalPresent}
+              {/* This Month Stats */}
+              <div className="pt-4 border-t">
+                <h4 className="text-sm font-semibold text-base-content mb-3">
+                  This Month
+                </h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-success">
+                      {attendanceSummary.thisMonth.totalPresent}
+                    </div>
+                    <div className="text-xs text-base-content/70">Present</div>
                   </div>
-                  <div className="text-xs text-base-content/70">Present</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-warning">
-                    {attendanceSummary.thisMonth.totalLate}
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-warning">
+                      {attendanceSummary.thisMonth.totalLate}
+                    </div>
+                    <div className="text-xs text-base-content/70">Late</div>
                   </div>
-                  <div className="text-xs text-base-content/70">Late</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-error">
-                    {attendanceSummary.thisMonth.totalAbsent}
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-error">
+                      {attendanceSummary.thisMonth.totalAbsent}
+                    </div>
+                    <div className="text-xs text-base-content/70">Absent</div>
                   </div>
-                  <div className="text-xs text-base-content/70">Absent</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Leave Balance */}
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
@@ -442,8 +467,11 @@ export default function EmployeeDashboard() {
                         {leave.leaveType}
                       </div>
                       <div className="text-xs text-base-content/70">
-                        {dayjs(leave.startDate).format("MMM DD")} -{" "}
-                        {dayjs(leave.endDate).format("MMM DD, YYYY")}
+                        {customFormatDate(
+                          leave.startDate,
+                          FORMAT_PRESETS.SHORT_DATE,
+                        )}{" "}
+                        - {customFormatDate(leave.endDate)}
                       </div>
                     </div>
                     <span className="badge badge-sm badge-success">
@@ -476,7 +504,12 @@ export default function EmployeeDashboard() {
               {attendanceSummary.recentAttendance.map(
                 (record: IRecentAttendance, index: number) => (
                   <tr key={index}>
-                    <td>{dayjs(record.date).format("ddd, MMM DD, YYYY")}</td>
+                    <td>
+                      {customFormatDate(
+                        record.date,
+                        "ddd, MMM DD, YYYY", // Or similar preset
+                      )}
+                    </td>
                     <td>
                       <span
                         className={`badge badge-sm ${
@@ -553,7 +586,10 @@ export default function EmployeeDashboard() {
                       </div>
                       <div className="text-xs text-base-content/70 mt-1">
                         {task.project} • Due{" "}
-                        {dayjs(task.dueDate).format("MMM DD")}
+                        {customFormatDate(
+                          task.dueDate,
+                          FORMAT_PRESETS.SHORT_DATE,
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -632,10 +668,7 @@ export default function EmployeeDashboard() {
                 </div>
               </div>
               <div className="text-xs text-base-content/70">
-                Paid on{" "}
-                {dayjs(payrollSummary.lastPayment.paidDate).format(
-                  "MMM DD, YYYY",
-                )}
+                Paid on {customFormatDate(payrollSummary.lastPayment.paidDate)}
               </div>
             </div>
           </div>
@@ -692,7 +725,7 @@ export default function EmployeeDashboard() {
               <div
                 key={index}
                 className={`flex gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors ${
-                  !notification.isRead ? "bg-blue-50" : "bg-gray-50"
+                  !notification.readAt ? "bg-blue-50" : "bg-gray-50"
                 }`}
               >
                 <div
@@ -721,10 +754,12 @@ export default function EmployeeDashboard() {
                     {notification.message}
                   </p>
                   <p className="text-xs text-base-content/70 mt-1">
-                    {dayjs(notification.timestamp).fromNow()}
+                    {customFormatDate(notification.timestamp, undefined, {
+                      relative: true,
+                    })}
                   </p>
                 </div>
-                {!notification.isRead && (
+                {!notification.readAt && (
                   <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
                 )}
               </div>
@@ -737,7 +772,7 @@ export default function EmployeeDashboard() {
 }
 
 // Quick Stat Card Component
-interface QuickStatCardProps {
+interface IQuickStatCardProps {
   title: string;
   value: string | number;
   subtitle: string;
@@ -751,7 +786,7 @@ function QuickStatCard({
   subtitle,
   icon,
   gradient,
-}: QuickStatCardProps) {
+}: IQuickStatCardProps) {
   return (
     <div className="relative overflow-hidden rounded-xl shadow-md border border-gray-100">
       <div

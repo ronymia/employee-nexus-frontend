@@ -8,9 +8,8 @@ export default function DashboardContainer() {
   const { user } = useAppStore((state) => state);
 
   // Check user role - assuming role is stored in user object
-  const isOwner =
-    user?.role?.name?.toLowerCase().includes("owner") ||
-    user?.role?.name?.toLowerCase().includes("admin");
+  const isOwner = user?.role?.name?.toLowerCase().includes("owner");
+  // user?.role?.name?.toLowerCase().includes("admin");
 
   if (isOwner) {
     return <OwnerDashboard />;
