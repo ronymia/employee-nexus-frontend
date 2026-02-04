@@ -210,7 +210,7 @@ export const EMPLOYEE_DASHBOARD = gql`
             type
             message
             timestamp
-            isRead
+            readAt
           }
         }
       }

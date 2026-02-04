@@ -248,7 +248,7 @@ export interface INotificationItem {
   type: string;
   message: string;
   timestamp: string;
-  isRead: boolean;
+  readAt?: Date | null;
 }
 
 export interface INotifications {
