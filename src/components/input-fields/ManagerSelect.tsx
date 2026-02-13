@@ -1,7 +1,7 @@
 import CustomSelect from "../form/input/CustomSelect";
 import { GET_MANAGERS } from "@/graphql/departments.api";
 import { useQuery } from "@apollo/client/react";
-import { IUser, IUserArrayResponse } from "@/types";
+import { IUserArrayResponse } from "@/types";
 
 interface IManagerSelectProps {
   dataAuto?: string;

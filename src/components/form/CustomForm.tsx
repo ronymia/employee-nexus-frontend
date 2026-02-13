@@ -1,4 +1,3 @@
-import { setGraphQLFormErrors } from "@/utils/error.utils";
 import type { ReactElement, ReactNode } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
