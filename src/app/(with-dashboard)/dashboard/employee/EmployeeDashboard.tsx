@@ -15,7 +15,6 @@ import RecentAttendance from "./components/RecentAttendance";
 import TaskOverview from "./components/TaskOverview";
 import PayrollSummary from "./components/PayrollSummary";
 import DashboardNotifications from "./components/DashboardNotifications";
-import WelcomeBanner from "./components/WelcomeBanner";
 
 export default function EmployeeDashboard() {
   const { data } = useQuery<{
@@ -37,7 +36,7 @@ export default function EmployeeDashboard() {
   }
 
   const {
-    personalInfo,
+    // personalInfo,
     attendanceSummary,
     leaveSummary,
     payrollSummary,
@@ -48,7 +47,7 @@ export default function EmployeeDashboard() {
   return (
     <div className="w-full space-y-6 p-4 md:p-6">
       {/* 1. Welcome Banner */}
-      <WelcomeBanner personalInfo={personalInfo} />
+      {/* <WelcomeBanner personalInfo={personalInfo} /> */}
 
       {/* 2. Quick Stats Grid */}
       <QuickStatsGrid
@@ -62,17 +61,7 @@ export default function EmployeeDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full items-stretch">
         <div className="h-full">
           {/* <TodaysAttendanceCard attendance={attendanceSummary.today} /> */}
-          <TodaysAttendanceCardV2
-            checkedIn={attendanceSummary.today.status === "PRESENT"}
-            times={{
-              nowTime: "12:30 PM", // Mock for now, or use dayjs/Date
-              todaysTotal: attendanceSummary.today.workingHours,
-              totalInThisClocks: "00:00:00",
-              todaysScheduledTotal: "08:00:00",
-              totalRemaining: "08:00:00",
-              totalOverTime: "00:00:00",
-            }}
-          />
+          <TodaysAttendanceCardV2 />
         </div>
         <div className="h-full">
           <LeaveBalanceCard leaveSummary={leaveSummary} />

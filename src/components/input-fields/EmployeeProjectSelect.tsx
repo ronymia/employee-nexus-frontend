@@ -28,7 +28,7 @@ export default function EmployeeProjectSelect({
       data: IUserProjectMember[];
     };
   }>(GET_USER_PROJECTS, {
-    variables: { userId: query?.userId },
+    variables: { userId: Number(query?.userId) },
     skip: !query?.userId,
   });
 

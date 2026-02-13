@@ -19,7 +19,7 @@ export default function ProfileWelcomeCard() {
 
   return (
     <div
-      className={`border shadow-md rounded-xl text-base-300 gap-y-5 sm:gap-x-3 py-5 px-2 md:py-8 md:px-8 bg-linear-to-tr to-secondary from-primary flex flex-col  sm:flex-row justify-center sm:justify-start items-center sm:items-start mb-6`}
+      className={`border shadow-md rounded-xl text-base-300 gap-y-5 sm:gap-x-3 py-5 px-2 md:py-8 md:px-8 bg-linear-to-tr to-primary from-primary flex flex-col  sm:flex-row justify-center sm:justify-start items-center sm:items-start mb-6`}
     >
       <div className={`flex flex-col justify-center items-center gap-4`}>
         {/* PROFILE  */}
@@ -40,7 +40,7 @@ export default function ProfileWelcomeCard() {
           />
 
           <span
-            className={`absolute -bottom-2 left-1/2 -translate-x-1/2 text-center bg-linear-to-tr from-primary to-secondary border-2 text-base-300 text-xs rounded-full font-bold inline-block px-2 py-1`}
+            className={`absolute -bottom-2 left-1/2 -translate-x-1/2 text-center bg-linear-to-tr from-primary to-primary border-2 text-base-300 text-xs rounded-full font-bold inline-block px-2 py-1`}
           >
             {user?.role?.name ? user?.role?.name : ""}
           </span>
