@@ -13,6 +13,7 @@ import { IDepartment } from "@/types";
 import { useMutation } from "@apollo/client/react";
 import CustomTextareaField from "@/components/form/input/CustomTextareaField";
 import { DepartmentSelect } from "@/components/input-fields";
+import useAppStore from "@/hooks/useAppStore";
 
 export default function DepartmentsForm({
   handleClosePopup,
@@ -21,6 +22,9 @@ export default function DepartmentsForm({
   handleClosePopup: () => void;
   data: IDepartment;
 }) {
+  //
+  const user = useAppStore((state) => state.user);
+
   // MUTATION TO CREATE A NEW DEPARTMENT
   const [createDepartment, createResult] = useMutation(CREATE_DEPARTMENT, {
     awaitRefetchQueries: true,
@@ -62,7 +66,7 @@ export default function DepartmentsForm({
       showToast.error(
         "Error",
         error.message ||
-          `Failed to ${data?.id ? "update" : "create"} department`
+          `Failed to ${data?.id ? "update" : "create"} department`,
       );
       throw error;
     }
@@ -95,7 +99,7 @@ export default function DepartmentsForm({
       />
 
       {/* MANAGER - DROPDOWN */}
-      <ManagerSelect />
+      {user?.role?.name === "owner" && <ManagerSelect />}
 
       {/* DESCRIPTION */}
       <CustomTextareaField name="description" label="Description" required />
