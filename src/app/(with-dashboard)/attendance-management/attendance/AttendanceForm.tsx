@@ -641,7 +641,6 @@ function PunchRecordsSection({
   });
 
   const hasSchedule = scheduleData?.getActiveWorkSchedule?.data?.workSchedule;
-  console.log({ hasSchedule });
 
   // ==================== AUTO-POPULATE PUNCH TIMES ====================
   // Auto-populate punch times when schedule is loaded

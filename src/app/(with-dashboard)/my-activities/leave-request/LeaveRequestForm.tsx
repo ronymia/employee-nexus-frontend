@@ -452,7 +452,11 @@ export default function LeaveRequestForm({
   };
 
   return (
-    <CustomForm submitHandler={handleSubmit} defaultValues={defaultValues}>
+    <CustomForm
+      submitHandler={handleSubmit}
+      defaultValues={defaultValues}
+      className={`flex flex-col gap-3`}
+    >
       <LeaveFormFields leave={leave} />
       <FormActionButton isPending={isPending} cancelHandler={onClose} />
     </CustomForm>
@@ -560,7 +564,6 @@ function LeaveFormFields({ leave }: { leave?: ILeave }) {
   };
 
   const specialDates = [
-    ...getWeekendDates(),
     ...(calendarData?.employeeCalendar?.data?.attendances?.map((att: any) => ({
       date: dayjs(att.date).format("DD-MM-YYYY"),
       title: `Attendance: ${att.status}`,
@@ -595,6 +598,7 @@ function LeaveFormFields({ leave }: { leave?: ILeave }) {
       }
       return dates;
     }) || []),
+    ...getWeekendDates(),
   ];
 
   // OPTIONS

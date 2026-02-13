@@ -94,8 +94,6 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
-              {/* ONLINE INDICATOR */}
-              <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-400 rounded-full border-4 border-white shadow-lg" />
             </motion.div>
 
             {/* USER INFO */}

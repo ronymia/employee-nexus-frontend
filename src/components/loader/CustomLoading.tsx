@@ -1,66 +1,32 @@
 "use client";
 
 import { motion } from "motion/react";
+import { useState, useEffect } from "react";
 
 // ==================== CUSTOM LOADING COMPONENT ====================
 export default function CustomLoading() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          return 100;
+        }
+        const diff = Math.random() * 10;
+        return Math.min(prev + diff, 100);
+      });
+    }, 200);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
   return (
     <div className="flex items-center justify-center w-full min-h-[400px] overflow-hidden">
       <div className="relative">
-        {/* RADIAL GRADIENT BACKGROUND */}
-        <motion.div
-          className="absolute inset-0 -m-24 rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)",
-          }}
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.5, 0.8, 0.5],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-
-        {/* OUTER GLOW EFFECT */}
-        <motion.div
-          className="absolute inset-0 -m-16 bg-primary/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-
-        {/* MORPHING ENERGY RINGS */}
-        {[0, 1].map((index) => (
-          <motion.div
-            key={`energy-ring-${index}`}
-            className="absolute inset-0 rounded-full border-2 border-primary/20"
-            style={{
-              margin: `-${14 + index * 6}px`,
-            }}
-            animate={{
-              scale: [1, 1.15, 1],
-              opacity: [0.3, 0.6, 0.3],
-              rotate: index % 2 === 0 ? 360 : -360,
-            }}
-            transition={{
-              duration: 3 + index,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: index * 0.5,
-            }}
-          />
-        ))}
-
         {/* ANIMATED LOGO WITH WAVE EFFECT */}
         <motion.div
           className="flex items-center gap-2 relative z-10"
@@ -169,96 +135,22 @@ export default function CustomLoading() {
           </div>
         </motion.div>
 
-        {/* ENHANCED PULSING DOTS WITH GRADIENT */}
+        {/* PROGRESS BAR */}
         <motion.div
-          className="flex justify-center gap-3 mt-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
+          className="absolute -bottom-12 left-0 right-0 max-w-[200px] mx-auto"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
         >
-          {[0, 1, 2].map((index) => (
-            <motion.div key={index} className="relative">
-              {/* DOT OUTER GLOW */}
-              <motion.div
-                className="absolute -inset-1 rounded-full bg-primary blur-md"
-                animate={{
-                  scale: [1, 2, 1],
-                  opacity: [0.3, 0.7, 0.3],
-                }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  delay: index * 0.2,
-                  ease: "easeInOut",
-                }}
-              />
-              {/* DOT INNER GLOW */}
-              <motion.div
-                className="absolute inset-0 rounded-full bg-primary blur-sm"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  delay: index * 0.2,
-                  ease: "easeInOut",
-                }}
-              />
-              {/* DOT */}
-              <motion.div
-                className="w-3 h-3 rounded-full bg-linear-to-br from-primary to-secondary relative z-10 shadow-lg"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  y: [0, -15, 0],
-                }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  delay: index * 0.2,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.div>
-          ))}
+          <div className="h-1 w-full bg-primary/20 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-primary rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.2 }}
+            />
+          </div>
         </motion.div>
-
-        {/* ORBITING PARTICLES WITH TRAILS */}
-        {[0, 1, 2, 3, 4, 5].map((index) => (
-          <motion.div
-            key={`particle-${index}`}
-            className="absolute rounded-full bg-linear-to-br from-primary to-secondary shadow-lg"
-            style={{
-              width: index % 2 === 0 ? "8px" : "6px",
-              height: index % 2 === 0 ? "8px" : "6px",
-              top: "50%",
-              left: "50%",
-              marginTop: index % 2 === 0 ? "-4px" : "-3px",
-              marginLeft: index % 2 === 0 ? "-4px" : "-3px",
-            }}
-            animate={{
-              x: [
-                Math.cos((index * Math.PI) / 3) * (index % 2 === 0 ? 85 : 70),
-                Math.cos((index * Math.PI) / 3 + Math.PI * 2) *
-                  (index % 2 === 0 ? 85 : 70),
-              ],
-              y: [
-                Math.sin((index * Math.PI) / 3) * (index % 2 === 0 ? 85 : 70),
-                Math.sin((index * Math.PI) / 3 + Math.PI * 2) *
-                  (index % 2 === 0 ? 85 : 70),
-              ],
-              scale: [1, 1.4, 1],
-              opacity: [0.6, 1, 0.6],
-            }}
-            transition={{
-              duration: index % 2 === 0 ? 3.5 : 4.5,
-              repeat: Infinity,
-              ease: "linear",
-              delay: index * 0.2,
-            }}
-          />
-        ))}
 
         {/* FLOATING BUBBLES */}
         {[0, 1, 2, 3, 4].map((index) => (

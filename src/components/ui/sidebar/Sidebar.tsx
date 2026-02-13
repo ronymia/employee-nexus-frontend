@@ -86,7 +86,9 @@ export default function Sidebar({
       show:
         (hasPermission(Permissions.AttendanceCreate) ||
           hasPermission(Permissions.LeaveCreate)) &&
-        (userRole === "employee" || userRole === "manager"),
+        (userRole === "employee" ||
+          userRole === "manager" ||
+          userRole === "admin"),
       subMenus: [
         {
           Icon: PiClock,
@@ -94,7 +96,9 @@ export default function Sidebar({
           path: "/my-activities/attendance-request",
           show:
             hasPermission(Permissions.AttendanceCreate) &&
-            (userRole === "employee" || userRole === "manager"),
+            (userRole === "employee" ||
+              userRole === "manager" ||
+              userRole === "admin"),
           subMenus: [],
         },
         {
@@ -103,7 +107,9 @@ export default function Sidebar({
           path: "/my-activities/leave-request",
           show:
             hasPermission(Permissions.LeaveCreate) &&
-            (userRole === "employee" || userRole === "manager"),
+            (userRole === "employee" ||
+              userRole === "manager" ||
+              userRole === "admin"),
           subMenus: [],
         },
       ],
@@ -151,7 +157,7 @@ export default function Sidebar({
       path: "/user-management",
       show:
         hasPermission(Permissions.UserRead) &&
-        hasPermission(Permissions.UserCreate) &&
+        userRole !== "employee" &&
         userRole !== "super_admin",
       subMenus: [
         {
@@ -165,21 +171,21 @@ export default function Sidebar({
           Icon: FiUsers,
           label: "Employees",
           path: "/user-management/employees",
-          show: hasPermission(Permissions.UserRead),
+          show: hasPermission(Permissions.UserRead) && userRole === "owner",
           subMenus: [],
         },
         {
           Icon: FiUsers,
           label: "Admins",
           path: "/user-management/admins",
-          show: hasPermission(Permissions.UserRead),
+          show: hasPermission(Permissions.UserRead) && userRole === "owner",
           subMenus: [],
         },
         {
           Icon: FiUsers,
           label: "Managers",
           path: "/user-management/managers",
-          show: hasPermission(Permissions.UserRead),
+          show: hasPermission(Permissions.UserRead) && userRole === "owner",
           subMenus: [],
         },
       ],

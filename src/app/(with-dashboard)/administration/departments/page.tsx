@@ -13,7 +13,12 @@ import {
 import { DELETE_DEPARTMENT, GET_DEPARTMENTS } from "@/graphql/departments.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IDepartment } from "@/types";
+import {
+  TableActionType,
+  TableColumnType,
+  IDepartment,
+  IDepartmentArrayResponse,
+} from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Fragment, useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -26,14 +31,10 @@ export default function DepartmentsPage() {
   const { popupOption, setPopupOption, createNewDepartment } = usePopupOption();
 
   // CREATE NEW DEPARTMENT
-  const { data, loading } = useQuery<{
-    departments: {
-      message: string;
-      statusCode: number;
-      success: boolean;
-      data: IDepartment[];
-    };
-  }>(GET_DEPARTMENTS, {});
+  const { data, loading } = useQuery<IDepartmentArrayResponse>(
+    GET_DEPARTMENTS,
+    {},
+  );
 
   // DELETE DEPARTMENT
   const [deleteDepartment, deleteResult] = useMutation(DELETE_DEPARTMENT, {

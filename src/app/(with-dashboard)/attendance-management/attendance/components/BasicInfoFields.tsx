@@ -101,8 +101,6 @@ export default function BasicInfoFields({
           specialDates={
             calendarData?.employeeCalendar?.data
               ? [
-                  // Mark weekend dates
-                  ...getWeekendDates(),
                   // Mark leave dates as overtime opportunity
                   ...(calendarData.employeeCalendar.data.leaves?.flatMap(
                     (leave: any) => {
@@ -149,6 +147,8 @@ export default function BasicInfoFields({
                       return dates;
                     },
                   ) || []),
+                  // Mark weekend dates
+                  ...getWeekendDates(),
                 ]
               : undefined
           }

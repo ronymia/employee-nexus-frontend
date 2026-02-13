@@ -93,12 +93,12 @@ function PunchRecordFields({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <EmployeeProjectSelect
             name={`punchRecords.${index}.projectId`}
-            required={false}
+            required={true}
             query={{ userId: Number(user?.id) }}
           />
           <EmployeeWorkSiteSelect
             name={`punchRecords.${index}.workSiteId`}
-            required={false}
+            required={true}
             query={{ userId: Number(user?.id) }}
           />
         </div>
@@ -252,6 +252,7 @@ export default function AttendanceRequestForm({
 
       onClose();
     } catch (error) {
+      console.log({ error });
       throw error;
     } finally {
       setIsPending(false);
@@ -355,17 +356,10 @@ function DateSection() {
     return weekendDates;
   };
   const specialDates = [
-    ...getWeekendDates(),
     ...(calendarData?.employeeCalendar?.data?.attendances?.map((att: any) => ({
       date: customFormatDate(att.date, FORMAT_PRESETS.INPUT_DATE),
       title: `Attendance: ${att.status}`,
       className: "bg-green-100 text-green-500 border-2 border-green-500",
-      disabled: true,
-    })) || []),
-    ...(calendarData?.employeeCalendar?.data?.holidays?.map((hol: any) => ({
-      date: customFormatDate(hol.startDate, FORMAT_PRESETS.INPUT_DATE),
-      title: `Holiday: ${hol.name}`,
-      className: "bg-blue-100 text-blue-500 border-2 border-blue-500",
       disabled: true,
     })) || []),
     ...(calendarData?.employeeCalendar?.data?.leaves?.map((leave: any) => ({
@@ -374,6 +368,13 @@ function DateSection() {
       className: "bg-orange-100 text-orange-500 border-2 border-orange-500",
       disabled: true,
     })) || []),
+    ...(calendarData?.employeeCalendar?.data?.holidays?.map((hol: any) => ({
+      date: customFormatDate(hol.startDate, FORMAT_PRESETS.INPUT_DATE),
+      title: `Holiday: ${hol.name}`,
+      className: "bg-blue-100 text-blue-500 border-2 border-blue-500",
+      disabled: true,
+    })) || []),
+    ...getWeekendDates(),
   ];
 
   return (

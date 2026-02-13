@@ -38,7 +38,10 @@ import CustomTable from "@/components/table/CustomTable";
 import OverviewCard from "@/components/card/OverviewCard";
 import { motion } from "motion/react";
 
-import { ILeaveOverviewResponse } from "@/types/leave.type";
+import {
+  ILeaveArrayResponse,
+  ILeaveOverviewResponse,
+} from "@/types/leave.type";
 import LeaveRecord from "./components/LeaveRecord";
 
 dayjs.extend(customParseFormat);
@@ -212,11 +215,7 @@ export default function LeaveRecordsPage() {
     data: leavesData,
     loading,
     refetch,
-  } = useQuery<{
-    leaves: {
-      data: ILeave[];
-    };
-  }>(GET_LEAVES, {
+  } = useQuery<ILeaveArrayResponse>(GET_LEAVES, {
     variables: {
       query: {},
     },

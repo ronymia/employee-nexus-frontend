@@ -10,7 +10,12 @@ import { DELETE_EMPLOYEE } from "@/graphql/employee.api";
 import { GET_USERS, GET_USER_STATISTICS } from "@/graphql/user.api";
 import usePermissionGuard from "@/guards/usePermissionGuard";
 import usePopupOption from "@/hooks/usePopupOption";
-import { TableActionType, TableColumnType, IMeta, IUser } from "@/types";
+import {
+  TableActionType,
+  TableColumnType,
+  IUser,
+  IUserArrayResponse,
+} from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { PiPlusCircle } from "react-icons/pi";
@@ -21,6 +26,7 @@ import PersonnelInsights from "@/components/ui/PersonnelInsights";
 import UserProfileCell from "@/components/ui/UserProfileCell";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { showToast } from "@/components/ui/CustomToast";
+import useAppStore from "@/hooks/useAppStore";
 
 // ==================== ALL USERS PAGE COMPONENT ====================
 export default function AllUsersPage() {
@@ -29,16 +35,11 @@ export default function AllUsersPage() {
   const { permissionGuard } = usePermissionGuard();
   const { popupOption, setPopupOption } = usePopupOption();
 
+  //
+  const user = useAppStore((state) => state.user);
+
   // ==================== GRAPHQL QUERY: FETCH ALL USERS ====================
-  const { data, loading } = useQuery<{
-    users: {
-      message: string;
-      statusCode: number;
-      success: boolean;
-      data: IUser[];
-      meta: IMeta;
-    };
-  }>(GET_USERS, {
+  const { data, loading } = useQuery<IUserArrayResponse>(GET_USERS, {
     variables: {
       query: {},
     },
@@ -188,10 +189,12 @@ export default function AllUsersPage() {
       />
 
       {/* PERSONNEL INSIGHTS SECTION */}
-      <PersonnelInsights
-        data={statsData?.userStatistics?.data}
-        loading={statsLoading}
-      />
+      {(user?.role?.name === "owner" || user?.role?.name === "admin") && (
+        <PersonnelInsights
+          data={statsData?.userStatistics?.data}
+          loading={statsLoading}
+        />
+      )}
 
       {/* ALL USERS DATA TABLE */}
       <CustomTable
