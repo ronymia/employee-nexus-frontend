@@ -13,7 +13,6 @@ import usePopupOption from "@/hooks/usePopupOption";
 import {
   TableActionType,
   TableColumnType,
-  IMeta,
   IUser,
   IUserArrayResponse,
 } from "@/types";
