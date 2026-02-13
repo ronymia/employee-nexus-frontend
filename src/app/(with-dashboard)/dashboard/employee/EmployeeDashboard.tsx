@@ -15,7 +15,6 @@ import RecentAttendance from "./components/RecentAttendance";
 import TaskOverview from "./components/TaskOverview";
 import PayrollSummary from "./components/PayrollSummary";
 import DashboardNotifications from "./components/DashboardNotifications";
-import WelcomeBanner from "./components/WelcomeBanner";
 
 export default function EmployeeDashboard() {
   const { data } = useQuery<{
@@ -37,7 +36,7 @@ export default function EmployeeDashboard() {
   }
 
   const {
-    personalInfo,
+    // personalInfo,
     attendanceSummary,
     leaveSummary,
     payrollSummary,
