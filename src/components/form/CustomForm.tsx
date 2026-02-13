@@ -1,4 +1,3 @@
-import { setGraphQLFormErrors } from "@/utils/error.utils";
 import type { ReactElement, ReactNode } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
@@ -47,9 +46,17 @@ export default function CustomForm({
     } catch (err: any) {
       methods.reset(undefined, { keepValues: true });
 
-      // console.log({ err });
+      console.log({ err });
+      const errors = err?.errors?.at(0)?.extensions?.errors;
 
-      setGraphQLFormErrors(err, methods.setError);
+      errors.forEach((validationError: any) => {
+        if (validationError.field && validationError.message) {
+          methods.setError(validationError.field, {
+            type: "manual",
+            message: validationError.message,
+          });
+        }
+      });
     }
   };
 

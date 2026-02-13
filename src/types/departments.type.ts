@@ -19,3 +19,12 @@ export interface IDepartment {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface IDepartmentArrayResponse {
+  departments: {
+    message: string;
+    statusCode: number;
+    success: boolean;
+    data: IDepartment[];
+  };
+}

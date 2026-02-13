@@ -38,7 +38,7 @@ export default function PrivateLayout({
             }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
-            className={`flex flex-col shadow-lg bg-base-300 text-primary rounded-box overflow-auto pb-5 h-full absolute top-0 left-0 z-10 scrollbar-hide`}
+            className={`flex flex-col shadow-lg bg-base-300 text-primary rounded-box overflow-auto pb-5 h-full absolute top-0 left-0 z-11 scrollbar-hide`}
           >
             <motion.nav
               initial={false}

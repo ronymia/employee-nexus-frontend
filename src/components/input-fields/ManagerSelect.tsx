@@ -1,7 +1,7 @@
 import CustomSelect from "../form/input/CustomSelect";
 import { GET_MANAGERS } from "@/graphql/departments.api";
 import { useQuery } from "@apollo/client/react";
-import { IUser } from "@/types";
+import { IUserArrayResponse } from "@/types";
 
 interface IManagerSelectProps {
   dataAuto?: string;
@@ -31,11 +31,7 @@ export default function ManagerSelect({
   position = "bottom",
 }: IManagerSelectProps) {
   // GET USERS FOR MANAGER DROPDOWN
-  const { data, loading } = useQuery<{
-    users: {
-      data: IUser[];
-    };
-  }>(GET_MANAGERS, {
+  const { data, loading } = useQuery<IUserArrayResponse>(GET_MANAGERS, {
     variables: {
       query: {
         role: `manager`,
@@ -46,7 +42,7 @@ export default function ManagerSelect({
   // USERS OPTIONS FOR MANAGER DROPDOWN
   const managersOptions =
     data?.users?.data?.map((user) => ({
-      label: user.profile?.fullName || user.name,
+      label: user.profile?.fullName,
       value: Number(user.id),
     })) || [];
 
