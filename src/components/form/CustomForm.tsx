@@ -47,9 +47,17 @@ export default function CustomForm({
     } catch (err: any) {
       methods.reset(undefined, { keepValues: true });
 
-      // console.log({ err });
+      console.log({ err });
+      const errors = err?.errors?.at(0)?.extensions?.errors;
 
-      setGraphQLFormErrors(err, methods.setError);
+      errors.forEach((validationError: any) => {
+        if (validationError.field && validationError.message) {
+          methods.setError(validationError.field, {
+            type: "manual",
+            message: validationError.message,
+          });
+        }
+      });
     }
   };
 
