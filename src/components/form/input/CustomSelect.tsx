@@ -63,7 +63,7 @@ export default function CustomSelect({
   const [searchTerms, setSearchTerms] = useState("");
 
   const filteredOptions = options?.filter((option) =>
-    option?.label.toLowerCase().includes(searchTerms.toLowerCase())
+    option?.label?.toLowerCase().includes(searchTerms?.toLowerCase()),
   );
 
   return (
@@ -78,13 +78,14 @@ export default function CustomSelect({
       }}
       render={({ field }) => {
         const selectedValue = multipleSelect
-          ? options?.filter((item) => field?.value?.includes(item.value)) ?? []
-          : options?.filter((item) => item?.value === field.value) ?? [];
+          ? (options?.filter((item) => field?.value?.includes(item.value)) ??
+            [])
+          : (options?.filter((item) => item?.value === field.value) ?? []);
         // HANDLE OPTION SELECTION
         const handleSelect = (option: IOption) => {
           // IF ALREADY SELECTED
           const isSelected = selectedValue?.some(
-            (item) => item.value === option.value
+            (item) => item.value === option.value,
           );
 
           // IF MULTIPLE
@@ -92,7 +93,7 @@ export default function CustomSelect({
             // IF MULTIPLE
             if (isSelected) {
               field.onChange?.(
-                field?.value?.filter((item: any) => item !== option?.value)
+                field?.value?.filter((item: any) => item !== option?.value),
               );
             } else {
               field?.onChange?.([...(field.value || []), option?.value]);
@@ -114,7 +115,7 @@ export default function CustomSelect({
           // IF MULTIPLE
           if (multipleSelect) {
             const newSelectedOptions = field.value?.filter(
-              (item: any) => item !== removedOption?.value
+              (item: any) => item !== removedOption?.value,
             );
             field.onChange?.(newSelectedOptions);
             return;
@@ -284,7 +285,7 @@ export default function CustomSelect({
                         className={`cursor-pointer px-3 py-2 m-2  hover:bg-primary rounded-md hover:text-base-300 drop-shadow-lg
                         ${
                           selectedValue.some(
-                            (item) => item?.value === option?.value
+                            (item) => item?.value === option?.value,
                           )
                             ? "bg-primary text-base-300"
                             : "text-gray-700"
@@ -292,7 +293,7 @@ export default function CustomSelect({
                     `}
                         role="option"
                         aria-selected={selectedValue.some(
-                          (item) => item?.value === option?.value
+                          (item) => item?.value === option?.value,
                         )}
                       >
                         {option.label}
